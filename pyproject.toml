@@ -22,7 +22,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = ["nltk", "numpy", "pandas", "swifter", "torch"]
 
 [project.urls]
 Documentation = "https://github.com/unknown/poprox-recommender#readme"
