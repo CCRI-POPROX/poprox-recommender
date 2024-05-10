@@ -162,6 +162,8 @@ def generate_recommendations(model, articles, article_vectors, similarity_matrix
 
 
 def select_with_model(
+    todays_articles,
+    todays_article_vectors,
     article_similarity_matrix,
     past_article_features,
     clicked_articles,
@@ -179,12 +181,26 @@ def select_with_model(
 
     recommendations = generate_recommendations(
         model,
+        todays_articles, 
+        todays_article_vectors,
         article_similarity_matrix,
         user_embeddings,
         num_slots=num_slots,
     )
 
     return recommendations
+
+
+def compute_similarity_matrix(todays_article_vectors):
+    num_values = len(todays_article_vectors)
+    similarity_matrix = np.zeros((num_values, num_values))
+    for i, value1 in tqdm(enumerate(todays_article_vectors), total=num_values):
+        value1 = value1.detach().cpu()
+        for j, value2 in enumerate(todays_article_vectors):
+            if i <= j:
+                value2 = value2.detach().cpu()
+                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
+    return similarity_matrix
 
 
 def select_articles(
@@ -220,14 +236,8 @@ def select_articles(
 
     # Compute today's article similarity matrix
     _, todays_article_vectors = build_article_embeddings(todays_article_features, model, model_device)
-    num_values = len(todays_article_vectors)
-    similarity_matrix = np.zeros((num_values, num_values))
-    for i, value1 in tqdm(enumerate(todays_article_vectors), total=num_values):
-        value1 = value1.detach().cpu()
-        for j, value2 in enumerate(todays_article_vectors):
-            if i <= j:
-                value2 = value2.detach().cpu()
-                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
+    similarity_matrix = compute_similarity_matrix(todays_article_vectors)
+
 
     recommendations = {}
     for user, clicks in click_data.items():
