@@ -146,7 +146,8 @@ def mmr_diversification(rewards, similarity_matrix, theta, topk):
             if mr_i >= best_MR and i not in S:
                 best_MR = mr_i
                 candidate = i
-        S.append(candidate)
+        if candidate:
+            S.append(candidate)
 
     return S
 
