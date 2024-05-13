@@ -1,7 +1,7 @@
 import torch
-from poprox_serverless.newsletter.model.nrms.news_encoder import NewsEncoder
-from poprox_serverless.newsletter.model.nrms.user_encoder import UserEncoder
-from poprox_serverless.newsletter.model.general.click_predictor.dot_product import (
+from poprox_recommender.model.nrms.news_encoder import NewsEncoder
+from poprox_recommender.model.nrms.user_encoder import UserEncoder
+from poprox_recommender.model.general.click_predictor.dot_product import (
     DotProductClickPredictor,
 )
 
