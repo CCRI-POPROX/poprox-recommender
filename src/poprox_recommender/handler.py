@@ -41,7 +41,7 @@ MODEL, DEVICE = load_model()
 TOKEN_MAPPING = load_token_mapping()
 
 
-def hello(event, context):
+def generate_recs(event, context):
     request_body = json.loads(event["body"])
 
     todays_articles = request_body["todays_articles"]

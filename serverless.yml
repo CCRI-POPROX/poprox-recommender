@@ -43,7 +43,7 @@ package:
 
 functions:
   generateRecommendations:
-    handler: src.poprox_recommender.handler.hello
+    handler: src.poprox_recommender.handler.generate_recs
     events:
       - httpApi:
           path: /
