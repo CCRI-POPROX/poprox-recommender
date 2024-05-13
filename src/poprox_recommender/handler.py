@@ -59,7 +59,6 @@ def hello(event, context):
         num_recs,
     )
     body = {
-        "input": request_body,
         "recommendations": recommendations,
     }
 
