@@ -1,8 +1,8 @@
 import torch
-from poprox_serverless.newsletter.model.general.attention.multihead_self import (
+from poprox_recommender.model.general.attention.multihead_self import (
     MultiHeadSelfAttention,
 )
-from poprox_serverless.newsletter.model.general.attention.additive import (
+from poprox_recommender.model.general.attention.additive import (
     AdditiveAttention,
 )
 
