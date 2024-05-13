@@ -1,6 +1,7 @@
 nltk
 numpy
 pandas
+smart_open
 swifter
 torch
 dvc[s3]
