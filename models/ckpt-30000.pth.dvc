@@ -1,0 +1,12 @@
+md5: a9589efe6cdde6c0d0b6b13043a4daae
+frozen: true
+deps:
+- etag: 084414b3a7933547eb823fd4a72c72e6-22
+  size: 372372587
+  hash: md5
+  path: s3://poprox-dev/models/ckpt-30000.pth
+outs:
+- md5: 598d31a4192feec062decb430dd77c3a
+  size: 372372587
+  hash: md5
+  path: ckpt-30000.pth
