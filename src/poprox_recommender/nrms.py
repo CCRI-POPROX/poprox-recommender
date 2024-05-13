@@ -151,18 +151,8 @@ def mmr_diversification(rewards, similarity_matrix, theta, topk):
     return S
 
 
-def generate_recommendations(model, articles, article_vectors, user_embeddings, num_slots=10):
+def generate_recommendations(model, articles, article_vectors, similarity_matrix, user_embeddings, num_slots=10):
     recommendations = {}
-
-    num_values = len(article_vectors)
-    similarity_matrix = np.zeros((num_values, num_values))
-    for i, value1 in tqdm(enumerate(article_vectors), total=num_values):
-        value1 = value1.detach().cpu()
-        for j, value2 in enumerate(article_vectors):
-            if i <= j:
-                value2 = value2.detach().cpu()
-                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
-
     for user, user_vector in user_embeddings.items():
         pred = model.get_prediction(article_vectors, user_vector.squeeze())
         pred = pred.cpu().detach().numpy()
@@ -173,10 +163,11 @@ def generate_recommendations(model, articles, article_vectors, user_embeddings, 
 
 def select_with_model(
     todays_articles,
-    todays_article_features,
+    todays_article_vectors,
+    article_similarity_matrix,
     past_article_features,
     clicked_articles,
-    model_checkpoint,
+    model,
     model_device,
     num_slots=10,
     max_clicks_per_user=10,
@@ -184,22 +175,32 @@ def select_with_model(
     # Translate clicks JSON to dataframe
     user_df = build_clicks_df(clicked_articles)
 
-    # Load model and build embedding tables
-    model = load_model(model_checkpoint, model_device)
+    # Build embedding tables
     past_article_embeddings, _ = build_article_embeddings(past_article_features, model, model_device)
     user_embeddings = build_user_embeddings(user_df, past_article_embeddings, model, model_device, max_clicks_per_user)
 
-    _, todays_article_vectors = build_article_embeddings(todays_article_features, model, model_device)
-
     recommendations = generate_recommendations(
         model,
-        todays_articles,
+        todays_articles, 
         todays_article_vectors,
+        article_similarity_matrix,
         user_embeddings,
         num_slots=num_slots,
     )
 
     return recommendations
+
+
+def compute_similarity_matrix(todays_article_vectors):
+    num_values = len(todays_article_vectors)
+    similarity_matrix = np.zeros((num_values, num_values))
+    for i, value1 in tqdm(enumerate(todays_article_vectors), total=num_values):
+        value1 = value1.detach().cpu()
+        for j, value2 in enumerate(todays_article_vectors):
+            if i <= j:
+                value2 = value2.detach().cpu()
+                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
+    return similarity_matrix
 
 
 def select_articles(
@@ -230,15 +231,24 @@ def select_articles(
         token_mapping,
     )
 
+    # Load model
+    model = load_model(model_checkpoint, model_device)
+
+    # Compute today's article similarity matrix
+    _, todays_article_vectors = build_article_embeddings(todays_article_features, model, model_device)
+    similarity_matrix = compute_similarity_matrix(todays_article_vectors)
+
+
     recommendations = {}
     for user, clicks in click_data.items():
         if model_checkpoint and token_mapping and clicks:
             user_recs = select_with_model(
                 todays_articles,
-                todays_article_features,
+                todays_article_vectors,
+                similarity_matrix,
                 past_article_features,
                 {user: clicks},
-                model_checkpoint,
+                model,
                 model_device,
                 num_slots=num_slots,
             )
