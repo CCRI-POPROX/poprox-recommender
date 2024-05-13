@@ -2,4 +2,4 @@
     remote = poprox-s3
 ['remote "poprox-s3"']
     url = s3://poprox-recommender-e24b613efbd9
-    profile = poprox
+
