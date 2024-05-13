@@ -3,3 +3,4 @@ numpy
 pandas
 swifter
 torch
+dvc[s3]
