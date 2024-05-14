@@ -1,0 +1,12 @@
+md5: e704268b0cefbfad12280b2a4febf5ad
+frozen: true
+deps:
+- etag: 8e29c9ae615b8147f468d0febcbc128a
+  size: 1499340
+  hash: md5
+  path: s3://poprox-dev/models/word2int.tsv
+outs:
+- md5: 8e29c9ae615b8147f468d0febcbc128a
+  size: 1499340
+  hash: md5
+  path: word2int.tsv
