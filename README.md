@@ -19,16 +19,17 @@ pip install poprox-recommender
 
 ## Local Development
 
-There are two sets of dependencies to install. To install Python dependencies:
+There are two sets of dependencies. To install the Serverless framework and Node dependencies:
+
+```console
+npm install -g serverless
+npm install
+```
+
+To install Python dependencies:
 
 ```console
 pip install -r requirements.txt
-```
-
-To install Node dependencies:
-
-```console
-npm install
 ```
 
 To run the API endpoint locally:
@@ -83,5 +84,6 @@ You can test this by sending a request with curl:
 
 ```console
 $ curl -X POST -H "Content-Type: application/json" -d @tests/basic-request.json localhost:3000
+
 {"recommendations": {"user 1": [{"article_id": "2", "title": "title 2", "content": "content 2", "url": "url 2"}]}}
 ```
