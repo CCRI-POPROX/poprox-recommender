@@ -1,3 +1,5 @@
+useDotenv: true
+
 service: poprox-default-recommender
 frameworkVersion: "3"
 
@@ -6,9 +8,8 @@ provider:
   runtime: python3.11
   versionFunctions: false
   region: ${opt:region, "us-east-1"}
-  stage: ${opt:stage, "prod"}
+  stage: ${opt:stage, "dev"}
   memorySize: 512
-  timeout: 900
 
   iam:
     role:
@@ -19,10 +20,23 @@ provider:
             - "logs:*"
           Resource: "*"
 
+  ecr:
+    # In this section you can define images that will be built locally and uploaded to ECR
+    images:
+      poprox-recommender:
+        path: "./"
+
 plugins:
   - serverless-offline
   - serverless-python-requirements
 custom:
+  "offline:true": # offline enabled parameters
+    enabled: true
+    filePrefix: "offline."
+  "offline:false": # offline disabled parameters
+    enabled: false
+    filePrefix: ""
+  offline: ${self:custom.offline:${strToBool(${env:IS_OFFLINE, false})}}
   pythonRequirements:
     dockerizePip: true
     useDownloadCache: false
@@ -42,9 +56,5 @@ package:
     - "**.html"
 
 functions:
-  generateRecommendations:
-    handler: src.poprox_recommender.handler.generate_recs
-    events:
-      - httpApi:
-          path: /
-          method: post
+  # if offline mode enabled filePrefix = 'offline.' else filePrefix = ''
+  ${file(./serverless/${self:custom.offline.filePrefix}functions.yaml):functions}
