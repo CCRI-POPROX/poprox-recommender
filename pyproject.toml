@@ -18,7 +18,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["nltk", "numpy", "pandas", "swifter", "torch", "dvc[s3]==3.*"]
+dependencies = ["nltk>=3.8,<4", "numpy>=1.26,<2", "pandas==2.*", "swifter>=1.4,<2", "torch==2.*", "dvc[s3]==3.*"]
 
 [project.urls]
 Documentation = "https://github.com/unknown/poprox-recommender#readme"
@@ -31,7 +31,7 @@ path = "src/poprox_recommender/__about__.py"
 [tool.hatch.envs.default]
 dependencies = [
   "coverage[toml]>=6.5",
-  "pytest",
+  "pytest>=8",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -50,7 +50,7 @@ detached = true
 dependencies = [
   "black>=23.1.0",
   "mypy>=1.0.0",
-  "ruff>=0.0.243",
+  "ruff>=0.4",
 ]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/poprox_recommender tests}"
