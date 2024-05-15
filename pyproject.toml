@@ -48,30 +48,24 @@ cov = [
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
-  "black>=23.1.0",
-  "mypy>=1.0.0",
   "ruff>=0.4",
+  "pyright>=1.1,<2",
 ]
 [tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/poprox_recommender tests}"
+typing = "pyright {args:src/poprox_recommender tests}"
 style = [
-  "ruff {args:.}",
-  "black --check --diff {args:.}",
+  "ruff check {args:.}",
+  "ruff format --check --diff {args:.}",
 ]
 fmt = [
-  "black {args:.}",
-  "ruff --fix {args:.}",
+  "ruff format {args:.}",
+  "ruff check --fix {args:.}",
   "style",
 ]
 all = [
   "style",
   "typing",
 ]
-
-[tool.black]
-target-version = ["py310"]
-line-length = 120
-skip-string-normalization = true
 
 [tool.ruff]
 target-version = "py310"
