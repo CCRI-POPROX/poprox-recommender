@@ -7,26 +7,15 @@ name = "poprox-recommender"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 keywords = []
 authors = [{ name = "Karl Higley", email = "khigley@umn.edu" }]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
-]
-dependencies = ["nltk", "numpy", "pandas", "swifter", "torch", "dvc[s3]==3.*"]
+dependencies = ["nltk>=3.8,<4", "numpy>=1.26,<2", "pandas==2.*", "swifter>=1.4,<2", "torch==2.*", "dvc[s3]==3.*"]
 
 [project.urls]
-Documentation = "https://github.com/unknown/poprox-recommender#readme"
-Issues = "https://github.com/unknown/poprox-recommender/issues"
-Source = "https://github.com/unknown/poprox-recommender"
+Documentation = "https://github.com/CCRI-POPROX/poprox-recommender#readme"
+Issues = "https://github.com/CCRI-POPROX/poprox-recommender/issues"
+Source = "https://github.com/CCRI-POPROX/poprox-recommender"
 
 [tool.hatch.version]
 path = "src/poprox_recommender/__about__.py"
@@ -34,7 +23,7 @@ path = "src/poprox_recommender/__about__.py"
 [tool.hatch.envs.default]
 dependencies = [
   "coverage[toml]>=6.5",
-  "pytest",
+  "pytest>=8",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -48,25 +37,21 @@ cov = [
   "cov-report",
 ]
 
-[[tool.hatch.envs.all.matrix]]
-python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
-
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
-  "black>=23.1.0",
-  "mypy>=1.0.0",
-  "ruff>=0.0.243",
+  "ruff>=0.4",
+  "pyright>=1.1,<2",
 ]
 [tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/poprox_recommender tests}"
+typing = "pyright {args:src/poprox_recommender tests}"
 style = [
-  "ruff {args:.}",
-  "black --check --diff {args:.}",
+  "ruff check {args:.}",
+  "ruff format --check --diff {args:.}",
 ]
 fmt = [
-  "black {args:.}",
-  "ruff --fix {args:.}",
+  "ruff format {args:.}",
+  "ruff check --fix {args:.}",
   "style",
 ]
 all = [
@@ -74,13 +59,8 @@ all = [
   "typing",
 ]
 
-[tool.black]
-target-version = ["py37"]
-line-length = 120
-skip-string-normalization = true
-
 [tool.ruff]
-target-version = "py37"
+target-version = "py310"
 line-length = 120
 select = [
   "A",
@@ -152,3 +132,34 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.conda-lock]
+channels = [
+  "pytorch",
+  "conda-forge",
+  "nodefaults",
+]
+# restrict to commonly-used platforms
+# if we need to add support for windows, we can try adding that here
+platforms = [
+  "linux-64",
+  "osx-arm64",
+]
+# extra deps in the conda environment
+[tool.conda-lock.dependencies]
+# specify our Python version
+python = "=3.11"
+# conda doesn't support extras, so this pulls in the DVC S3 support
+dvc-s3 = "=3"
+# the end-to-end recommender is deployed without CUDA, so force CPU PyTorch.
+# this does not prevent us from using CUDA in the model repo to train models,
+# as it will get its own environments.
+pytorch-mutex = "=*=cpu"
+# conda-lock doesn't look in Hatch environments, so this pulls in dev deps
+ruff = ">=0.4"
+pyright = ">=1.1,<2"
+pytest = ">=7"
+coverage = ">=6.5"
+# we want conda-lock to manage the lockfiles
+conda-lock = ">=2.5,<3"
+# TODO: find a way to force MKL BLAS, but only on X86-64.
