@@ -137,3 +137,34 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.conda-lock]
+channels = [
+  "pytorch",
+  "conda-forge",
+  "nodefaults",
+]
+# restrict to commonly-used platforms
+# if we need to add support for windows, we can try adding that here
+platforms = [
+  "linux-64",
+  "osx-arm64",
+]
+# extra deps in the conda environment
+[tool.conda-lock.dependencies]
+# specify our Python version
+python = "=3.11"
+# conda doesn't support extras, so this pulls in the DVC S3 support
+dvc-s3 = "=3"
+# the end-to-end recommender is deployed without CUDA, so force CPU PyTorch.
+# this does not prevent us from using CUDA in the model repo to train models,
+# as it will get its own environments.
+pytorch-mutex = "=*=cpu"
+# conda-lock doesn't look in Hatch environments, so this pulls in dev deps
+ruff = ">=0.4"
+pyright = ">=1.1,<2"
+pytest = ">=7"
+coverage = ">=6.5"
+# we want conda-lock to manage the lockfiles
+conda-lock = ">=2.5,<3"
+# TODO: find a way to force MKL BLAS, but only on X86-64.
