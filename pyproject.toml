@@ -115,9 +115,6 @@ unfixable = [
 [tool.ruff.isort]
 known-first-party = ["poprox_recommender"]
 
-[tool.ruff.flake8-tidy-imports]
-ban-relative-imports = "all"
-
 [tool.ruff.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
