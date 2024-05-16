@@ -106,3 +106,28 @@ $ curl -X POST -H "Content-Type: application/json" -d @tests/basic-request.json 
 
 {"recommendations": {"user 1": [{"article_id": "2", "title": "title 2", "content": "content 2", "url": "url 2"}]}}
 ```
+
+To add large data or model file via dvc:
+
+1. install dvc dependencies if you don't have them already
+
+    `pip install dvc`
+    `pip install dvc_s3`
+
+2. Obtain the credentials for the S3 bucket and put them in `.env` (the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`).
+If this step does not work, you can also try to directly export them with 
+
+    `export AWS_ACCESS_KEY_ID="REPLACE_WITH_KEY_IDENTIFIERS"`
+    `export AWS_SECRET_ACCESS_KEY="REPLACE_WITH_SECRET_ACCESS_KEY"`
+
+
+3. Add the data or model files you wish to push to the repo:
+
+    `dvc add <filename>`
+    `dvc push`
+
+4. Use git to update the new dvc file and commit and push as usual:
+
+    `git add <filename.dvc>`
+    `git commit -m "YOUR_COMMIT_MESSAGE"`
+    `git push`
