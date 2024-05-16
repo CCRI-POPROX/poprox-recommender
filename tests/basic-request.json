@@ -1,0 +1,24 @@
+{
+    "past_articles": [
+        {
+            "article_id": "1",
+            "title": "title 1",
+            "content": "content 1",
+            "url": "url 1"
+        }
+    ],
+    "todays_articles": [
+        {
+            "article_id": "2",
+            "title": "title 2",
+            "content": "content 2",
+            "url": "url 2"
+        }
+    ],
+    "click_data": {
+        "user 1": [
+            "url 1"
+        ]
+    },
+    "num_recs": 1
+}
