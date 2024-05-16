@@ -1,0 +1,50 @@
+service: poprox-default-recommender
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.11
+  versionFunctions: false
+  region: ${opt:region, "us-east-1"}
+  stage: ${opt:stage, "prod"}
+  memorySize: 512
+  timeout: 900
+
+  iam:
+    role:
+      # Add statements to the IAM role to give permissions to Lambda functions
+      statements:
+        - Effect: Allow
+          Action:
+            - "logs:*"
+          Resource: "*"
+
+plugins:
+  - serverless-offline
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    useDownloadCache: false
+    useStaticCache: false
+    slim: true
+    strip: false
+    slimPatterns:
+      - "**/*.csv"
+
+package:
+  patterns:
+    - "!venv/**"
+    - "!models/**"
+    - "!node_modules/**"
+    - "!tests/**"
+    - "**.py"
+    - "**.html"
+
+functions:
+  generateRecommendations:
+    handler: src.poprox_recommender.handler.generate_recs
+    events:
+      - httpApi:
+          path: /
+          method: post
