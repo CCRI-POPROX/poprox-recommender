@@ -36,7 +36,6 @@ To get the data and models, there are two steps:
 1.  Obtain the credentials for the S3 bucket and put them in `.env` (the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`)
 2.  `dvc pull`
 
-
 ## Local Development
 
 There are two sets of dependencies. To install the Serverless framework and Node dependencies:
