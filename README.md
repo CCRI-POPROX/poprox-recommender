@@ -107,6 +107,9 @@ $ curl -X POST -H "Content-Type: application/json" -d @tests/basic-request.json 
 {"recommendations": {"user 1": [{"article_id": "2", "title": "title 2", "content": "content 2", "url": "url 2"}]}}
 ```
 
+Also, you can test the rec model with MIND Large test dataset by running the `eval_with_mind_large_test.py` file, which will produce
+AUC, MRR, nDCG@5, nDCG@10 values.
+
 To add large data or model file via dvc:
 
 1. install dvc dependencies if you don't have them already
