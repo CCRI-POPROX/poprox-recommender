@@ -1,6 +1,7 @@
 import random
 from dataclasses import dataclass
 from functools import partial
+from typing import List
 
 import swifter  # noqa: F401 # pylint: disable=unused-import
 import numpy as np
@@ -10,6 +11,7 @@ import torch as th
 from tqdm import tqdm
 from nltk.tokenize import word_tokenize
 
+from poprox_recommender.domain.article import Article
 from poprox_recommender.model.nrms import NRMS
 
 
@@ -50,10 +52,11 @@ def parse_row(token_mapping, row):
 
 
 # prepare the news.tsv with information for NRMS model
-def transform_article_features(ap_news_df, token_mapping):
-    ap_news_df.fillna(" ", inplace=True)
+def transform_article_features(articles: List[Article], token_mapping):
+    article_df = pd.DataFrame([article.model_dump() for article in articles])
+    article_df.fillna(" ", inplace=True)
     parse_fn = partial(parse_row, token_mapping)
-    return ap_news_df.swifter.apply(parse_fn, axis=1)
+    return article_df.swifter.apply(parse_fn, axis=1)
 
 
 def load_model(checkpoint, device):
@@ -182,7 +185,7 @@ def select_with_model(
 
     recommendations = generate_recommendations(
         model,
-        todays_articles, 
+        todays_articles,
         todays_article_vectors,
         article_similarity_matrix,
         user_embeddings,
@@ -205,30 +208,28 @@ def compute_similarity_matrix(todays_article_vectors):
 
 
 def select_articles(
-    todays_articles,
-    past_articles,
+    todays_articles: List[Article],
+    past_articles: List[Article],
     click_data,
     model_checkpoint,
     model_device,
     token_mapping,
     num_slots=10,
 ):
+
     # Transform news to model features
-    todays_article_features = transform_article_features(
-        pd.DataFrame(todays_articles),
-        token_mapping,
-    )
+    todays_article_features = transform_article_features(todays_articles, token_mapping)
 
     # Extract the set of articles that have actually been clicked
     clicked_urls = set()
     for clicks in click_data.values():
         clicked_urls.update(clicks)
 
-    clicked_articles = [article for article in past_articles if article["url"] in clicked_urls]
+    clicked_articles = [article for article in past_articles if article.url in clicked_urls]
 
     # Convert clicked article attributes into model features
     past_article_features = transform_article_features(
-        pd.DataFrame(clicked_articles),
+        clicked_articles,
         token_mapping,
     )
 
@@ -238,7 +239,6 @@ def select_articles(
     # Compute today's article similarity matrix
     _, todays_article_vectors = build_article_embeddings(todays_article_features, model, model_device)
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
-
 
     recommendations = {}
     for user, clicks in click_data.items():
