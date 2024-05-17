@@ -11,7 +11,7 @@ import torch as th
 
 from tqdm import tqdm
 from nltk.tokenize import word_tokenize
-
+from transformers import AutoTokenizer
 from poprox_recommender.domain import Article, ClickHistory
 from poprox_recommender.model.nrms import NRMS
 
@@ -19,30 +19,32 @@ from poprox_recommender.model.nrms import NRMS
 @dataclass
 class ModelConfig:
     num_epochs: float = 10
-    num_batches_show_loss: float = 100
-    num_batches_validate: float = 1000
-    batch_size: float = 128
-    learning_rate: float = 0.0001
-    num_workers: float = 4
+    
     num_clicked_news_a_user: float = 50
     word_freq_threshold: float = 1
     dropout_probability: float = 0.2
     word_embedding_dim: float = 300
     category_embedding_dim: float = 100
     query_vector_dim: float = 200
-    num_attention_heads: float = 15
+    additive_attn_hidden_dim: float = 200
+    num_attention_heads: float = 16
+    hidden_size: int = 768
 
-    num_words: int = 101222
+    pretrained_model = 'distilbert-base-uncased'
 
 
 def parse_row(token_mapping, row):
-    new_row = [row.url, [0] * 20]
+    new_row = [row.url, []]
 
     try:
         for i, w in enumerate(word_tokenize(row.title.lower())):
             if w in token_mapping:
                 new_row[1][i] = token_mapping[w]
-
+        # token_mapping is the name of pre-trained tokenizer
+        tokenizer = AutoTokenizer.from_pretrained(token_mapping)
+        new_row[1] = tokenizer.encode(row.title, padding = 'max_length', 
+                                      max_length = 30, truncation = True)
+        
     except IndexError:
         pass
 
@@ -52,9 +54,18 @@ def parse_row(token_mapping, row):
     )
 
 
+# check the input type of articles 
+def is_list_of_dicts(articles): 
+    if isinstance(articles, list) and all(isinstance(item, dict) for item in articles):
+        return True 
+    return False
+
 # prepare the news.tsv with information for NRMS model
 def transform_article_features(articles: List[Article], token_mapping):
-    article_df = pd.DataFrame([article.model_dump() for article in articles])
+    if is_list_of_dicts: 
+        article_df = pd.DataFrame(articles)
+    else:
+        article_df = pd.DataFrame([article.model_dump() for article in articles])
     article_df.fillna(" ", inplace=True)
     parse_fn = partial(parse_row, token_mapping)
     return article_df.swifter.apply(parse_fn, axis=1)
@@ -62,7 +73,8 @@ def transform_article_features(articles: List[Article], token_mapping):
 
 def load_model(checkpoint, device):
     model = NRMS(ModelConfig()).to(device)
-    model.load_state_dict(checkpoint["model_state_dict"])
+
+    model.load_state_dict(checkpoint)
     model.eval()
 
     return model
@@ -75,7 +87,7 @@ def build_article_embeddings(article_features, model, device):
         "title": th.tensor(article_features["title"]),
     }
     article_embeddings = {}
-    article_vectors = model.get_news_vector(articles)
+    article_vectors = model.get_news_vector(articles['title'].to(device))
     for article_id, article_vector in zip(articles["id"], article_vectors):
         if article_id not in article_embeddings:
             article_embeddings[article_id] = article_vector
@@ -86,8 +98,8 @@ def build_article_embeddings(article_features, model, device):
 
 def build_clicks_df(click_history: ClickHistory):
     user_df = pd.DataFrame()
-    user_df["user"] = [str(click_history.account_id)]
-    user_df["clicked_news"] = [" ".join([str(id_ for id_ in click_history.article_ids)])]
+    user_df["user"] = [str(click_history['account_id'])]
+    user_df["clicked_news"] = [" ".join([str(id_ for id_ in click_history['article_id'])])]
     return user_df
 
 
@@ -210,7 +222,7 @@ def compute_similarity_matrix(todays_article_vectors):
 def select_articles(
     todays_articles: List[Article],
     past_articles: List[Article],
-    click_histories: List[ClickHistory],
+    click_histories: List[ClickHistory], 
     model_checkpoint,
     model_device,
     token_mapping,
@@ -223,9 +235,9 @@ def select_articles(
     # Extract the set of articles that have actually been clicked
     clicked_article_ids = set()
     for history in click_histories:
-        clicked_article_ids.update(history.article_ids)
+        clicked_article_ids.update(history['article_id'])
 
-    clicked_articles = [article for article in past_articles if article.article_id in clicked_article_ids]
+    clicked_articles = [article for article in past_articles if article['article_id'] in clicked_article_ids]
 
     # Convert clicked article attributes into model features
     past_article_features = transform_article_features(
@@ -242,8 +254,8 @@ def select_articles(
 
     recommendations = {}
     for click_history in click_histories:
-        account_id = click_history.account_id
-        if model_checkpoint and token_mapping and click_history.article_ids:
+        account_id = click_history['account_id']
+        if model_checkpoint and token_mapping and click_history['article_id']:
             user_recs = select_with_model(
                 todays_articles,
                 todays_article_vectors,
