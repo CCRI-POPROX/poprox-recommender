@@ -1,7 +1,8 @@
 import random
 from dataclasses import dataclass
 from functools import partial
-from typing import List
+from typing import Dict, List
+from uuid import UUID
 
 import swifter  # noqa: F401 # pylint: disable=unused-import
 import numpy as np
@@ -11,7 +12,7 @@ import torch as th
 from tqdm import tqdm
 from nltk.tokenize import word_tokenize
 
-from poprox_recommender.domain.article import Article
+from poprox_recommender.domain import Article, ClickHistory
 from poprox_recommender.model.nrms import NRMS
 
 
@@ -83,11 +84,10 @@ def build_article_embeddings(article_features, model, device):
     return article_embeddings, article_vectors
 
 
-def build_clicks_df(user_clicked):
-    # Currently, every impression contains ALL candidates
+def build_clicks_df(click_history: ClickHistory):
     user_df = pd.DataFrame()
-    user_df["user"] = list(user_clicked.keys())
-    user_df["clicked_news"] = [" ".join(sublist) for sublist in list(user_clicked.values())]
+    user_df["user"] = [str(click_history.account_id)]
+    user_df["clicked_news"] = [" ".join([str(id_ for id_ in click_history.article_ids)])]
     return user_df
 
 
@@ -166,18 +166,18 @@ def generate_recommendations(model, articles, article_vectors, similarity_matrix
 
 
 def select_with_model(
-    todays_articles,
-    todays_article_vectors,
+    todays_articles: List[Article],
+    todays_article_vectors: List[Article],
     article_similarity_matrix,
     past_article_features,
-    clicked_articles,
+    click_history: ClickHistory,
     model,
     model_device,
     num_slots=10,
     max_clicks_per_user=10,
 ):
     # Translate clicks JSON to dataframe
-    user_df = build_clicks_df(clicked_articles)
+    user_df = build_clicks_df(click_history)
 
     # Build embedding tables
     past_article_embeddings, _ = build_article_embeddings(past_article_features, model, model_device)
@@ -210,7 +210,7 @@ def compute_similarity_matrix(todays_article_vectors):
 def select_articles(
     todays_articles: List[Article],
     past_articles: List[Article],
-    click_data,
+    click_histories: List[ClickHistory],
     model_checkpoint,
     model_device,
     token_mapping,
@@ -221,11 +221,11 @@ def select_articles(
     todays_article_features = transform_article_features(todays_articles, token_mapping)
 
     # Extract the set of articles that have actually been clicked
-    clicked_urls = set()
-    for clicks in click_data.values():
-        clicked_urls.update(clicks)
+    clicked_article_ids = set()
+    for history in click_histories:
+        clicked_article_ids.update(history.article_ids)
 
-    clicked_articles = [article for article in past_articles if article.url in clicked_urls]
+    clicked_articles = [article for article in past_articles if article.article_id in clicked_article_ids]
 
     # Convert clicked article attributes into model features
     past_article_features = transform_article_features(
@@ -241,20 +241,21 @@ def select_articles(
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
 
     recommendations = {}
-    for user, clicks in click_data.items():
-        if model_checkpoint and token_mapping and clicks:
+    for click_history in click_histories:
+        account_id = click_history.account_id
+        if model_checkpoint and token_mapping and click_history.article_ids:
             user_recs = select_with_model(
                 todays_articles,
                 todays_article_vectors,
                 similarity_matrix,
                 past_article_features,
-                {user: clicks},
+                click_history,
                 model,
                 model_device,
                 num_slots=num_slots,
             )
-            recommendations[user] = user_recs[user]
+            recommendations[account_id] = user_recs[str(account_id)]
         else:
-            recommendations[user] = random.sample(todays_articles, num_slots)
+            recommendations[account_id] = random.sample(todays_articles, num_slots)
 
     return recommendations
