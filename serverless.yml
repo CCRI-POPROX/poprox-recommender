@@ -8,7 +8,7 @@ provider:
   runtime: python3.11
   versionFunctions: false
   region: ${opt:region, "us-east-1"}
-  stage: ${opt:stage, "dev"}
+  stage: ${opt:stage, "local"}
   memorySize: 512
 
   iam:
