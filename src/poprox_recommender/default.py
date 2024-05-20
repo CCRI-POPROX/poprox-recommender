@@ -12,7 +12,7 @@ import torch as th
 from tqdm import tqdm
 from nltk.tokenize import word_tokenize
 
-from poprox_recommender.domain import Article, ClickHistory
+from poprox_concepts import Article, ClickHistory
 from poprox_recommender.model.nrms import NRMS
 
 
