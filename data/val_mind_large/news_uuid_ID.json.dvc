@@ -1,0 +1,5 @@
+outs:
+- md5: da3ac6581b5c9a66360fab38e2a9321b
+  size: 3899617
+  hash: md5
+  path: news_uuid_ID.json
