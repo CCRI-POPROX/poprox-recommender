@@ -6,4 +6,4 @@ from pydantic import BaseModel
 
 class ClickHistory(BaseModel):
     account_id: UUID = None
-    article_id: List[UUID]
+    article_ids: List[UUID]
