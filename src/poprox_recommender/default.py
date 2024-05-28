@@ -96,7 +96,7 @@ def build_article_embeddings(article_features, model, device):
 def build_clicks_df(click_history: ClickHistory):
     user_df = pd.DataFrame()
     user_df["user"] = [str(click_history.account_id)]
-    user_df["clicked_news"] = [" ".join([str(id_) for id_ in click_history.article_id])]
+    user_df["clicked_news"] = [" ".join([str(id_) for id_ in click_history.article_ids])]
     return user_df
 
 
@@ -236,7 +236,7 @@ def select_articles(
     # Extract the set of articles that have actually been clicked
     clicked_article_ids = set()
     for history in click_histories:
-        clicked_article_ids.update(history.article_id)
+        clicked_article_ids.update(history.article_ids)
 
     clicked_articles = [article for article in past_articles if article.article_id in clicked_article_ids]
 
@@ -256,7 +256,7 @@ def select_articles(
     recommendations = {}
     for click_history in click_histories:
         account_id = click_history.account_id
-        if model_checkpoint and token_mapping and click_history.article_id:
+        if model_checkpoint and token_mapping and click_history.article_ids:
             user_recs = select_with_model(
                 todays_articles,
                 todays_article_vectors,
