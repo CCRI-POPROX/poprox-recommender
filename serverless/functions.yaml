@@ -1,0 +1,9 @@
+functions:
+  generateRecommendations:
+    image:
+      name: poprox-recommender
+    memorySize: 4096
+    events:
+      - httpApi:
+          path: /
+          method: post

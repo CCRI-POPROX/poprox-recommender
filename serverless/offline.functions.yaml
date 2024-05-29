@@ -1,0 +1,8 @@
+functions:
+  generateRecommendations:
+    handler: src.poprox_recommender.handler.generate_recs
+    memorySize: 4096
+    events:
+      - httpApi:
+          path: /
+          method: post
