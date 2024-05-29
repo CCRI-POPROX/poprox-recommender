@@ -1,5 +1,5 @@
 [core]
     remote = poprox-s3
+    autostage = true
 ['remote "poprox-s3"']
     url = s3://poprox-recommender-e24b613efbd9
-

@@ -10,12 +10,23 @@ readme = "README.md"
 requires-python = ">=3.10"
 keywords = []
 authors = [{ name = "Karl Higley", email = "khigley@umn.edu" }]
-dependencies = ["nltk>=3.8,<4", "numpy>=1.26,<2", "pandas==2.*", "swifter>=1.4,<2", "torch==2.*", "dvc[s3]==3.*"]
+dependencies = [
+  "nltk>=3.8,<4",
+  "numpy>=1.26,<2",
+  "pandas==2.*",
+  "swifter>=1.4,<2",
+  "torch==2.*",
+  "dvc[s3]==3.*",
+  "smart_open==7.*",
+]
 
 [project.urls]
 Documentation = "https://github.com/CCRI-POPROX/poprox-recommender#readme"
 Issues = "https://github.com/CCRI-POPROX/poprox-recommender/issues"
 Source = "https://github.com/CCRI-POPROX/poprox-recommender"
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/models" = "models/"
 
 [tool.hatch.version]
 path = "src/poprox_recommender/__about__.py"
