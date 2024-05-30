@@ -3,6 +3,7 @@ import json
 
 import pandas as pd
 import torch as th
+from safetensors.torch import load_file
 from smart_open import open as smart_open
 
 from poprox_recommender.default import select_articles
@@ -16,29 +17,23 @@ def load_model(device_name=None):
     if device_name is None:
         device_name = "cuda" if th.cuda.is_available() else "cpu"
 
-    load_path = f"{project_root()}/models/ckpt-30000.pth"
-    with smart_open(load_path, "rb") as f:
-        buffer = io.BytesIO(f.read())
+    load_path = f"{project_root()}/models/model.safetensors"
+    #with smart_open(load_path, "rb") as f:
+        #buffer = io.BytesIO(f.read())
 
-    if buffer:
-        device = th.device(device_name)
-        checkpoint = th.load(buffer, map_location=device)
+    #if buffer:
+        #device = th.device(device_name)
+        #checkpoint = th.load(buffer, map_location=device)
 
-    return checkpoint, device
+    checkpoint = load_file(load_path)
+    return checkpoint, device_name
 
 
-def load_token_mapping():
-    token_mapping = None
 
-    token_mapping_path = f"{project_root()}/models/word2int.tsv"
-    with smart_open(token_mapping_path, "rb") as f:
-        token_mapping = dict(pd.read_table(f, na_filter=False).values.tolist())
-
-    return token_mapping
 
 
 MODEL, DEVICE = load_model()
-TOKEN_MAPPING = load_token_mapping()
+TOKEN_MAPPING = 'distilbert-base-uncased' # can be modified
 
 
 def generate_recs(event, context):

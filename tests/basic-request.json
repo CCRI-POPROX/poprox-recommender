@@ -15,10 +15,7 @@
             "url": "url 2"
         }
     ],
-    "click_data": {
-        "user 1": [
-            "url 1"
-        ]
-    },
+    "click_data": [{"account_id": "user 1", 
+                    "article_id": "1"}],
     "num_recs": 1
 }

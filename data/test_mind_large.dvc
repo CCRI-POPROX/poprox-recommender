@@ -1,0 +1,6 @@
+outs:
+- md5: 5d3b9fd909bb7af5f21672449451205b.dir
+  size: 365822287
+  nfiles: 5
+  hash: md5
+  path: test_mind_large

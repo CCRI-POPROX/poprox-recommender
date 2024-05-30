@@ -1,11 +1,5 @@
 import torch
-import torch.nn as nn
-
 from torch import nn
-import torch.nn.functional as F
-
-
-
 
 
 def init_weights(m: nn.Module) -> None:
@@ -15,7 +9,7 @@ def init_weights(m: nn.Module) -> None:
             nn.init.zeros_(m.bias)
 
 
-class AdditiveAttention(nn.Module):
+class NewsAdditiveAttention(nn.Module):
     def __init__(self, input_dim: int, hidden_dim: int) -> None:
         super().__init__()
         self.attention = nn.Sequential(
