@@ -1,0 +1,5 @@
+outs:
+- md5: 822683ab3eabb9c2d9689d20914d8439
+  size: 11792875321
+  hash: md5
+  path: mind_test.json
