@@ -36,7 +36,7 @@ class ModelConfig:
 
 
 def parse_row(token_mapping, row):
-    new_row = [row.url, []]
+    new_row = [str(row.article_id), []]
 
     try:
         # token_mapping is the name of pre-trained tokenizer
@@ -49,7 +49,7 @@ def parse_row(token_mapping, row):
 
     return pd.Series(
         new_row,
-        index=["url", "title"],
+        index=["article_id", "title"],
     )
 
 
@@ -81,7 +81,7 @@ def load_model(checkpoint, device):
 # Compute a vector for each news story
 def build_article_embeddings(article_features, model, device):
     articles = {
-        "id": article_features["url"],
+        "id": article_features["article_id"],
         "title": th.tensor(article_features["title"]),
     }
     article_embeddings = {}
@@ -97,7 +97,7 @@ def build_article_embeddings(article_features, model, device):
 def build_clicks_df(click_history: ClickHistory):
     user_df = pd.DataFrame()
     user_df["user"] = [str(click_history.account_id)]
-    user_df["clicked_news"] = [" ".join([str(id_) for id_ in click_history.article_ids])]
+    user_df["clicked_news"] = [[str(id_) for id_ in click_history.article_ids]]
     return user_df
 
 
@@ -107,26 +107,23 @@ def build_user_embeddings(user_df, article_embeddings, model, device, max_clicks
     for _, row in user_df.iterrows():
         user = {
             "user": row.user,
-            "clicked_news_string": row.clicked_news,
-            "clicked_news": row.clicked_news.split()[-max_clicks_per_user:],
+            "clicked_news": row.clicked_news[-max_clicks_per_user:],
         }
         user["clicked_news_length"] = len(user["clicked_news"])
         repeated_times = max_clicks_per_user - len(user["clicked_news"])
         assert repeated_times >= 0
         user["clicked_news"] = ["PADDED_NEWS"] * repeated_times + user["clicked_news"]
         default = article_embeddings["PADDED_NEWS"]
+        clicked_article_embeddings = [
+            article_embeddings.get(clicked_article, default).to(device)
+            for clicked_article in user["clicked_news"]
+        ]
         clicked_news_vector = (
             th.stack(
-                [
-                    th.stack(
-                        [article_embeddings.get(x, default).to(device) for x in [news_list]],
-                        dim=0,
-                    )
-                    for news_list in user["clicked_news"]
-                ],
+                clicked_article_embeddings,
                 dim=0,
             )
-            .transpose(0, 1)
+            .unsqueeze(0)
             .to(device)
         )
 
