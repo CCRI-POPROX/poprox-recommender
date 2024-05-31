@@ -181,7 +181,7 @@ def generate_recommendations(
     for user, user_vector in user_embeddings.items():
         pred = model.get_prediction(article_vectors, user_vector.squeeze())
         pred = pred.cpu().detach().numpy()
-        recs = mmr_diversification(pred, similarity_matrix, theta=1, topk=num_slots)
+        recs = mmr_diversification(pred, similarity_matrix, theta=0.8, topk=num_slots)
         recommendations[user] = [articles[int(rec)] for rec in recs]
     return recommendations
 
