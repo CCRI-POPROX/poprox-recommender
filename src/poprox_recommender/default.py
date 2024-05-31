@@ -41,7 +41,7 @@ def parse_row(token_mapping, row):
 
     try:
         # token_mapping is the name of pre-trained tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(token_mapping)
+        tokenizer = AutoTokenizer.from_pretrained(token_mapping, cache_dir="/tmp/")
         new_row[1] = tokenizer.encode(
             row.title, padding="max_length", max_length=30, truncation=True
         )
