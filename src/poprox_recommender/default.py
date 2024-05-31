@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 import torch as th
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 from tqdm import tqdm
 from nltk.tokenize import word_tokenize
 from transformers import AutoTokenizer
@@ -32,7 +33,7 @@ class ModelConfig:
     num_attention_heads: float = 16
     hidden_size: int = 768
 
-    pretrained_model = 'distilbert-base-uncased'
+    pretrained_model = "distilbert-base-uncased"
 
 
 def parse_row(token_mapping, row):
@@ -41,8 +42,9 @@ def parse_row(token_mapping, row):
     try:
         # token_mapping is the name of pre-trained tokenizer
         tokenizer = AutoTokenizer.from_pretrained(token_mapping)
-        new_row[1] = tokenizer.encode(row.title, padding = 'max_length',
-                                      max_length = 30, truncation = True)
+        new_row[1] = tokenizer.encode(
+            row.title, padding="max_length", max_length=30, truncation=True
+        )
 
     except IndexError:
         pass
@@ -58,6 +60,7 @@ def is_list_of_dicts(articles):
     if isinstance(articles, list) and all(isinstance(item, dict) for item in articles):
         return True
     return False
+
 
 # prepare the news.tsv with information for NRMS model
 def transform_article_features(articles: List[Article], token_mapping):
@@ -85,12 +88,14 @@ def build_article_embeddings(article_features, model, device):
         "title": th.tensor(article_features["title"]),
     }
     article_embeddings = {}
-    article_vectors = model.get_news_vector(articles['title'].to(device))
+    article_vectors = model.get_news_vector(articles["title"].to(device))
     for article_id, article_vector in zip(articles["id"], article_vectors):
         if article_id not in article_embeddings:
             article_embeddings[article_id] = article_vector
 
-    article_embeddings["PADDED_NEWS"] = th.zeros(list(article_embeddings.values())[0].size(), device=device)
+    article_embeddings["PADDED_NEWS"] = th.zeros(
+        list(article_embeddings.values())[0].size(), device=device
+    )
     return article_embeddings, article_vectors
 
 
@@ -102,7 +107,9 @@ def build_clicks_df(click_history: ClickHistory):
 
 
 # Compute a vector for each user
-def build_user_embeddings(user_df, article_embeddings, model, device, max_clicks_per_user):
+def build_user_embeddings(
+    user_df, article_embeddings, model, device, max_clicks_per_user
+):
     user_embeddings = {}
     for _, row in user_df.iterrows():
         user = {
@@ -141,7 +148,7 @@ def mmr_diversification(rewards, similarity_matrix, theta, topk):
     S.append(rewards.argmax())
 
     for k in range(topk - 1):
-        candidate = None # next item
+        candidate = None  # next item
         best_MR = float("-inf")
 
         for i, reward_i in enumerate(rewards):  # iterate R for next item
@@ -161,10 +168,12 @@ def mmr_diversification(rewards, similarity_matrix, theta, topk):
 
         if candidate != None:
             S.append(candidate)
-    return S # LIST(candidate index)
+    return S  # LIST(candidate index)
 
 
-def generate_recommendations(model, articles, article_vectors, similarity_matrix, user_embeddings, num_slots=10):
+def generate_recommendations(
+    model, articles, article_vectors, similarity_matrix, user_embeddings, num_slots=10
+):
     recommendations = {}
     for user, user_vector in user_embeddings.items():
         pred = model.get_prediction(article_vectors, user_vector.squeeze())
@@ -189,9 +198,13 @@ def select_with_model(
     user_df = build_clicks_df(click_history)
 
     # Build embedding tables
-    past_article_embeddings, _ = build_article_embeddings(past_article_features, model, model_device)
+    past_article_embeddings, _ = build_article_embeddings(
+        past_article_features, model, model_device
+    )
 
-    user_embeddings = build_user_embeddings(user_df, past_article_embeddings, model, model_device, max_clicks_per_user)
+    user_embeddings = build_user_embeddings(
+        user_df, past_article_embeddings, model, model_device, max_clicks_per_user
+    )
 
     recommendations = generate_recommendations(
         model,
@@ -213,7 +226,9 @@ def compute_similarity_matrix(todays_article_vectors):
         for j, value2 in enumerate(todays_article_vectors):
             if i <= j:
                 value2 = value2.detach().cpu()
-                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
+                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(
+                    value1, value2
+                )
     return similarity_matrix
 
 
@@ -225,7 +240,6 @@ def select_articles(
     model_device,
     token_mapping,
     num_slots,
-
 ):
 
     # Transform news to model features
@@ -236,7 +250,11 @@ def select_articles(
     for history in click_histories:
         clicked_article_ids.update(history.article_ids)
 
-    clicked_articles = [article for article in past_articles if article.article_id in clicked_article_ids]
+    clicked_articles = [
+        article
+        for article in past_articles
+        if article.article_id in clicked_article_ids
+    ]
 
     # Convert clicked article attributes into model features
     past_article_features = transform_article_features(
@@ -248,7 +266,9 @@ def select_articles(
     model = load_model(model_checkpoint, model_device)
 
     # Compute today's article similarity matrix
-    _, todays_article_vectors = build_article_embeddings(todays_article_features, model, model_device)
+    _, todays_article_vectors = build_article_embeddings(
+        todays_article_features, model, model_device
+    )
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
 
     recommendations = {}
