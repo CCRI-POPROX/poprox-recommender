@@ -1,36 +1,22 @@
-import io
 import json
 
-import pandas as pd
 import torch as th
 from safetensors.torch import load_file
-from smart_open import open as smart_open
 
 from poprox_recommender.default import select_articles
 from poprox_recommender.paths import project_root
 
 
 def load_model(device_name=None):
-    buffer = None
     checkpoint = None
 
     if device_name is None:
         device_name = "cuda" if th.cuda.is_available() else "cpu"
 
     load_path = f"{project_root()}/models/model.safetensors"
-    #with smart_open(load_path, "rb") as f:
-        #buffer = io.BytesIO(f.read())
-
-    #if buffer:
-        #device = th.device(device_name)
-        #checkpoint = th.load(buffer, map_location=device)
 
     checkpoint = load_file(load_path)
     return checkpoint, device_name
-
-
-
-
 
 MODEL, DEVICE = load_model()
 TOKEN_MAPPING = 'distilbert-base-uncased' # can be modified
