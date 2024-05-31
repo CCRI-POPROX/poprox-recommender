@@ -112,9 +112,12 @@ def build_user_embeddings(
 ):
     user_embeddings = {}
     for _, row in user_df.iterrows():
+        clicked_news = list(
+            dict.fromkeys(row.clicked_news)
+        )  # deduplicate while maintaining order
         user = {
             "user": row.user,
-            "clicked_news": row.clicked_news[-max_clicks_per_user:],
+            "clicked_news": clicked_news[-max_clicks_per_user:],
         }
         user["clicked_news_length"] = len(user["clicked_news"])
         repeated_times = max_clicks_per_user - len(user["clicked_news"])
