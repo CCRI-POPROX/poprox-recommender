@@ -18,6 +18,7 @@ dependencies = [
   "torch==2.*",
   "dvc[s3]==3.*",
   "smart_open==7.*",
+  "safetensors>=0.4,<1",
 ]
 
 [project.urls]
