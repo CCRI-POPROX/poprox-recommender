@@ -1,3 +1,8 @@
+data/
+dist/
+.dvc/
+.git/
 node_modules/
 __pycache__/
 .serverless/
+.requirements*
