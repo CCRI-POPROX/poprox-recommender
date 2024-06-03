@@ -8,6 +8,8 @@ RUN yum -y install git gcc python3-devel
 RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install nltk && python -m nltk.downloader -d /var/lang/nltk_data punkt
 
+ENV TRANSFORMERS_CACHE /tmp/
+
 # Install the package and other dependencies
 COPY ./ ${LAMBDA_TASK_ROOT}/poprox_recommender
 RUN pip install ${LAMBDA_TASK_ROOT}/poprox_recommender
