@@ -9,7 +9,8 @@ provider:
   versionFunctions: false
   region: ${opt:region, "us-east-1"}
   stage: ${opt:stage, "local"}
-  memorySize: 512
+  memorySize: 4096
+  timeout: 25
 
   iam:
     role:
@@ -38,6 +39,7 @@ custom:
     filePrefix: ""
   offline: ${self:custom.offline:${strToBool(${env:IS_OFFLINE, false})}}
   pythonRequirements:
+    zip: true
     dockerizePip: true
     useDownloadCache: false
     useStaticCache: false
