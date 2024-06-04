@@ -9,7 +9,10 @@ provider:
   versionFunctions: false
   region: ${opt:region, "us-east-1"}
   stage: ${opt:stage, "local"}
-  memorySize: 512
+  memorySize: 2048 # 2gb
+  ephemeralStorageSize: 2048
+  timeout: 25
+  architecture: x86_64
 
   iam:
     role:
@@ -28,7 +31,6 @@ provider:
 
 plugins:
   - serverless-offline
-  - serverless-python-requirements
 custom:
   "offline:true": # offline enabled parameters
     enabled: true
@@ -37,14 +39,6 @@ custom:
     enabled: false
     filePrefix: ""
   offline: ${self:custom.offline:${strToBool(${env:IS_OFFLINE, false})}}
-  pythonRequirements:
-    dockerizePip: true
-    useDownloadCache: false
-    useStaticCache: false
-    slim: true
-    strip: false
-    slimPatterns:
-      - "**/*.csv"
 
 package:
   patterns:

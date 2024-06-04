@@ -1,8 +1,0 @@
-nltk
-numpy
-pandas
-smart_open
-swifter
-torch
-transformers
-dvc[s3]

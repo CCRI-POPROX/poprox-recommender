@@ -63,8 +63,8 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
 ```json
 {
     "past_articles": [
-                {
-            "article_id": "1",
+        {
+            "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d",
             "title": "title 1",
             "content": "content 1",
             "url": "url 1"
@@ -72,13 +72,20 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
     ],
     "todays_articles": [
         {
-            "article_id": "2",
+            "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
             "title": "title 2",
             "content": "content 2",
             "url": "url 2"
         }
     ],
-    "click_data": {"user 1": ["url 1"]},
+    "click_data": [
+        {
+            "account_id": "977a3c88-937a-46fb-bbfe-94dc5dcb68c8",
+            "article_ids": [
+                "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
+            ]
+        }
+    ],
     "num_recs": 1
 }
 ```
@@ -88,12 +95,14 @@ should receive this response:
 ```json
 {
     "recommendations": {
-        "user 1": [
+        "977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [
             {
-                "article_id": "2",
+                "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
                 "title": "title 2",
                 "content": "content 2",
-                "url": "url 2"
+                "url": "url 2",
+                "published_at": "1970-01-01T00:00:00Z",
+                "mentions": []
             }
         ]
     }
@@ -105,5 +114,5 @@ You can test this by sending a request with curl:
 ```console
 $ curl -X POST -H "Content-Type: application/json" -d @tests/basic-request.json localhost:3000
 
-{"recommendations": {"user 1": [{"article_id": "2", "title": "title 2", "content": "content 2", "url": "url 2"}]}}
+{"recommendations": {"977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [{"article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff", "title": "title 2", "content": "content 2", "url": "url 2", "published_at": "1970-01-01T00:00:00Z", "mentions": []}]}}
 ```
