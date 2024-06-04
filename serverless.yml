@@ -30,7 +30,6 @@ provider:
 
 plugins:
   - serverless-offline
-  - serverless-python-requirements
 custom:
   "offline:true": # offline enabled parameters
     enabled: true
@@ -39,15 +38,6 @@ custom:
     enabled: false
     filePrefix: ""
   offline: ${self:custom.offline:${strToBool(${env:IS_OFFLINE, false})}}
-  pythonRequirements:
-    zip: true
-    dockerizePip: true
-    useDownloadCache: false
-    useStaticCache: false
-    slim: true
-    strip: false
-    slimPatterns:
-      - "**/*.csv"
 
 package:
   patterns:
