@@ -12,6 +12,7 @@ provider:
   memorySize: 2048
   ephemeralStorageSize: 2048
   timeout: 25
+  architecture: x86_64
 
   iam:
     role:
