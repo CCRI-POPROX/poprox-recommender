@@ -47,10 +47,7 @@ def generate_recs(event, context):
         TOKEN_MAPPING,
         num_recs,
     )
-    for _, articles in recommendations.items():
-        for article in articles:
-            print(article)
-            print(article.model_dump())
+
     body = {
         "recommendations": {
             str(account_id): [
