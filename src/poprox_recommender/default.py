@@ -173,6 +173,53 @@ def mmr_diversification(rewards, similarity_matrix, theta, topk):
             S.append(candidate)
     return S  # LIST(candidate index)
 
+def pfar_diversification(rewards, articles, lamb, tau, topk):
+    # articles: LIST[ARTICLE]
+    # p(v|u) + lamb*tau \sum_{d \in D} P(d|u)I{v \in d} \prod_{i \in S} I{i \in d}
+
+    S = [] # final recommendation LIST[candidate index]
+    initial_item = rewards.argmax()
+    S.append(initial_item)
+
+    S_topic = set()
+    article = articles[int(initial_item)]
+    S_topic.add(topic for topic in [mention.entity.name for mention in article.mentions])
+
+
+    for k in range(topk - 1):
+        candidate = None  # next item
+        best_PFAR = float("-inf")
+
+        for i, reward_i in enumerate(rewards):  # iterate R for next item
+            if i in S:
+                continue
+            product = 1
+            summation = 0
+
+            candidate_topic = [mention.entity.name for mention in articles[int(i)].mentions]
+            for topic in candidate_topic:
+                if topic in S_topic:
+                    product = 0
+                    break
+
+            for topic in candidate_topic:
+                summation += user_preference[topic]
+
+            PFAR_i = reward_i + lamb * tau * summation * product
+
+            if PFAR_i > best_PFAR:
+                best_PFAR = PFAR_i
+                candidate = i
+
+        if candidate != None:
+            S.append(candidate)
+            S_topic.add(topic for topic in candidate_topic)
+
+    return S  # LIST(candidate index)
+
+
+
+
 
 def generate_recommendations(
     model, articles, article_vectors, similarity_matrix, user_embeddings, num_slots=10
