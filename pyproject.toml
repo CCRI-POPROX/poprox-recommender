@@ -11,6 +11,7 @@ requires-python = ">=3.10"
 keywords = []
 authors = [{ name = "Karl Higley", email = "khigley@umn.edu" }]
 dependencies = [
+  "lenskit==0.14.*",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
   "pandas==2.*",
