@@ -290,6 +290,7 @@ def select_articles(
     model_device,
     token_mapping,
     num_slots,
+    todays_article_matched_topics
 ) -> Dict[UUID, List[Article]]:
 
     # Transform news to model features
