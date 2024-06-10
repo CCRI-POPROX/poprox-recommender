@@ -12,11 +12,12 @@ import sys
 
 sys.path.append("../")
 from tqdm import tqdm
-from nltk.tokenize import word_tokenize
+from safetensors.torch import load_file
 from transformers import AutoTokenizer
 
 from poprox_concepts import Article, ClickHistory
 from poprox_recommender.model.nrms import NRMS
+from poprox_recommender.paths import project_root
 
 
 @dataclass
@@ -36,12 +37,36 @@ class ModelConfig:
     pretrained_model = "distilbert-base-uncased"
 
 
-def parse_row(token_mapping, row):
+def load_checkpoint(device_name=None):
+    checkpoint = None
+
+    if device_name is None:
+        # device_name = "cuda" if th.cuda.is_available() else "cpu"
+        device_name = "cpu"
+
+    load_path = f"{project_root()}/models/model.safetensors"
+
+    checkpoint = load_file(load_path)
+    return checkpoint, device_name
+
+
+def load_model(checkpoint, device):
+    model = NRMS(ModelConfig()).to(device)
+    model.load_state_dict(checkpoint)
+    model.eval()
+
+    return model
+
+
+TOKENIZER = AutoTokenizer.from_pretrained("distilbert-base-uncased", cache_dir="/tmp/")
+CHECKPOINT, DEVICE = load_checkpoint()
+MODEL = load_model(CHECKPOINT, DEVICE)
+
+
+def parse_row(tokenizer, row):
     new_row = [str(row.article_id), []]
 
     try:
-        # token_mapping is the name of pre-trained tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(token_mapping, cache_dir="/tmp/")
         new_row[1] = tokenizer.encode(
             row.title, padding="max_length", max_length=30, truncation=True
         )
@@ -63,22 +88,12 @@ def is_list_of_dicts(articles):
 
 
 # prepare the news.tsv with information for NRMS model
-def transform_article_features(articles: List[Article], token_mapping):
-
+def transform_article_features(articles: List[Article], tokenizer):
     article_df = pd.DataFrame([article.model_dump() for article in articles])
     article_df.fillna(" ", inplace=True)
-    parse_fn = partial(parse_row, token_mapping)
+    parse_fn = partial(parse_row, tokenizer)
 
     return article_df.swifter.apply(parse_fn, axis=1)
-
-
-def load_model(checkpoint, device):
-    model = NRMS(ModelConfig()).to(device)
-
-    model.load_state_dict(checkpoint)
-    model.eval()
-
-    return model
 
 
 # Compute a vector for each news story
@@ -239,14 +254,11 @@ def select_articles(
     todays_articles: List[Article],
     past_articles: List[Article],
     click_histories: List[ClickHistory],
-    model_checkpoint,
-    model_device,
-    token_mapping,
     num_slots,
 ) -> Dict[UUID, List[Article]]:
 
     # Transform news to model features
-    todays_article_features = transform_article_features(todays_articles, token_mapping)
+    todays_article_features = transform_article_features(todays_articles, TOKENIZER)
 
     # Extract the set of articles that have actually been clicked
     clicked_article_ids = set()
@@ -262,30 +274,27 @@ def select_articles(
     # Convert clicked article attributes into model features
     past_article_features = transform_article_features(
         clicked_articles,
-        token_mapping,
+        TOKENIZER,
     )
-
-    # Load model
-    model = load_model(model_checkpoint, model_device)
 
     # Compute today's article similarity matrix
     _, todays_article_vectors = build_article_embeddings(
-        todays_article_features, model, model_device
+        todays_article_features, MODEL, DEVICE
     )
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
 
     recommendations = {}
     for click_history in click_histories:
         account_id = click_history.account_id
-        if model_checkpoint and token_mapping and click_history.article_ids:
+        if MODEL and TOKENIZER and click_history.article_ids:
             user_recs = select_with_model(
                 todays_articles,
                 todays_article_vectors,
                 similarity_matrix,
                 past_article_features,
                 click_history,
-                model,
-                model_device,
+                MODEL,
+                DEVICE,
                 num_slots=num_slots,
             )
             recommendations[account_id] = user_recs[str(account_id)]
