@@ -169,6 +169,8 @@ platforms = [
 [tool.conda-lock.dependencies]
 # specify our Python version
 python = "=3.11"
+# need pip in deployment too
+pip = ">=24"
 # conda doesn't support extras, so this pulls in the DVC S3 support
 dvc-s3 = "=3"
 # the end-to-end recommender is deployed without CUDA, so force CPU PyTorch.
