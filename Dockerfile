@@ -1,6 +1,9 @@
 # Use Lambda "Provided" base image for the build container
 FROM public.ecr.aws/lambda/provided:al2 as build
 
+# install necessary system packages
+RUN yum -y install git
+
 # Fetch the micromamba executable from GitHub
 ADD --chmod=0755 https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 /usr/local/bin/micromamba
 
@@ -12,7 +15,7 @@ ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 # Install recommender dependencies from Conda
 RUN micromamba create -y --always-copy -p /opt/poprox -f conda-lock.yml
 # Download the punkt NLTK data
-RUN python -m nltk.downloader -d /opt/poprox/nltk_data punkt
+RUN micromamba run -p /opt/poprox python -m nltk.downloader -d /opt/poprox/nltk_data punkt
 # Install the Lambda runtime bridge
 RUN micromamba install -p /opt/poprox -c conda-forge awslambdaric
 # Install the poprox-recommender module
