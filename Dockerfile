@@ -10,7 +10,7 @@ WORKDIR ${LAMBDA_TASK_ROOT}/poprox_recommender
 ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 
 # Install recommender dependencies from Conda
-RUN micromamba create -y -p /opt/poprox --copy -f conda-lock.yml
+RUN micromamba create -y --always-copy -p /opt/poprox -f conda-lock.yml
 # Download the punkt NLTK data
 RUN python -m nltk.downloader -d /opt/poprox/nltk_data punkt
 # Install the Lambda runtime bridge
