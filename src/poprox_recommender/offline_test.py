@@ -12,7 +12,7 @@ import pandas as pd
 from tqdm import tqdm
 from poprox_concepts import Article, ClickHistory
 from poprox_recommender.default import select_articles
-from poprox_recommender.paths import project_root
+from poprox_recommender.paths import project_root, model_file_path
 
 
 
@@ -21,7 +21,7 @@ def load_model(device_name=None):
     if device_name is None:
         device_name = "cuda" if th.cuda.is_available() else "cpu"
 
-    load_path = f"{project_root()}/models/model.safetensors"
+    load_path = model_file_path("model.safetensors")
     checkpoint = load_file(load_path)
 
     return checkpoint, device_name
@@ -35,7 +35,7 @@ def custom_encoder(obj):
 def recsys_metric(recommendations, row_index, news_struuid_ID ):
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
-    impressions_truth = pd.read_table(f"{project_root()}/data/test_mind_large/behaviors.tsv",
+    impressions_truth = pd.read_table(project_root() / "data/test_mind_large/behaviors.tsv",
                                     header='infer',
                                     usecols=range(5),
                                     names=[
@@ -46,12 +46,12 @@ def recsys_metric(recommendations, row_index, news_struuid_ID ):
     account_id = list(recommendations.keys())[0]
     recommended_list = recommendations[account_id]
     recommended_list = [news_struuid_ID[item.url] for item in recommended_list]
-    
-    
+
+
     recs = pd.DataFrame({
         'item': recommended_list
     })
-    
+
     truth = pd.DataFrame.from_records(
         (
             (row.split('-')[0], int(row.split('-')[1]))
@@ -73,11 +73,11 @@ if __name__ == '__main__':
     MODEL, DEVICE = load_model()
     TOKEN_MAPPING = 'distilbert-base-uncased'  # can be modified
 
-    with open(f"{project_root()}/data/val_mind_large/news_uuid_ID.json", 'r') as json_file:
+    with open(project_root() / "data/val_mind_large/news_uuid_ID.json", 'r') as json_file:
         news_struuid_ID = json.load(json_file)
 
     # load the mind test json file
-    with open(f"{project_root()}/data/val_mind_large/mind_test.json", 'r') as json_file:
+    with open(project_root() / "data/val_mind_large/mind_test.json", 'r') as json_file:
         mind_data = json.load(json_file)
 
     ndcg5 = []
