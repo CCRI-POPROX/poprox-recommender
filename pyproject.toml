@@ -182,6 +182,8 @@ ruff = ">=0.4"
 pyright = ">=1.1,<2"
 pytest = ">=7"
 coverage = ">=6.5"
+# poprox concepts comes from PyPI
+poprox-concepts = {source = "pypi"}
 # we want conda-lock to manage the lockfiles
 conda-lock = ">=2.5,<3"
 # TODO: find a way to force MKL BLAS, but only on X86-64.
