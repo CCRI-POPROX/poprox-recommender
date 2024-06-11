@@ -27,7 +27,7 @@ def project_root(require: bool = True) -> Path | None:
     candidate = cwd
     while not _is_project_root(candidate):
         candidate = candidate.parent
-        if not candidate or candidate == "/":
+        if not candidate or str(candidate) == "/":
             if require:
                 msg = f"cannot find project root for {cwd}"
                 raise RuntimeError(msg)

@@ -8,7 +8,7 @@ from poprox_recommender.default import select_articles
 
 
 def generate_recs(event, context):
-    req = RecommendationRequest.model_validate_json(event["body"])
+    req = RecommendationRequest.model_validate(event)
 
     recommendations = select_articles(
         req.todays_articles,

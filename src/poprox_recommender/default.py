@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from functools import partial
 from typing import Dict, List
 from uuid import UUID
+import logging
 
 import swifter  # noqa: F401 # pylint: disable=unused-import
 import numpy as np
@@ -18,6 +19,8 @@ from transformers import AutoTokenizer
 from poprox_concepts import Article, ClickHistory
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -37,22 +40,26 @@ class ModelConfig:
     pretrained_model = "distilbert-base-uncased"
 
 
+def load_tokenizer():
+    path = model_file_path("distilbert-base-uncased")
+    _logger.info("loading tokenizer from %s", path)
+    return AutoTokenizer.from_pretrained(path)
+
+
 def load_checkpoint(device_name=None):
     checkpoint = None
 
     if device_name is None:
         # device_name = "cuda" if th.cuda.is_available() else "cpu"
         device_name = "cpu"
-
     load_path = model_file_path("model.safetensors")
-    print("loading checkpoint", load_path)
-
+    _logger.info("loading checkpoint from %s", checkpoint)
     checkpoint = load_file(load_path)
     return checkpoint, device_name
 
 
 def load_model(checkpoint, device):
-    print('assembling model')
+    _logger.info("instantiating model")
     model = NRMS(ModelConfig()).to(device)
     model.load_state_dict(checkpoint)
     model.eval()
@@ -60,10 +67,8 @@ def load_model(checkpoint, device):
     return model
 
 
-print("loading tokenizer")
-TOKENIZER = AutoTokenizer.from_pretrained(model_file_path('distilbert-base-uncased'))
+TOKENIZER = load_tokenizer()
 CHECKPOINT, DEVICE = load_checkpoint()
-print("loading model")
 MODEL = load_model(CHECKPOINT, DEVICE)
 
 
