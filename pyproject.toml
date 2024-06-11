@@ -20,7 +20,7 @@ dependencies = [
   "smart_open==7.*",
   "safetensors>=0.4,<1",
   "transformers>=4.41,<5",
-  "poprox-concepts@git+https://github.com/CCRI-POPROX/poprox-concepts.git",
+  "poprox-concepts@git+https://github.com/CCRI-POPROX/poprox-concepts.git@main",
 ]
 
 [project.optional-dependencies]
