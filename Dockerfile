@@ -26,7 +26,7 @@ COPY pyproject.toml README.md /src/poprox-recommender
 COPY src/ /src/poprox-recommender/src/
 WORKDIR /src/poprox-recommender
 # Install the poprox-recommender module
-RUN micromamba run -p /opt/poprox pip install .
+RUN micromamba run -p /opt/poprox pip install --no-deps .
 
 # Copy the Poprox models
 COPY models/ /opt/poprox/models/
