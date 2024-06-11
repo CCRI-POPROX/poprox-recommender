@@ -35,15 +35,21 @@ COPY models/ /opt/poprox/models/
 # We installed Python ourselves
 FROM public.ecr.aws/lambda/provided:al2
 
+# Install the Amazon RIE emulator for easy debugging
+ADD --chmod=0755 https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie \
+    /usr/local/bin/aws-lambda-rie
+
 # Copy the installed packages and data from the build container
 COPY --from=build /usr/local/bin/micromamba /usr/local/bin/micromamba
 COPY --from=build /opt/poprox /opt/poprox
 ENV MAMBA_ROOT_PREFIX=/opt/micromamba
+# Copy the entrypoint script
+COPY entrypoint.sh /opt/poprox-entrypoint.sh
 
 # Set the transformers cache to a writeable directory
 ENV TRANSFORMERS_CACHE /tmp/.transformers
 
 # Since we use the "provided" runtime, we need to set Docker entry point
-ENTRYPOINT ["/usr/local/bin/micromamba", "run", "-p", "/opt/poprox", "python", "-m", "awslambdaric"]
+ENTRYPOINT ["/opt/poprox-entrypoint.sh"]
 # Tell it to use our poprox recommender entry point
 CMD ["poprox_recommender.handler.generate_recs"]
