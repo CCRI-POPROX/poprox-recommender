@@ -1,39 +1,29 @@
 import json
 
-from poprox_concepts import Article, ClickHistory
+from poprox_concepts.api.recommendations import (
+    RecommendationRequest,
+    RecommendationResponse,
+)
 from poprox_recommender.default import select_articles
 
 
 def generate_recs(event, context):
-    req_body = json.loads(event["body"])
-
-    todays_articles = [
-        Article.model_validate(attrs) for attrs in req_body["todays_articles"]
-    ]
-    past_articles = [
-        Article.model_validate(attrs) for attrs in req_body["past_articles"]
-    ]
-    click_data = [
-        ClickHistory.model_validate(attrs) for attrs in req_body["click_data"]
-    ]
-    num_recs = req_body["num_recs"]
+    req = RecommendationRequest.model_validate_json(event["body"])
 
     recommendations = select_articles(
-        todays_articles,
-        past_articles,
-        click_data,
-        num_recs,
+        req.todays_articles,
+        req.past_articles,
+        req.click_histories,
+        req.num_recs,
     )
 
-    body = {
-        "recommendations": {
-            str(account_id): [
-                json.loads(article.model_dump_json()) for article in articles
-            ]
-            for account_id, articles in recommendations.items()
-        },
-    }
+    resp_body = RecommendationResponse.model_validate(
+        {"recommendations": recommendations}
+    )
 
-    response = {"statusCode": 200, "body": json.dumps(body)}
+    # Dumping to JSON serializes UUIDs properly but requests
+    # wants a Python data structure as the body. There's gotta
+    # be a better way, but this workaround bridges the gap for now.
+    response = {"statusCode": 200, "body": json.loads(resp_body.model_dump_json())}
 
     return response
