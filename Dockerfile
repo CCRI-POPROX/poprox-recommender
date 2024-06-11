@@ -28,6 +28,9 @@ WORKDIR /src/poprox-recommender
 # Install the poprox-recommender module
 RUN micromamba run -p /opt/poprox pip install .
 
+# Copy the Poprox models
+COPY models/ /opt/poprox/models/
+
 # Use Lambda "Provided" base image for the deployment container
 # We installed Python ourselves
 FROM public.ecr.aws/lambda/provided:al2
