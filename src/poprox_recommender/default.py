@@ -45,12 +45,14 @@ def load_checkpoint(device_name=None):
         device_name = "cpu"
 
     load_path = model_file_path("model.safetensors")
+    print("loading checkpoint", load_path)
 
     checkpoint = load_file(load_path)
     return checkpoint, device_name
 
 
 def load_model(checkpoint, device):
+    print('assembling model')
     model = NRMS(ModelConfig()).to(device)
     model.load_state_dict(checkpoint)
     model.eval()
@@ -58,8 +60,10 @@ def load_model(checkpoint, device):
     return model
 
 
-TOKENIZER = AutoTokenizer.from_pretrained("distilbert-base-uncased", cache_dir="/tmp/")
+print("loading tokenizer")
+TOKENIZER = AutoTokenizer.from_pretrained(model_file_path('distilbert-base-uncased'))
 CHECKPOINT, DEVICE = load_checkpoint()
+print("loading model")
 MODEL = load_model(CHECKPOINT, DEVICE)
 
 
