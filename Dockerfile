@@ -10,18 +10,21 @@ ADD --chmod=0755 https://github.com/mamba-org/micromamba-releases/releases/lates
 # Copy source and dependency specifications
 ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 
-# copy the lock file to install deps
-COPY conda-lock.yml /tmp/conda-lock.yml
+# Copy dependency files to install deps.
+COPY conda-lock.yml /src/poprox-recommender/
 # Install recommender dependencies from Conda
-RUN micromamba create -y --always-copy -p /opt/poprox -f /tmp/conda-lock.yml
+RUN micromamba create -y --always-copy -p /opt/poprox -f /src/poprox-recommender/conda-lock.yml
 # Download the punkt NLTK data
 RUN micromamba run -p /opt/poprox python -m nltk.downloader -d /opt/poprox/nltk_data punkt
 # Install the Lambda runtime bridge
 RUN micromamba install -p /opt/poprox -c conda-forge awslambdaric
 
-# Copy the source and models to bake into the model
-COPY ./ /src/poprox_recommender
-WORKDIR /src/poprox_recommender
+# Copy the source and models to bake into the model.
+# This is separate to allow the dependency stages to be cached.
+# TODO do we want to copy the sdist or wheel instead?
+COPY pyproject.toml README.md /src/poprox-recommender
+COPY src/ /src/poprox-recommender/src/
+WORKDIR /src/poprox-recommender
 # Install the poprox-recommender module
 RUN micromamba run -p /opt/poprox pip install .
 
@@ -38,7 +41,6 @@ ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 ENV TRANSFORMERS_CACHE /tmp/.transformers
 
 # Since we use the "provided" runtime, we need to set Docker entry point
-ENTRYPOINT "/bin/bash"
-# ENTRYPOINT ["/usr/local/bin/micromamba", "run", "-p", "/opt/poprox", "python", "-m", "awslambdaric"]
+ENTRYPOINT ["/usr/local/bin/micromamba", "run", "-p", "/opt/poprox", "python", "-m", "awslambdaric"]
 # Tell it to use our poprox recommender entry point
-# CMD ["poprox_recommender.handler.generate_recs"]
+CMD ["poprox_recommender.handler.generate_recs"]
