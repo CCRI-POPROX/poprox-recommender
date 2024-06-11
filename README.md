@@ -42,7 +42,7 @@ To get the data and models, there are two steps:
 There are two sets of dependencies. To install the Serverless framework and Node dependencies:
 
 ```console
-npm install -g serverless
+npm install -g serverless@3
 npm install
 ```
 
