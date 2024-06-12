@@ -11,17 +11,15 @@ def project_root(require: bool = True) -> Path | None:
     Find the project root directory (when we are running in the project).
 
     This searches upwards from the **current working directory** to find the
-    root of the project, which it identifies by the presence of the
-    `pyproject.toml` file.  If this function is called from a directory that is
-    not within a checkout of the ``poprox-recommender`` repository , it will
-    raise an error.
+    root of the project, which it identifies by the ``pyproject.toml`` file.  If
+    this function is called from a directory that is not within a checkout of
+    the ``poprox-recommender`` repository, it will raise an error.
 
     Args:
         require:
             Whether to fail when the project root is not found, or return
             ``None``. If ``require=False`` this function will stil fail on a
-            *defective* project root (it contains an invalid
-            ``pyproject.toml``).
+            *defective* project root (contains an invalid ``pyproject.toml``).
     """
     cwd = Path(".").resolve()
     candidate = cwd
@@ -39,11 +37,13 @@ def project_root(require: bool = True) -> Path | None:
 
 def model_file_path(name: str) -> Path:
     """
-    Get the path of a model file.  It looks in the following locations, in order:
+    Get the path of a model file.  It looks in the following locations, in
+    order:
 
-    * The path specified by the ``POPROX_MODELS`` directory.
+    * The path specified by the ``POPROX_MODELS`` environment variable.
     * The ``models`` directory under the :func:`project_root`.
-    * ``$CONDA_PREFIX/models`` (if ``CONDA_PREFIX`` is defined).
+    * ``$CONDA_PREFIX/models`` (if env var ``CONDA_PREFIX`` is defined, which is
+      done by ``conda activate``).
     """
     model_dirs = []
     if "POPROX_MODELS" in os.environ:
