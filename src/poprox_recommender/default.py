@@ -1,7 +1,7 @@
 import random
 from dataclasses import dataclass
 from functools import partial
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 import swifter  # noqa: F401 # pylint: disable=unused-import
@@ -157,7 +157,7 @@ def build_user_embeddings(
     return user_embeddings
 
 
-def mmr_diversification(rewards, similarity_matrix, theta, topk):
+def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
     # MR_i = \theta * reward_i - (1 - \theta)*max_{j \in S} sim(i, j) # S us
     # R is all candidates (not selected yet)
 
@@ -190,13 +190,22 @@ def mmr_diversification(rewards, similarity_matrix, theta, topk):
 
 
 def generate_recommendations(
-    model, articles, article_vectors, similarity_matrix, user_embeddings, num_slots=10
+    model,
+    articles,
+    article_vectors,
+    similarity_matrix,
+    user_embeddings,
+    num_slots: int = 10,
+    algo_params: Optional[Dict[str, Any]] = None,
 ):
+    algo_params = algo_params or {}
+    theta = float(algo_params.get("theta", 0.8))
+
     recommendations = {}
     for user, user_vector in user_embeddings.items():
         pred = model.get_prediction(article_vectors, user_vector.squeeze())
         pred = pred.cpu().detach().numpy()
-        recs = mmr_diversification(pred, similarity_matrix, theta=0.8, topk=num_slots)
+        recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
         recommendations[user] = [articles[int(rec)] for rec in recs]
     return recommendations
 
@@ -209,8 +218,9 @@ def select_with_model(
     click_history: ClickHistory,
     model,
     model_device,
-    num_slots=10,
-    max_clicks_per_user=50,
+    num_slots: int = 10,
+    max_clicks_per_user: int = 50,
+    algo_params: Optional[Dict[str, Any]] = None,
 ):
     # Translate clicks JSON to dataframe
     user_df = build_clicks_df(click_history)
@@ -231,6 +241,7 @@ def select_with_model(
         article_similarity_matrix,
         user_embeddings,
         num_slots=num_slots,
+        algo_params=algo_params,
     )
 
     return recommendations
@@ -254,7 +265,8 @@ def select_articles(
     todays_articles: List[Article],
     past_articles: List[Article],
     click_histories: List[ClickHistory],
-    num_slots,
+    num_slots: int,
+    algo_params: Optional[Dict[str, Any]] = None,
 ) -> Dict[UUID, List[Article]]:
 
     # Transform news to model features
@@ -296,6 +308,7 @@ def select_articles(
                 MODEL,
                 DEVICE,
                 num_slots=num_slots,
+                algo_params=algo_params,
             )
             recommendations[account_id] = user_recs[str(account_id)]
         else:
