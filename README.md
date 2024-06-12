@@ -8,7 +8,7 @@ trained models.
 - [Local Development](#localdevelopment)
 - [License](#license)
 
-## Installation
+## Installation for Development
 
 Model and data files are managed using [dvc][].  The `conda-lock.yml` provides a
 [conda-lock][] lockfile for reproducibly creating an environment with all
@@ -36,26 +36,19 @@ To get the data and models, there are two steps:
 1.  Obtain the credentials for the S3 bucket and put them in `.env` (the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`)
 2.  `dvc pull`
 
+## Local Endpoint Development
 
-## Local Development
-
-There are two sets of dependencies. To install the Serverless framework and Node dependencies:
+For local testing of the REST endpoint, you need Serverless and Node
+dependencies (in addition to the environment above):
 
 ```console
-npm install -g serverless@3
 npm install
-```
-
-To install Python dependencies:
-
-```console
-pip install -r requirements.txt
 ```
 
 To run the API endpoint locally:
 
 ```console
-serverless offline start --reloadHandler
+npx serverless offline start --reloadHandler
 ```
 
 Once the local server is running, you can send requests to `localhost:3000`. A request with this JSON body:
