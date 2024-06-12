@@ -1,0 +1,5 @@
+outs:
+- md5: 64800d5d8528ce344256daf115d4965e
+  size: 231508
+  hash: md5
+  path: vocab.txt
