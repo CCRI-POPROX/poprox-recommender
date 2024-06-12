@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import torch as th
 import sys
+import tempfile
 
 sys.path.append("../")
 from tqdm import tqdm
@@ -43,7 +44,7 @@ class ModelConfig:
 def load_tokenizer():
     path = model_file_path("distilbert-base-uncased")
     _logger.info("loading tokenizer from %s", path)
-    return AutoTokenizer.from_pretrained(path)
+    return AutoTokenizer.from_pretrained(path, cache_dir=tempfile.gettempdir())
 
 
 def load_checkpoint(device_name=None):

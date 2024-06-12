@@ -1,3 +1,4 @@
+import tempfile
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,10 +17,12 @@ class NewsEncoder(torch.nn.Module):
 
         self.plm = AutoModel.from_pretrained(
             model_file_path(self.config.pretrained_model),
+            cache_dir=tempfile.gettempdir(),
         )
 
         plm_hidden_size = AutoConfig.from_pretrained(
             model_file_path(self.config.pretrained_model),
+            cache_dir=tempfile.gettempdir(),
         ).hidden_size
 
         self.multihead_attention = nn.MultiheadAttention(
