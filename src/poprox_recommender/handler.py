@@ -12,18 +12,20 @@ logger.setLevel(logging.DEBUG)
 
 
 def generate_recs(event, context):
-
-    req = RecommendationRequest.model_validate_json(event["body"])
+    logger.info(f"Received event: {event}")
     body = base64.b64decode(event["body"]) if event["isBase64Encoded"] else event["body"]
+    logger.info(f"Decoded body: {body}")
     req = RecommendationRequest.model_validate_json(body)
 
     algo_params = event.get("queryStringParameters", {})
 
     if algo_params:
-        logger.info(f"Generating recommendations with parameters: {algo_params}")
+        logger.info(f"Using parameters: {algo_params}")
     else:
-        logger.info("Generating recommendations with default parameters")
+        logger.info("Using default parameters")
 
+
+    logger.info(f"Selecting articles...")
     recommendations = select_articles(
         req.todays_articles,
         req.past_articles,
@@ -32,12 +34,15 @@ def generate_recs(event, context):
         algo_params,
     )
 
+    logger.info(f"Constructing response...")
     resp_body = RecommendationResponse.model_validate(
         {"recommendations": recommendations}
     )
 
+    logger.info(f"Serializing response...")
     response = {"statusCode": 200, "body": resp_body.model_dump_json()}
 
+    logger.info(f"Finished.")
     return response
 
 def classify_news_topic(model, tokenizer, general_topics, topic):
