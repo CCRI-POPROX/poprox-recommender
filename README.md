@@ -71,7 +71,7 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
             "url": "url 2"
         }
     ],
-    "click_data": [
+    "click_histories": [
         {
             "account_id": "977a3c88-937a-46fb-bbfe-94dc5dcb68c8",
             "article_ids": [
