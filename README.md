@@ -21,14 +21,14 @@ To set up the environment with Conda:
 
 ```
 conda install -n base -c conda-forge conda-lock
-conda lock install -n poprox-recsys --dev
+conda lock install -n poprox-recsys
 conda activate poprox-recsys
 ```
 
 If you use `micromamba` instead of a full Conda installation, it can directly use the lockfile:
 
 ```
-micromamba create -n poprox-recs -f conda-lock.yml --categories dev
+micromamba create -n poprox-recs -f conda-lock.yml
 ```
 
 To get the data and models, there are two steps:
