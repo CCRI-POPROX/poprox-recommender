@@ -39,10 +39,6 @@ def generate_recs(event, context):
         {"recommendations": recommendations}
     )
 
-    # Dumping to JSON serializes UUIDs properly but requests
-    # wants a Python data structure as the body. There's gotta
-    # be a better way, but this workaround bridges the gap for now.
-    # MDE FIXME: serverless warns that the body is supposed to be a string
-    response = {"statusCode": 200, "body": json.loads(resp_body.model_dump_json())}
+    response = {"statusCode": 200, "body": resp_body.model_dump_json()}
 
     return response
