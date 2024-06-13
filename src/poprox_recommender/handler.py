@@ -1,4 +1,4 @@
-import json
+import base64
 import logging
 
 from poprox_concepts.api.recommendations import (
@@ -13,6 +13,8 @@ logger.setLevel(logging.DEBUG)
 
 def generate_recs(event, context):
     req = RecommendationRequest.model_validate_json(event["body"])
+    body = base64.b64decode(event["body"]) if event["isBase64Encoded"] else event["body"]
+    req = RecommendationRequest.model_validate_json(body)
 
     algo_params = event.get("queryStringParameters", {})
 
@@ -33,9 +35,6 @@ def generate_recs(event, context):
         {"recommendations": recommendations}
     )
 
-    # Dumping to JSON serializes UUIDs properly but requests
-    # wants a Python data structure as the body. There's gotta
-    # be a better way, but this workaround bridges the gap for now.
-    response = {"statusCode": 200, "body": json.loads(resp_body.model_dump_json())}
+    response = {"statusCode": 200, "body": resp_body.model_dump_json()}
 
     return response
