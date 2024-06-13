@@ -2,7 +2,7 @@ import random
 import sys
 from dataclasses import dataclass
 from functools import partial
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID
 
 import numpy as np
@@ -175,7 +175,7 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
                 best_MR = mr_i
                 candidate = i
 
-        if candidate != None:
+        if candidate is not None:
             S.append(candidate)
     return S  # LIST(candidate index)
 

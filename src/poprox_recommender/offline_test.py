@@ -1,6 +1,4 @@
-import io
 import json
-import os
 import sys
 
 from lenskit.metrics import topn
@@ -12,7 +10,6 @@ import numpy as np
 import pandas as pd
 import torch as th
 from safetensors.torch import load_file
-from tqdm import tqdm
 
 from poprox_concepts import Article, ClickHistory
 from poprox_recommender.default import select_articles
@@ -106,7 +103,7 @@ if __name__ == "__main__":
         single_ndcg5, single_ndcg10, single_mrr = recsys_metric(recommendations, impression_idx, news_struuid_ID)
         # recommendations {account id (uuid): LIST[Article]}
         print(
-            f"----------------evaluation using the first {impression_idx + 1} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_mrr}"
+            f"----------------evaluation using the first {impression_idx + 1} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_mrr}"  # noqa: E501
         )
 
         ndcg5.append(single_ndcg5)
@@ -114,7 +111,7 @@ if __name__ == "__main__":
         mrr.append(single_mrr)
 
     print(
-        f"Offline evaluation metrics on MIND data: NDCG@5 = {np.mean(ndcg5)}, NDCG@10 = {np.mean(ndcg10)}, MRR = {np.mean(mrr)}"
+        f"Offline evaluation metrics on MIND data: NDCG@5 = {np.mean(ndcg5)}, NDCG@10 = {np.mean(ndcg10)}, MRR = {np.mean(mrr)}"  # noqa: E501
     )
 
     # response = {"statusCode": 200, "body": json.dump(body, default=custom_encoder)}
