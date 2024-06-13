@@ -12,13 +12,7 @@ logger.setLevel(logging.DEBUG)
 
 
 def generate_recs(event, context):
-    # we get a couple of different formats depending on how we are called
-    # if the JSON is just POSTed to Docker, it's as-is
-    # if we're in Serverless, it's an event with a 'body'
-    if "body" in event:
-        req = RecommendationRequest.model_validate_json(event["body"])
-    else:
-        req = RecommendationRequest.model_validate(event)
+    req = RecommendationRequest.model_validate_json(event["body"])
 
     algo_params = event.get("queryStringParameters", {})
 

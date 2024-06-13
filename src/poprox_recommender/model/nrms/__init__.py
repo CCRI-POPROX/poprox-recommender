@@ -15,14 +15,14 @@ class NRMS(torch.nn.Module):
 
     def __init__(self, args):
         super(NRMS, self).__init__()
-
+        
         self.news_encoder = NewsEncoder(args)
         self.user_encoder = UserEncoder(args)
         self.click_predictor = DotProductClickPredictor()
         self.loss_fn = nn.CrossEntropyLoss()
 
     def forward(self, candidate_news, clicked_news, clicked, mode = 'train'):
-
+       
         # batch_size, 1 + K, word_embedding_dim
         candidate_news = candidate_news.permute(1, 0, 2)
         clicked_news = clicked_news.permute(1, 0, 2)
@@ -40,12 +40,12 @@ class NRMS(torch.nn.Module):
         user_vector = self.user_encoder(clicked_news_vector)
         # batch_size, 1 + K
         click_probability = self.click_predictor(candidate_news_vector, user_vector)
-
-        if mode == 'train':
-            return {'click_prob': click_probability,
+        
+        if mode == 'train': 
+            return {'click_prob': click_probability, 
                     'loss': self.loss_fn(click_probability, clicked)
             }
-
+        
         return click_probability
 
     def get_news_vector(self, news):
