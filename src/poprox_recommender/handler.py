@@ -1,4 +1,4 @@
-import json
+import base64
 import logging
 
 from poprox_concepts.api.recommendations import (
@@ -14,6 +14,8 @@ logger.setLevel(logging.DEBUG)
 def generate_recs(event, context):
 
     req = RecommendationRequest.model_validate_json(event["body"])
+    body = base64.b64decode(event["body"]) if event["isBase64Encoded"] else event["body"]
+    req = RecommendationRequest.model_validate_json(body)
 
     algo_params = event.get("queryStringParameters", {})
 
