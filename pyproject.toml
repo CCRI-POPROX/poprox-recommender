@@ -82,6 +82,8 @@ all = [
 [tool.ruff]
 target-version = "py310"
 line-length = 120
+
+[tool.ruff.lint]
 select = [
   "A",
   "ARG",
@@ -125,7 +127,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["poprox_recommender"]
+known-first-party = ["poprox_recommender", "poprox_concepts"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
