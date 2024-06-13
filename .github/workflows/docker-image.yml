@@ -1,0 +1,49 @@
+name: Test Docker
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test-docker:
+    name: Build and test Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
+      - name: Install DVC
+        # to fetch things, all we need is DVC, so just use pipx
+        # saves the time of installing a whole environment
+        run: |
+          pipx install "dvc[s3]==3.*"
+
+      - name: Fetch model data
+        run: |
+          dvc pull -R src/models
+        env:
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+
+      - name: Build Docker image
+        run: |
+          docker build -t poprox-recommender:ci .
+
+      - name: Start Docker container
+        run: |
+          docker run -d -p 9000:8080 --name=poprox-recommender poprox-recommender:ci
+
+      - name: Submit test request
+        run: |
+          curl -v -XPOST http://localhost:9000 --data @tests/basic-request.json
+
+      - name: Tear down Docker
+        run: |
+          docker stop poprox-recommender
+          docker rm poprox-recommender
