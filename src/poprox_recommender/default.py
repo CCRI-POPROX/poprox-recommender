@@ -1,18 +1,18 @@
 import random
+import sys
 from dataclasses import dataclass
 from functools import partial
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-import swifter  # noqa: F401 # pylint: disable=unused-import
 import numpy as np
 import pandas as pd
+import swifter  # noqa: F401 # pylint: disable=unused-import
 import torch as th
-import sys
 
 sys.path.append("../")
-from tqdm import tqdm
 from safetensors.torch import load_file
+from tqdm import tqdm
 from transformers import AutoTokenizer
 
 from poprox_concepts import Article, ClickHistory
@@ -67,9 +67,7 @@ def parse_row(tokenizer, row):
     new_row = [str(row.article_id), []]
 
     try:
-        new_row[1] = tokenizer.encode(
-            row.title, padding="max_length", max_length=30, truncation=True
-        )
+        new_row[1] = tokenizer.encode(row.title, padding="max_length", max_length=30, truncation=True)
 
     except IndexError:
         pass
@@ -88,7 +86,7 @@ def is_list_of_dicts(articles):
 
 
 # prepare the news.tsv with information for NRMS model
-def transform_article_features(articles: List[Article], tokenizer):
+def transform_article_features(articles: list[Article], tokenizer):
     article_df = pd.DataFrame([article.model_dump() for article in articles])
     article_df.fillna(" ", inplace=True)
     parse_fn = partial(parse_row, tokenizer)
@@ -104,13 +102,11 @@ def build_article_embeddings(article_features, model, device):
     }
     article_embeddings = {}
     article_vectors = model.get_news_vector(articles["title"].to(device))
-    for article_id, article_vector in zip(articles["id"], article_vectors):
+    for article_id, article_vector in zip(articles["id"], article_vectors, strict=False):
         if article_id not in article_embeddings:
             article_embeddings[article_id] = article_vector
 
-    article_embeddings["PADDED_NEWS"] = th.zeros(
-        list(article_embeddings.values())[0].size(), device=device
-    )
+    article_embeddings["PADDED_NEWS"] = th.zeros(list(article_embeddings.values())[0].size(), device=device)
     return article_embeddings, article_vectors
 
 
@@ -122,14 +118,10 @@ def build_clicks_df(click_history: ClickHistory):
 
 
 # Compute a vector for each user
-def build_user_embeddings(
-    user_df, article_embeddings, model, device, max_clicks_per_user
-):
+def build_user_embeddings(user_df, article_embeddings, model, device, max_clicks_per_user):
     user_embeddings = {}
     for _, row in user_df.iterrows():
-        clicked_news = list(
-            dict.fromkeys(row.clicked_news)
-        )  # deduplicate while maintaining order
+        clicked_news = list(dict.fromkeys(row.clicked_news))  # deduplicate while maintaining order
         user = {
             "user": row.user,
             "clicked_news": clicked_news[-max_clicks_per_user:],
@@ -140,8 +132,7 @@ def build_user_embeddings(
         user["clicked_news"] = ["PADDED_NEWS"] * repeated_times + user["clicked_news"]
         default = article_embeddings["PADDED_NEWS"]
         clicked_article_embeddings = [
-            article_embeddings.get(clicked_article, default).to(device)
-            for clicked_article in user["clicked_news"]
+            article_embeddings.get(clicked_article, default).to(device) for clicked_article in user["clicked_news"]
         ]
         clicked_news_vector = (
             th.stack(
@@ -196,7 +187,7 @@ def generate_recommendations(
     similarity_matrix,
     user_embeddings,
     num_slots: int = 10,
-    algo_params: Optional[Dict[str, Any]] = None,
+    algo_params: dict[str, Any] | None = None,
 ):
     algo_params = algo_params or {}
     theta = float(algo_params.get("theta", 0.8))
@@ -211,8 +202,8 @@ def generate_recommendations(
 
 
 def select_with_model(
-    todays_articles: List[Article],
-    todays_article_vectors: List[Article],
+    todays_articles: list[Article],
+    todays_article_vectors: list[Article],
     article_similarity_matrix,
     past_article_features,
     click_history: ClickHistory,
@@ -220,19 +211,15 @@ def select_with_model(
     model_device,
     num_slots: int = 10,
     max_clicks_per_user: int = 50,
-    algo_params: Optional[Dict[str, Any]] = None,
+    algo_params: dict[str, Any] | None = None,
 ):
     # Translate clicks JSON to dataframe
     user_df = build_clicks_df(click_history)
 
     # Build embedding tables
-    past_article_embeddings, _ = build_article_embeddings(
-        past_article_features, model, model_device
-    )
+    past_article_embeddings, _ = build_article_embeddings(past_article_features, model, model_device)
 
-    user_embeddings = build_user_embeddings(
-        user_df, past_article_embeddings, model, model_device, max_clicks_per_user
-    )
+    user_embeddings = build_user_embeddings(user_df, past_article_embeddings, model, model_device, max_clicks_per_user)
 
     recommendations = generate_recommendations(
         model,
@@ -255,20 +242,17 @@ def compute_similarity_matrix(todays_article_vectors):
         for j, value2 in enumerate(todays_article_vectors):
             if i <= j:
                 value2 = value2.detach().cpu()
-                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(
-                    value1, value2
-                )
+                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
     return similarity_matrix
 
 
 def select_articles(
-    todays_articles: List[Article],
-    past_articles: List[Article],
-    click_histories: List[ClickHistory],
+    todays_articles: list[Article],
+    past_articles: list[Article],
+    click_histories: list[ClickHistory],
     num_slots: int,
-    algo_params: Optional[Dict[str, Any]] = None,
-) -> Dict[UUID, List[Article]]:
-
+    algo_params: dict[str, Any] | None = None,
+) -> dict[UUID, list[Article]]:
     # Transform news to model features
     todays_article_features = transform_article_features(todays_articles, TOKENIZER)
 
@@ -277,11 +261,7 @@ def select_articles(
     for history in click_histories:
         clicked_article_ids.update(history.article_ids)
 
-    clicked_articles = [
-        article
-        for article in past_articles
-        if article.article_id in clicked_article_ids
-    ]
+    clicked_articles = [article for article in past_articles if article.article_id in clicked_article_ids]
 
     # Convert clicked article attributes into model features
     past_article_features = transform_article_features(
@@ -290,9 +270,7 @@ def select_articles(
     )
 
     # Compute today's article similarity matrix
-    _, todays_article_vectors = build_article_embeddings(
-        todays_article_features, MODEL, DEVICE
-    )
+    _, todays_article_vectors = build_article_embeddings(todays_article_features, MODEL, DEVICE)
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
 
     recommendations = {}

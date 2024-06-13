@@ -1,6 +1,6 @@
-import torch
-import torch.nn as nn
 import numpy as np
+import torch
+from torch import nn
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -50,36 +50,18 @@ class MultiHeadSelfAttention(nn.Module):
             V = Q
         batch_size = Q.size(0)
 
-        q_s = (
-            self.W_Q(Q)
-            .view(batch_size, -1, self.num_attention_heads, self.d_k)
-            .transpose(1, 2)
-        )
-        k_s = (
-            self.W_K(K)
-            .view(batch_size, -1, self.num_attention_heads, self.d_k)
-            .transpose(1, 2)
-        )
-        v_s = (
-            self.W_V(V)
-            .view(batch_size, -1, self.num_attention_heads, self.d_v)
-            .transpose(1, 2)
-        )
+        q_s = self.W_Q(Q).view(batch_size, -1, self.num_attention_heads, self.d_k).transpose(1, 2)
+        k_s = self.W_K(K).view(batch_size, -1, self.num_attention_heads, self.d_k).transpose(1, 2)
+        v_s = self.W_V(V).view(batch_size, -1, self.num_attention_heads, self.d_v).transpose(1, 2)
 
         if length is not None:
             maxlen = Q.size(1)
-            attn_mask = torch.arange(maxlen).to(device).expand(
-                batch_size, maxlen
-            ) < length.to(device).view(-1, 1)
+            attn_mask = torch.arange(maxlen).to(device).expand(batch_size, maxlen) < length.to(device).view(-1, 1)
             attn_mask = attn_mask.unsqueeze(1).expand(batch_size, maxlen, maxlen)
             attn_mask = attn_mask.unsqueeze(1).repeat(1, self.num_attention_heads, 1, 1)
         else:
             attn_mask = None
 
         context, attn = ScaledDotProductAttention(self.d_k)(q_s, k_s, v_s, attn_mask)
-        context = (
-            context.transpose(1, 2)
-            .contiguous()
-            .view(batch_size, -1, self.num_attention_heads * self.d_v)
-        )
+        context = context.transpose(1, 2).contiguous().view(batch_size, -1, self.num_attention_heads * self.d_v)
         return context
