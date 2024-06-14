@@ -10,6 +10,7 @@ from poprox_recommender.default import select_articles
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 def generate_recs(event, context):
     logger.info(f"Received event: {event}")
 
@@ -44,4 +45,3 @@ def generate_recs(event, context):
 
     logger.info("Finished.")
     return response
-
