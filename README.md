@@ -6,6 +6,7 @@ trained models.
 
 - [Installation](#installation)
 - [Local Development](#localdevelopment)
+- [Editor Setup](#editor-setup)
 - [License](#license)
 
 ## Installation for Development
@@ -114,3 +115,11 @@ $ curl -X POST -H "Content-Type: application/json" -d @tests/basic-request.json 
 
 {"recommendations": {"977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [{"article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff", "title": "title 2", "content": "content 2", "url": "url 2", "published_at": "1970-01-01T00:00:00Z", "mentions": []}]}}
 ```
+
+## Editor Setup
+
+If you are using VSCode, you should install the following plugins for best success with this repository:
+
+- [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
+- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+- [Ruff](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)
