@@ -123,3 +123,5 @@ If you are using VSCode, you should install the following plugins for best succe
 - [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
 - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 - [Ruff](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)
+
+When you open the repository, they should automatically be recommended.
