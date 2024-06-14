@@ -36,7 +36,7 @@ jobs:
           fi
 
   ruff-lint:
-    name: Report lint fialures
+    name: Report lint failures
     runs-on: ubuntu-latest
 
     steps:
