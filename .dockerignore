@@ -1,5 +1,6 @@
 data/
 dist/
+src/data/
 .dvc/
 .git/
 node_modules/

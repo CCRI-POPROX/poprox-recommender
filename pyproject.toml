@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["dvc[s3]==3.*"]
+dev = ["dvc[s3]==3.*", "docopt>=0.6", "requests~=2.31"]
 
 [project.urls]
 Documentation = "https://github.com/CCRI-POPROX/poprox-recommender#readme"
