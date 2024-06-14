@@ -36,6 +36,12 @@ To get the data and models, there are two steps:
 1.  Obtain the credentials for the S3 bucket and put them in `.env` (the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`)
 2.  `dvc pull`
 
+Finally, set up `pre-commit` to make sure that code formatting rules are applied as you make changes:
+
+```console
+pre-commit install
+```
+
 ## Local Endpoint Development
 
 For local testing of the REST endpoint, you need Serverless and Node
