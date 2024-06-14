@@ -24,7 +24,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["dvc[s3]==3.*", "docopt>=0.6", "requests~=2.31"]
+# this is sub-optimal for various reasons, but it's the best way with conda-lock
+dev = ["dvc[s3]==3.*", "docopt>=0.6", "requests~=2.31", "pre-commit>=3.7,<4"]
 
 [project.urls]
 Documentation = "https://github.com/CCRI-POPROX/poprox-recommender#readme"
@@ -62,11 +63,7 @@ target-version = "py310"
 line-length = 120
 
 [tool.ruff.lint]
-select = [
-  "F",
-  "I",
-  "E",
-]
+select = ["F", "I", "E"]
 ignore = [
   # Allow non-abstract empty methods in abstract base classes
   "B027",

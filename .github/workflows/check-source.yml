@@ -1,0 +1,50 @@
+name: Validate Source
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check-pre-commit:
+    name: Check that the pre-commit hooks have run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pre-commit
+        run: |
+          pipx install pre-commit
+
+      - name: Install pre-commit hooks
+        run: |
+          pre-commit install-hooks
+
+      - name: Check source repo
+        run: |
+          if pre-commit run --all-files; then
+            echo "::notice title=pre-commit::pre-commit checks passed"
+          else
+            git status -s |sed -Ee 's/^...(.*)/::error file=\1,title=pre-commit::pre-commit wants to modify file/'
+            echo "::error title=pre-commit::committed code does not cleanly pass pre-commit"
+            exit 1
+          fi
+
+  ruff-lint:
+    name: Report lint failures
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Ruff lint and report
+        run: |
+          pipx run ruff check --output-format=github

@@ -10,9 +10,6 @@ repos:
       - id: debug-statements
       - id: end-of-file-fixer
       - id: mixed-line-ending
-      - id: name-tests-test
-      - id: pretty-format-json
-      - id: requirements-txt-fixer
       - id: trailing-whitespace
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
@@ -23,3 +20,22 @@ repos:
         args: [--fix]
       # Run the formatter.
       - id: ruff-format
+  - repo: local
+    hooks:
+      - id: format-toml-files
+        name: toml-format
+        entry: taplo
+        args: ["format"]
+        files: \.toml$
+        language: node
+        additional_dependencies:
+          - "@taplo/cli"
+      - id: format-yaml-files
+        name: yaml-format
+        files: \.ya?ml$
+        exclude: conda-lock.yml
+        entry: prettier
+        args: [-w]
+        language: node
+        additional_dependencies:
+          - prettier
