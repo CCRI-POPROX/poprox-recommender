@@ -46,7 +46,7 @@ def load_checkpoint(device_name=None):
         # device_name = "cuda" if th.cuda.is_available() else "cpu"
         device_name = "cpu"
 
-    load_path = f"{src_dir()}/models/model.safetensors"
+    load_path = src_dir() / "models" / "model.safetensors"
 
     checkpoint = load_file(load_path)
     return checkpoint, device_name
