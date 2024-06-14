@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .dvc/cache
-          key: test-dvc-cache-${{ hashFiles('models/**/*.dvc') }}
+          key: test-dvc-cache-${{ hashFiles('models/*.dvc') }}
 
       - name: Fetch model data
         run: |
