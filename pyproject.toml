@@ -122,8 +122,6 @@ platforms = ["win-64", "linux-64", "osx-arm64"]
 python = "=3.11"
 # need pip in deployment too
 pip = ">=24"
-# it's pulled in transitively, but dev envs need node explicitly
-node = "*"
 # conda doesn't support extras, so this pulls in the DVC S3 support
 dvc-s3 = "=3"
 # the end-to-end recommender is deployed without CUDA, so force CPU PyTorch.
