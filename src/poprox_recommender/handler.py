@@ -20,7 +20,7 @@ def generate_recs(event, context):
 
     body = base64.b64decode(body) if is_encoded else body
     logger.info(f"Decoded body: {body}")
-    
+
     req = RecommendationRequest.model_validate_json(body)
 
     if algo_params:
