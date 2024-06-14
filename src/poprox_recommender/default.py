@@ -1,5 +1,6 @@
 import random
 import sys
+from collections import defaultdict
 from dataclasses import dataclass
 from functools import partial
 from typing import Any
@@ -179,6 +180,7 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
             S.append(candidate)
     return S
 
+
 def pfar_diversification(
     user,
     rewards,
@@ -231,9 +233,6 @@ def pfar_diversification(
             S_topic.add(topic for topic in candidate_topic)
 
     return S  # LIST(candidate index)
-
-
-
 
 
 def generate_recommendations(
@@ -309,23 +308,20 @@ def compute_similarity_matrix(todays_article_vectors):
                 similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
     return similarity_matrix
 
-def find_topic(past_articles: List[Article], article_id: UUID):
+def find_topic(past_articles: list[Article], article_id: UUID):
     # each article might correspond to multiple topic
     for article in past_articles:
         if article.article_id == article_id:
             return [mention.entity.name for mention in article.mentions]
 
-def normalized_topic_count(topic_count_dict):
-
-    normalized_count = {}
-    total_count = sum(topic_count_dict.values())
-    for topic in topic_count_dict:
-        normalized_count[topic] = topic_count_dict[topic] / total_count
-    return normalized_count
+def normalized_topic_count(topic_counts: dict[str, int]):
+    total_count = sum(topic_counts.values())
+    normalized_counts = {key: value/total_count for key,value in topic_counts.items()}
+    return normalized_counts
 
 def user_topic_preference(
-    past_articles: List[Article],
-    click_histories: List[ClickHistory]
+    past_articles: list[Article],
+    click_histories: list[ClickHistory]
 ):
     '''Topic preference only based on click history'''
     user_preference_dict = {}
@@ -333,15 +329,12 @@ def user_topic_preference(
         account_id = click_history.account_id
         clicked_articles = click_history.article_ids # List[UUID]
 
-        topic_count_dict = {}
+        topic_count_dict = defaultdict(int)
 
         for article_id in clicked_articles:
             clicked_topics = find_topic(past_articles, article_id )
             for topic in clicked_topics:
-                if topic in topic_count_dict:
-                    topic_count_dict[topic] += 1
-                else:
-                    topic_count_dict[topic] = 1
+                topic_count_dict[topic] += 1
 
         user_preference_dict[str(account_id)] = normalized_topic_count(topic_count_dict)
     return user_preference_dict
