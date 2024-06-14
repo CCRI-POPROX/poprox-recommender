@@ -12,8 +12,8 @@ defaults:
     shell: bash -el {0}
 
 jobs:
-  serverless-smoketest:
-    name: Smoke-test the recommender with Serverless Offline
+  run-tests:
+    name: Run the PyTest tests
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +27,7 @@ jobs:
         with:
           environment-file: conda-lock.yml
           environment-name: poprox
-          create-args: --category main --category dev
+          create-args: --category main --category dev --category test
 
       - name: Install Node dependencies
         run: |
@@ -40,8 +40,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
-      - name: Start and test Serverless container
+      - name: Run tests
         run: |
-          npx serverless offline start &
-          sleep 2
-          curl -vf -XPOST http://localhost:3000 --data @tests/basic-request.json
+          python -m pytest -v
