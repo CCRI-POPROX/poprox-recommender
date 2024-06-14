@@ -33,7 +33,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t poprox-recommender:ci .
+          docker build -t poprox-recommender:ci --build-arg LOG_LEVEL=DEBUG .
 
       - name: Start Docker container
         run: |
@@ -41,9 +41,16 @@ jobs:
 
       - name: Submit test request
         run: |
-          curl -v -XPOST http://localhost:9000 --data @tests/basic-request.json
+          pipx run ./tests/test-docker-lambda.py
+
+      - name: Dump Docker logs
+        if: always()
+        run: |
+          docker logs poprox-recommender
 
       - name: Tear down Docker
+        if: always()
         run: |
           docker stop poprox-recommender
           docker rm poprox-recommender
+          docker image rm poprox-recommender:ci
