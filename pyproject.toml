@@ -20,7 +20,7 @@ dependencies = [
   "smart_open==7.*",
   "safetensors>=0.4,<1",
   "transformers>=4.41,<5",
-  "poprox-concepts@git+https://github.com/CCRI-POPROX/poprox-concepts.git",
+  "poprox-concepts@git+https://github.com/CCRI-POPROX/poprox-concepts.git@main",
 ]
 
 [project.optional-dependencies]
@@ -41,73 +41,31 @@ allow-direct-references = true
 path = "src/poprox_recommender/__about__.py"
 
 [tool.hatch.envs.default]
-dependencies = [
-  "coverage[toml]>=6.5",
-  "pytest>=8",
-]
+dependencies = ["coverage[toml]>=6.5", "pytest>=8"]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
-cov-report = [
-  "- coverage combine",
-  "coverage report",
-]
-cov = [
-  "test-cov",
-  "cov-report",
-]
+cov-report = ["- coverage combine", "coverage report"]
+cov = ["test-cov", "cov-report"]
 
 [tool.hatch.envs.lint]
 detached = true
-dependencies = [
-  "ruff>=0.4",
-  "pyright>=1.1,<2",
-]
+dependencies = ["ruff>=0.4", "pyright>=1.1,<2"]
 [tool.hatch.envs.lint.scripts]
 typing = "pyright {args:src/poprox_recommender tests}"
-style = [
-  "ruff check {args:.}",
-  "ruff format --check --diff {args:.}",
-]
-fmt = [
-  "ruff format {args:.}",
-  "ruff check --fix {args:.}",
-  "style",
-]
-all = [
-  "style",
-  "typing",
-]
+style = ["ruff check {args:.}", "ruff format --check --diff {args:.}"]
+fmt = ["ruff format {args:.}", "ruff check --fix {args:.}", "style"]
+all = ["style", "typing"]
 
 [tool.ruff]
 target-version = "py310"
 line-length = 120
+
+[tool.ruff.lint]
 select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
   "F",
-  "FBT",
   "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
+  "E",
 ]
 ignore = [
   # Allow non-abstract empty methods in abstract base classes
@@ -115,9 +73,15 @@ ignore = [
   # Allow boolean positional values in function calls, like `dict.get(... True)`
   "FBT003",
   # Ignore checks for possible passwords
-  "S105", "S106", "S107",
+  "S105",
+  "S106",
+  "S107",
   # Ignore complexity
-  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  "C901",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913",
+  "PLR0915",
 ]
 unfixable = [
   # Don't touch unused imports
@@ -125,7 +89,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["poprox_recommender"]
+known-first-party = ["poprox_recommender", "poprox_concepts"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -138,37 +102,29 @@ ban-relative-imports = "all"
 source_pkgs = ["poprox_recommender", "tests"]
 branch = true
 parallel = true
-omit = [
-  "src/poprox_recommender/__about__.py",
-]
+omit = ["src/poprox_recommender/__about__.py"]
 
 [tool.coverage.paths]
-poprox_recommender = ["src/poprox_recommender", "*/poprox-recommender/src/poprox_recommender"]
+poprox_recommender = [
+  "src/poprox_recommender",
+  "*/poprox-recommender/src/poprox_recommender",
+]
 tests = ["tests", "*/poprox-recommender/tests"]
 
 [tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.conda-lock]
-channels = [
-  "pytorch",
-  "conda-forge",
-  "nodefaults",
-]
+channels = ["pytorch", "conda-forge", "nodefaults"]
 # restrict to commonly-used platforms
 # if we need to add support for windows, we can try adding that here
-platforms = [
-  "linux-64",
-  "osx-arm64",
-]
+platforms = ["win-64", "linux-64", "osx-arm64"]
 # extra deps in the conda environment
 [tool.conda-lock.dependencies]
 # specify our Python version
 python = "=3.11"
+# need pip in deployment too
+pip = ">=24"
 # conda doesn't support extras, so this pulls in the DVC S3 support
 dvc-s3 = "=3"
 # the end-to-end recommender is deployed without CUDA, so force CPU PyTorch.
@@ -180,6 +136,8 @@ ruff = ">=0.4"
 pyright = ">=1.1,<2"
 pytest = ">=7"
 coverage = ">=6.5"
+# poprox concepts comes from PyPI
+poprox-concepts = { source = "pypi" }
 # we want conda-lock to manage the lockfiles
 conda-lock = ">=2.5,<3"
 # TODO: find a way to force MKL BLAS, but only on X86-64.
