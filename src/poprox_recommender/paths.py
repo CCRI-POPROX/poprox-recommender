@@ -3,10 +3,9 @@ from __future__ import annotations
 
 import logging
 import os
+import tomllib
 from pathlib import Path
 from typing import overload
-
-import tomllib
 
 _logger = logging.getLogger(__name__)
 
