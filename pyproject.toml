@@ -24,7 +24,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["dvc[s3]==3.*", "docopt>=0.6", "requests~=2.31"]
+# this is sub-optimal for various reasons, but it's the best way with conda-lock
+dev = ["dvc[s3]==3.*", "docopt>=0.6", "requests~=2.31", "pre-commit>=3.7,<4"]
 
 [project.urls]
 Documentation = "https://github.com/CCRI-POPROX/poprox-recommender#readme"
@@ -121,6 +122,8 @@ platforms = ["win-64", "linux-64", "osx-arm64"]
 python = "=3.11"
 # need pip in deployment too
 pip = ">=24"
+# it's pulled in transitively, but dev envs need node explicitly
+node = "*"
 # conda doesn't support extras, so this pulls in the DVC S3 support
 dvc-s3 = "=3"
 # the end-to-end recommender is deployed without CUDA, so force CPU PyTorch.
