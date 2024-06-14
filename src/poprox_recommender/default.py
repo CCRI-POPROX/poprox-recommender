@@ -19,7 +19,7 @@ from transformers import AutoTokenizer
 from poprox_concepts import Article, ClickHistory
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import src_dir
-
+from poprox_recommender.topics import extract_general_topic
 
 @dataclass
 class ModelConfig:
@@ -312,7 +312,7 @@ def find_topic(past_articles: list[Article], article_id: UUID):
     # each article might correspond to multiple topic
     for article in past_articles:
         if article.article_id == article_id:
-            return [mention.entity.name for mention in article.mentions]
+            return extract_general_topic(article)
 
 def normalized_topic_count(topic_counts: dict[str, int]):
     total_count = sum(topic_counts.values())

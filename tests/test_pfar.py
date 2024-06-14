@@ -1,16 +1,15 @@
 import json
 import torch as th
 import sys
-# sys.path.append('PATH_TO_src_dir'), should not need this when model path func is ready
+sys.path.append('/home/sun00587/research/POPROX/poprox-recommender/src') # should not need this when model path func is ready
 from poprox_concepts import Article, ClickHistory
-from poprox_recommender.handler import extract_general_topic
-from poprox_recommender.topics import general_topics, match_news_topics_to_general
+from poprox_recommender.topics import general_topics, match_news_topics_to_general, extract_general_topic
 from poprox_recommender.default import select_articles, user_topic_preference
 from safetensors.torch import load_file
 
 
 def load_test_articles():
-    event_path = "request_body.json" # update when the model path func is ready
+    event_path = "/home/sun00587/research/POPROX/poprox-recommender/tests/request_body.json" # update when the model path func is ready
     with open(event_path, 'r') as j:
         req_body = json.loads(j.read())
 
@@ -48,7 +47,7 @@ def load_model(device_name=None):
     if device_name is None:
         device_name = "cuda" if th.cuda.is_available() else "cpu"
 
-    load_path = "model.safetensors" # update when the model path func is ready
+    load_path = "/home/sun00587/research/POPROX/poprox-recommender/src/models/model.safetensors" # update when the model path func is ready
     checkpoint = load_file(load_path)
 
     return checkpoint, device_name

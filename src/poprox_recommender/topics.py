@@ -20,6 +20,10 @@ general_topics = [
     "Oddities",
 ]
 
+def extract_general_topic(article: Article):
+    article_topics = set([mention.entity.name for mention in article.mentions])
+    return article_topics.intersection(set(general_topics))
+
 def classify_news_topic(model, tokenizer, general_topics, topic):
     inputs = tokenizer.batch_encode_plus([topic] + general_topics, return_tensors='pt', pad_to_max_length=True)
     input_ids = inputs['input_ids']

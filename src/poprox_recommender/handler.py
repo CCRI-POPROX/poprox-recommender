@@ -6,8 +6,6 @@ from poprox_concepts.api.recommendations import (
     RecommendationResponse,
 )
 from poprox_recommender.default import select_articles
-from poprox_concepts import Article
-from poprox_recommender.topics import general_topics
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -47,6 +45,3 @@ def generate_recs(event, context):
     logger.info("Finished.")
     return response
 
-def extract_general_topic(article: Article):
-    article_topics = set([mention.entity.name for mention in article.mentions])
-    return article_topics.intersection(set(general_topics))
