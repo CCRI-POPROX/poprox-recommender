@@ -62,11 +62,7 @@ target-version = "py310"
 line-length = 120
 
 [tool.ruff.lint]
-select = [
-  "F",
-  "I",
-  "E",
-]
+select = ["F", "I", "E"]
 ignore = [
   # Allow non-abstract empty methods in abstract base classes
   "B027",
