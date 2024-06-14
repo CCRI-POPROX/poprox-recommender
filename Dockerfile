@@ -1,3 +1,4 @@
+ARG LOG_LEVEL=INFO
 # Use Lambda Python base image for the build container
 FROM public.ecr.aws/lambda/python:3.11 as build
 
@@ -21,7 +22,7 @@ COPY --from=build /var/lang/lib/python3.11/site-packages /var/lang/lib/python3.1
 COPY --from=build /var/lang/nltk_data /var/lang/nltk_data
 
 # Set the transformers cache to a writeable directory
-ENV TRANSFORMERS_CACHE /tmp/.transformers
-
+ENV TRANSFORMERS_CACHE=/tmp/.transformers
+ENV AWS_LAMBDA_LOG_LEVEL=${LOG_LEVEL}
 # Set entry point function
 CMD ["poprox_recommender.handler.generate_recs"]
