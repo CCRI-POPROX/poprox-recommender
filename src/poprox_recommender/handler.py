@@ -24,8 +24,7 @@ def generate_recs(event, context):
     else:
         logger.info("Using default parameters")
 
-
-    logger.info(f"Selecting articles...")
+    logger.info("Selecting articles...")
     recommendations = select_articles(
         req.todays_articles,
         req.past_articles,
@@ -34,13 +33,11 @@ def generate_recs(event, context):
         algo_params,
     )
 
-    logger.info(f"Constructing response...")
-    resp_body = RecommendationResponse.model_validate(
-        {"recommendations": recommendations}
-    )
+    logger.info("Constructing response...")
+    resp_body = RecommendationResponse.model_validate({"recommendations": recommendations})
 
-    logger.info(f"Serializing response...")
+    logger.info("Serializing response...")
     response = {"statusCode": 200, "body": resp_body.model_dump_json()}
 
-    logger.info(f"Finished.")
+    logger.info("Finished.")
     return response

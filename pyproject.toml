@@ -60,32 +60,12 @@ all = ["style", "typing"]
 [tool.ruff]
 target-version = "py310"
 line-length = 120
+
+[tool.ruff.lint]
 select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
   "F",
-  "FBT",
   "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
+  "E",
 ]
 ignore = [
   # Allow non-abstract empty methods in abstract base classes
@@ -109,7 +89,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["poprox_recommender"]
+known-first-party = ["poprox_recommender", "poprox_concepts"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"

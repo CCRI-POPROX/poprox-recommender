@@ -1,10 +1,10 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from torch import nn
+from transformers import AutoConfig, AutoModel
+
 from poprox_recommender.model.general.attention.newsadditive import (
     NewsAdditiveAttention,
 )
-from transformers import AutoConfig, AutoModel
 
 
 class NewsEncoder(torch.nn.Module):
@@ -13,13 +13,9 @@ class NewsEncoder(torch.nn.Module):
 
         self.config = config
 
-        self.plm = AutoModel.from_pretrained(
-            self.config.pretrained_model, cache_dir="/tmp/"
-        )
+        self.plm = AutoModel.from_pretrained(self.config.pretrained_model, cache_dir="/tmp/")
 
-        plm_hidden_size = AutoConfig.from_pretrained(
-            self.config.pretrained_model, cache_dir="/tmp/"
-        ).hidden_size
+        plm_hidden_size = AutoConfig.from_pretrained(self.config.pretrained_model, cache_dir="/tmp/").hidden_size
 
         self.multihead_attention = nn.MultiheadAttention(
             embed_dim=plm_hidden_size,
@@ -27,12 +23,9 @@ class NewsEncoder(torch.nn.Module):
             batch_first=True,
         )
 
-        self.additive_attention = NewsAdditiveAttention(
-            plm_hidden_size, self.config.additive_attn_hidden_dim
-        )
+        self.additive_attention = NewsAdditiveAttention(plm_hidden_size, self.config.additive_attn_hidden_dim)
 
     def forward(self, news_input):
-
         # batch_size, num_words_title, word_embedding_dim
 
         V = self.plm(news_input).last_hidden_state
