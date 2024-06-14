@@ -10,6 +10,7 @@ from poprox_recommender.default import select_articles
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 def generate_recs(event, context):
     logger.info(f"Received event: {event}")
 
@@ -19,7 +20,7 @@ def generate_recs(event, context):
 
     body = base64.b64decode(body) if is_encoded else body
     logger.info(f"Decoded body: {body}")
-    
+
     req = RecommendationRequest.model_validate_json(body)
 
     if algo_params:
@@ -44,4 +45,3 @@ def generate_recs(event, context):
 
     logger.info("Finished.")
     return response
-

@@ -17,7 +17,6 @@ jobs:
         with:
           fetch-depth: 0
 
-
       - name: Install DVC
         # to fetch things, all we need is DVC, so just use pipx
         # saves the time of installing a whole environment

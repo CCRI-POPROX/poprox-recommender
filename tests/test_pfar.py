@@ -1,16 +1,21 @@
 import json
-import torch as th
 import sys
-sys.path.append('/home/sun00587/research/POPROX/poprox-recommender/src') # should not need this when model path func is ready
-from poprox_concepts import Article, ClickHistory
-from poprox_recommender.topics import general_topics, match_news_topics_to_general, extract_general_topic
-from poprox_recommender.default import select_articles, user_topic_preference
+
+import torch as th
+
+sys.path.append(
+    "/home/sun00587/research/POPROX/poprox-recommender/src"
+)  # should not need this when model path func is ready
 from safetensors.torch import load_file
+
+from poprox_concepts import Article, ClickHistory
+from poprox_recommender.default import select_articles, user_topic_preference
+from poprox_recommender.topics import extract_general_topic, general_topics, match_news_topics_to_general
 
 
 def load_test_articles():
-    event_path = "/home/sun00587/research/POPROX/poprox-recommender/tests/request_body.json" # update when the model path func is ready
-    with open(event_path, 'r') as j:
+    event_path = "/home/sun00587/research/POPROX/poprox-recommender/tests/request_body.json"  # update when the model path func is ready  # noqa: E501
+    with open(event_path, "r") as j:
         req_body = json.loads(j.read())
 
         todays_articles = [Article.model_validate(attrs) for attrs in req_body["todays_articles"]]
@@ -27,7 +32,7 @@ def load_test_articles():
 def test_topic_classification():
     todays_articles, _, _, _ = load_test_articles()
     topic_matched_dict, todays_article_matched_topics = match_news_topics_to_general(todays_articles)
-    print('***************** topic matched dict *****************')
+    print("***************** topic matched dict *****************")
     print(topic_matched_dict)
     for article_topic in todays_article_matched_topics:
         print(todays_article_matched_topics[article_topic])
@@ -43,26 +48,19 @@ def test_extract_generalized_topic():
 
 
 def load_model(device_name=None):
-
     if device_name is None:
         device_name = "cuda" if th.cuda.is_available() else "cpu"
 
-    load_path = "/home/sun00587/research/POPROX/poprox-recommender/src/models/model.safetensors" # update when the model path func is ready
+    load_path = "/home/sun00587/research/POPROX/poprox-recommender/src/models/model.safetensors"  # update when the model path func is ready  # noqa: E501
     checkpoint = load_file(load_path)
 
     return checkpoint, device_name
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     todays_articles, past_articles, click_data, num_recs = load_test_articles()
 
     user_preference_dict = user_topic_preference(past_articles, click_data)
-    algo_params = {'user_topic_preference': user_preference_dict}
-    recommendations = select_articles(
-        todays_articles,
-        past_articles,
-        click_data,
-        num_recs,
-        algo_params
-    )
+    algo_params = {"user_topic_preference": user_preference_dict}
+    recommendations = select_articles(todays_articles, past_articles, click_data, num_recs, algo_params)
     print(recommendations)
