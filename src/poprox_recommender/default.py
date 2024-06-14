@@ -186,11 +186,18 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
 
         if candidate != None:
             S.append(candidate)
-    return S  # LIST(candidate index)
+    return S
 
-def pfar_diversification(rewards, articles, lamb, tau, topk):
-    # articles: LIST[ARTICLE]
-    # p(v|u) + lamb*tau \sum_{d \in D} P(d|u)I{v \in d} \prod_{i \in S} I{i \in d}
+def pfar_diversification(
+    user,
+    rewards,
+    articles,
+    user_preference_dict,
+    lamb,
+    tau,
+    topk):
+
+    # p(v|u) + lamb*tau \sum_{d \in D} P(d|u)I{v \in d} \prod_{i \in S} I{i \in d} for each user
 
     S = [] # final recommendation LIST[candidate index]
     initial_item = rewards.argmax()
@@ -202,7 +209,7 @@ def pfar_diversification(rewards, articles, lamb, tau, topk):
 
 
     for k in range(topk - 1):
-        candidate = None  # next item
+        candidate = None
         best_PFAR = float("-inf")
 
         for i, reward_i in enumerate(rewards):  # iterate R for next item
@@ -218,7 +225,9 @@ def pfar_diversification(rewards, articles, lamb, tau, topk):
                     break
 
             for topic in candidate_topic:
-                summation += user_preference[topic]
+                if topic in user_preference_dict[user]:
+                    summation += user_preference_dict[user][topic]
+
 
             PFAR_i = reward_i + lamb * tau * summation * product
 
@@ -247,12 +256,20 @@ def generate_recommendations(
 ):
     algo_params = algo_params or {}
     theta = float(algo_params.get("theta", 0.8))
+    lamb = float(algo_params.get('pfar_lamb', 1))
+    tau = float(algo_params.get('pfar_tau', 1))
+    diversify = str(algo_params.get('diversity_algo', 'mmr'))
 
     recommendations = {}
     for user, user_vector in user_embeddings.items():
         pred = model.get_prediction(article_vectors, user_vector.squeeze())
         pred = pred.cpu().detach().numpy()
-        recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
+        if diversify == 'mmr':
+            recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
+        if diversify == 'pfar':
+            user_preference_dict = algo_params.get('user_topic_preference')
+            recs =  pfar_diversification(user, pred, articles, user_preference_dict, lamb, tau, topk=num_slots)
+
         recommendations[user] = [articles[int(rec)] for rec in recs]
     return recommendations
 
@@ -307,6 +324,44 @@ def compute_similarity_matrix(todays_article_vectors):
                 )
     return similarity_matrix
 
+def find_topic(past_articles: List[Article], article_id: UUID):
+    # each article might correspond to multiple topic
+    for article in past_articles:
+        if article.article_id == article_id:
+            return [mention.entity.name for mention in article.mentions]
+
+def normalized_topic_count(topic_count_dict):
+
+    normalized_count = {}
+    total_count = sum(topic_count_dict.values())
+    for topic in topic_count_dict:
+        normalized_count[topic] = topic_count_dict[topic] / total_count
+    return normalized_count
+
+def user_topic_preference(
+    past_articles: List[Article],
+    click_histories: List[ClickHistory]
+):
+    '''Topic preference only based on click history'''
+    user_preference_dict = {}
+    for click_history in click_histories:
+        account_id = click_history.account_id
+        clicked_articles = click_history.article_ids # List[UUID]
+
+        topic_count_dict = {}
+
+        for article_id in clicked_articles:
+            clicked_topics = find_topic(past_articles, article_id )
+            for topic in clicked_topics:
+                if topic in topic_count_dict:
+                    topic_count_dict[topic] += 1
+                else:
+                    topic_count_dict[topic] = 1
+
+        user_preference_dict[str(account_id)] = normalized_topic_count(topic_count_dict)
+    return user_preference_dict
+
+
 
 def select_articles(
     todays_articles: List[Article],
@@ -341,6 +396,7 @@ def select_articles(
         todays_article_features, MODEL, DEVICE
     )
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
+    user_preference_dict = user_topic_preference(past_articles, click_histories)
 
     recommendations = {}
     for click_history in click_histories:
