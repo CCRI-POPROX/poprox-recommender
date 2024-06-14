@@ -13,11 +13,15 @@ logger.setLevel(logging.DEBUG)
 
 def generate_recs(event, context):
     logger.info(f"Received event: {event}")
-    body = base64.b64decode(event["body"]) if event["isBase64Encoded"] else event["body"]
-    logger.info(f"Decoded body: {body}")
-    req = RecommendationRequest.model_validate_json(body)
 
+    body = event.get("body", {})
+    is_encoded = event.get("isBase64Encoded", False)
     algo_params = event.get("queryStringParameters", {})
+
+    body = base64.b64decode(body) if is_encoded else body
+    logger.info(f"Decoded body: {body}")
+    
+    req = RecommendationRequest.model_validate_json(body)
 
     if algo_params:
         logger.info(f"Using parameters: {algo_params}")
