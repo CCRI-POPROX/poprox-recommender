@@ -29,6 +29,8 @@ repos:
         args: ["format"]
         files: \.toml$
         language: node
+        additional_dependencies:
+          - "@taplo/cli"
       - id: format-yaml-files
         name: yaml-format
         files: \.ya?ml$
@@ -36,3 +38,5 @@ repos:
         entry: prettier
         args: [-w]
         language: node
+        additional_dependencies:
+          - prettier

@@ -1,7 +1,5 @@
 {
   "devDependencies": {
-    "@taplo/cli": "^0.7.0",
-    "prettier": "^3.3.2",
     "serverless-offline": "^13.5.0",
     "serverless-python-requirements": "^6.1.0"
   },

@@ -31,12 +31,6 @@ If you use `micromamba` instead of a full Conda installation, it can directly us
 micromamba create -n poprox-recs -f conda-lock.yml --category dev
 ```
 
-We also have some Node-based development tools, install them with:
-
-```console
-npm install
-```
-
 Set up `pre-commit` to make sure that code formatting rules are applied as you make changes:
 
 ```console
@@ -49,6 +43,12 @@ To get the data and models, there are two steps:
 2.  `dvc pull`
 
 ## Local Endpoint Development
+
+Local endpoint development also requires some Node-based tools in addition to the tools above:
+
+```console
+npm install
+```
 
 To run the API endpoint locally:
 
