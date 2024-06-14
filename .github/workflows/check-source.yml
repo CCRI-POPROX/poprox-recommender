@@ -34,3 +34,17 @@ jobs:
             echo "::error title=pre-commit::committed code does not cleanly pass pre-commit"
             exit 1
           fi
+
+  ruff-lint:
+    name: Report lint fialures
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Ruff lint and report
+        run: |
+          pipx run ruff check --output-format=github
