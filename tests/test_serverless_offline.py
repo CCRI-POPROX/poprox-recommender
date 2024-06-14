@@ -8,8 +8,8 @@ from pathlib import Path
 from threading import Condition, Lock, Thread
 
 import requests
-from pexpect import EOF, mark, spawn
-from pytest import fail, fixture
+from pexpect import EOF, spawn
+from pytest import fail, fixture, mark
 
 logger = logging.getLogger(__name__)
 
