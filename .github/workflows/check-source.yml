@@ -21,6 +21,13 @@ jobs:
         run: |
           pipx install pre-commit
 
+      - name: Install Node
+        uses: actions/setup-node@v4
+
+      - name: Install NPM deps
+        run: |
+          npm ci
+
       - name: Install pre-commit hooks
         run: |
           pre-commit install-hooks
