@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .dvc/cache
-          key: docker-dvc-cache-${{ hashFiles('models/**.dvc') }}
+          key: docker-dvc-cache-${{ hashFiles('src/models/**.dvc') }}
 
       - name: Fetch model data
         run: |
