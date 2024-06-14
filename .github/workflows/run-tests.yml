@@ -1,4 +1,4 @@
-name: Source Tests
+name: Tests
 
 on:
   push:
@@ -43,4 +43,5 @@ jobs:
       - name: Start and test Serverless container
         run: |
           npx serverless offline start &
+          sleep 2
           curl -vf -XPOST http://localhost:3000 --data @tests/basic-request.json
