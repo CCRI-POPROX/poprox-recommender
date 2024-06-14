@@ -31,4 +31,5 @@ jobs:
             echo "::notice title=pre-commit::pre-commit checks passed"
           else
             echo "::error title=pre-commit::committed code does not cleanly pass pre-commit"
+            exit 1
           fi
