@@ -2,28 +2,12 @@ from torch.nn.functional import cosine_similarity
 from transformers import AutoModel, AutoTokenizer
 
 from poprox_concepts import Article
-
-general_topics = [
-    "US News",
-    "World News",
-    "Politics",
-    "Business",
-    "Entertainment",
-    "Sports",
-    "Health",
-    "Science",
-    "Tech ",
-    "Lifestyle",
-    "Religion",
-    "Climate",
-    "Education",
-    "Oddities",
-]
+from poprox_concepts.domain.topics import GENERAL_TOPICS
 
 
 def extract_general_topic(article: Article):
     article_topics = set([mention.entity.name for mention in article.mentions])
-    return article_topics.intersection(set(general_topics))
+    return article_topics.intersection(GENERAL_TOPICS)
 
 
 def classify_news_topic(model, tokenizer, general_topics, topic):
@@ -59,7 +43,7 @@ def match_news_topics_to_general(articles: list[Article]):
         article_topic = set()
         for topic in news_topics:
             if topic not in topic_matched_dict:
-                matched_general_topics = classify_news_topic(model, tokenizer, general_topics, topic)
+                matched_general_topics = classify_news_topic(model, tokenizer, GENERAL_TOPICS, topic)
                 topic_matched_dict[topic] = matched_general_topics  # again, we can store this into db
                 for t in matched_general_topics:
                     article_topic.add(t)
