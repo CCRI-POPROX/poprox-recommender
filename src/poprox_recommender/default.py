@@ -220,7 +220,7 @@ def generate_recommendations(
     article_vectors,
     similarity_matrix,
     user_embedding,
-    topics,
+    interest_profile,
     num_slots: int = 10,
     algo_params: dict[str, Any] | None = None,
 ) -> list[Article]:
@@ -235,7 +235,17 @@ def generate_recommendations(
     if diversify == "mmr":
         recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
     if diversify == "pfar":
-        recs = pfar_diversification(pred, articles, topics, lamb, tau, topk=num_slots)
+        topic_preferences: dict[str, int] = {}
+
+        onboarding_weight = 1
+
+        for interest in interest_profile.onboarding_topics:
+            topic_preferences[interest.entity_name] = onboarding_weight * min(interest.preference - 1, 0)
+
+        for topic, click_count in interest_profile.click_topics.items():
+            topic_preferences[topic] = click_count
+
+        recs = pfar_diversification(pred, articles, topic_preferences, lamb, tau, topk=num_slots)
 
     return [articles[int(rec)] for rec in recs]
 
@@ -269,7 +279,7 @@ def select_with_model(
         todays_article_vectors,
         article_similarity_matrix,
         user_embedding,
-        interest_profile.onboarding_topics,
+        interest_profile,
         num_slots=num_slots,
         algo_params=algo_params,
     )
@@ -339,7 +349,8 @@ def select_articles(
     # Compute today's article similarity matrix
     _, todays_article_vectors = build_article_embeddings(todays_article_features, MODEL, DEVICE)
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
-    user_click_topics = user_topic_preference(past_articles, interest_profile.click_history)  # noqa: F841
+
+    interest_profile.click_topics = user_topic_preference(past_articles, interest_profile.click_history)
 
     recommendations = {}
     account_id = click_history.account_id
