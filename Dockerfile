@@ -20,6 +20,8 @@ FROM public.ecr.aws/lambda/python:3.11
 # Copy the installed packages from the build container
 COPY --from=build /var/lang/lib/python3.11/site-packages /var/lang/lib/python3.11/site-packages
 COPY --from=build /var/lang/nltk_data /var/lang/nltk_data
+COPY ./models/ /var/lang/poprox-models
+ENV POPROX_MODELS /var/lang/poprox-models
 
 # Set the transformers cache to a writeable directory
 ENV TRANSFORMERS_CACHE=/tmp/.transformers

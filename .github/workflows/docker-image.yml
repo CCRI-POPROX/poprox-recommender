@@ -27,11 +27,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .dvc/cache
-          key: docker-dvc-cache-${{ hashFiles('src/models/**.dvc') }}
+          key: docker-dvc-cache-${{ hashFiles('models/**.dvc') }}
 
       - name: Fetch model data
         run: |
-          dvc pull -R src/models
+          dvc pull -R models
         env:
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
