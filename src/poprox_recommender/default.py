@@ -220,7 +220,7 @@ def generate_recommendations(
     article_vectors,
     similarity_matrix,
     user_embedding,
-    interest_profile,
+    interest_profile: InterestProfile,
     num_slots: int = 10,
     algo_params: dict[str, Any] | None = None,
 ) -> list[Article]:
@@ -237,15 +237,15 @@ def generate_recommendations(
     if diversify == "pfar":
         topic_preferences: dict[str, int] = {}
 
-        onboarding_weight = 1
-
         for interest in interest_profile.onboarding_topics:
-            topic_preferences[interest.entity_name] = onboarding_weight * min(interest.preference - 1, 0)
+            topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
 
         for topic, click_count in interest_profile.click_topics.items():
             topic_preferences[topic] = click_count
 
-        recs = pfar_diversification(pred, articles, topic_preferences, lamb, tau, topk=num_slots)
+        normalized_topic_prefs = normalized_topic_count(topic_preferences)
+
+        recs = pfar_diversification(pred, articles, normalized_topic_prefs, lamb, tau, topk=num_slots)
 
     return [articles[int(rec)] for rec in recs]
 
@@ -323,7 +323,7 @@ def user_topic_preference(past_articles: list[Article], click_history: ClickHist
         for topic in clicked_topics:
             topic_count_dict[topic] += 1
 
-    return normalized_topic_count(topic_count_dict)
+    return topic_count_dict
 
 
 def select_articles(
