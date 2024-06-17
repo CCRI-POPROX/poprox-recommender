@@ -27,7 +27,7 @@ jobs:
         with:
           environment-file: conda-lock.yml
           environment-name: poprox
-          create-args: --category main --category dev --category test
+          create-args: --category main --category dev
 
       - name: Install Node dependencies
         run: |
