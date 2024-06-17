@@ -6,7 +6,8 @@ import os
 from pathlib import Path
 from typing import overload
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
+_cached_root: Path | None = None
 
 
 @overload
@@ -32,19 +33,25 @@ def project_root(*, require: bool = True) -> Path | None:
         The full path to the project root directory.  If the project root is
         not found and ``require=False``, returns ``None``.
     """
-    cwd = Path(".").resolve()
-    candidate = cwd
-    while not _is_project_root(candidate):
-        candidate = candidate.parent
-        if not candidate or str(candidate) == "/":
-            if require:
-                msg = f"cannot find project root for {cwd}"
-                raise RuntimeError(msg)
-            else:
-                return None
+    global _cached_root
+    if _cached_root is None:
+        cwd = Path(".").resolve()
+        candidate = cwd
+        logger.debug("searching for project root upwards from %s", candidate)
+        while not _is_project_root(candidate):
+            candidate = candidate.parent
+            if not candidate or str(candidate) == "/":
+                if require:
+                    msg = f"cannot find project root for {cwd}"
+                    raise RuntimeError(msg)
+                else:
+                    # don't cache None
+                    return None
 
-    _logger.debug("found project root at  %s", candidate)
-    return candidate
+        logger.debug("found project root at  %s", candidate)
+        _cached_root = candidate
+
+    return _cached_root
 
 
 def model_file_path(name: str) -> Path:
@@ -77,13 +84,13 @@ def model_file_path(name: str) -> Path:
         raise RuntimeError(msg)
 
     for md in model_dirs:
-        _logger.debug("looking for %s in %s", name, md)
+        logger.debug("looking for %s in %s", name, md)
         mf = md / name
         if mf.exists():
-            _logger.info("resolved %s: %s", name, mf)
+            logger.info("resolved %s: %s", name, mf)
             return mf
 
-    _logger.error("could not find model file %s in any of %d locations", name, len(model_dirs))
+    logger.error("could not find model file %s in any of %d locations", name, len(model_dirs))
     msg = f"model file {name}"
     raise FileNotFoundError(msg)
 
