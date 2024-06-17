@@ -1,0 +1,23 @@
+# Dependencies needed for working on the poprox-recommender code and repo.
+# This does *not* include the dependencies of poprox-recommender itself —
+# it is only the tooling and dependencies for development, image building,
+# etc.  It is included in the conda lockfile as the 'dev' category, and
+# can be directly installed in CI for repo manipulation.
+category: dev
+dependencies:
+  # tooling for environments and data
+  - dvc >=3.51,<4
+  - dvc-s3
+  - conda-lock >=2.5,<3
+  - hatch
+  # dependencies for development scripts
+  - docopt >=0.6
+  - requests >=2.31,<3
+  # dependencies for tests
+  - pytest >=7
+  - coverage >=6.5
+  - pexpect~=4.9
+  # tooling for code validation
+  - pre-commit >=3.7,<4
+  - ruff >=0.4
+  - pyright >=1.1,<2
