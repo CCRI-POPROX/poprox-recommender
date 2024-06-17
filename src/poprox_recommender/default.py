@@ -16,7 +16,7 @@ from safetensors.torch import load_file
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from poprox_concepts import Article, ClickHistory
+from poprox_concepts import Article, ClickHistory, InterestProfile
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topic
@@ -170,7 +170,7 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
     return S
 
 
-def pfar_diversification(user, rewards, articles, user_preference_dict, lamb, tau, topk):
+def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
     # p(v|u) + lamb*tau \sum_{d \in D} P(d|u)I{v \in d} \prod_{i \in S} I{i \in d} for each user
 
     S = []  # final recommendation LIST[candidate index]
@@ -198,8 +198,8 @@ def pfar_diversification(user, rewards, articles, user_preference_dict, lamb, ta
                     break
 
             for topic in candidate_topic:
-                if topic in user_preference_dict[user]:
-                    summation += user_preference_dict[user][topic]
+                if topic in topic_preferences:
+                    summation += topic_preferences[topic]
 
             PFAR_i = reward_i + lamb * tau * summation * product
 
@@ -219,28 +219,25 @@ def generate_recommendations(
     articles,
     article_vectors,
     similarity_matrix,
-    user_embeddings,
+    user_embedding,
+    topics,
     num_slots: int = 10,
     algo_params: dict[str, Any] | None = None,
-):
+) -> list[Article]:
     algo_params = algo_params or {}
     theta = float(algo_params.get("theta", 0.8))
     lamb = float(algo_params.get("pfar_lamb", 1))
     tau = float(algo_params.get("pfar_tau", 1))
     diversify = str(algo_params.get("diversity_algo", "mmr"))
 
-    recommendations = {}
-    for user, user_vector in user_embeddings.items():
-        pred = model.get_prediction(article_vectors, user_vector.squeeze())
-        pred = pred.cpu().detach().numpy()
-        if diversify == "mmr":
-            recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
-        if diversify == "pfar":
-            user_preference_dict = algo_params.get("user_topic_preference")
-            recs = pfar_diversification(user, pred, articles, user_preference_dict, lamb, tau, topk=num_slots)
+    pred = model.get_prediction(article_vectors, user_embedding.squeeze())
+    pred = pred.cpu().detach().numpy()
+    if diversify == "mmr":
+        recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
+    if diversify == "pfar":
+        recs = pfar_diversification(pred, articles, topics, lamb, tau, topk=num_slots)
 
-        recommendations[user] = [articles[int(rec)] for rec in recs]
-    return recommendations
+    return [articles[int(rec)] for rec in recs]
 
 
 def select_with_model(
@@ -248,7 +245,7 @@ def select_with_model(
     todays_article_vectors: list[Article],
     article_similarity_matrix,
     past_article_features,
-    click_history: ClickHistory,
+    interest_profile: InterestProfile,
     model,
     model_device,
     num_slots: int = 10,
@@ -258,8 +255,12 @@ def select_with_model(
     # Build embedding tables
     past_article_embeddings, _ = build_article_embeddings(past_article_features, model, model_device)
 
-    user_embeddings = build_user_embedding(
-        click_history, past_article_embeddings, model, model_device, max_clicks_per_user
+    user_embedding = build_user_embedding(
+        interest_profile.click_history,
+        past_article_embeddings,
+        model,
+        model_device,
+        max_clicks_per_user,
     )
 
     recommendations = generate_recommendations(
@@ -267,7 +268,8 @@ def select_with_model(
         todays_articles,
         todays_article_vectors,
         article_similarity_matrix,
-        user_embeddings,
+        user_embedding,
+        interest_profile.onboarding_topics,
         num_slots=num_slots,
         algo_params=algo_params,
     )
@@ -300,40 +302,33 @@ def normalized_topic_count(topic_counts: dict[str, int]):
     return normalized_counts
 
 
-def user_topic_preference(past_articles: list[Article], click_histories: list[ClickHistory]):
+def user_topic_preference(past_articles: list[Article], click_history: ClickHistory) -> dict[str, int]:
     """Topic preference only based on click history"""
-    user_preference_dict = {}
-    for click_history in click_histories:
-        account_id = click_history.account_id
-        clicked_articles = click_history.article_ids  # List[UUID]
+    clicked_articles = click_history.article_ids  # List[UUID]
 
-        topic_count_dict = defaultdict(int)
+    topic_count_dict = defaultdict(int)
 
-        for article_id in clicked_articles:
-            clicked_topics = find_topic(past_articles, article_id)
-            for topic in clicked_topics:
-                topic_count_dict[topic] += 1
+    for article_id in clicked_articles:
+        clicked_topics = find_topic(past_articles, article_id)
+        for topic in clicked_topics:
+            topic_count_dict[topic] += 1
 
-        user_preference_dict[str(account_id)] = normalized_topic_count(topic_count_dict)
-    return user_preference_dict
+    return normalized_topic_count(topic_count_dict)
 
 
 def select_articles(
     todays_articles: list[Article],
     past_articles: list[Article],
-    click_histories: list[ClickHistory],
+    interest_profile: InterestProfile,
     num_slots: int,
     algo_params: dict[str, Any] | None = None,
 ) -> dict[UUID, list[Article]]:
+    click_history = interest_profile.click_history
+
     # Transform news to model features
     todays_article_features = transform_article_features(todays_articles, TOKENIZER)
 
-    # Extract the set of articles that have actually been clicked
-    clicked_article_ids = set()
-    for history in click_histories:
-        clicked_article_ids.update(history.article_ids)
-
-    clicked_articles = [article for article in past_articles if article.article_id in clicked_article_ids]
+    clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
 
     # Convert clicked article attributes into model features
     past_article_features = transform_article_features(
@@ -344,25 +339,24 @@ def select_articles(
     # Compute today's article similarity matrix
     _, todays_article_vectors = build_article_embeddings(todays_article_features, MODEL, DEVICE)
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
-    user_preference_dict = user_topic_preference(past_articles, click_histories)  # noqa: F841
+    user_click_topics = user_topic_preference(past_articles, interest_profile.click_history)  # noqa: F841
 
     recommendations = {}
-    for click_history in click_histories:
-        account_id = click_history.account_id
-        if MODEL and TOKENIZER and click_history.article_ids:
-            user_recs = select_with_model(
-                todays_articles,
-                todays_article_vectors,
-                similarity_matrix,
-                past_article_features,
-                click_history,
-                MODEL,
-                DEVICE,
-                num_slots=num_slots,
-                algo_params=algo_params,
-            )
-            recommendations[account_id] = user_recs[str(account_id)]
-        else:
-            recommendations[account_id] = random.sample(todays_articles, num_slots)
+    account_id = click_history.account_id
+    if MODEL and TOKENIZER and click_history.article_ids:
+        user_recs = select_with_model(
+            todays_articles,
+            todays_article_vectors,
+            similarity_matrix,
+            past_article_features,
+            interest_profile,
+            MODEL,
+            DEVICE,
+            num_slots=num_slots,
+            algo_params=algo_params,
+        )
+        recommendations[account_id] = user_recs
+    else:
+        recommendations[account_id] = random.sample(todays_articles, num_slots)
 
     return recommendations

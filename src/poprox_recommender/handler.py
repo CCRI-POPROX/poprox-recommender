@@ -32,7 +32,7 @@ def generate_recs(event, context):
     recommendations = select_articles(
         req.todays_articles,
         req.past_articles,
-        req.click_histories,
+        req.interest_profile,
         req.num_recs,
         algo_params,
     )
