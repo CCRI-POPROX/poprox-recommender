@@ -36,7 +36,7 @@ def recsys_metric(recommendations, row_index, news_struuid_ID):
     # use the url of Article
     impressions_truth = (
         pd.read_table(
-            f"{project_root()}/data/test_mind_large/behaviors.tsv",
+            project_root() / "data" / "test_mind_large" / "behaviors.tsv",
             header="infer",
             usecols=range(5),
             names=["impression_id", "user", "time", "clicked_news", "impressions"],
