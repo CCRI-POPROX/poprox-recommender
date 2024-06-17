@@ -15,9 +15,9 @@
 version: 1
 metadata:
   content_hash:
-    win-64: 3fff14af7a2b604d3f5af87c368a50ac073bba5244ee1c8d0465059732f81340
-    linux-64: 56ca3ab160eaac85dedc8711256b4c6a362dfe72a7e507f7478cad02d2c5f27a
-    osx-arm64: 8cd1a138f0524cc67c6d7bd1f206766f51e275fec14c179459cec48104691f57
+    win-64: ba6c7ce3da6dc2f431e12f9d793b070097df37fc3750830389f00cb53ca70d03
+    linux-64: 0ea25337871378e8b2e55111b2770e0a6e6ddfbbddb3ea9d45915bf059a4516a
+    osx-arm64: 3359e9440e37a2121c57091d0226d1eaf5b95eaf7886aee24a060cb3108bf265
   channels:
   - url: pytorch
     used_env_vars: []
@@ -10527,6 +10527,45 @@ package:
     sha256: 9a82c7d49c4771342b398661862975efb9c30e7af600b5d2e08a0bf416fda492
   category: main
   optional: false
+- name: pexpect
+  version: 4.9.0
+  manager: conda
+  platform: linux-64
+  dependencies:
+    ptyprocess: '>=0.5'
+    python: '>=3.7'
+  url: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_0.conda
+  hash:
+    md5: 629f3203c99b32e0988910c93e77f3b6
+    sha256: 90a09d134a4a43911b716d4d6eb9d169238aff2349056f7323d9db613812667e
+  category: dev
+  optional: true
+- name: pexpect
+  version: 4.9.0
+  manager: conda
+  platform: osx-arm64
+  dependencies:
+    python: '>=3.7'
+    ptyprocess: '>=0.5'
+  url: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_0.conda
+  hash:
+    md5: 629f3203c99b32e0988910c93e77f3b6
+    sha256: 90a09d134a4a43911b716d4d6eb9d169238aff2349056f7323d9db613812667e
+  category: dev
+  optional: true
+- name: pexpect
+  version: 4.9.0
+  manager: conda
+  platform: win-64
+  dependencies:
+    python: '>=3.7'
+    ptyprocess: '>=0.5'
+  url: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_0.conda
+  hash:
+    md5: 629f3203c99b32e0988910c93e77f3b6
+    sha256: 90a09d134a4a43911b716d4d6eb9d169238aff2349056f7323d9db613812667e
+  category: dev
+  optional: true
 - name: pillow
   version: 10.3.0
   manager: conda
@@ -11005,6 +11044,42 @@ package:
     sha256: 576a228630a72f25d255a5e345e5f10878e153221a96560f2498040cd6f54005
   category: main
   optional: false
+- name: ptyprocess
+  version: 0.7.0
+  manager: conda
+  platform: linux-64
+  dependencies:
+    python: ''
+  url: https://conda.anaconda.org/conda-forge/noarch/ptyprocess-0.7.0-pyhd3deb0d_0.tar.bz2
+  hash:
+    md5: 359eeb6536da0e687af562ed265ec263
+    sha256: fb31e006a25eb2e18f3440eb8d17be44c8ccfae559499199f73584566d0a444a
+  category: dev
+  optional: true
+- name: ptyprocess
+  version: 0.7.0
+  manager: conda
+  platform: osx-arm64
+  dependencies:
+    python: ''
+  url: https://conda.anaconda.org/conda-forge/noarch/ptyprocess-0.7.0-pyhd3deb0d_0.tar.bz2
+  hash:
+    md5: 359eeb6536da0e687af562ed265ec263
+    sha256: fb31e006a25eb2e18f3440eb8d17be44c8ccfae559499199f73584566d0a444a
+  category: dev
+  optional: true
+- name: ptyprocess
+  version: 0.7.0
+  manager: conda
+  platform: win-64
+  dependencies:
+    python: ''
+  url: https://conda.anaconda.org/conda-forge/noarch/ptyprocess-0.7.0-pyhd3deb0d_0.tar.bz2
+  hash:
+    md5: 359eeb6536da0e687af562ed265ec263
+    sha256: fb31e006a25eb2e18f3440eb8d17be44c8ccfae559499199f73584566d0a444a
+  category: dev
+  optional: true
 - name: pyarrow
   version: 16.1.0
   manager: conda

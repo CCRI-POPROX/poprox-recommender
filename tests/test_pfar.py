@@ -12,6 +12,13 @@ from poprox_concepts import Article, ClickHistory
 from poprox_recommender.default import select_articles, user_topic_preference
 from poprox_recommender.topics import extract_general_topic, general_topics, match_news_topics_to_general
 
+try:
+    import pytest
+
+    pytestmark = pytest.mark.skip("not a test module")
+except ImportError:
+    pass
+
 
 def load_test_articles():
     event_path = "/home/sun00587/research/POPROX/poprox-recommender/tests/request_body.json"  # update when the model path func is ready  # noqa: E501

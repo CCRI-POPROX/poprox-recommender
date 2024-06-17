@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+# override default shell for mamba activation
+defaults:
+  run:
+    shell: bash -el {0}
+
+jobs:
+  run-tests:
+    name: Run the PyTest tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: conda-lock.yml
+          environment-name: poprox
+          create-args: --category main --category dev --category test
+
+      - name: Install Node dependencies
+        run: |
+          npm ci
+
+      - name: Install recommender package
+        run: |
+          pip install --no-deps -e .
+
+      - name: Cache model data
+        uses: actions/cache@v4
+        with:
+          path: .dvc/cache
+          key: test-dvc-cache-${{ hashFiles('src/models/**.dvc') }}
+
+      - name: Fetch model data
+        run: |
+          dvc pull -R src/models
+        env:
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+
+      - name: Run tests
+        run: |
+          python -m pytest -v

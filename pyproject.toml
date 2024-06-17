@@ -26,6 +26,7 @@ dependencies = [
 [project.optional-dependencies]
 # this is sub-optimal for various reasons, but it's the best way with conda-lock
 dev = ["dvc[s3]==3.*", "docopt>=0.6", "requests~=2.31", "pre-commit>=3.7,<4"]
+test = ["pexpect~=4.9"]
 
 [project.urls]
 Documentation = "https://github.com/CCRI-POPROX/poprox-recommender#readme"
@@ -42,7 +43,12 @@ allow-direct-references = true
 path = "src/poprox_recommender/__about__.py"
 
 [tool.hatch.envs.default]
-dependencies = ["coverage[toml]>=6.5", "pytest>=8"]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest>=8",
+  "pexpect~=4.9",
+  "requests~=2.13",
+]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
