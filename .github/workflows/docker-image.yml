@@ -6,6 +6,11 @@ on:
       - main
   pull_request:
 
+# override default shell for mamba activation
+defaults:
+  run:
+    shell: bash -el {0}
+
 jobs:
   test-docker:
     name: Build and test Docker image
@@ -17,11 +22,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install DVC
-        # to fetch things, all we need is DVC, so just use pipx
-        # saves the time of installing a whole environment
-        run: |
-          pipx install "dvc[s3]==3.*"
+      - name: Install tooling
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: conda-lock.yml
+          environment-name: poprox
+          # we *don't* need --category main — only dev deps are needed
+          create-args: --category dev
 
       - name: Cache model data
         uses: actions/cache@v4
@@ -46,7 +53,7 @@ jobs:
 
       - name: Submit test request
         run: |
-          pipx run ./tests/test-docker-lambda.py
+          python ./tests/test-docker-lambda.py
 
       - name: Dump Docker logs
         if: always()
