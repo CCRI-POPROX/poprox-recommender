@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 import os
-import tomllib
 from pathlib import Path
 from typing import overload
 
@@ -44,6 +43,7 @@ def project_root(*, require: bool = True) -> Path | None:
             else:
                 return None
 
+    _logger.debug("found project root at  %s", candidate)
     return candidate
 
 
@@ -83,6 +83,7 @@ def model_file_path(name: str) -> Path:
             _logger.info("resolved %s: %s", name, mf)
             return mf
 
+    _logger.error("could not find model file %s in any of %d locations", name, len(model_dirs))
     msg = f"model file {name}"
     raise FileNotFoundError(msg)
 
@@ -90,18 +91,6 @@ def model_file_path(name: str) -> Path:
 def _is_project_root(path: Path) -> bool:
     tomlf = path / "pyproject.toml"
     if tomlf.exists():
-        # we found the root, but double-check
-        ppt = tomllib.loads(tomlf.read_text())
-        # bad pyproject.toml indicates something *deeply* wrong so fail instead of returning false
-        try:
-            proj = ppt["project"]
-        except AttributeError as e:
-            msg = f"{ppt} has no project definition"
-            raise RuntimeError(msg) from e
-        if proj.get("name", None) != "poprox-recommender":
-            msg = f"found {ppt}, but it is not for poprox-recommender, wrong working directory?"
-            raise RuntimeError(msg)
-        # got this far, all good!
         return True
     else:
         return False
