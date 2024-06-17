@@ -112,42 +112,30 @@ def build_article_embeddings(article_features, model, device):
     return article_embeddings, article_vectors
 
 
-def build_clicks_df(click_history: ClickHistory):
-    user_df = pd.DataFrame()
-    user_df["user"] = [str(click_history.account_id)]
-    user_df["clicked_news"] = [[str(id_) for id_ in click_history.article_ids]]
-    return user_df
-
-
 # Compute a vector for each user
-def build_user_embeddings(user_df, article_embeddings, model, device, max_clicks_per_user):
-    user_embeddings = {}
-    for _, row in user_df.iterrows():
-        clicked_news = list(dict.fromkeys(row.clicked_news))  # deduplicate while maintaining order
-        user = {
-            "user": row.user,
-            "clicked_news": clicked_news[-max_clicks_per_user:],
-        }
-        user["clicked_news_length"] = len(user["clicked_news"])
-        repeated_times = max_clicks_per_user - len(user["clicked_news"])
-        assert repeated_times >= 0
-        user["clicked_news"] = ["PADDED_NEWS"] * repeated_times + user["clicked_news"]
-        default = article_embeddings["PADDED_NEWS"]
-        clicked_article_embeddings = [
-            article_embeddings.get(clicked_article, default).to(device) for clicked_article in user["clicked_news"]
-        ]
-        clicked_news_vector = (
-            th.stack(
-                clicked_article_embeddings,
-                dim=0,
-            )
-            .unsqueeze(0)
-            .to(device)
-        )
+def build_user_embedding(click_history: ClickHistory, article_embeddings, model, device, max_clicks_per_user):
+    article_ids = list(dict.fromkeys(click_history.article_ids))[
+        -max_clicks_per_user:
+    ]  # deduplicate while maintaining order
 
-        user_vector = model.get_user_vector(clicked_news_vector)
-        user_embeddings[row.user] = user_vector
-    return user_embeddings
+    padded_positions = max_clicks_per_user - len(article_ids)
+    assert padded_positions >= 0
+
+    article_ids = ["PADDED_NEWS"] * padded_positions + article_ids
+    default = article_embeddings["PADDED_NEWS"]
+    clicked_article_embeddings = [
+        article_embeddings.get(clicked_article, default).to(device) for clicked_article in article_ids
+    ]
+    clicked_news_vector = (
+        th.stack(
+            clicked_article_embeddings,
+            dim=0,
+        )
+        .unsqueeze(0)
+        .to(device)
+    )
+
+    return model.get_user_vector(clicked_news_vector)
 
 
 def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
@@ -267,13 +255,12 @@ def select_with_model(
     max_clicks_per_user: int = 50,
     algo_params: dict[str, Any] | None = None,
 ):
-    # Translate clicks JSON to dataframe
-    user_df = build_clicks_df(click_history)
-
     # Build embedding tables
     past_article_embeddings, _ = build_article_embeddings(past_article_features, model, model_device)
 
-    user_embeddings = build_user_embeddings(user_df, past_article_embeddings, model, model_device, max_clicks_per_user)
+    user_embeddings = build_user_embedding(
+        click_history, past_article_embeddings, model, model_device, max_clicks_per_user
+    )
 
     recommendations = generate_recommendations(
         model,
