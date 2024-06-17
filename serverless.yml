@@ -49,6 +49,5 @@ package:
     - "**.py"
     - "**.html"
 
-functions:
-  # if offline mode enabled filePrefix = 'offline.' else filePrefix = ''
-  ${file(./serverless/${self:custom.offline.filePrefix}functions.yaml):functions}
+# if offline mode enabled filePrefix = 'offline.' else filePrefix = ''
+functions: ${file(./serverless/${self:custom.offline.filePrefix}functions.yaml):functions}
