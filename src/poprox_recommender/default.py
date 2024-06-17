@@ -18,7 +18,7 @@ from transformers import AutoTokenizer
 
 from poprox_concepts import Article, ClickHistory
 from poprox_recommender.model.nrms import NRMS
-from poprox_recommender.paths import src_dir
+from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topic
 
 
@@ -46,7 +46,7 @@ def load_checkpoint(device_name=None):
         # device_name = "cuda" if th.cuda.is_available() else "cpu"
         device_name = "cpu"
 
-    load_path = src_dir() / "models" / "model.safetensors"
+    load_path = model_file_path("model.safetensors")
 
     checkpoint = load_file(load_path)
     return checkpoint, device_name

@@ -13,14 +13,14 @@ from safetensors.torch import load_file
 
 from poprox_concepts import Article, ClickHistory
 from poprox_recommender.default import select_articles
-from poprox_recommender.paths import src_dir
+from poprox_recommender.paths import model_file_path, project_root
 
 
 def load_model(device_name=None):
     if device_name is None:
         device_name = "cuda" if th.cuda.is_available() else "cpu"
 
-    load_path = src_dir() / "models" / "model.safetensors"
+    load_path = model_file_path("model.safetensors")
     checkpoint = load_file(load_path)
 
     return checkpoint, device_name
@@ -36,7 +36,7 @@ def recsys_metric(recommendations, row_index, news_struuid_ID):
     # use the url of Article
     impressions_truth = (
         pd.read_table(
-            src_dir() / "data" / "test_mind_large" / "behaviors.tsv",
+            project_root() / "data" / "test_mind_large" / "behaviors.tsv",
             header="infer",
             usecols=range(5),
             names=["impression_id", "user", "time", "clicked_news", "impressions"],
@@ -69,11 +69,11 @@ if __name__ == "__main__":
     MODEL, DEVICE = load_model()
     TOKEN_MAPPING = "distilbert-base-uncased"  # can be modified
 
-    with open(src_dir() / "data" / "val_mind_large" / " news_uuid_ID.json") as json_file:
+    with open(project_root() / "data" / "val_mind_large" / " news_uuid_ID.json") as json_file:
         news_struuid_ID = json.load(json_file)
 
     # load the mind test json file
-    with open(src_dir() / "data" / "val_mind_large" / "mind_test.json") as json_file:
+    with open(project_root() / "data" / "val_mind_large" / "mind_test.json") as json_file:
         mind_data = json.load(json_file)
 
     ndcg5 = []

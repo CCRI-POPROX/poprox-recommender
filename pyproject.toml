@@ -7,7 +7,7 @@ name = "poprox-recommender"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = []
 authors = [{ name = "Karl Higley", email = "khigley@umn.edu" }]
 dependencies = [
@@ -36,9 +36,6 @@ Source = "https://github.com/CCRI-POPROX/poprox-recommender"
 [tool.hatch.metadata]
 allow-direct-references = true
 
-[tool.hatch.build.targets.wheel.force-include]
-"src/models" = "models/"
-
 [tool.hatch.version]
 path = "src/poprox_recommender/__about__.py"
 
@@ -65,7 +62,7 @@ fmt = ["ruff format {args:.}", "ruff check --fix {args:.}", "style"]
 all = ["style", "typing"]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
