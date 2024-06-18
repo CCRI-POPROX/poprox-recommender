@@ -20,7 +20,7 @@ def test_direct_basic_request():
     recs = select_articles(
         req.todays_articles,
         req.past_articles,
-        req.click_histories,
+        req.interest_profile,
         req.num_recs,
     )
     # do we get recommendations?
