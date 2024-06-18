@@ -35,7 +35,7 @@ jobs:
 
       - name: Install recommender package
         run: |
-          pip install --no-deps -e .
+          pip install -e .
 
       - name: Cache model data
         uses: actions/cache@v4
