@@ -240,7 +240,7 @@ def generate_recommendations(
         for interest in interest_profile.onboarding_topics:
             topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
 
-        for topic, click_count in interest_profile.click_topics.items():
+        for topic, click_count in interest_profile.click_topic_counts.items():
             topic_preferences[topic] = click_count
 
         normalized_topic_prefs = normalized_topic_count(topic_preferences)
@@ -350,7 +350,7 @@ def select_articles(
     _, todays_article_vectors = build_article_embeddings(todays_article_features, MODEL, DEVICE)
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
 
-    interest_profile.click_topics = user_topic_preference(past_articles, interest_profile.click_history)
+    interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
 
     recommendations = {}
     account_id = click_history.account_id
