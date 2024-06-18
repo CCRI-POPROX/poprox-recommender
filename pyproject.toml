@@ -23,11 +23,6 @@ dependencies = [
   "poprox-concepts@git+https://github.com/CCRI-POPROX/poprox-concepts.git@main",
 ]
 
-[project.optional-dependencies]
-# this is sub-optimal for various reasons, but it's the best way with conda-lock
-dev = ["dvc[s3]==3.*", "docopt>=0.6", "requests~=2.31", "pre-commit>=3.7,<4"]
-test = ["pexpect~=4.9"]
-
 [project.urls]
 Documentation = "https://github.com/CCRI-POPROX/poprox-recommender#readme"
 Issues = "https://github.com/CCRI-POPROX/poprox-recommender/issues"
@@ -40,13 +35,19 @@ allow-direct-references = true
 path = "src/poprox_recommender/__about__.py"
 
 [tool.hatch.envs.default]
+python = "3.11"
+# keep these dependencies in sync with dev/dev-environment.yml
 dependencies = [
+  "dvc[s3] ~=3.51",
+  "conda-lock ~=2.5",
+  "docopt~=0.6",
+  "requests~=2.13",
   "coverage[toml]>=6.5",
   "pytest>=8",
   "pexpect~=4.9",
-  "requests~=2.13",
 ]
 [tool.hatch.envs.default.scripts]
+lock-deps = "conda-lock -f pyproject.toml -f dev/constraints.yml -f dev/environment.yml"
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
 cov-report = ["- coverage combine", "coverage report"]
@@ -121,23 +122,8 @@ channels = ["pytorch", "conda-forge", "nodefaults"]
 platforms = ["win-64", "linux-64", "osx-arm64"]
 # extra deps in the conda environment
 [tool.conda-lock.dependencies]
-# specify our Python version
+# specify our Python version & make sure we have pip
 python = "=3.11"
-# need pip in deployment too
 pip = ">=24"
-# conda doesn't support extras, so this pulls in the DVC S3 support
-dvc-s3 = "=3"
-# the end-to-end recommender is deployed without CUDA, so force CPU PyTorch.
-# this does not prevent us from using CUDA in the model repo to train models,
-# as it will get its own environments.
-pytorch-mutex = "=*=cpu"
-# conda-lock doesn't look in Hatch environments, so this pulls in dev deps
-ruff = ">=0.4"
-pyright = ">=1.1,<2"
-pytest = ">=7"
-coverage = ">=6.5"
 # poprox concepts comes from PyPI
 poprox-concepts = { source = "pypi" }
-# we want conda-lock to manage the lockfiles
-conda-lock = ">=2.5,<3"
-# TODO: find a way to force MKL BLAS, but only on X86-64.
