@@ -43,6 +43,19 @@ To get the data and models, there are two steps:
 1.  Obtain the credentials for the S3 bucket and put them in `.env` (the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`)
 2.  `dvc pull`
 
+### Dependency Updates
+
+If you update the dependencies in poprox-recommender, or add code that requires
+a newer version of `poprox-concepts`, you need to regenerate the lock file:
+
+```console
+./dev/update-dep-lock.sh
+```
+
+> [!NOTE]
+> If you are trying to re-lock the dependencies on Windows, you should run the
+> shell script from within a Git Bash or MSYS2 environment.
+
 ## Local Endpoint Development
 
 Local endpoint development also requires some Node-based tools in addition to the tools above:
