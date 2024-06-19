@@ -15,13 +15,14 @@
             "url": "url 2"
         }
     ],
-    "click_histories": [
-        {
+    "interest_profile": {
+        "click_history": {
             "account_id": "977a3c88-937a-46fb-bbfe-94dc5dcb68c8",
             "article_ids": [
                 "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
             ]
-        }
-    ],
+        },
+        "onboarding_topics": []
+    },
     "num_recs": 1
 }
