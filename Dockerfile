@@ -1,30 +1,52 @@
 ARG LOG_LEVEL=INFO
-# Use Lambda Python base image for the build container
-FROM public.ecr.aws/lambda/python:3.11 as build
+# Use Lambda "Provided" base image for the build container
+FROM public.ecr.aws/lambda/provided:al2 as build
 
-# Install prerequisite packages
-RUN yum -y install git gcc python3-devel
+# install necessary system packages
+RUN yum -y install git-core
 
-# Install Python dependencies w/ special requirements
-RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip install nltk && python -m nltk.downloader -d /var/lang/nltk_data punkt
+# Fetch the micromamba executable from GitHub
+ADD --chmod=0755 https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 /usr/local/bin/micromamba
+ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 
-# Install our package
-COPY ./ ${LAMBDA_TASK_ROOT}/poprox_recommender
-RUN pip install ${LAMBDA_TASK_ROOT}/poprox_recommender
+# Copy dependency lockfile and install deps
+COPY conda-lock.yml /src/poprox-recommender/
+RUN micromamba create -y --always-copy -p /opt/poprox -f /src/poprox-recommender/conda-lock.yml
+# Download the punkt NLTK data
+RUN micromamba run -p /opt/poprox python -m nltk.downloader -d /opt/poprox/nltk_data punkt
+# Install the Lambda runtime bridge
+RUN micromamba install -p /opt/poprox -c conda-forge awslambdaric
 
+# Copy the soure code into the image to install it
+# TODO do we want to copy the sdist or wheel instead?
+COPY pyproject.toml README.md /src/poprox-recommender/
+COPY src/ /src/poprox-recommender/src/
+WORKDIR /src/poprox-recommender
+# Install the poprox-recommender module
+RUN micromamba run -p /opt/poprox pip install --no-deps .
 
-# Use Lambda Python base image for the deployment container
-FROM public.ecr.aws/lambda/python:3.11
+# Use Lambda "Provided" base image for the deployment container
+# We installed Python ourselves
+FROM public.ecr.aws/lambda/provided:al2
 
-# Copy the installed packages from the build container
-COPY --from=build /var/lang/lib/python3.11/site-packages /var/lang/lib/python3.11/site-packages
-COPY --from=build /var/lang/nltk_data /var/lang/nltk_data
-COPY ./models/ /var/lang/poprox-models
-ENV POPROX_MODELS /var/lang/poprox-models
+# Copy the installed packages and data from the build container
+COPY --from=build /usr/local/bin/micromamba /usr/local/bin/micromamba
+COPY --from=build /opt/poprox /opt/poprox
+ENV MAMBA_ROOT_PREFIX=/opt/micromamba
+
+# Bake the model data into the image
+COPY models/ /opt/poprox/models/
+ENV POPROX_MODELS=/opt/poprox/models
+
+# Make sure we can import the recommender
+RUN micromamba run -p /opt/poprox python -m poprox_recommender.handler
+
+# Copy the bootstrap script
+COPY --chmod=0555 lambda-bootstrap.sh /var/runtime/bootstrap
 
 # Set the transformers cache to a writeable directory
 ENV TRANSFORMERS_CACHE=/tmp/.transformers
 ENV AWS_LAMBDA_LOG_LEVEL=${LOG_LEVEL}
-# Set entry point function
+
+# Run the bootstrap with our handler by default
 CMD ["poprox_recommender.handler.generate_recs"]
