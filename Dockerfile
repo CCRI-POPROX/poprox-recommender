@@ -45,7 +45,7 @@ RUN micromamba run -p /opt/poprox python -m poprox_recommender.handler
 COPY --chmod=0555 lambda-bootstrap.sh /var/runtime/bootstrap
 
 # Set the transformers cache to a writeable directory
-ENV TRANSFORMERS_CACHE /tmp/.transformers
+ENV TRANSFORMERS_CACHE=/tmp/.transformers
 ENV AWS_LAMBDA_LOG_LEVEL=${LOG_LEVEL}
 
 # Run the bootstrap with our handler by default
