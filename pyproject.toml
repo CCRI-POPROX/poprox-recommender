@@ -39,7 +39,6 @@ python = "3.11"
 # keep these dependencies in sync with dev/dev-environment.yml
 dependencies = [
   "dvc[s3] ~=3.51",
-  "conda-lock ~=2.5",
   "docopt~=0.6",
   "requests~=2.13",
   "coverage[toml]>=6.5",
@@ -47,7 +46,6 @@ dependencies = [
   "pexpect~=4.9",
 ]
 [tool.hatch.envs.default.scripts]
-lock-deps = "conda-lock -f pyproject.toml -f dev/constraints.yml -f dev/environment.yml"
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
 cov-report = ["- coverage combine", "coverage report"]
