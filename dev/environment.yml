@@ -12,7 +12,8 @@ dependencies:
   - hatch
   # dependencies for development scripts
   - docopt >=0.6
-  - requests >=2.31,<3
+  # requests is a pulled in by other things. omit here to avoid screwing up categories.
+  # - requests >=2.31,<3
   # dependencies for tests
   - pytest >=7
   - coverage >=6.5
