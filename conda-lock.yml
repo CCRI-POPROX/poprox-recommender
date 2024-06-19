@@ -3270,8 +3270,8 @@ package:
     huggingface_hub: '>=0.21.2'
     requests: '>=2.32.2'
     tqdm: '>=4.66.3'
-    fsspec: '>=2023.1.0,<=2024.5.0'
     pyarrow: '>=15.0.0'
+    fsspec: '>=2023.1.0,<=2024.5.0'
   url: https://conda.anaconda.org/conda-forge/noarch/datasets-2.20.0-pyhd8ed1ab_0.conda
   hash:
     md5: 7e2c046cd09a2498bac484413771a9df
@@ -3297,8 +3297,8 @@ package:
     huggingface_hub: '>=0.21.2'
     requests: '>=2.32.2'
     tqdm: '>=4.66.3'
-    fsspec: '>=2023.1.0,<=2024.5.0'
     pyarrow: '>=15.0.0'
+    fsspec: '>=2023.1.0,<=2024.5.0'
   url: https://conda.anaconda.org/conda-forge/noarch/datasets-2.20.0-pyhd8ed1ab_0.conda
   hash:
     md5: 7e2c046cd09a2498bac484413771a9df
@@ -3808,8 +3808,8 @@ package:
     pygtrie: '>=2.3.2'
     networkx: '>=2.5'
     tabulate: '>=0.8.7'
-    configobj: '>=5.0.6'
     requests: '>=2.22'
+    configobj: '>=5.0.6'
     colorama: '>=0.3.9'
     pathspec: '>=0.10.3'
     packaging: '>=19'
@@ -3862,8 +3862,8 @@ package:
     pygtrie: '>=2.3.2'
     networkx: '>=2.5'
     tabulate: '>=0.8.7'
-    configobj: '>=5.0.6'
     requests: '>=2.22'
+    configobj: '>=5.0.6'
     colorama: '>=0.3.9'
     pathspec: '>=0.10.3'
     packaging: '>=19'
@@ -6097,7 +6097,7 @@ package:
   category: dev
   optional: true
 - name: huggingface_hub
-  version: 0.23.3
+  version: 0.23.4
   manager: conda
   platform: linux-64
   dependencies:
@@ -6109,14 +6109,14 @@ package:
     requests: ''
     tqdm: '>=4.42.1'
     typing-extensions: '>=3.7.4.3'
-  url: https://conda.anaconda.org/conda-forge/noarch/huggingface_hub-0.23.3-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/huggingface_hub-0.23.4-pyhd8ed1ab_0.conda
   hash:
-    md5: 57f751bd93c2ea0f2df7de6a49630f2f
-    sha256: c58baec87c083a084d9c45b365df10dc7aa1dd5cfc28108d5ac94e90c8bae832
+    md5: 759dfbd44e93d75a23b203fe50dade8d
+    sha256: 298cf27a319a97f70e826364fcc92aeccb3197e462d40b28297e5ced0cbd753d
   category: main
   optional: false
 - name: huggingface_hub
-  version: 0.23.3
+  version: 0.23.4
   manager: conda
   platform: osx-arm64
   dependencies:
@@ -6128,14 +6128,14 @@ package:
     typing-extensions: '>=3.7.4.3'
     fsspec: '>=2023.5.0'
     tqdm: '>=4.42.1'
-  url: https://conda.anaconda.org/conda-forge/noarch/huggingface_hub-0.23.3-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/huggingface_hub-0.23.4-pyhd8ed1ab_0.conda
   hash:
-    md5: 57f751bd93c2ea0f2df7de6a49630f2f
-    sha256: c58baec87c083a084d9c45b365df10dc7aa1dd5cfc28108d5ac94e90c8bae832
+    md5: 759dfbd44e93d75a23b203fe50dade8d
+    sha256: 298cf27a319a97f70e826364fcc92aeccb3197e462d40b28297e5ced0cbd753d
   category: main
   optional: false
 - name: huggingface_hub
-  version: 0.23.3
+  version: 0.23.4
   manager: conda
   platform: win-64
   dependencies:
@@ -6147,10 +6147,10 @@ package:
     typing-extensions: '>=3.7.4.3'
     fsspec: '>=2023.5.0'
     tqdm: '>=4.42.1'
-  url: https://conda.anaconda.org/conda-forge/noarch/huggingface_hub-0.23.3-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/huggingface_hub-0.23.4-pyhd8ed1ab_0.conda
   hash:
-    md5: 57f751bd93c2ea0f2df7de6a49630f2f
-    sha256: c58baec87c083a084d9c45b365df10dc7aa1dd5cfc28108d5ac94e90c8bae832
+    md5: 759dfbd44e93d75a23b203fe50dade8d
+    sha256: 298cf27a319a97f70e826364fcc92aeccb3197e462d40b28297e5ced0cbd753d
   category: main
   optional: false
 - name: hydra-core
@@ -14992,45 +14992,45 @@ package:
   category: dev
   optional: true
 - name: urllib3
-  version: 1.26.18
+  version: 1.26.19
   manager: conda
   platform: linux-64
   dependencies:
     brotli-python: '>=1.0.9'
     pysocks: '>=1.5.6,<2.0,!=1.5.7'
     python: '>=3.7'
-  url: https://conda.anaconda.org/conda-forge/noarch/urllib3-1.26.18-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/urllib3-1.26.19-pyhd8ed1ab_0.conda
   hash:
-    md5: bf61cfd2a7f212efba378167a07d4a6a
-    sha256: 1cc0bab65a6ad0f5a8bd7657760a4fb4e670d30377f9dab88b792977cb3687e7
+    md5: 6bb37c314b3cc1515dcf086ffe01c46e
+    sha256: 543ebab5241418a4e0d4d9e356ef13e4361504810a067a01481660bb35eb5643
   category: main
   optional: false
 - name: urllib3
-  version: 1.26.18
+  version: 1.26.19
   manager: conda
   platform: osx-arm64
   dependencies:
     python: '>=3.7'
     brotli-python: '>=1.0.9'
     pysocks: '>=1.5.6,<2.0,!=1.5.7'
-  url: https://conda.anaconda.org/conda-forge/noarch/urllib3-1.26.18-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/urllib3-1.26.19-pyhd8ed1ab_0.conda
   hash:
-    md5: bf61cfd2a7f212efba378167a07d4a6a
-    sha256: 1cc0bab65a6ad0f5a8bd7657760a4fb4e670d30377f9dab88b792977cb3687e7
+    md5: 6bb37c314b3cc1515dcf086ffe01c46e
+    sha256: 543ebab5241418a4e0d4d9e356ef13e4361504810a067a01481660bb35eb5643
   category: main
   optional: false
 - name: urllib3
-  version: 1.26.18
+  version: 1.26.19
   manager: conda
   platform: win-64
   dependencies:
     python: '>=3.7'
     brotli-python: '>=1.0.9'
     pysocks: '>=1.5.6,<2.0,!=1.5.7'
-  url: https://conda.anaconda.org/conda-forge/noarch/urllib3-1.26.18-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/urllib3-1.26.19-pyhd8ed1ab_0.conda
   hash:
-    md5: bf61cfd2a7f212efba378167a07d4a6a
-    sha256: 1cc0bab65a6ad0f5a8bd7657760a4fb4e670d30377f9dab88b792977cb3687e7
+    md5: 6bb37c314b3cc1515dcf086ffe01c46e
+    sha256: 543ebab5241418a4e0d4d9e356ef13e4361504810a067a01481660bb35eb5643
   category: main
   optional: false
 - name: userpath
@@ -15073,43 +15073,43 @@ package:
   category: dev
   optional: true
 - name: uv
-  version: 0.2.6
+  version: 0.2.13
   manager: conda
   platform: linux-64
   dependencies:
     libgcc-ng: '>=12'
     libstdcxx-ng: '>=12'
-  url: https://conda.anaconda.org/conda-forge/linux-64/uv-0.2.6-h0ea3d13_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/uv-0.2.13-h0ea3d13_0.conda
   hash:
-    md5: 59b5b6fd31fe993afe844687c36f64b5
-    sha256: a3476e0af359a15fcc4e575b106cd4d44d9633de43f83687c82a2b3b657ecb54
+    md5: 7d09e1e02f5207d63b2a77f90f937071
+    sha256: 451be34c3b33ccdec2e9031b60f32b892e0d66a1a62ddc14d3e4ab95255a3137
   category: dev
   optional: true
 - name: uv
-  version: 0.2.6
+  version: 0.2.13
   manager: conda
   platform: osx-arm64
   dependencies:
     __osx: '>=11.0'
     libcxx: '>=16'
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/uv-0.2.6-hc069d6b_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/uv-0.2.13-hc069d6b_0.conda
   hash:
-    md5: d02bbc69d6ddfbcd822f64643360ec81
-    sha256: be826015f52a30931940291ceafea4b57d8cb539bae21974fe252cf5b3dc8486
+    md5: 5d29bcbc10048cea9a87b55e7ac8a5a7
+    sha256: 698da5451e73c916be54bf01fce57408030c8431512fe5537db33ac2fa80fff2
   category: dev
   optional: true
 - name: uv
-  version: 0.2.6
+  version: 0.2.13
   manager: conda
   platform: win-64
   dependencies:
     ucrt: '>=10.0.20348.0'
     vc: '>=14.2,<15'
     vc14_runtime: '>=14.29.30139'
-  url: https://conda.anaconda.org/conda-forge/win-64/uv-0.2.6-ha08ef0e_0.conda
+  url: https://conda.anaconda.org/conda-forge/win-64/uv-0.2.13-ha08ef0e_0.conda
   hash:
-    md5: 434644f2e1bc03498baf906a4f318ee7
-    sha256: 7884ae5d1027c20d79242a633ba0e6578c28f628f0c6c8e4e56f95dcc8667c96
+    md5: 202dc492efb130cc17a8f12671c42c31
+    sha256: e47472c428a2b55ad18cf0f62d5f0722cd9c4a16c5fb292ccaf9fa9b94d23141
   category: dev
   optional: true
 - name: vc
@@ -16189,13 +16189,13 @@ package:
   platform: linux-64
   dependencies:
     pydantic: '>=2.7.1,<2.8.0'
-  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@353ecb9146086937463f7391d1de0637939999d5
+  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@c0552428f046dcb1f706f421b3ae637e8022d9a6
   hash:
-    sha256: 353ecb9146086937463f7391d1de0637939999d5
+    sha256: c0552428f046dcb1f706f421b3ae637e8022d9a6
   category: main
   source:
     type: url
-    url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@353ecb9146086937463f7391d1de0637939999d5
+    url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@c0552428f046dcb1f706f421b3ae637e8022d9a6
   optional: false
 - name: poprox-concepts
   version: 0.0.1
@@ -16203,13 +16203,13 @@ package:
   platform: osx-arm64
   dependencies:
     pydantic: '>=2.7.1,<2.8.0'
-  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@353ecb9146086937463f7391d1de0637939999d5
+  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@c0552428f046dcb1f706f421b3ae637e8022d9a6
   hash:
-    sha256: 353ecb9146086937463f7391d1de0637939999d5
+    sha256: c0552428f046dcb1f706f421b3ae637e8022d9a6
   category: main
   source:
     type: url
-    url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@353ecb9146086937463f7391d1de0637939999d5
+    url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@c0552428f046dcb1f706f421b3ae637e8022d9a6
   optional: false
 - name: poprox-concepts
   version: 0.0.1
@@ -16217,11 +16217,11 @@ package:
   platform: win-64
   dependencies:
     pydantic: '>=2.7.1,<2.8.0'
-  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@353ecb9146086937463f7391d1de0637939999d5
+  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@c0552428f046dcb1f706f421b3ae637e8022d9a6
   hash:
-    sha256: 353ecb9146086937463f7391d1de0637939999d5
+    sha256: c0552428f046dcb1f706f421b3ae637e8022d9a6
   category: main
   source:
     type: url
-    url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@353ecb9146086937463f7391d1de0637939999d5
+    url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@c0552428f046dcb1f706f421b3ae637e8022d9a6
   optional: false
