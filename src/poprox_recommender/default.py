@@ -1,6 +1,5 @@
 import random
 import sys
-from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
