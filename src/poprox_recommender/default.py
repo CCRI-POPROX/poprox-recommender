@@ -4,38 +4,12 @@ from uuid import UUID
 
 import torch as th
 
-from poprox_concepts import Article, ClickHistory, InterestProfile
+from poprox_concepts import Article, InterestProfile
 from poprox_recommender.diversifiers import mmr_diversification, pfar_diversification
 from poprox_recommender.diversifiers.mmr import compute_similarity_matrix
-from poprox_recommender.embedders import ArticleEmbedder
+from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
 from poprox_recommender.topics import normalized_topic_count, user_topic_preference
-
-
-# Compute a vector for each user
-def build_user_embedding(click_history: ClickHistory, article_embeddings, model, device, max_clicks_per_user):
-    article_ids = list(dict.fromkeys(click_history.article_ids))[
-        -max_clicks_per_user:
-    ]  # deduplicate while maintaining order
-
-    padded_positions = max_clicks_per_user - len(article_ids)
-    assert padded_positions >= 0
-
-    article_ids = ["PADDED_NEWS"] * padded_positions + article_ids
-    default = article_embeddings["PADDED_NEWS"]
-    clicked_article_embeddings = [
-        article_embeddings.get(clicked_article, default).to(device) for clicked_article in article_ids
-    ]
-    clicked_news_vector = (
-        th.stack(
-            clicked_article_embeddings,
-            dim=0,
-        )
-        .unsqueeze(0)
-        .to(device)
-    )
-
-    return model.get_user_vector(clicked_news_vector)
 
 
 def generate_recommendations(
@@ -91,26 +65,19 @@ def select_articles(
     click_history = interest_profile.click_history
     if MODEL and TOKENIZER and click_history.article_ids:
         article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
+        user_embedder = UserEmbedder(MODEL, DEVICE)
 
         clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
 
         todays_article_lookup, todays_article_tensor = article_embedder(todays_articles)
         clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
 
+        user_embedding = user_embedder(interest_profile, clicked_article_lookup)
+
         interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
 
         recommendations = {}
         account_id = click_history.account_id
-
-        max_clicks_per_user: int = 50
-
-        user_embedding = build_user_embedding(
-            interest_profile.click_history,
-            clicked_article_lookup,
-            MODEL,
-            DEVICE,
-            max_clicks_per_user,
-        )
 
         user_recs = generate_recommendations(
             MODEL,
