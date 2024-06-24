@@ -3,14 +3,12 @@ import sys
 from typing import Any
 from uuid import UUID
 
-import numpy as np
 import torch as th
 
 sys.path.append("../")
-from tqdm import tqdm
 
 from poprox_concepts import Article, ClickHistory, InterestProfile
-from poprox_recommender.diversifiers.mmr import mmr_diversification
+from poprox_recommender.diversifiers.mmr import compute_similarity_matrix, mmr_diversification
 from poprox_recommender.diversifiers.pfar import pfar_diversification
 from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
 from poprox_recommender.topics import normalized_topic_count, user_topic_preference
@@ -143,18 +141,6 @@ def select_with_model(
     )
 
     return recommendations
-
-
-def compute_similarity_matrix(todays_article_vectors):
-    num_values = len(todays_article_vectors)
-    similarity_matrix = np.zeros((num_values, num_values))
-    for i, value1 in tqdm(enumerate(todays_article_vectors), total=num_values):
-        value1 = value1.detach().cpu()
-        for j, value2 in enumerate(todays_article_vectors):
-            if i <= j:
-                value2 = value2.detach().cpu()
-                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
-    return similarity_matrix
 
 
 def select_articles(
