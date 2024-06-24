@@ -82,39 +82,6 @@ def generate_recommendations(
     return [candidate_articles[int(rec)] for rec in recs]
 
 
-def select_with_model(
-    todays_articles: list[Article],
-    todays_article_tensor: th.Tensor,
-    clicked_article_embeddings: dict[str, th.Tensor],
-    interest_profile: InterestProfile,
-    model,
-    model_device,
-    num_slots: int = 10,
-    max_clicks_per_user: int = 50,
-    algo_params: dict[str, Any] | None = None,
-):
-    # Build embedding tables
-    user_embedding = build_user_embedding(
-        interest_profile.click_history,
-        clicked_article_embeddings,
-        model,
-        model_device,
-        max_clicks_per_user,
-    )
-
-    recommendations = generate_recommendations(
-        model,
-        todays_articles,
-        todays_article_tensor,
-        user_embedding,
-        interest_profile,
-        num_slots=num_slots,
-        algo_params=algo_params,
-    )
-
-    return recommendations
-
-
 def select_articles(
     todays_articles: list[Article],
     past_articles: list[Article],
@@ -135,16 +102,27 @@ def select_articles(
     recommendations = {}
     account_id = click_history.account_id
     if MODEL and TOKENIZER and click_history.article_ids:
-        recommendations[account_id] = select_with_model(
-            todays_articles,
-            todays_article_tensor,
+        max_clicks_per_user: int = 50
+
+        user_embedding = build_user_embedding(
+            interest_profile.click_history,
             clicked_article_lookup,
-            interest_profile,
             MODEL,
             DEVICE,
+            max_clicks_per_user,
+        )
+
+        user_recs = generate_recommendations(
+            MODEL,
+            todays_articles,
+            todays_article_tensor,
+            user_embedding,
+            interest_profile,
             num_slots=num_slots,
             algo_params=algo_params,
         )
+
+        recommendations[account_id] = user_recs
     else:
         recommendations[account_id] = select_by_topic(
             todays_articles,
