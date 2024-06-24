@@ -9,6 +9,7 @@ from poprox_recommender.diversifiers import mmr_diversification, pfar_diversific
 from poprox_recommender.diversifiers.mmr import compute_similarity_matrix
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
+from poprox_recommender.scorers import ArticleScorer
 from poprox_recommender.topics import normalized_topic_count, user_topic_preference
 
 
@@ -31,13 +32,13 @@ def select_articles(
     if MODEL and TOKENIZER and click_history.article_ids:
         article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
         user_embedder = UserEmbedder(MODEL, DEVICE)
+        article_scorer = ArticleScorer(MODEL)
 
         candidate_article_lookup, candidate_article_tensor = article_embedder(candidate_articles)
         clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
 
         user_embedding = user_embedder(interest_profile, clicked_article_lookup)
-
-        pred = MODEL.get_prediction(candidate_article_tensor, user_embedding.squeeze())
+        article_scores = article_scorer(candidate_article_tensor, user_embedding)
 
         if diversify == "mmr":
             theta = float(algo_params.get("theta", 0.8))
@@ -45,13 +46,12 @@ def select_articles(
             # Compute today's article similarity matrix
             similarity_matrix = compute_similarity_matrix(candidate_article_tensor)
 
-            pred = pred.cpu().detach().numpy()
-            recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
+            recs = mmr_diversification(article_scores, similarity_matrix, theta=theta, topk=num_slots)
 
         elif diversify == "pfar":
             lamb = float(algo_params.get("pfar_lamb", 1))
             tau = algo_params.get("pfar_tau", None)
-            pred = th.sigmoid(pred).cpu().detach().numpy()
+            article_scores = th.sigmoid(th.tensor(article_scores)).cpu().detach().numpy()
 
             topic_preferences: dict[str, int] = {}
 
@@ -63,7 +63,9 @@ def select_articles(
 
             normalized_topic_prefs = normalized_topic_count(topic_preferences)
 
-            recs = pfar_diversification(pred, candidate_articles, normalized_topic_prefs, lamb, tau, topk=num_slots)
+            recs = pfar_diversification(
+                article_scores, candidate_articles, normalized_topic_prefs, lamb, tau, topk=num_slots
+            )
 
         recommendations[account_id] = [candidate_articles[int(rec)] for rec in recs]
     else:
