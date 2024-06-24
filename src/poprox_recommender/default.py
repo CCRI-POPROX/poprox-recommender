@@ -40,8 +40,8 @@ def build_user_embedding(click_history: ClickHistory, article_embeddings, model,
 
 def generate_recommendations(
     model,
-    articles,
-    article_vectors,
+    candidate_articles: list[Article],
+    candidate_article_tensor: th.Tensor,
     similarity_matrix,
     user_embedding,
     interest_profile: InterestProfile,
@@ -51,10 +51,14 @@ def generate_recommendations(
     algo_params = algo_params or {}
     diversify = str(algo_params.get("diversity_algo", "pfar"))
 
-    pred = model.get_prediction(article_vectors, user_embedding.squeeze())
+    pred = model.get_prediction(candidate_article_tensor, user_embedding.squeeze())
 
     if diversify == "mmr":
         theta = float(algo_params.get("theta", 0.8))
+
+        # Compute today's article similarity matrix
+        similarity_matrix = compute_similarity_matrix(candidate_article_tensor)
+
         pred = pred.cpu().detach().numpy()
         recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
 
@@ -73,15 +77,14 @@ def generate_recommendations(
 
         normalized_topic_prefs = normalized_topic_count(topic_preferences)
 
-        recs = pfar_diversification(pred, articles, normalized_topic_prefs, lamb, tau, topk=num_slots)
+        recs = pfar_diversification(pred, candidate_articles, normalized_topic_prefs, lamb, tau, topk=num_slots)
 
-    return [articles[int(rec)] for rec in recs]
+    return [candidate_articles[int(rec)] for rec in recs]
 
 
 def select_with_model(
     todays_articles: list[Article],
-    todays_article_vectors: th.Tensor,
-    article_similarity_matrix,
+    todays_article_tensor: th.Tensor,
     clicked_article_embeddings: dict[str, th.Tensor],
     interest_profile: InterestProfile,
     model,
@@ -102,8 +105,7 @@ def select_with_model(
     recommendations = generate_recommendations(
         model,
         todays_articles,
-        todays_article_vectors,
-        article_similarity_matrix,
+        todays_article_tensor,
         user_embedding,
         interest_profile,
         num_slots=num_slots,
@@ -128,9 +130,6 @@ def select_articles(
     todays_article_lookup, todays_article_tensor = article_embedder(todays_articles)
     clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
 
-    # Compute today's article similarity matrix
-    similarity_matrix = compute_similarity_matrix(todays_article_tensor)
-
     interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
 
     recommendations = {}
@@ -139,7 +138,6 @@ def select_articles(
         recommendations[account_id] = select_with_model(
             todays_articles,
             todays_article_tensor,
-            similarity_matrix,
             clicked_article_lookup,
             interest_profile,
             MODEL,
