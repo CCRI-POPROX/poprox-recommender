@@ -88,19 +88,20 @@ def select_articles(
     num_slots: int,
     algo_params: dict[str, Any] | None = None,
 ) -> dict[UUID, list[Article]]:
-    article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
-
     click_history = interest_profile.click_history
-    clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
-
-    todays_article_lookup, todays_article_tensor = article_embedder(todays_articles)
-    clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
-
-    interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
-
-    recommendations = {}
-    account_id = click_history.account_id
     if MODEL and TOKENIZER and click_history.article_ids:
+        article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
+
+        clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
+
+        todays_article_lookup, todays_article_tensor = article_embedder(todays_articles)
+        clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
+
+        interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
+
+        recommendations = {}
+        account_id = click_history.account_id
+
         max_clicks_per_user: int = 50
 
         user_embedding = build_user_embedding(
