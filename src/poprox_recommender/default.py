@@ -138,6 +138,19 @@ def select_with_model(
     return recommendations
 
 
+class ArticleEmbedder:
+    def __init__(self, model, tokenizer, device):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.device = device
+
+    def __call__(self, articles: list[Article]):
+        article_features = transform_article_features(articles, self.tokenizer)
+        article_lookup, article_tensor = build_article_embeddings(article_features, self.model, self.device)
+
+        return article_lookup, article_tensor
+
+
 def select_articles(
     todays_articles: list[Article],
     past_articles: list[Article],
@@ -145,23 +158,16 @@ def select_articles(
     num_slots: int,
     algo_params: dict[str, Any] | None = None,
 ) -> dict[UUID, list[Article]]:
+    article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
+
     click_history = interest_profile.click_history
-
-    # Transform news to model features
-    todays_article_features = transform_article_features(todays_articles, TOKENIZER)
-    _, todays_article_vectors = build_article_embeddings(todays_article_features, MODEL, DEVICE)
-
     clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
 
-    # Convert clicked article attributes into model features
-    clicked_article_features = transform_article_features(
-        clicked_articles,
-        TOKENIZER,
-    )
-    clicked_article_embeddings, _ = build_article_embeddings(clicked_article_features, MODEL, DEVICE)
+    todays_article_lookup, todays_article_tensor = article_embedder(todays_articles)
+    clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
 
     # Compute today's article similarity matrix
-    similarity_matrix = compute_similarity_matrix(todays_article_vectors)
+    similarity_matrix = compute_similarity_matrix(todays_article_tensor)
 
     interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
 
@@ -170,9 +176,9 @@ def select_articles(
     if MODEL and TOKENIZER and click_history.article_ids:
         recommendations[account_id] = select_with_model(
             todays_articles,
-            todays_article_vectors,
+            todays_article_tensor,
             similarity_matrix,
-            clicked_article_embeddings,
+            clicked_article_lookup,
             interest_profile,
             MODEL,
             DEVICE,
