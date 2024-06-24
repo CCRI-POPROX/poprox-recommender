@@ -12,51 +12,8 @@ from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
 from poprox_recommender.topics import normalized_topic_count, user_topic_preference
 
 
-def generate_recommendations(
-    model,
-    candidate_articles: list[Article],
-    candidate_article_tensor: th.Tensor,
-    user_embedding,
-    interest_profile: InterestProfile,
-    num_slots: int = 10,
-    algo_params: dict[str, Any] | None = None,
-) -> list[Article]:
-    algo_params = algo_params or {}
-    diversify = str(algo_params.get("diversity_algo", "pfar"))
-
-    pred = model.get_prediction(candidate_article_tensor, user_embedding.squeeze())
-
-    if diversify == "mmr":
-        theta = float(algo_params.get("theta", 0.8))
-
-        # Compute today's article similarity matrix
-        similarity_matrix = compute_similarity_matrix(candidate_article_tensor)
-
-        pred = pred.cpu().detach().numpy()
-        recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
-
-    elif diversify == "pfar":
-        lamb = float(algo_params.get("pfar_lamb", 1))
-        tau = algo_params.get("pfar_tau", None)
-        pred = th.sigmoid(pred).cpu().detach().numpy()
-
-        topic_preferences: dict[str, int] = {}
-
-        for interest in interest_profile.onboarding_topics:
-            topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
-
-        for topic, click_count in interest_profile.click_topic_counts.items():
-            topic_preferences[topic] = click_count
-
-        normalized_topic_prefs = normalized_topic_count(topic_preferences)
-
-        recs = pfar_diversification(pred, candidate_articles, normalized_topic_prefs, lamb, tau, topk=num_slots)
-
-    return [candidate_articles[int(rec)] for rec in recs]
-
-
 def select_articles(
-    todays_articles: list[Article],
+    candidate_articles: list[Article],
     past_articles: list[Article],
     interest_profile: InterestProfile,
     num_slots: int,
@@ -67,27 +24,48 @@ def select_articles(
     interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
     account_id = click_history.account_id
 
+    algo_params = algo_params or {}
+    diversify = str(algo_params.get("diversity_algo", "pfar"))
+
     recommendations = {}
     if MODEL and TOKENIZER and click_history.article_ids:
         article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
         user_embedder = UserEmbedder(MODEL, DEVICE)
 
-        todays_article_lookup, todays_article_tensor = article_embedder(todays_articles)
+        candidate_article_lookup, candidate_article_tensor = article_embedder(candidate_articles)
         clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
 
         user_embedding = user_embedder(interest_profile, clicked_article_lookup)
 
-        user_recs = generate_recommendations(
-            MODEL,
-            todays_articles,
-            todays_article_tensor,
-            user_embedding,
-            interest_profile,
-            num_slots=num_slots,
-            algo_params=algo_params,
-        )
+        pred = MODEL.get_prediction(candidate_article_tensor, user_embedding.squeeze())
 
-        recommendations[account_id] = user_recs
+        if diversify == "mmr":
+            theta = float(algo_params.get("theta", 0.8))
+
+            # Compute today's article similarity matrix
+            similarity_matrix = compute_similarity_matrix(candidate_article_tensor)
+
+            pred = pred.cpu().detach().numpy()
+            recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
+
+        elif diversify == "pfar":
+            lamb = float(algo_params.get("pfar_lamb", 1))
+            tau = algo_params.get("pfar_tau", None)
+            pred = th.sigmoid(pred).cpu().detach().numpy()
+
+            topic_preferences: dict[str, int] = {}
+
+            for interest in interest_profile.onboarding_topics:
+                topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
+
+            for topic, click_count in interest_profile.click_topic_counts.items():
+                topic_preferences[topic] = click_count
+
+            normalized_topic_prefs = normalized_topic_count(topic_preferences)
+
+            recs = pfar_diversification(pred, candidate_articles, normalized_topic_prefs, lamb, tau, topk=num_slots)
+
+        recommendations[account_id] = [candidate_articles[int(rec)] for rec in recs]
     else:
         recommendations[account_id] = select_by_topic(
             todays_articles,
