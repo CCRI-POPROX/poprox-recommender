@@ -179,7 +179,7 @@ def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
 
     S_topic = set()
     article = articles[int(initial_item)]
-    S_topic.add(topic for topic in [mention.entity.name for mention in article.mentions])
+    S_topic.update([mention.entity.name for mention in article.mentions])
 
     for k in range(topk - 1):
         candidate = None
@@ -191,13 +191,13 @@ def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
             product = 1
             summation = 0
 
-            candidate_topic = [mention.entity.name for mention in articles[int(i)].mentions]
-            for topic in candidate_topic:
+            candidate_topics = [mention.entity.name for mention in articles[int(i)].mentions]
+            for topic in candidate_topics:
                 if topic in S_topic:
                     product = 0
                     break
 
-            for topic in candidate_topic:
+            for topic in candidate_topics:
                 if topic in topic_preferences:
                     summation += topic_preferences[topic]
 
@@ -209,7 +209,7 @@ def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
 
         if candidate is not None:
             S.append(candidate)
-            S_topic.add(topic for topic in candidate_topic)
+            S_topic.update(candidate_topics)
 
     return S  # LIST(candidate index)
 
