@@ -170,46 +170,46 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
     return S
 
 
-def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
+def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, tau, topk):
     # p(v|u) + lamb*tau \sum_{d \in D} P(d|u)I{v \in d} \prod_{i \in S} I{i \in d} for each user
 
     S = []  # final recommendation LIST[candidate index]
-    initial_item = rewards.argmax()
+    initial_item = relevance_scores.argmax()
     S.append(initial_item)
 
     S_topic = set()
     article = articles[int(initial_item)]
-    S_topic.add(topic for topic in [mention.entity.name for mention in article.mentions])
+    S_topic.update([mention.entity.name for mention in article.mentions])
 
     for k in range(topk - 1):
-        candidate = None
-        best_PFAR = float("-inf")
+        candidate_idx = None
+        best_score = float("-inf")
 
-        for i, reward_i in enumerate(rewards):  # iterate R for next item
+        for i, relevance_i in enumerate(relevance_scores):  # iterate R for next item
             if i in S:
                 continue
             product = 1
             summation = 0
 
-            candidate_topic = [mention.entity.name for mention in articles[int(i)].mentions]
-            for topic in candidate_topic:
+            candidate_topics = [mention.entity.name for mention in articles[int(i)].mentions]
+            for topic in candidate_topics:
                 if topic in S_topic:
                     product = 0
                     break
 
-            for topic in candidate_topic:
+            for topic in candidate_topics:
                 if topic in topic_preferences:
                     summation += topic_preferences[topic]
 
-            PFAR_i = reward_i + lamb * tau * summation * product
+            pfar_score_i = relevance_i + lamb * tau * summation * product
 
-            if PFAR_i > best_PFAR:
-                best_PFAR = PFAR_i
-                candidate = i
+            if pfar_score_i > best_score:
+                best_score = pfar_score_i
+                candidate_idx = i
 
-        if candidate is not None:
-            S.append(candidate)
-            S_topic.add(topic for topic in candidate_topic)
+        if candidate_idx is not None:
+            S.append(candidate_idx)
+            S_topic.update([mention.entity.name for mention in articles[candidate_idx].mentions])
 
     return S  # LIST(candidate index)
 
