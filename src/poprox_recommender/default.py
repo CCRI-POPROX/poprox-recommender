@@ -5,8 +5,8 @@ from uuid import UUID
 import torch as th
 
 from poprox_concepts import Article, ClickHistory, InterestProfile
-from poprox_recommender.diversifiers.mmr import compute_similarity_matrix, mmr_diversification
-from poprox_recommender.diversifiers.pfar import pfar_diversification
+from poprox_recommender.diversifiers import mmr_diversification, pfar_diversification
+from poprox_recommender.diversifiers.mmr import compute_similarity_matrix
 from poprox_recommender.embedders import ArticleEmbedder
 from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
 from poprox_recommender.topics import normalized_topic_count, user_topic_preference
