@@ -1,11 +1,8 @@
 import random
-import sys
 from typing import Any
 from uuid import UUID
 
 import torch as th
-
-sys.path.append("../")
 
 from poprox_concepts import Article, ClickHistory, InterestProfile
 from poprox_recommender.diversifiers.mmr import compute_similarity_matrix, mmr_diversification
