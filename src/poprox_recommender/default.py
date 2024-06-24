@@ -5,8 +5,7 @@ from uuid import UUID
 import torch as th
 
 from poprox_concepts import Article, InterestProfile
-from poprox_recommender.diversifiers import mmr_diversification, pfar_diversification
-from poprox_recommender.diversifiers.mmr import compute_similarity_matrix
+from poprox_recommender.diversifiers import MMRDiversifier, pfar_diversification
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
 from poprox_recommender.scorers import ArticleScorer
@@ -41,12 +40,8 @@ def select_articles(
         article_scores = article_scorer(candidate_article_tensor, user_embedding)
 
         if diversify == "mmr":
-            theta = float(algo_params.get("theta", 0.8))
-
-            # Compute today's article similarity matrix
-            similarity_matrix = compute_similarity_matrix(candidate_article_tensor)
-
-            recs = mmr_diversification(article_scores, similarity_matrix, theta=theta, topk=num_slots)
+            diversifier = MMRDiversifier(algo_params)
+            recs = diversifier(article_scores, candidate_article_tensor, num_slots)
 
         elif diversify == "pfar":
             lamb = float(algo_params.get("pfar_lamb", 1))

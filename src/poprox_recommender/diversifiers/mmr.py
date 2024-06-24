@@ -1,5 +1,17 @@
+from typing import Any
+
 import numpy as np
 from tqdm import tqdm
+
+
+class MMRDiversifier:
+    def __init__(self, algo_params: dict[str, Any]):
+        self.theta = float(algo_params.get("theta", 0.8))
+
+    def __call__(self, article_scores, candidate_article_tensor, topk):
+        similarity_matrix = compute_similarity_matrix(candidate_article_tensor)
+
+        return mmr_diversification(article_scores, similarity_matrix, theta=self.theta, topk=topk)
 
 
 def compute_similarity_matrix(todays_article_vectors):
