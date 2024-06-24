@@ -234,18 +234,18 @@ def generate_recommendations(
     algo_params: dict[str, Any] | None = None,
 ) -> list[Article]:
     algo_params = algo_params or {}
-    theta = float(algo_params.get("theta", 0.8))
-    lamb = float(algo_params.get("pfar_lamb", 1))
-    tau = algo_params.get("pfar_tau", None)
-    diversify = str(algo_params.get("diversity_algo", "mmr"))
+    diversify = str(algo_params.get("diversity_algo", "pfar"))
 
     pred = model.get_prediction(article_vectors, user_embedding.squeeze())
 
     if diversify == "mmr":
+        theta = float(algo_params.get("theta", 0.8))
         pred = pred.cpu().detach().numpy()
         recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
 
     elif diversify == "pfar":
+        lamb = float(algo_params.get("pfar_lamb", 1))
+        tau = algo_params.get("pfar_tau", None)
         pred = th.sigmoid(pred).cpu().detach().numpy()
 
         topic_preferences: dict[str, int] = {}
