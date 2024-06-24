@@ -42,7 +42,6 @@ def generate_recommendations(
     model,
     candidate_articles: list[Article],
     candidate_article_tensor: th.Tensor,
-    similarity_matrix,
     user_embedding,
     interest_profile: InterestProfile,
     num_slots: int = 10,
