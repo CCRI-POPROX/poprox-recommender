@@ -1,3 +1,4 @@
+import math
 import random
 import sys
 from collections import defaultdict
@@ -173,6 +174,14 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
 def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, tau, topk):
     # p(v|u) + lamb*tau \sum_{d \in D} P(d|u)I{v \in d} \prod_{i \in S} I{i \in d} for each user
 
+    if tau is None:
+        tau = 0
+        for topic, weight in topic_preferences.items():
+            if weight > 0:
+                tau -= weight * math.log(weight)
+    else:
+        tau = float(tau)
+
     S = []  # final recommendation LIST[candidate index]
     initial_item = relevance_scores.argmax()
     S.append(initial_item)
@@ -227,7 +236,7 @@ def generate_recommendations(
     algo_params = algo_params or {}
     theta = float(algo_params.get("theta", 0.8))
     lamb = float(algo_params.get("pfar_lamb", 1))
-    tau = float(algo_params.get("pfar_tau", 1))
+    tau = algo_params.get("pfar_tau", None)
     diversify = str(algo_params.get("diversity_algo", "mmr"))
 
     pred = model.get_prediction(article_vectors, user_embedding.squeeze())
