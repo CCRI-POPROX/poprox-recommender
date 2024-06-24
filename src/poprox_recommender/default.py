@@ -1,7 +1,6 @@
 import math
 import random
 import sys
-from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
@@ -17,7 +16,7 @@ from transformers import AutoTokenizer
 from poprox_concepts import Article, ClickHistory, InterestProfile
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
-from poprox_recommender.topics import extract_general_topics
+from poprox_recommender.topics import normalized_topic_count, user_topic_preference
 
 
 @dataclass
@@ -288,33 +287,6 @@ def compute_similarity_matrix(todays_article_vectors):
                 value2 = value2.detach().cpu()
                 similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
     return similarity_matrix
-
-
-def find_topic(past_articles: list[Article], article_id: UUID):
-    # each article might correspond to multiple topic
-    for article in past_articles:
-        if article.article_id == article_id:
-            return extract_general_topics(article)
-
-
-def normalized_topic_count(topic_counts: dict[str, int]):
-    total_count = sum(topic_counts.values())
-    normalized_counts = {key: value / total_count for key, value in topic_counts.items()}
-    return normalized_counts
-
-
-def user_topic_preference(past_articles: list[Article], click_history: ClickHistory) -> dict[str, int]:
-    """Topic preference only based on click history"""
-    clicked_articles = click_history.article_ids  # List[UUID]
-
-    topic_count_dict = defaultdict(int)
-
-    for article_id in clicked_articles:
-        clicked_topics = find_topic(past_articles, article_id)
-        for topic in clicked_topics:
-            topic_count_dict[topic] += 1
-
-    return topic_count_dict
 
 
 def select_articles(
