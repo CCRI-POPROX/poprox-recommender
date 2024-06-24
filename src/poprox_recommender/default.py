@@ -63,21 +63,19 @@ def select_articles(
     algo_params: dict[str, Any] | None = None,
 ) -> dict[UUID, list[Article]]:
     click_history = interest_profile.click_history
+    clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
+    interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
+    account_id = click_history.account_id
+
+    recommendations = {}
     if MODEL and TOKENIZER and click_history.article_ids:
         article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
         user_embedder = UserEmbedder(MODEL, DEVICE)
-
-        clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
 
         todays_article_lookup, todays_article_tensor = article_embedder(todays_articles)
         clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
 
         user_embedding = user_embedder(interest_profile, clicked_article_lookup)
-
-        interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
-
-        recommendations = {}
-        account_id = click_history.account_id
 
         user_recs = generate_recommendations(
             MODEL,
