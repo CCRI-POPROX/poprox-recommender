@@ -10,7 +10,7 @@ from safetensors.torch import load_file
 
 from poprox_concepts import Article, ClickHistory
 from poprox_recommender.default import select_articles, user_topic_preference
-from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topic, match_news_topics_to_general
+from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, match_news_topics_to_general
 
 try:
     import pytest
@@ -49,7 +49,7 @@ def test_topic_classification():
 def test_extract_generalized_topic():
     todays_articles, _, _, _ = load_test_articles()
     for article in todays_articles:
-        generalized_topics = extract_general_topic(article)
+        generalized_topics = extract_general_topics(article)
         for topic in generalized_topics:
             assert topic in GENERAL_TOPICS
 

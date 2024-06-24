@@ -20,7 +20,7 @@ from transformers import AutoTokenizer
 from poprox_concepts import Article, ClickHistory, InterestProfile
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
-from poprox_recommender.topics import extract_general_topic
+from poprox_recommender.topics import extract_general_topics
 
 
 @dataclass
@@ -188,7 +188,7 @@ def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, ta
 
     S_topic = set()
     article = articles[int(initial_item)]
-    S_topic.update([mention.entity.name for mention in article.mentions])
+    S_topic.update(extract_general_topics(article))
 
     for k in range(topk - 1):
         candidate_idx = None
@@ -200,7 +200,8 @@ def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, ta
             product = 1
             summation = 0
 
-            candidate_topics = [mention.entity.name for mention in articles[int(i)].mentions]
+            candidate_topics = set(extract_general_topics(articles[int(i)]))
+
             for topic in candidate_topics:
                 if topic in S_topic:
                     product = 0
@@ -217,8 +218,9 @@ def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, ta
                 candidate_idx = i
 
         if candidate_idx is not None:
+            candidate_topics = set(extract_general_topics(articles[int(candidate_idx)]))
             S.append(candidate_idx)
-            S_topic.update([mention.entity.name for mention in articles[candidate_idx].mentions])
+            S_topic.update(candidate_topics)
 
     return S  # LIST(candidate index)
 
@@ -316,7 +318,7 @@ def find_topic(past_articles: list[Article], article_id: UUID):
     # each article might correspond to multiple topic
     for article in past_articles:
         if article.article_id == article_id:
-            return extract_general_topic(article)
+            return extract_general_topics(article)
 
 
 def normalized_topic_count(topic_counts: dict[str, int]):

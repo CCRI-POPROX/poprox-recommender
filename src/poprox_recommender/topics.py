@@ -5,7 +5,7 @@ from poprox_concepts import Article
 from poprox_concepts.domain.topics import GENERAL_TOPICS
 
 
-def extract_general_topic(article: Article):
+def extract_general_topics(article: Article):
     article_topics = set([mention.entity.name for mention in article.mentions])
     return article_topics.intersection(GENERAL_TOPICS)
 
