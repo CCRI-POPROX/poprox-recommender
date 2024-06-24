@@ -2,14 +2,12 @@ import random
 from typing import Any
 from uuid import UUID
 
-import torch as th
-
 from poprox_concepts import Article, InterestProfile
-from poprox_recommender.diversifiers import MMRDiversifier, pfar_diversification
+from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
 from poprox_recommender.scorers import ArticleScorer
-from poprox_recommender.topics import normalized_topic_count, user_topic_preference
+from poprox_recommender.topics import user_topic_preference
 
 
 def select_articles(
@@ -44,23 +42,8 @@ def select_articles(
             recs = diversifier(article_scores, candidate_article_tensor, num_slots)
 
         elif diversify == "pfar":
-            lamb = float(algo_params.get("pfar_lamb", 1))
-            tau = algo_params.get("pfar_tau", None)
-            article_scores = th.sigmoid(th.tensor(article_scores)).cpu().detach().numpy()
-
-            topic_preferences: dict[str, int] = {}
-
-            for interest in interest_profile.onboarding_topics:
-                topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
-
-            for topic, click_count in interest_profile.click_topic_counts.items():
-                topic_preferences[topic] = click_count
-
-            normalized_topic_prefs = normalized_topic_count(topic_preferences)
-
-            recs = pfar_diversification(
-                article_scores, candidate_articles, normalized_topic_prefs, lamb, tau, topk=num_slots
-            )
+            diversifier = PFARDiversifier(algo_params)
+            recs = diversifier(article_scores, interest_profile, candidate_articles, num_slots)
 
         recommendations[account_id] = [candidate_articles[int(rec)] for rec in recs]
     else:
