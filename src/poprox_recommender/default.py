@@ -240,10 +240,14 @@ def generate_recommendations(
     diversify = str(algo_params.get("diversity_algo", "mmr"))
 
     pred = model.get_prediction(article_vectors, user_embedding.squeeze())
-    pred = pred.cpu().detach().numpy()
+
     if diversify == "mmr":
+        pred = pred.cpu().detach().numpy()
         recs = mmr_diversification(pred, similarity_matrix, theta=theta, topk=num_slots)
-    if diversify == "pfar":
+
+    elif diversify == "pfar":
+        pred = th.sigmoid(pred).cpu().detach().numpy()
+
         topic_preferences: dict[str, int] = {}
 
         for interest in interest_profile.onboarding_topics:
