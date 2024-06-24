@@ -170,11 +170,11 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
     return S
 
 
-def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
+def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, tau, topk):
     # p(v|u) + lamb*tau \sum_{d \in D} P(d|u)I{v \in d} \prod_{i \in S} I{i \in d} for each user
 
     S = []  # final recommendation LIST[candidate index]
-    initial_item = rewards.argmax()
+    initial_item = relevance_scores.argmax()
     S.append(initial_item)
 
     S_topic = set()
@@ -183,9 +183,9 @@ def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
 
     for k in range(topk - 1):
         candidate_idx = None
-        best_PFAR = float("-inf")
+        best_score = float("-inf")
 
-        for i, reward_i in enumerate(rewards):  # iterate R for next item
+        for i, relevance_i in enumerate(relevance_scores):  # iterate R for next item
             if i in S:
                 continue
             product = 1
@@ -201,10 +201,10 @@ def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
                 if topic in topic_preferences:
                     summation += topic_preferences[topic]
 
-            PFAR_i = reward_i + lamb * tau * summation * product
+            pfar_score_i = relevance_i + lamb * tau * summation * product
 
-            if PFAR_i > best_PFAR:
-                best_PFAR = PFAR_i
+            if pfar_score_i > best_score:
+                best_score = pfar_score_i
                 candidate_idx = i
 
         if candidate_idx is not None:
