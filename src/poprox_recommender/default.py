@@ -182,7 +182,7 @@ def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
     S_topic.update([mention.entity.name for mention in article.mentions])
 
     for k in range(topk - 1):
-        candidate = None
+        candidate_idx = None
         best_PFAR = float("-inf")
 
         for i, reward_i in enumerate(rewards):  # iterate R for next item
@@ -205,11 +205,11 @@ def pfar_diversification(rewards, articles, topic_preferences, lamb, tau, topk):
 
             if PFAR_i > best_PFAR:
                 best_PFAR = PFAR_i
-                candidate = i
+                candidate_idx = i
 
-        if candidate is not None:
-            S.append(candidate)
-            S_topic.update(candidate_topics)
+        if candidate_idx is not None:
+            S.append(candidate_idx)
+            S_topic.update([mention.entity.name for mention in articles[candidate_idx].mentions])
 
     return S  # LIST(candidate index)
 
