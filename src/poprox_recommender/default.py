@@ -22,7 +22,7 @@ def transform_article_features(articles: list[Article], tokenizer) -> dict[str, 
 
 
 # Compute a vector for each news story
-def build_article_embeddings(article_features, model, device):
+def build_article_embeddings(article_features, model, device) -> tuple[dict[str, th.Tensor], th.Tensor]:
     articles = {
         "id": list(article_features.keys()),
         "title": th.tensor(list(article_features.values())),
@@ -105,9 +105,9 @@ def generate_recommendations(
 
 def select_with_model(
     todays_articles: list[Article],
-    todays_article_vectors: list[Article],
+    todays_article_vectors: th.Tensor,
     article_similarity_matrix,
-    past_article_features,
+    clicked_article_embeddings: dict[str, th.Tensor],
     interest_profile: InterestProfile,
     model,
     model_device,
@@ -116,11 +116,9 @@ def select_with_model(
     algo_params: dict[str, Any] | None = None,
 ):
     # Build embedding tables
-    past_article_embeddings, _ = build_article_embeddings(past_article_features, model, model_device)
-
     user_embedding = build_user_embedding(
         interest_profile.click_history,
-        past_article_embeddings,
+        clicked_article_embeddings,
         model,
         model_device,
         max_clicks_per_user,
@@ -151,17 +149,18 @@ def select_articles(
 
     # Transform news to model features
     todays_article_features = transform_article_features(todays_articles, TOKENIZER)
+    _, todays_article_vectors = build_article_embeddings(todays_article_features, MODEL, DEVICE)
 
     clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
 
     # Convert clicked article attributes into model features
-    past_article_features = transform_article_features(
+    clicked_article_features = transform_article_features(
         clicked_articles,
         TOKENIZER,
     )
+    clicked_article_embeddings, _ = build_article_embeddings(clicked_article_features, MODEL, DEVICE)
 
     # Compute today's article similarity matrix
-    _, todays_article_vectors = build_article_embeddings(todays_article_features, MODEL, DEVICE)
     similarity_matrix = compute_similarity_matrix(todays_article_vectors)
 
     interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
@@ -173,7 +172,7 @@ def select_articles(
             todays_articles,
             todays_article_vectors,
             similarity_matrix,
-            past_article_features,
+            clicked_article_embeddings,
             interest_profile,
             MODEL,
             DEVICE,
