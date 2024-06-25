@@ -3,13 +3,10 @@ import random
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
-from functools import partial
 from typing import Any
 from uuid import UUID
 
 import numpy as np
-import pandas as pd
-import swifter  # noqa: F401 # pylint: disable=unused-import
 import torch as th
 
 sys.path.append("../")
@@ -66,42 +63,21 @@ CHECKPOINT, DEVICE = load_checkpoint()
 MODEL = load_model(CHECKPOINT, DEVICE)
 
 
-def parse_row(tokenizer, row):
-    new_row = [str(row.article_id), []]
+def transform_article_features(articles: list[Article], tokenizer) -> dict[str, list]:
+    tokenized_titles = {}
+    for article in articles:
+        tokenized_titles[article.article_id] = tokenizer.encode(
+            article.title, padding="max_length", max_length=30, truncation=True
+        )
 
-    try:
-        new_row[1] = tokenizer.encode(row.title, padding="max_length", max_length=30, truncation=True)
-
-    except IndexError:
-        pass
-
-    return pd.Series(
-        new_row,
-        index=["article_id", "title"],
-    )
-
-
-# check the input type of articles
-def is_list_of_dicts(articles):
-    if isinstance(articles, list) and all(isinstance(item, dict) for item in articles):
-        return True
-    return False
-
-
-# prepare the news.tsv with information for NRMS model
-def transform_article_features(articles: list[Article], tokenizer):
-    article_df = pd.DataFrame([article.model_dump() for article in articles])
-    article_df.fillna(" ", inplace=True)
-    parse_fn = partial(parse_row, tokenizer)
-
-    return article_df.swifter.apply(parse_fn, axis=1)
+    return tokenized_titles
 
 
 # Compute a vector for each news story
 def build_article_embeddings(article_features, model, device):
     articles = {
-        "id": article_features["article_id"],
-        "title": th.tensor(article_features["title"]),
+        "id": list(article_features.keys()),
+        "title": th.tensor(list(article_features.values())),
     }
     article_embeddings = {}
     article_vectors = model.get_news_vector(articles["title"].to(device))
