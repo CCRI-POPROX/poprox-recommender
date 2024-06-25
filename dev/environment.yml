@@ -18,6 +18,7 @@ dependencies:
   - pytest >=7
   - coverage >=6.5
   - pexpect~=4.9
+  - pandas==2.*
   # tooling for code validation
   - pre-commit >=3.7,<4
   - ruff >=0.4
