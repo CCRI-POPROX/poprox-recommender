@@ -17,7 +17,8 @@ from safetensors.torch import load_file
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from poprox_concepts import GENERAL_TOPICS, Article, ClickHistory, InterestProfile
+from poprox_concepts import Article, ClickHistory, InterestProfile
+from poprox_concepts.domain.topics import GENERAL_TOPICS
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics
