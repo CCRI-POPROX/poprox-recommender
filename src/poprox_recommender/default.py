@@ -17,7 +17,7 @@ from safetensors.torch import load_file
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from poprox_concepts import Article, ClickHistory, InterestProfile
+from poprox_concepts import GENERAL_TOPICS, Article, ClickHistory, InterestProfile
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics
@@ -207,9 +207,7 @@ def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, ta
                     product = 0
                     break
 
-            for topic in candidate_topics:
-                if topic in topic_preferences:
-                    summation += topic_preferences[topic]
+                summation += 1.0 / len(GENERAL_TOPICS)
 
             pfar_score_i = relevance_i + lamb * tau * summation * product
 
