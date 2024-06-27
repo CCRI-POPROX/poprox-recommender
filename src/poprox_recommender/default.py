@@ -346,7 +346,7 @@ def select_articles(
     recommendations = {}
     account_id = click_history.account_id
     if MODEL and TOKENIZER and click_history.article_ids:
-        user_recs = select_with_model(
+        recommendations[account_id] = select_with_model(
             todays_articles,
             todays_article_vectors,
             similarity_matrix,
@@ -357,8 +357,37 @@ def select_articles(
             num_slots=num_slots,
             algo_params=algo_params,
         )
-        recommendations[account_id] = user_recs
     else:
-        recommendations[account_id] = random.sample(todays_articles, num_slots)
+        recommendations[account_id] = select_by_topic(
+            todays_articles,
+            interest_profile,
+            num_slots,
+        )
 
     return recommendations
+
+
+def select_by_topic(todays_articles: list[Article], interest_profile: InterestProfile, num_slots: int):
+    # Preference values from onboarding are 1-indexed, where 1 means "absolutely no interest."
+    # We might want to normalize them to 0-indexed somewhere upstream, but in the mean time
+    # this is one of the simpler ways to filter out topics people aren't interested in from
+    # their early newsletters
+    profile_topics = {
+        interest.entity_name for interest in interest_profile.onboarding_topics if interest.preference > 1
+    }
+
+    other_articles = []
+    topical_articles = []
+    for article in todays_articles:
+        article_topics = {mention.entity.name for mention in article.mentions}
+        if len(profile_topics.intersection(article_topics)) > 0:
+            topical_articles.append(article)
+        else:
+            other_articles.append(article)
+
+    if len(topical_articles) >= num_slots:
+        return random.sample(topical_articles, num_slots)
+    else:
+        return random.sample(topical_articles, len(topical_articles)) + random.sample(
+            other_articles, num_slots - len(topical_articles)
+        )
