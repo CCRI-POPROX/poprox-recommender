@@ -12,18 +12,16 @@ class UserEmbedder:
     def __call__(
         self, interest_profile: InterestProfile, clicked_articles: list[Article], clicked_article_embeddings: th.Tensor
     ):
-        clicked_article_embeddings = {}
+        embedding_lookup = {}
         for article, article_vector in zip(clicked_articles, clicked_article_embeddings, strict=True):
-            if article.article_id not in clicked_article_embeddings:
-                clicked_article_embeddings[article.article_id] = article_vector
+            if article.article_id not in embedding_lookup:
+                embedding_lookup[article.article_id] = article_vector
 
-        clicked_article_embeddings["PADDED_NEWS"] = th.zeros(
-            list(clicked_article_embeddings.values())[0].size(), device=self.device
-        )
+        embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
         user_embedding = build_user_embedding(
             interest_profile.click_history,
-            clicked_article_embeddings,
+            embedding_lookup,
             self.model,
             self.device,
             self.max_clicks,
