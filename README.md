@@ -31,7 +31,11 @@ If you use `micromamba` instead of a full Conda installation, it can directly us
 
 ```console
 micromamba create -n poprox-recs -f conda-lock.yml --category main --category dev
+python -m pip install --no-deps -e .
 ```
+
+> [!NOTE]
+> You need to re-run the `pip install` every time you re-create your Conda environment.
 
 Set up `pre-commit` to make sure that code formatting rules are applied as you make changes:
 
