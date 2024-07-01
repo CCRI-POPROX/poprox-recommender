@@ -48,7 +48,7 @@ def select_articles(
         recommendations[account_id] = [candidate_articles[int(rec)] for rec in recs]
     else:
         recommendations[account_id] = select_by_topic(
-            todays_articles,
+            candidate_articles,
             interest_profile,
             num_slots,
         )

@@ -17,7 +17,7 @@ def find_topic(past_articles: list[Article], article_id: UUID):
     # each article might correspond to multiple topic
     for article in past_articles:
         if article.article_id == article_id:
-            return extract_general_topic(article)
+            return extract_general_topics(article)
 
 
 def normalized_topic_count(topic_counts: dict[str, int]):
