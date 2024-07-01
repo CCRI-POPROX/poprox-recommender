@@ -18,7 +18,7 @@ def select_articles(
     algo_params: dict[str, Any] | None = None,
 ) -> dict[UUID, list[Article]]:
     click_history = interest_profile.click_history
-    clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
+    clicked_articles = list(filter(lambda a: a.article_id in set(click_history.article_ids), past_articles))
     interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
     account_id = click_history.account_id
 

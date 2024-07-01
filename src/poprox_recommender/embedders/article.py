@@ -16,9 +16,8 @@ class ArticleEmbedder:
                 article.title, padding="max_length", max_length=30, truncation=True
             )
 
-        articles = {
-            "id": list(tokenized_titles.keys()),
-            "title": th.tensor(list(tokenized_titles.values())),
-        }
+        title_tensor = th.tensor(list(tokenized_titles.values())).to(self.device)
+        if len(title_tensor.shape) == 1:
+            title_tensor = title_tensor.unsqueeze(dim=0)
 
-        return self.model.get_news_vector(articles["title"].to(self.device))
+        return self.model.get_news_vector(title_tensor)
