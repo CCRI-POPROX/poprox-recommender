@@ -2,7 +2,7 @@ import math
 
 import torch as th
 
-from poprox_recommender.topics import extract_general_topics, normalized_topic_count
+from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_topic_count
 
 
 class PFARDiversifier:
@@ -68,7 +68,7 @@ def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, ta
 
             for topic in candidate_topics:
                 if topic in topic_preferences:
-                    summation += topic_preferences[topic]
+                    summation += 1.0 / len(GENERAL_TOPICS)
 
             pfar_score_i = relevance_i + lamb * tau * summation * product
 
