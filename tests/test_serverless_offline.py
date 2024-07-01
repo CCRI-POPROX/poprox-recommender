@@ -3,6 +3,7 @@ Test the POPROX endpoint running under Serverless Offline.
 """
 
 import logging
+import os
 import sys
 from pathlib import Path
 from threading import Condition, Lock, Thread
@@ -19,6 +20,11 @@ def sl_listener():
     """
     Fixture that starts and stops serverless offline to test endpoint responses.
     """
+
+    local = os.environ.get("POPROX_LOCAL_LAMBDA", None)
+    if local:
+        yield
+        return
 
     thread = ServerlessBackground()
     thread.start()
