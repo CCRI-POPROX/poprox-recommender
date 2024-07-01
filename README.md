@@ -24,13 +24,18 @@ To set up the environment with Conda:
 conda install -n base -c conda-forge conda-lock
 conda lock install -n poprox-recsys --dev
 conda activate poprox-recsys
+python -m pip install --no-deps -e .
 ```
 
 If you use `micromamba` instead of a full Conda installation, it can directly use the lockfile:
 
 ```console
 micromamba create -n poprox-recs -f conda-lock.yml --category main --category dev
+python -m pip install --no-deps -e .
 ```
+
+> [!NOTE]
+> You need to re-run the `pip install` every time you re-create your Conda environment.
 
 Set up `pre-commit` to make sure that code formatting rules are applied as you make changes:
 
