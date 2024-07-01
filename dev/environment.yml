@@ -23,3 +23,6 @@ dependencies:
   - pre-commit >=3.7,<4
   - ruff >=0.4
   - pyright >=1.1,<2
+  # tooling for interactive Python for dev work
+  - ipython >=8
+  - notebook >=7.2
