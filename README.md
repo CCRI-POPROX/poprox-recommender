@@ -24,6 +24,7 @@ To set up the environment with Conda:
 conda install -n base -c conda-forge conda-lock
 conda lock install -n poprox-recsys --dev
 conda activate poprox-recsys
+python -m pip install --no-deps -e .
 ```
 
 If you use `micromamba` instead of a full Conda installation, it can directly use the lockfile:
