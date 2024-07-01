@@ -15,9 +15,9 @@
 version: 1
 metadata:
   content_hash:
-    win-64: 7a6103f34a10e4da117f362c3575185ff1fb6aa54f0e2c7483f22513b56b0352
-    linux-64: f0e29668161af229b7714bd7ddf74efbcce4cf948d1f46d10e3e4b2828ddce38
-    osx-arm64: 2d48a959fb2d1dc8e0cac842f6856c054ace7ef72c9f1973f097a03b33cd18ba
+    win-64: 4a99f8966177705ed15daa94c0248f22eb7129004e3c9a8f63300b399ece59d9
+    linux-64: af8c5dab8e70b599089a170ae35abdb70520dd0d33256227c7d1e99c4ae93e00
+    osx-arm64: ef25d38afab172c479d842a6749ed07936499a7845ab98feb8b67ae36bea5d9c
   channels:
   - url: pytorch
     used_env_vars: []
@@ -8133,6 +8133,60 @@ package:
     sha256: d4b9f9f46b3c494d678b4f003d7a2f7ac834dba641bd02332079dde5a9a85c98
   category: dev
   optional: true
+- name: jupytext
+  version: 1.16.2
+  manager: conda
+  platform: linux-64
+  dependencies:
+    markdown-it-py: '>=1.0'
+    mdit-py-plugins: ''
+    nbformat: ''
+    packaging: ''
+    python: '>=3.8'
+    pyyaml: ''
+    tomli: ''
+  url: https://conda.anaconda.org/conda-forge/noarch/jupytext-1.16.2-pyhd8ed1ab_1.conda
+  hash:
+    md5: 86aa2d7c9be0af3fcd0b98e89e060446
+    sha256: 83b97d188d872f7bc336ae34705224297f26cfecaf1ee4d919da58c72077a050
+  category: dev
+  optional: true
+- name: jupytext
+  version: 1.16.2
+  manager: conda
+  platform: osx-arm64
+  dependencies:
+    pyyaml: ''
+    packaging: ''
+    nbformat: ''
+    tomli: ''
+    mdit-py-plugins: ''
+    python: '>=3.8'
+    markdown-it-py: '>=1.0'
+  url: https://conda.anaconda.org/conda-forge/noarch/jupytext-1.16.2-pyhd8ed1ab_1.conda
+  hash:
+    md5: 86aa2d7c9be0af3fcd0b98e89e060446
+    sha256: 83b97d188d872f7bc336ae34705224297f26cfecaf1ee4d919da58c72077a050
+  category: dev
+  optional: true
+- name: jupytext
+  version: 1.16.2
+  manager: conda
+  platform: win-64
+  dependencies:
+    pyyaml: ''
+    packaging: ''
+    nbformat: ''
+    tomli: ''
+    mdit-py-plugins: ''
+    python: '>=3.8'
+    markdown-it-py: '>=1.0'
+  url: https://conda.anaconda.org/conda-forge/noarch/jupytext-1.16.2-pyhd8ed1ab_1.conda
+  hash:
+    md5: 86aa2d7c9be0af3fcd0b98e89e060446
+    sha256: 83b97d188d872f7bc336ae34705224297f26cfecaf1ee4d919da58c72077a050
+  category: dev
+  optional: true
 - name: keyring
   version: 25.2.1
   manager: conda
@@ -11017,6 +11071,45 @@ package:
   hash:
     md5: 779345c95648be40d22aaa89de7d4254
     sha256: 7ea68676ea35fbb095420bbcc1c82c4767b8be7bb56abb6989b7f89d957a3bab
+  category: dev
+  optional: true
+- name: mdit-py-plugins
+  version: 0.4.1
+  manager: conda
+  platform: linux-64
+  dependencies:
+    markdown-it-py: '>=1.0.0,<4.0.0'
+    python: '>=3.8'
+  url: https://conda.anaconda.org/conda-forge/noarch/mdit-py-plugins-0.4.1-pyhd8ed1ab_0.conda
+  hash:
+    md5: eb90dd178bcdd0260dfaa6e1cbccf042
+    sha256: 3525b8e4598ccaab913a2bcb8a63998c6e5cc1870d0c5a5b4e867aa69c720aa1
+  category: dev
+  optional: true
+- name: mdit-py-plugins
+  version: 0.4.1
+  manager: conda
+  platform: osx-arm64
+  dependencies:
+    python: '>=3.8'
+    markdown-it-py: '>=1.0.0,<4.0.0'
+  url: https://conda.anaconda.org/conda-forge/noarch/mdit-py-plugins-0.4.1-pyhd8ed1ab_0.conda
+  hash:
+    md5: eb90dd178bcdd0260dfaa6e1cbccf042
+    sha256: 3525b8e4598ccaab913a2bcb8a63998c6e5cc1870d0c5a5b4e867aa69c720aa1
+  category: dev
+  optional: true
+- name: mdit-py-plugins
+  version: 0.4.1
+  manager: conda
+  platform: win-64
+  dependencies:
+    python: '>=3.8'
+    markdown-it-py: '>=1.0.0,<4.0.0'
+  url: https://conda.anaconda.org/conda-forge/noarch/mdit-py-plugins-0.4.1-pyhd8ed1ab_0.conda
+  hash:
+    md5: eb90dd178bcdd0260dfaa6e1cbccf042
+    sha256: 3525b8e4598ccaab913a2bcb8a63998c6e5cc1870d0c5a5b4e867aa69c720aa1
   category: dev
   optional: true
 - name: mdurl
