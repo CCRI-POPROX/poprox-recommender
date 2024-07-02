@@ -42,15 +42,15 @@ def select_articles(
         clicked_articles = article_embedder(clicked_articles)
 
         interest_profile = user_embedder(interest_profile, clicked_articles)
-        article_scores = article_scorer(candidate_articles.embeddings, interest_profile.embedding)
+        candidate_articles = article_scorer(candidate_articles, interest_profile)
 
         if diversify == "mmr":
             diversifier = MMRDiversifier(algo_params)
-            recs = diversifier(article_scores, candidate_articles.embeddings, num_slots)
+            recs = diversifier(candidate_articles.scores, candidate_articles.embeddings, num_slots)
 
         elif diversify == "pfar":
             diversifier = PFARDiversifier(algo_params)
-            recs = diversifier(article_scores, interest_profile, candidate_articles.articles, num_slots)
+            recs = diversifier(candidate_articles.scores, interest_profile, candidate_articles.articles, num_slots)
 
         recommendations[account_id] = [candidate_articles.articles[int(rec)] for rec in recs]
     else:
