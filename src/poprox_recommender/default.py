@@ -5,7 +5,7 @@ from uuid import UUID
 from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
-from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
+from poprox_recommender.model import get_model
 from poprox_recommender.scorers import ArticleScorer
 from poprox_recommender.topics import user_topic_preference
 
@@ -31,12 +31,14 @@ def select_articles(
     algo_params = algo_params or {}
     diversify = str(algo_params.get("diversity_algo", "pfar"))
 
+    model = get_model()
     recommendations = {}
+
     # The following code should ONLY access the InterestProfile and ArticleSets defined above
-    if MODEL and TOKENIZER and click_history.article_ids:
-        article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
-        user_embedder = UserEmbedder(MODEL, DEVICE)
-        article_scorer = ArticleScorer(MODEL)
+    if model and click_history.article_ids:
+        article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
+        user_embedder = UserEmbedder(model.model, model.device)
+        article_scorer = ArticleScorer(model.model)
 
         candidate_articles = article_embedder(candidate_articles)
         clicked_articles = article_embedder(clicked_articles)
