@@ -45,8 +45,8 @@ def select_articles(
         candidate_articles = article_scorer(candidate_articles, interest_profile)
 
         if diversify == "mmr":
-            diversifier = MMRDiversifier(algo_params)
-            recs = diversifier(candidate_articles.scores, candidate_articles.embeddings, num_slots)
+            diversifier = MMRDiversifier(algo_params, num_slots)
+            recs = diversifier(candidate_articles)
 
         elif diversify == "pfar":
             diversifier = PFARDiversifier(algo_params)
