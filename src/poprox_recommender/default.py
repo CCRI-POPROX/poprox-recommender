@@ -5,7 +5,7 @@ from uuid import UUID
 from poprox_concepts import Article, InterestProfile
 from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
-from poprox_recommender.model import get_recommender
+from poprox_recommender.model import get_model
 from poprox_recommender.scorers import ArticleScorer
 from poprox_recommender.topics import user_topic_preference
 
@@ -25,7 +25,7 @@ def select_articles(
     algo_params = algo_params or {}
     diversify = str(algo_params.get("diversity_algo", "pfar"))
 
-    rec = get_recommender()
+    rec = get_model()
     recommendations = {}
     if rec and click_history.article_ids:
         article_embedder = ArticleEmbedder(rec.model, rec.tokenizer, rec.device)
