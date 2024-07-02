@@ -41,8 +41,8 @@ def select_articles(
         candidate_articles = article_embedder(candidate_articles)
         clicked_articles = article_embedder(clicked_articles)
 
-        user_embedding = user_embedder(interest_profile, clicked_articles.articles, clicked_articles.embeddings)
-        article_scores = article_scorer(candidate_articles.embeddings, user_embedding)
+        interest_profile = user_embedder(interest_profile, clicked_articles)
+        article_scores = article_scorer(candidate_articles.embeddings, interest_profile.embedding)
 
         if diversify == "mmr":
             diversifier = MMRDiversifier(algo_params)
