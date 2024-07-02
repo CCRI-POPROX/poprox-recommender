@@ -9,6 +9,7 @@ from transformers import AutoTokenizer
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
 
+TOKENIZER_NAME = "distilbert-base-uncased"
 _cached_model: Optional[RecommenderComponents] = None
 
 
@@ -26,7 +27,7 @@ class ModelConfig:
     num_attention_heads: float = 16
     hidden_size: int = 768
 
-    pretrained_model = "distilbert-base-uncased"
+    pretrained_model = TOKENIZER_NAME
 
 
 @dataclass
@@ -60,7 +61,7 @@ def load_model(checkpoint, device):
 def get_model(device=None) -> RecommenderComponents:
     global _cached_model
     if _cached_model is None:
-        tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased", cache_dir="/tmp/")
+        tokenizer = AutoTokenizer.from_pretrained(model_file_path(TOKENIZER_NAME), cache_dir="/tmp/")
         checkpoint, device = load_checkpoint(device)
         model = load_model(checkpoint, device)
         _cached_model = RecommenderComponents(tokenizer, model, device)
