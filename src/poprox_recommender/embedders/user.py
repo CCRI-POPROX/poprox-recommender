@@ -9,7 +9,7 @@ class UserEmbedder:
         self.device = device
         self.max_clicks = max_clicks_per_user
 
-    def __call__(self, interest_profile: InterestProfile, clicked_articles: ArticleSet) -> InterestProfile:
+    def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
         embedding_lookup = {}
         for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):
             if article.article_id not in embedding_lookup:

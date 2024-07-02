@@ -41,7 +41,7 @@ def select_articles(
         candidate_articles = article_embedder(candidate_articles)
         clicked_articles = article_embedder(clicked_articles)
 
-        interest_profile = user_embedder(interest_profile, clicked_articles)
+        interest_profile = user_embedder(clicked_articles, interest_profile)
         candidate_articles = article_scorer(candidate_articles, interest_profile)
 
         if diversify == "mmr":
