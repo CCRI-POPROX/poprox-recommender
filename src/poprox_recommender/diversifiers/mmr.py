@@ -3,15 +3,22 @@ from typing import Any
 import numpy as np
 from tqdm import tqdm
 
+from poprox_concepts import ArticleSet
+
 
 class MMRDiversifier:
-    def __init__(self, algo_params: dict[str, Any]):
+    def __init__(self, algo_params: dict[str, Any], num_slots=10):
         self.theta = float(algo_params.get("theta", 0.8))
+        self.num_slots = num_slots
 
-    def __call__(self, article_scores, candidate_article_tensor, topk):
-        similarity_matrix = compute_similarity_matrix(candidate_article_tensor)
+    def __call__(self, candidate_articles: ArticleSet) -> ArticleSet:
+        similarity_matrix = compute_similarity_matrix(candidate_articles.embeddings)
 
-        return mmr_diversification(article_scores, similarity_matrix, theta=self.theta, topk=topk)
+        article_indices = mmr_diversification(
+            candidate_articles.scores, similarity_matrix, theta=self.theta, topk=self.num_slots
+        )
+
+        return ArticleSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 
 
 def compute_similarity_matrix(todays_article_vectors):
