@@ -1,6 +1,6 @@
 import torch as th
 
-from poprox_concepts import Article, ClickHistory, InterestProfile
+from poprox_concepts import ArticleSet, ClickHistory, InterestProfile
 
 
 class UserEmbedder:
@@ -9,11 +9,9 @@ class UserEmbedder:
         self.device = device
         self.max_clicks = max_clicks_per_user
 
-    def __call__(
-        self, interest_profile: InterestProfile, clicked_articles: list[Article], clicked_article_embeddings: th.Tensor
-    ):
+    def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
         embedding_lookup = {}
-        for article, article_vector in zip(clicked_articles, clicked_article_embeddings, strict=True):
+        for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):
             if article.article_id not in embedding_lookup:
                 embedding_lookup[article.article_id] = article_vector
 
@@ -27,7 +25,7 @@ class UserEmbedder:
             self.max_clicks,
         )
 
-        return user_embedding
+        return interest_profile.model_copy(update={"embedding": user_embedding})
 
 
 # Compute a vector for each user
