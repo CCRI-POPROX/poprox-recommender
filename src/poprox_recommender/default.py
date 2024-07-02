@@ -49,10 +49,10 @@ def select_articles(
             recs = diversifier(candidate_articles)
 
         elif diversify == "pfar":
-            diversifier = PFARDiversifier(algo_params)
-            recs = diversifier(candidate_articles.scores, interest_profile, candidate_articles.articles, num_slots)
+            diversifier = PFARDiversifier(algo_params, num_slots)
+            recs = diversifier(candidate_articles, interest_profile)
 
-        recommendations[account_id] = [candidate_articles.articles[int(rec)] for rec in recs]
+        recommendations[account_id] = recs.articles
     else:
         recommendations[account_id] = select_by_topic(
             candidate_articles.articles,

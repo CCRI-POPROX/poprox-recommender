@@ -2,16 +2,18 @@ import math
 
 import torch as th
 
+from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.topics import extract_general_topics, normalized_topic_count
 
 
 class PFARDiversifier:
-    def __init__(self, algo_params):
+    def __init__(self, algo_params, num_slots):
         self.lamb = float(algo_params.get("pfar_lamb", 1))
         self.tau = algo_params.get("pfar_tau", None)
+        self.num_slots = num_slots
 
-    def __call__(self, article_scores, interest_profile, candidate_articles, topk):
-        article_scores = th.sigmoid(th.tensor(article_scores)).cpu().detach().numpy()
+    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+        article_scores = th.sigmoid(th.tensor(candidate_articles.scores)).cpu().detach().numpy()
 
         topic_preferences: dict[str, int] = {}
 
@@ -23,14 +25,19 @@ class PFARDiversifier:
 
         normalized_topic_prefs = normalized_topic_count(topic_preferences)
 
-        recs = pfar_diversification(
-            article_scores, candidate_articles, normalized_topic_prefs, self.lamb, self.tau, topk=topk
+        article_indices = pfar_diversification(
+            article_scores,
+            candidate_articles.articles,
+            normalized_topic_prefs,
+            self.lamb,
+            self.tau,
+            topk=self.num_slots,
         )
 
-        return recs
+        return ArticleSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 
 
-def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, tau, topk):
+def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, tau, topk) -> list[Article]:
     # p(v|u) + lamb*tau \sum_{d \in D} P(d|u)I{v \in d} \prod_{i \in S} I{i \in d} for each user
 
     if tau is None:
