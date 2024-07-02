@@ -18,7 +18,7 @@ def select_articles(
     algo_params: dict[str, Any] | None = None,
 ) -> dict[UUID, list[Article]]:
     click_history = interest_profile.click_history
-    clicked_articles = filter(lambda a: a.article_id in set(click_history.article_ids), past_articles)
+    clicked_articles = list(filter(lambda a: a.article_id in set(click_history.article_ids), past_articles))
     interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
     account_id = click_history.account_id
 
@@ -31,15 +31,15 @@ def select_articles(
         user_embedder = UserEmbedder(MODEL, DEVICE)
         article_scorer = ArticleScorer(MODEL)
 
-        candidate_article_lookup, candidate_article_tensor = article_embedder(candidate_articles)
-        clicked_article_lookup, clicked_article_tensor = article_embedder(clicked_articles)
+        candidate_article_embeddings = article_embedder(candidate_articles)
+        clicked_article_embeddings = article_embedder(clicked_articles)
 
-        user_embedding = user_embedder(interest_profile, clicked_article_lookup)
-        article_scores = article_scorer(candidate_article_tensor, user_embedding)
+        user_embedding = user_embedder(interest_profile, clicked_articles, clicked_article_embeddings)
+        article_scores = article_scorer(candidate_article_embeddings, user_embedding)
 
         if diversify == "mmr":
             diversifier = MMRDiversifier(algo_params)
-            recs = diversifier(article_scores, candidate_article_tensor, num_slots)
+            recs = diversifier(article_scores, candidate_article_embeddings, num_slots)
 
         elif diversify == "pfar":
             diversifier = PFARDiversifier(algo_params)
