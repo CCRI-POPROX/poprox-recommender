@@ -2,7 +2,7 @@ import random
 from typing import Any
 from uuid import UUID
 
-from poprox_concepts import Article, InterestProfile
+from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.model import DEVICE, MODEL, TOKENIZER
@@ -17,24 +17,31 @@ def select_articles(
     num_slots: int,
     algo_params: dict[str, Any] | None = None,
 ) -> dict[UUID, list[Article]]:
+    candidate_articles = ArticleSet(articles=candidate_articles)
+    past_articles = ArticleSet(articles=past_articles)
+
     click_history = interest_profile.click_history
-    clicked_articles = list(filter(lambda a: a.article_id in set(click_history.article_ids), past_articles))
-    interest_profile.click_topic_counts = user_topic_preference(past_articles, interest_profile.click_history)
+    clicked_articles = list(filter(lambda a: a.article_id in set(click_history.article_ids), past_articles.articles))
+    clicked_articles = ArticleSet(articles=clicked_articles)
+
+    # This could be a component but should likely be moved upstream to the platform
+    interest_profile.click_topic_counts = user_topic_preference(past_articles.articles, interest_profile.click_history)
     account_id = click_history.account_id
 
     algo_params = algo_params or {}
     diversify = str(algo_params.get("diversity_algo", "pfar"))
 
     recommendations = {}
+    # The following code should ONLY access the InterestProfile and ArticleSets defined above
     if MODEL and TOKENIZER and click_history.article_ids:
         article_embedder = ArticleEmbedder(MODEL, TOKENIZER, DEVICE)
         user_embedder = UserEmbedder(MODEL, DEVICE)
         article_scorer = ArticleScorer(MODEL)
 
-        candidate_article_embeddings = article_embedder(candidate_articles)
-        clicked_article_embeddings = article_embedder(clicked_articles)
+        candidate_article_embeddings = article_embedder(candidate_articles.articles)
+        clicked_article_embeddings = article_embedder(clicked_articles.articles)
 
-        user_embedding = user_embedder(interest_profile, clicked_articles, clicked_article_embeddings)
+        user_embedding = user_embedder(interest_profile, clicked_articles.articles, clicked_article_embeddings)
         article_scores = article_scorer(candidate_article_embeddings, user_embedding)
 
         if diversify == "mmr":
@@ -43,12 +50,12 @@ def select_articles(
 
         elif diversify == "pfar":
             diversifier = PFARDiversifier(algo_params)
-            recs = diversifier(article_scores, interest_profile, candidate_articles, num_slots)
+            recs = diversifier(article_scores, interest_profile, candidate_articles.articles, num_slots)
 
-        recommendations[account_id] = [candidate_articles[int(rec)] for rec in recs]
+        recommendations[account_id] = [candidate_articles.articles[int(rec)] for rec in recs]
     else:
         recommendations[account_id] = select_by_topic(
-            candidate_articles,
+            candidate_articles.articles,
             interest_profile,
             num_slots,
         )
