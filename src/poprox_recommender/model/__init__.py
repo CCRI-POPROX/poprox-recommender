@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Optional
 
 from safetensors.torch import load_file
 from transformers import AutoTokenizer
 
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
+
+_cached_recommender: Optional[RecommenderComponents] = None
 
 
 @dataclass
@@ -22,6 +27,13 @@ class ModelConfig:
     hidden_size: int = 768
 
     pretrained_model = "distilbert-base-uncased"
+
+
+@dataclass
+class RecommenderComponents:
+    tokenizer: AutoTokenizer
+    model: NRMS
+    device: str | None
 
 
 def load_checkpoint(device_name=None):
@@ -45,6 +57,12 @@ def load_model(checkpoint, device):
     return model
 
 
-TOKENIZER = AutoTokenizer.from_pretrained("distilbert-base-uncased", cache_dir="/tmp/")
-CHECKPOINT, DEVICE = load_checkpoint()
-MODEL = load_model(CHECKPOINT, DEVICE)
+def get_recommender(device=None) -> RecommenderComponents:
+    global _cached_recommender
+    if _cached_recommender is None:
+        tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased", cache_dir="/tmp/")
+        checkpoint, device = load_checkpoint(device)
+        model = load_model(checkpoint, device)
+        _cached_recommender = RecommenderComponents(tokenizer, model, device)
+
+    return _cached_recommender
