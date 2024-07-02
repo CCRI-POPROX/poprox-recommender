@@ -38,15 +38,15 @@ def select_articles(
         user_embedder = UserEmbedder(MODEL, DEVICE)
         article_scorer = ArticleScorer(MODEL)
 
-        candidate_article_embeddings = article_embedder(candidate_articles.articles)
-        clicked_article_embeddings = article_embedder(clicked_articles.articles)
+        candidate_articles = article_embedder(candidate_articles)
+        clicked_articles = article_embedder(clicked_articles)
 
-        user_embedding = user_embedder(interest_profile, clicked_articles.articles, clicked_article_embeddings)
-        article_scores = article_scorer(candidate_article_embeddings, user_embedding)
+        user_embedding = user_embedder(interest_profile, clicked_articles.articles, clicked_articles.embeddings)
+        article_scores = article_scorer(candidate_articles.embeddings, user_embedding)
 
         if diversify == "mmr":
             diversifier = MMRDiversifier(algo_params)
-            recs = diversifier(article_scores, candidate_article_embeddings, num_slots)
+            recs = diversifier(article_scores, candidate_articles.embeddings, num_slots)
 
         elif diversify == "pfar":
             diversifier = PFARDiversifier(algo_params)

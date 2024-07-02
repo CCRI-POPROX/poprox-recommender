@@ -1,6 +1,6 @@
 import torch as th
 
-from poprox_concepts import Article
+from poprox_concepts import ArticleSet
 
 
 class ArticleEmbedder:
@@ -9,9 +9,9 @@ class ArticleEmbedder:
         self.tokenizer = tokenizer
         self.device = device
 
-    def __call__(self, articles: list[Article]) -> th.Tensor:
+    def __call__(self, article_set: ArticleSet) -> ArticleSet:
         tokenized_titles = {}
-        for article in articles:
+        for article in article_set.articles:
             tokenized_titles[article.article_id] = self.tokenizer.encode(
                 article.title, padding="max_length", max_length=30, truncation=True
             )
@@ -20,4 +20,6 @@ class ArticleEmbedder:
         if len(title_tensor.shape) == 1:
             title_tensor = title_tensor.unsqueeze(dim=0)
 
-        return self.model.get_news_vector(title_tensor)
+        article_embeddings = self.model.get_news_vector(title_tensor)
+
+        return article_set.model_copy(update={"embeddings": article_embeddings})
