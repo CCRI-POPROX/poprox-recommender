@@ -55,7 +55,7 @@ def select_articles(
         pipeline.add(diversifier, inputs=["candidate", "profile"], output="recs")
     else:
         topic_filter = TopicFilter()
-        sampler = UniformSampler(num_slots=10)
+        sampler = UniformSampler(num_slots=num_slots)
 
         pipeline = RecommendationPipeline(name="random_topical")
         pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
