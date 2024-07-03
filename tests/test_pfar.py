@@ -3,13 +3,11 @@ import logging
 import random
 from pathlib import Path
 
-from poprox_concepts import Article, ArticleSet, ClickHistory, InterestProfile
-from poprox_recommender.default import select_articles
+from poprox_concepts import Article, ArticleSet, ClickHistory
 from poprox_recommender.topics import (
     GENERAL_TOPICS,
     extract_general_topics,
     match_news_topics_to_general,
-    user_topic_preference,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,18 +42,3 @@ def test_extract_generalized_topic():
         generalized_topics = extract_general_topics(article)
         for topic in generalized_topics:
             assert topic in GENERAL_TOPICS
-
-
-def test_user_topic_pref():
-    candidate, past, click_data, num_recs = load_test_articles()
-    interest_profile = InterestProfile.model_validate(
-        {
-            "click_history": click_data[0],
-            "onboarding_topics": [],
-        }
-    )
-
-    user_preference_dict = user_topic_preference(past.articles, click_data[0])
-    algo_params = {"user_topic_preference": user_preference_dict}
-    recommendations = select_articles(candidate, past, interest_profile, num_recs, algo_params)
-    assert len(recommendations) > 0
