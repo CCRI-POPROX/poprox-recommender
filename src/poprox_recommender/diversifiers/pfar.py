@@ -20,8 +20,9 @@ class PFARDiversifier:
         for interest in interest_profile.onboarding_topics:
             topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
 
-        for topic, click_count in interest_profile.click_topic_counts.items():
-            topic_preferences[topic] = click_count
+        if interest_profile.click_topic_counts:
+            for topic, click_count in interest_profile.click_topic_counts.items():
+                topic_preferences[topic] = click_count
 
         normalized_topic_prefs = normalized_topic_count(topic_preferences)
 

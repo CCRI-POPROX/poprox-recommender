@@ -5,7 +5,7 @@ Test the POPROX API through direct call.
 import logging
 from pathlib import Path
 
-from poprox_concepts import ClickHistory
+from poprox_concepts import ArticleSet, ClickHistory
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.default import select_articles
 
@@ -19,13 +19,13 @@ def test_direct_basic_request():
 
     logger.info("generating recommendations")
     recs = select_articles(
-        req.todays_articles,
-        req.past_articles,
+        ArticleSet(articles=req.todays_articles),
+        ArticleSet(articles=req.past_articles),
         req.interest_profile,
         req.num_recs,
     )
     # do we get recommendations?
-    assert len(recs) > 0
+    assert len(recs.articles) > 0
 
 
 def test_direct_basic_request_without_clicks():
@@ -38,10 +38,10 @@ def test_direct_basic_request_without_clicks():
     profile = req.interest_profile
     profile.click_history = ClickHistory(article_ids=[])
     recs = select_articles(
-        req.todays_articles,
-        req.past_articles,
+        ArticleSet(articles=req.todays_articles),
+        ArticleSet(articles=req.past_articles),
         req.interest_profile,
         req.num_recs,
     )
     # do we get recommendations?
-    assert len(recs) > 0
+    assert len(recs.articles) > 0
