@@ -4,8 +4,13 @@ import random
 from pathlib import Path
 
 from poprox_concepts import Article, ClickHistory, InterestProfile
-from poprox_recommender.default import select_articles, user_topic_preference
-from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, match_news_topics_to_general
+from poprox_recommender.default import select_articles
+from poprox_recommender.topics import (
+    GENERAL_TOPICS,
+    extract_general_topics,
+    match_news_topics_to_general,
+    user_topic_preference,
+)
 
 logger = logging.getLogger(__name__)
 
