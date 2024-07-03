@@ -1,12 +1,13 @@
-import random
 from typing import Any
 from uuid import UUID
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
+from poprox_recommender.filters import TopicFilter
 from poprox_recommender.model import get_model
 from poprox_recommender.pipeline import RecommendationPipeline
+from poprox_recommender.samplers import UniformSampler
 from poprox_recommender.scorers import ArticleScorer
 from poprox_recommender.topics import user_topic_preference
 
@@ -63,36 +64,19 @@ def select_articles(
 
         recommendations[account_id] = recs.articles
     else:
-        recommendations[account_id] = select_by_topic(
-            candidate_articles.articles,
-            interest_profile,
-            num_slots,
+        topic_filter = TopicFilter()
+        sampler = UniformSampler(num_slots=10)
+
+        pipeline = RecommendationPipeline(name="random_topical")
+        pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
+        pipeline.add(sampler, inputs=["topical", "candidate"], output="recs")
+
+        recommendations[account_id] = pipeline(
+            {
+                "candidate": candidate_articles,
+                "clicked": clicked_articles,
+                "profile": interest_profile,
+            }
         )
 
     return recommendations
-
-
-def select_by_topic(todays_articles: list[Article], interest_profile: InterestProfile, num_slots: int):
-    # Preference values from onboarding are 1-indexed, where 1 means "absolutely no interest."
-    # We might want to normalize them to 0-indexed somewhere upstream, but in the mean time
-    # this is one of the simpler ways to filter out topics people aren't interested in from
-    # their early newsletters
-    profile_topics = {
-        interest.entity_name for interest in interest_profile.onboarding_topics if interest.preference > 1
-    }
-
-    other_articles = []
-    topical_articles = []
-    for article in todays_articles:
-        article_topics = {mention.entity.name for mention in article.mentions}
-        if len(profile_topics.intersection(article_topics)) > 0:
-            topical_articles.append(article)
-        else:
-            other_articles.append(article)
-
-    if len(topical_articles) >= num_slots:
-        return random.sample(topical_articles, num_slots)
-    else:
-        return random.sample(topical_articles, len(topical_articles)) + random.sample(
-            other_articles, num_slots - len(topical_articles)
-        )
