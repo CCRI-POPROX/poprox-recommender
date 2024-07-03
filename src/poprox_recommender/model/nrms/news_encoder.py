@@ -5,6 +5,7 @@ from transformers import AutoConfig, AutoModel
 from poprox_recommender.model.general.attention.newsadditive import (
     NewsAdditiveAttention,
 )
+from poprox_recommender.paths import model_file_path
 
 
 class NewsEncoder(torch.nn.Module):
@@ -13,9 +14,11 @@ class NewsEncoder(torch.nn.Module):
 
         self.config = config
 
-        self.plm = AutoModel.from_pretrained(self.config.pretrained_model, cache_dir="/tmp/")
+        self.plm = AutoModel.from_pretrained(model_file_path(self.config.pretrained_model), cache_dir="/tmp/")
 
-        plm_hidden_size = AutoConfig.from_pretrained(self.config.pretrained_model, cache_dir="/tmp/").hidden_size
+        plm_hidden_size = AutoConfig.from_pretrained(
+            model_file_path(self.config.pretrained_model), cache_dir="/tmp/"
+        ).hidden_size
 
         self.multihead_attention = nn.MultiheadAttention(
             embed_dim=plm_hidden_size,
