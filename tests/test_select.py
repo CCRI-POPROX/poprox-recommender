@@ -1,8 +1,10 @@
 from uuid import uuid4
 
-from poprox_concepts import Article, ClickHistory, Entity, Mention
+from poprox_concepts import Article, ArticleSet, ClickHistory, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
-from poprox_recommender.default import select_by_topic
+from poprox_recommender.filters import TopicFilter
+from poprox_recommender.pipeline import RecommendationPipeline
+from poprox_recommender.samplers import UniformSampler
 
 
 def test_select_by_topic_filters_articles():
@@ -37,17 +39,31 @@ def test_select_by_topic_filters_articles():
         ),
     ]
 
-    # If we can, only select articles matching interests
-    recs = select_by_topic(articles, profile, num_slots=2)
+    topic_filter = TopicFilter()
+    sampler = UniformSampler(num_slots=2)
 
-    for article in recs:
+    pipeline = RecommendationPipeline(name="random_topical")
+    pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
+    pipeline.add(sampler, inputs=["topical", "candidate"], output="recs")
+
+    # If we can, only select articles matching interests
+    inputs = {
+        "candidate": ArticleSet(articles=articles),
+        "clicked": ArticleSet(articles=[]),
+        "profile": profile,
+    }
+    recs = pipeline(inputs)
+
+    for article in recs.articles:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
-    recs = select_by_topic(articles, profile, num_slots=3)
-    assert len(recs) == 3
+    sampler.num_slots = 3
+    recs = pipeline(inputs)
 
-    for article in recs[:2]:
+    assert len(recs.articles) == 3
+
+    for article in recs.articles[:2]:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
