@@ -26,7 +26,7 @@ def select_articles(
 
     # This could be a component but should likely be moved upstream to the platform
     interest_profile.click_topic_counts = user_topic_preference(past_articles.articles, interest_profile.click_history)
-    account_id = click_history.account_id
+    profile_id = interest_profile.profile_id
 
     algo_params = algo_params or {}
     diversify = str(algo_params.get("diversity_algo", "pfar"))
@@ -54,9 +54,9 @@ def select_articles(
             diversifier = PFARDiversifier(algo_params, num_slots)
             recs = diversifier(candidate_articles, interest_profile)
 
-        recommendations[account_id] = recs.articles
+        recommendations[profile_id] = recs.articles
     else:
-        recommendations[account_id] = select_by_topic(
+        recommendations[profile_id] = select_by_topic(
             candidate_articles.articles,
             interest_profile,
             num_slots,
