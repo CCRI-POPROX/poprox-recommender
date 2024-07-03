@@ -55,7 +55,9 @@ def generate_recs(event, context):
     )
 
     logger.info("Constructing response...")
-    resp_body = RecommendationResponse.model_validate({"recommendations": recommendations})
+    resp_body = RecommendationResponse.model_validate(
+        {"recommendations": {profile.profile_id: recommendations.articles}}
+    )
 
     logger.info("Serializing response...")
     response = {"statusCode": 200, "body": resp_body.model_dump_json()}

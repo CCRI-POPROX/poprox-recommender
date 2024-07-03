@@ -1,7 +1,6 @@
 from typing import Any
-from uuid import UUID
 
-from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.filters import TopicFilter
@@ -17,13 +16,12 @@ def select_articles(
     interest_profile: InterestProfile,
     num_slots: int,
     algo_params: dict[str, Any] | None = None,
-) -> dict[UUID, list[Article]]:
+) -> ArticleSet:
     algo_params = algo_params or {}
     diversify = str(algo_params.get("diversity_algo", "pfar"))
 
     model = get_model()
 
-    recommendations = {}
     if model and interest_profile.click_history.article_ids:
         article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
         user_embedder = UserEmbedder(model.model, model.device)
@@ -48,12 +46,10 @@ def select_articles(
         pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
         pipeline.add(sampler, inputs=["topical", "candidate"], output="recs")
 
-    recommendations[interest_profile.profile_id] = pipeline(
+    return pipeline(
         {
             "candidate": candidate_articles,
             "clicked": clicked_articles,
             "profile": interest_profile,
         }
     )
-
-    return recommendations
