@@ -1,11 +1,13 @@
 import base64
 import logging
 
+from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import (
     RecommendationRequest,
     RecommendationResponse,
 )
 from poprox_recommender.default import select_articles
+from poprox_recommender.topics import user_topic_preference
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -29,10 +31,25 @@ def generate_recs(event, context):
         logger.info("Using default parameters")
 
     logger.info("Selecting articles...")
+
+    # The platform should send an ArticleSet but we'll do it here for now
+    candidate_articles = ArticleSet(articles=req.todays_articles)
+    past_articles = ArticleSet(articles=req.past_articles)
+
+    # Similarly, the platform should provided pre-filtered clicked articles
+    # and compute the topic counts but this shim lets us ignore that issue
+    # in the actual article selection
+    profile = req.interest_profile
+    click_history = profile.click_history
+    clicked_articles = list(filter(lambda a: a.article_id in set(click_history.article_ids), past_articles.articles))
+    clicked_articles = ArticleSet(articles=clicked_articles)
+
+    profile.click_topic_counts = user_topic_preference(past_articles.articles, profile.click_history)
+
     recommendations = select_articles(
-        req.todays_articles,
-        req.past_articles,
-        req.interest_profile,
+        candidate_articles,
+        clicked_articles,
+        profile,
         req.num_recs,
         algo_params,
     )
