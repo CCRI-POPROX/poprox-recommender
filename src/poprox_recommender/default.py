@@ -47,14 +47,19 @@ def select_articles(
             diversifier = PFARDiversifier(algo_params, num_slots)
 
         pipeline = RecommendationPipeline(name=diversify)
-        pipeline.add(article_embedder)
-        pipeline.add(article_scorer)
-        pipeline.add(diversifier)
+        pipeline.add(article_embedder, inputs=["candidate"], output="candidate")
+        pipeline.add(article_embedder, inputs=["clicked"], output="clicked")
+        pipeline.add(user_embedder, inputs=["clicked", "profile"], output="profile")
+        pipeline.add(article_scorer, inputs=["candidate", "profile"], output="candidate")
+        pipeline.add(diversifier, inputs=["candidate", "profile"], output="recs")
 
-        clicked_articles = article_embedder(clicked_articles)
-        interest_profile = user_embedder(clicked_articles, interest_profile)
-
-        recs = pipeline(candidate_articles, interest_profile)
+        recs = pipeline(
+            {
+                "candidate": candidate_articles,
+                "clicked": clicked_articles,
+                "profile": interest_profile,
+            }
+        )
 
         recommendations[account_id] = recs.articles
     else:

@@ -1,7 +1,15 @@
-from inspect import signature
+from copy import deepcopy
+from dataclasses import dataclass
 from typing import Callable
 
 from poprox_concepts import ArticleSet, InterestProfile
+
+
+@dataclass
+class ComponentSpec:
+    component: Callable
+    inputs: list[str]
+    output: str
 
 
 class RecommendationPipeline:
@@ -9,37 +17,31 @@ class RecommendationPipeline:
         self.name = name
         self.components = []
 
-    def add(self, component: Callable):
-        self.components.append(component)
+    def add(self, component: Callable, inputs: list[str], output: str):
+        self.components.append(ComponentSpec(component, inputs, output))
 
-    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+    def __call__(self, inputs: dict[str, ArticleSet | InterestProfile]) -> ArticleSet:
         # Avoid modifying the inputs
-        articles = candidate_articles.model_copy()
-        interests = interest_profile.model_copy()
+        state = deepcopy(inputs)
 
         # Run each component in the order it was added
-        for component in self.components:
-            output = self.run_component(component, articles, interests)
+        for component_spec in self.components:
+            state = self.run_component(component_spec, state)
 
-            if isinstance(output, ArticleSet):
-                articles = output
-            elif isinstance(output, InterestProfile):
-                interests = output
-            else:
-                msg = f"Pipeline components must return ArticleSet or InterestProfile, but received {type(output)}"
-                raise TypeError(msg)
+        recs = state[self.components[-1].output]
 
         # Double check that we're returning the right type for recs
-        if not isinstance(articles, ArticleSet):
-            msg = f"The final pipeline component must return ArticleSet, but received {type(articles)}"
+        if not isinstance(recs, ArticleSet):
+            msg = f"The final pipeline component must return ArticleSet, but received {type(recs)}"
+            raise TypeError(msg)
 
-        return articles
+        return recs
 
-    def run_component(self, component, articles: ArticleSet, interests: InterestProfile):
-        sig = signature(component)
+    def run_component(self, component_spec: ComponentSpec, state: dict[str, ArticleSet | InterestProfile]):
+        arguments = []
+        for input_name in component_spec.inputs:
+            arguments.append(state[input_name])
 
-        if len(sig.parameters) == 1:
-            output = component(articles)
-        elif len(sig.parameters) == 2:
-            output = component(articles, interests)
-        return output
+        state[component_spec.output] = component_spec.component(*arguments)
+
+        return state
