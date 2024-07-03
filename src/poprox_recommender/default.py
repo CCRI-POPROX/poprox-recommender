@@ -53,16 +53,6 @@ def select_articles(
         pipeline.add(user_embedder, inputs=["clicked", "profile"], output="profile")
         pipeline.add(article_scorer, inputs=["candidate", "profile"], output="candidate")
         pipeline.add(diversifier, inputs=["candidate", "profile"], output="recs")
-
-        recs = pipeline(
-            {
-                "candidate": candidate_articles,
-                "clicked": clicked_articles,
-                "profile": interest_profile,
-            }
-        )
-
-        recommendations[account_id] = recs.articles
     else:
         topic_filter = TopicFilter()
         sampler = UniformSampler(num_slots=10)
@@ -71,12 +61,12 @@ def select_articles(
         pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
         pipeline.add(sampler, inputs=["topical", "candidate"], output="recs")
 
-        recommendations[account_id] = pipeline(
-            {
-                "candidate": candidate_articles,
-                "clicked": clicked_articles,
-                "profile": interest_profile,
-            }
-        )
+    recommendations[account_id] = pipeline(
+        {
+            "candidate": candidate_articles,
+            "clicked": clicked_articles,
+            "profile": interest_profile,
+        }
+    )
 
     return recommendations
