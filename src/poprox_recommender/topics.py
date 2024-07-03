@@ -6,6 +6,9 @@ from transformers import AutoModel, AutoTokenizer
 
 from poprox_concepts import Article, ClickHistory
 from poprox_concepts.domain.topics import GENERAL_TOPICS
+from poprox_recommender.paths import model_file_path
+
+NEWS_MODEL_NAME = "news-category-classifier-distilbert"
 
 
 def extract_general_topics(article: Article):
@@ -61,9 +64,9 @@ def classify_news_topic(model, tokenizer, general_topics, topic):
 def match_news_topics_to_general(articles: list[Article]):
     # Load the pre-trained tokenizer and model
     tokenizer = AutoTokenizer.from_pretrained(
-        "dima806/news-category-classifier-distilbert"
+        model_file_path(NEWS_MODEL_NAME)
     )  # a highly downloaded fine-tuned model on news
-    model = AutoModel.from_pretrained("dima806/news-category-classifier-distilbert")
+    model = AutoModel.from_pretrained(model_file_path(NEWS_MODEL_NAME))
 
     topic_matched_dict = {}  # we might be able to connect this to DB to read previous matching?
     article_to_new_topic = {}
