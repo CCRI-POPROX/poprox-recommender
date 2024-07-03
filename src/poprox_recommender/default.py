@@ -6,6 +6,7 @@ from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.model import get_model
+from poprox_recommender.pipeline import RecommendationPipeline
 from poprox_recommender.scorers import ArticleScorer
 from poprox_recommender.topics import user_topic_preference
 
@@ -40,19 +41,20 @@ def select_articles(
         user_embedder = UserEmbedder(model.model, model.device)
         article_scorer = ArticleScorer(model.model)
 
-        candidate_articles = article_embedder(candidate_articles)
-        clicked_articles = article_embedder(clicked_articles)
-
-        interest_profile = user_embedder(clicked_articles, interest_profile)
-        candidate_articles = article_scorer(candidate_articles, interest_profile)
-
         if diversify == "mmr":
             diversifier = MMRDiversifier(algo_params, num_slots)
-            recs = diversifier(candidate_articles)
-
         elif diversify == "pfar":
             diversifier = PFARDiversifier(algo_params, num_slots)
-            recs = diversifier(candidate_articles, interest_profile)
+
+        pipeline = RecommendationPipeline(name=diversify)
+        pipeline.add(article_embedder)
+        pipeline.add(article_scorer)
+        pipeline.add(diversifier)
+
+        clicked_articles = article_embedder(clicked_articles)
+        interest_profile = user_embedder(clicked_articles, interest_profile)
+
+        recs = pipeline(candidate_articles, interest_profile)
 
         recommendations[account_id] = recs.articles
     else:
