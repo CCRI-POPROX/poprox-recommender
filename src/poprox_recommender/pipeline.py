@@ -42,6 +42,15 @@ class RecommendationPipeline:
         for input_name in component_spec.inputs:
             arguments.append(state[input_name])
 
-        state[component_spec.output] = component_spec.component(*arguments)
+        output = component_spec.component(*arguments)
+
+        if not isinstance(output, (ArticleSet, InterestProfile)):
+            msg = (
+                f"Pipeline components must return ArticleSet or InterestProfile, "
+                f"but received {type(output)} from {type(component_spec.component)}"
+            )
+            raise TypeError(msg)
+
+        state[component_spec.output] = output
 
         return state
