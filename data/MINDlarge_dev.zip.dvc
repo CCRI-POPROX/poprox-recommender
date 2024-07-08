@@ -1,0 +1,5 @@
+outs:
+- md5: c93fa1728e3537649b441c78cce5e6f1
+  size: 103456245
+  hash: md5
+  path: MINDlarge_dev.zip
