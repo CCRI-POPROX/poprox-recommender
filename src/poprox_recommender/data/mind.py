@@ -83,7 +83,7 @@ def load_mind_data(archive="MINDlarge_dev") -> MindData:
     # ID_newsuuid
 
     logger.info("converting MIND impressions to POPROX requests")
-    for i in tqdm(range(behaviors_df.shape[0])):
+    for i in tqdm(range(behaviors_df.shape[0]), desc="converting articles"):
         test_json = {}
         test_json["past_articles"] = []
         test_json["num_recs"] = 10
