@@ -36,3 +36,12 @@ repos:
         language: node
         additional_dependencies:
           - "@taplo/cli"
+      # shfmt support, adapted from https://github.com/mvdan/sh/issues/818
+      - id: format-shell-files
+        name: format shell scripts
+        language: golang
+        require_serial: true
+        additional_dependencies: [mvdan.cc/sh/v3/cmd/shfmt@v3.8.0]
+        entry: shfmt
+        args: ["-l", "-w", "-i", "4"]
+        types: [shell]
