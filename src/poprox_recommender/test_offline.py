@@ -1,7 +1,10 @@
-import json
+import logging
 import sys
 
 from lenskit.metrics import topn
+from tqdm import tqdm
+
+from poprox_recommender.data.mind import load_mind_data
 
 sys.path.append("src")
 from uuid import UUID
@@ -11,9 +14,11 @@ import pandas as pd
 import torch as th
 from safetensors.torch import load_file
 
-from poprox_concepts import Article, ClickHistory
+from poprox_concepts import Article, ArticleSet, ClickHistory, InterestProfile
 from poprox_recommender.default import select_articles
 from poprox_recommender.paths import model_file_path, project_root
+
+logger = logging.getLogger("poprox_recommender.test_offline")
 
 
 def load_model(device_name=None):
@@ -31,9 +36,10 @@ def custom_encoder(obj):
         return str(obj)
 
 
-def recsys_metric(recommendations, row_index, news_struuid_ID):
+def recsys_metric(recommendations: ArticleSet, row_index, news_struuid_ID: dict[str, str]):
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
+    ## FIXME: we are reloading this for *every* user, that's really slow
     impressions_truth = (
         pd.read_table(
             project_root() / "data" / "test_mind_large" / "behaviors.tsv",
@@ -45,9 +51,7 @@ def recsys_metric(recommendations, row_index, news_struuid_ID):
         .impressions.split()
     )  # LIST[ID-label]
 
-    account_id = list(recommendations.keys())[0]
-    recommended_list = recommendations[account_id]
-    recommended_list = [news_struuid_ID[item.url] for item in recommended_list]
+    recommended_list = [news_struuid_ID[item.url] for item in recommendations.articles]
 
     recs = pd.DataFrame({"item": recommended_list})
 
@@ -66,41 +70,43 @@ if __name__ == "__main__":
     """
     For offline evaluation, set theta in mmr_diversity = 1
     """
+    logging.basicConfig(level=logging.INFO, stream=sys.stderr)
     MODEL, DEVICE = load_model()
     TOKEN_MAPPING = "distilbert-base-uncased"  # can be modified
 
-    with open(project_root() / "data" / "val_mind_large" / " news_uuid_ID.json") as json_file:
-        news_struuid_ID = json.load(json_file)
+    mind_data = load_mind_data()
 
-    # load the mind test json file
-    with open(project_root() / "data" / "val_mind_large" / "mind_test.json") as json_file:
-        mind_data = json.load(json_file)
-
+    ngood = 0
+    nbad = 0
     ndcg5 = []
     ndcg10 = []
     mrr = []
 
-    for impression_idx in range(10):  # one by one
-        request_body = mind_data[impression_idx]
+    logger.info("measuring recommendations")
+    for impression_idx in tqdm(range(10), desc="recommend"):  # one by one
+        request_body = mind_data.test_list[impression_idx]
 
         todays_articles = [Article.parse_obj(item) for item in request_body["todays_articles"]]
         past_articles = [Article.parse_obj(item) for item in request_body["past_articles"]]
 
-        click_data = [ClickHistory.parse_obj(request_body["click_data"])]
+        click_data = ClickHistory.parse_obj(request_body["click_data"])
+        profile = InterestProfile(profile_id=click_data.account_id, click_history=click_data, onboarding_topics=[])
 
-        num_recs = len(todays_articles)
+        logger.debug("recommending for user %s", profile.profile_id)
+        try:
+            recommendations = select_articles(
+                ArticleSet(articles=todays_articles),
+                ArticleSet(articles=past_articles),
+                profile,
+                request_body["num_recs"],
+            )
+        except Exception as e:
+            logger.error("error recommending for user %s: %s", profile.profile_id, e)
+            nbad += 1
+            continue
 
-        recommendations = select_articles(
-            todays_articles,
-            past_articles,
-            click_data,
-            MODEL,
-            DEVICE,
-            TOKEN_MAPPING,
-            num_recs,
-        )
-
-        single_ndcg5, single_ndcg10, single_mrr = recsys_metric(recommendations, impression_idx, news_struuid_ID)
+        logger.debug("measuring for user %s", profile.profile_id)
+        single_ndcg5, single_ndcg10, single_mrr = recsys_metric(recommendations, impression_idx, mind_data.news_uuid_ID)
         # recommendations {account id (uuid): LIST[Article]}
         print(
             f"----------------evaluation using the first {impression_idx + 1} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_mrr}"  # noqa: E501
@@ -109,7 +115,11 @@ if __name__ == "__main__":
         ndcg5.append(single_ndcg5)
         ndcg10.append(single_ndcg10)
         mrr.append(single_mrr)
+        ngood += 1
 
+    logger.info("recommended for %d users", ngood)
+    if nbad:
+        logger.error("recommendation FAILED for %d users", nbad)
     print(
         f"Offline evaluation metrics on MIND data: NDCG@5 = {np.mean(ndcg5)}, NDCG@10 = {np.mean(ndcg10)}, MRR = {np.mean(mrr)}"  # noqa: E501
     )
