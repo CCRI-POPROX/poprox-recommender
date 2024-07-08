@@ -1,10 +1,11 @@
 import logging
 import sys
+from itertools import islice
 
 from lenskit.metrics import topn
 from tqdm import tqdm
 
-from poprox_recommender.data.mind import load_mind_data
+from poprox_recommender.data.mind import MindData
 
 sys.path.append("src")
 from uuid import UUID
@@ -14,9 +15,10 @@ import pandas as pd
 import torch as th
 from safetensors.torch import load_file
 
-from poprox_concepts import Article, ArticleSet, ClickHistory, InterestProfile
+from poprox_concepts import ArticleSet
+from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.default import select_articles
-from poprox_recommender.paths import model_file_path, project_root
+from poprox_recommender.paths import model_file_path
 
 logger = logging.getLogger("poprox_recommender.test_offline")
 
@@ -36,30 +38,15 @@ def custom_encoder(obj):
         return str(obj)
 
 
-def recsys_metric(recommendations: ArticleSet, row_index, news_struuid_ID: dict[str, str]):
+def recsys_metric(mind_data: MindData, request: RecommendationRequest, recommendations: ArticleSet):
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
-    ## FIXME: we are reloading this for *every* user, that's really slow
-    impressions_truth = (
-        pd.read_table(
-            project_root() / "data" / "test_mind_large" / "behaviors.tsv",
-            header="infer",
-            usecols=range(5),
-            names=["impression_id", "user", "time", "clicked_news", "impressions"],
-        )
-        .iloc[row_index]
-        .impressions.split()
-    )  # LIST[ID-label]
 
-    recommended_list = [news_struuid_ID[item.url] for item in recommendations.articles]
+    recs = pd.DataFrame({"item": [a.article_id for a in recommendations.articles]})
+    truth = mind_data.user_truth(request.interest_profile.profile_id)
 
-    recs = pd.DataFrame({"item": recommended_list})
-
-    truth = pd.DataFrame.from_records(
-        ((row.split("-")[0], int(row.split("-")[1])) for row in impressions_truth), columns=["item", "rating"]
-    ).set_index("item")
-
-    single_rr = topn.recip_rank(recs, truth)
+    # RR should look for *clicked* articles, not just all impression articles
+    single_rr = topn.recip_rank(recs, truth[truth["rating"] > 0])
     single_ndcg5 = topn.ndcg(recs, truth, k=5)
     single_ndcg10 = topn.ndcg(recs, truth, k=10)
 
@@ -74,7 +61,7 @@ if __name__ == "__main__":
     MODEL, DEVICE = load_model()
     TOKEN_MAPPING = "distilbert-base-uncased"  # can be modified
 
-    mind_data = load_mind_data()
+    mind_data = MindData()
 
     ngood = 0
     nbad = 0
@@ -83,33 +70,25 @@ if __name__ == "__main__":
     mrr = []
 
     logger.info("measuring recommendations")
-    for impression_idx in tqdm(range(10), desc="recommend"):  # one by one
-        request_body = mind_data.test_list[impression_idx]
-
-        todays_articles = [Article.parse_obj(item) for item in request_body["todays_articles"]]
-        past_articles = [Article.parse_obj(item) for item in request_body["past_articles"]]
-
-        click_data = ClickHistory.parse_obj(request_body["click_data"])
-        profile = InterestProfile(profile_id=click_data.account_id, click_history=click_data, onboarding_topics=[])
-
-        logger.debug("recommending for user %s", profile.profile_id)
+    for request in tqdm(islice(mind_data.iter_users(), 10), total=10, desc="recommend"):  # one by one
+        logger.debug("recommending for user %s", request.interest_profile.profile_id)
         try:
             recommendations = select_articles(
-                ArticleSet(articles=todays_articles),
-                ArticleSet(articles=past_articles),
-                profile,
-                request_body["num_recs"],
+                ArticleSet(articles=request.todays_articles),
+                ArticleSet(articles=request.past_articles),
+                request.interest_profile,
+                request.num_recs,
             )
         except Exception as e:
-            logger.error("error recommending for user %s: %s", profile.profile_id, e)
+            logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
             nbad += 1
             continue
 
-        logger.debug("measuring for user %s", profile.profile_id)
-        single_ndcg5, single_ndcg10, single_mrr = recsys_metric(recommendations, impression_idx, mind_data.news_uuid_ID)
+        logger.debug("measuring for user %s", request.interest_profile.profile_id)
+        single_ndcg5, single_ndcg10, single_mrr = recsys_metric(mind_data, request, recommendations)
         # recommendations {account id (uuid): LIST[Article]}
         print(
-            f"----------------evaluation using the first {impression_idx + 1} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_mrr}"  # noqa: E501
+            f"----------------evaluation for {request.interest_profile.profile_id} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_mrr}"  # noqa: E501
         )
 
         ndcg5.append(single_ndcg5)
