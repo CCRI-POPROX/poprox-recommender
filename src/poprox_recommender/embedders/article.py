@@ -20,6 +20,6 @@ class ArticleEmbedder:
         if len(title_tensor.shape) == 1:
             title_tensor = title_tensor.unsqueeze(dim=0)
 
-        article_embeddings = self.model.get_news_vector(title_tensor)
+        article_set.embeddings = self.model.get_news_vector(title_tensor)
 
-        return article_set.model_copy(update={"embeddings": article_embeddings})
+        return article_set
