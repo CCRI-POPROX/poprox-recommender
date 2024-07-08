@@ -1,6 +1,5 @@
 import logging
 import sys
-from itertools import islice
 
 from lenskit.metrics import topn
 from tqdm import tqdm
@@ -70,7 +69,7 @@ if __name__ == "__main__":
     mrr = []
 
     logger.info("measuring recommendations")
-    for request in tqdm(islice(mind_data.iter_users(), 10), total=10, desc="recommend"):  # one by one
+    for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
         logger.debug("recommending for user %s", request.interest_profile.profile_id)
         try:
             recommendations = select_articles(
