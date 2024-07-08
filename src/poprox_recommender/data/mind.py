@@ -4,11 +4,12 @@ Support for loading MIND_ data for evaluation.
 .. _MIND: https://msnews.github.io/
 """
 
+# pyright: basic
 import json
 import logging
 import zipfile
 from datetime import datetime, timezone
-from typing import Any, List, NamedTuple
+from typing import Any, List, NamedTuple, Optional
 from uuid import UUID, uuid4
 
 import pandas as pd
@@ -34,8 +35,8 @@ class MindData(NamedTuple):
     News and behavior data loaded from MIND (compiled dictionaries like original JSON).
     """
 
-    news_uuid_ID: dict[UUID, str]
-    behavior_uuid_ID: dict[UUID, str]
+    news_uuid_ID: dict[str, str]
+    behavior_uuid_ID: dict[str, str]
     test_list: list[dict[str, Any]]
 
 
@@ -48,7 +49,7 @@ class Article(BaseModel):
 
 
 class ClickHistory(BaseModel):
-    account_id: UUID = None
+    account_id: Optional[UUID] = None
     article_ids: List[UUID]
 
 
@@ -67,8 +68,8 @@ def load_mind_data(archive="MINDlarge_dev") -> MindData:
     news_df = frames.news
     behaviors_df = frames.behaviors
 
-    news_df["uuid"] = [uuid4() for i in range(news_df.shape[0])]
-    behaviors_df["uuid"] = [uuid4() for i in range(behaviors_df.shape[0])]
+    news_df["uuid"] = [str(uuid4()) for i in range(news_df.shape[0])]
+    behaviors_df["uuid"] = [str(uuid4()) for i in range(behaviors_df.shape[0])]
 
     ID_title = dict(zip(news_df.id, news_df.title))
     ID_newsuuid = dict(zip(news_df.id, news_df.uuid))
@@ -99,7 +100,7 @@ def load_mind_data(archive="MINDlarge_dev") -> MindData:
             single_news["title"] = single_news["content"] = ID_title[candidate_pair.split("-")[0]]
 
             single_news = convert_to_Article(single_news)
-            single_news = single_news.model_dump()
+            single_news = single_news.model_dump(mode="json")
             test_json["todays_articles"].append(single_news)
 
         for article in row.clicked_news.split():
@@ -109,7 +110,7 @@ def load_mind_data(archive="MINDlarge_dev") -> MindData:
             single_news["title"] = single_news["content"] = ID_title[article]
 
             single_news = convert_to_Article(single_news)
-            single_news = single_news.model_dump()
+            single_news = single_news.model_dump(mode="json")
             test_json["past_articles"].append(single_news)
 
         click_data = {
@@ -119,7 +120,7 @@ def load_mind_data(archive="MINDlarge_dev") -> MindData:
 
         click_data = convert_to_ClickHistory(click_data)
 
-        click_data = click_data.model_dump()
+        click_data = click_data.model_dump(mode="json")
         test_json["click_data"] = click_data
 
         test_list.append(test_json)
@@ -173,10 +174,13 @@ def export_main():
     data = load_mind_data()
     out = project_root() / "data" / "mind-converted"
     out.mkdir(exist_ok=True, parents=True)
+    logger.info("saving news UUID-ID mapping")
     with open(out / "news-uuid-id.json", "wt") as jsf:
         json.dump(data.news_uuid_ID, jsf)
+    logger.info("saving behavior UUID-ID mapping")
     with open(out / "behavior-uuid-id.json", "wt") as jsf:
         json.dump(data.behavior_uuid_ID, jsf)
+    logger.info("saving test data")
     with open(out / "test-data.json", "wt") as jsf:
         json.dump(data.test_list, jsf)
 
