@@ -24,12 +24,14 @@ repos:
       # Run the linter.
       - id: ruff
         args: [--fix]
+        name: auto-fix Python lint errors
       # Run the formatter.
       - id: ruff-format
+        name: format Python source
   - repo: local
     hooks:
       - id: format-toml-files
-        name: toml-format
+        name: format toml files
         entry: taplo
         args: ["format"]
         files: \.toml$
@@ -37,7 +39,7 @@ repos:
         additional_dependencies:
           - "@taplo/cli"
       # shfmt support, adapted from https://github.com/mvdan/sh/issues/818
-      - id: format-shell-files
+      - id: format-shell-scripts
         name: format shell scripts
         language: golang
         require_serial: true
