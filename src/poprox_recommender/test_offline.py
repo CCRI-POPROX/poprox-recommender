@@ -1,9 +1,10 @@
-import json
 import logging
 import sys
 
 from lenskit.metrics import topn
 from tqdm import tqdm
+
+from poprox_recommender.data.mind import load_mind_data
 
 sys.path.append("src")
 from uuid import UUID
@@ -73,14 +74,9 @@ if __name__ == "__main__":
     MODEL, DEVICE = load_model()
     TOKEN_MAPPING = "distilbert-base-uncased"  # can be modified
 
-    logger.info("loading news article mapping")
-    with open(project_root() / "data" / "val_mind_large" / "news_uuid_ID.json") as json_file:
-        news_struuid_ID = json.load(json_file)
+    mind_data = load_mind_data()
 
-    logger.info("loading MIND test data")
-    with open(project_root() / "data" / "val_mind_large" / "mind_test.json") as json_file:
-        mind_data = json.load(json_file)
-
+    ngood = 0
     nbad = 0
     ndcg5 = []
     ndcg10 = []
@@ -88,7 +84,7 @@ if __name__ == "__main__":
 
     logger.info("measuring recommendations")
     for impression_idx in tqdm(range(10), desc="recommend"):  # one by one
-        request_body = mind_data[impression_idx]
+        request_body = mind_data.test_list[impression_idx]
 
         todays_articles = [Article.parse_obj(item) for item in request_body["todays_articles"]]
         past_articles = [Article.parse_obj(item) for item in request_body["past_articles"]]
@@ -110,7 +106,7 @@ if __name__ == "__main__":
             continue
 
         logger.debug("measuring for user %s", profile.profile_id)
-        single_ndcg5, single_ndcg10, single_mrr = recsys_metric(recommendations, impression_idx, news_struuid_ID)
+        single_ndcg5, single_ndcg10, single_mrr = recsys_metric(recommendations, impression_idx, mind_data.news_uuid_ID)
         # recommendations {account id (uuid): LIST[Article]}
         print(
             f"----------------evaluation using the first {impression_idx + 1} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_mrr}"  # noqa: E501
@@ -119,7 +115,9 @@ if __name__ == "__main__":
         ndcg5.append(single_ndcg5)
         ndcg10.append(single_ndcg10)
         mrr.append(single_mrr)
+        ngood += 1
 
+    logger.info("recommended for %d users", ngood)
     if nbad:
         logger.error("recommendation FAILED for %d users", nbad)
     print(
