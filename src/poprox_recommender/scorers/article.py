@@ -10,4 +10,6 @@ class ArticleScorer:
         user_embedding = interest_profile.embedding
 
         pred = self.model.get_prediction(candidate_embeddings, user_embedding.squeeze())
-        return candidate_articles.model_copy(update={"scores": pred.cpu().detach().numpy()})
+        candidate_articles.scores = pred.cpu().detach().numpy()
+
+        return candidate_articles

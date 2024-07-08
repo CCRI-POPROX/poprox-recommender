@@ -17,7 +17,7 @@ class UserEmbedder:
 
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
-        user_embedding = build_user_embedding(
+        interest_profile.embedding = build_user_embedding(
             interest_profile.click_history,
             embedding_lookup,
             self.model,
@@ -25,7 +25,7 @@ class UserEmbedder:
             self.max_clicks,
         )
 
-        return interest_profile.model_copy(update={"embedding": user_embedding})
+        return interest_profile
 
 
 # Compute a vector for each user
