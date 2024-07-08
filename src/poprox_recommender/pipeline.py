@@ -1,5 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass
+from inspect import _empty, signature
 from typing import Callable
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
@@ -39,9 +40,13 @@ class RecommendationPipeline:
     def __init__(self, name):
         self.name = name
         self.components = []
+        self._state_types = {"candidate": ArticleSet, "clicked": ArticleSet, "profile": InterestProfile}
 
     def add(self, component: Callable, inputs: list[str], output: str):
-        self.components.append(ComponentSpec(component, inputs, output))
+        spec = ComponentSpec(component, inputs, output)
+        self._validate_input_types(spec, self._state_types)
+        self._state_types[output] = self._validate_output_type(spec)
+        self.components.append(spec)
 
     def __call__(self, inputs: PipelineState | StateDict) -> PipelineState:
         # Avoid modifying the inputs
@@ -82,3 +87,37 @@ class RecommendationPipeline:
         state[state._last] = output
 
         return state
+
+    def _validate_input_types(self, spec: ComponentSpec, state_types: dict[str, type]):
+        # Best effort type-checking to highlight when inputs are mismatched or out of order
+        sig = signature(spec.component.__call__)
+        sig_params = list(sig.parameters.values())
+
+        for input_name, sig_param in zip(spec.inputs, sig_params):
+            input_type = state_types[input_name]
+            sig_param_type = sig_param.annotation
+            if sig_param_type is not _empty and input_type != sig_param_type:
+                msg = (
+                    f"Component {spec.component} expected inputs with types {[p.annotation for p in sig_params]} "
+                    f"but received inputs with types {[state_types[i] for i in spec.inputs]}"
+                )
+
+                raise TypeError(msg)
+
+    def _validate_output_type(self, spec: ComponentSpec):
+        # Best effort type-checking to highlight when output is
+        # mismatched with existing state values types
+        sig = signature(spec.component.__call__)
+        output_name = spec.output
+
+        state_type = self._state_types.get(output_name, None)
+        output_type = sig.return_annotation
+        if state_type and output_type is not _empty and state_type != output_type:
+            msg = (
+                f"Component {spec.component} returns output with type {output_type} "
+                f"but would need to return {state_type} in order to overwrite {output_name}"
+            )
+
+            raise TypeError(msg)
+
+        return output_type
