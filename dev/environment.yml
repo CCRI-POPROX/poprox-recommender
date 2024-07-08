@@ -9,6 +9,7 @@ dependencies:
   - dvc >=3.51,<4
   - dvc-s3
   - conda-lock >=2.5,<3
+  - yq
   - hatch
   # dependencies for development scripts
   - docopt >=0.6
