@@ -13,11 +13,18 @@ fi
 
 while [[ -n "$1" ]]; do
     case "$1" in
-        --freeze-concepts) freeze_concepts=yes; shift;;
-        --*)
-            echo "invalid flag $1" >&2; exit 2;;
-        *)
-            echo "unexpected argument $1" >&2; exit 2;;
+    --freeze-concepts)
+        freeze_concepts=yes
+        shift
+        ;;
+    --*)
+        echo "invalid flag $1" >&2
+        exit 2
+        ;;
+    *)
+        echo "unexpected argument $1" >&2
+        exit 2
+        ;;
     esac
 done
 
