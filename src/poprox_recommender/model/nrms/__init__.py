@@ -22,6 +22,10 @@ class NRMS(torch.nn.Module):
         self.click_predictor = DotProductClickPredictor()
         self.loss_fn = nn.CrossEntropyLoss()
 
+    @property
+    def embedding_size(self) -> int:
+        return self.news_encoder.plm_hidden_size
+
     def forward(self, candidate_news, clicked_news, clicked, mode="train"):
         # batch_size, 1 + K, word_embedding_dim
         candidate_news = candidate_news.permute(1, 0, 2)

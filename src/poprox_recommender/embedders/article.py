@@ -18,6 +18,8 @@ class ArticleEmbeddingModel(Protocol):
     Interface exposed by article embedding models.
     """
 
+    embedding_size: int
+
     def get_news_vector(self, news: th.Tensor) -> th.Tensor: ...
 
 
