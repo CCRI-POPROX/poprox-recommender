@@ -6,6 +6,7 @@ import torch as th
 from transformers import PreTrainedTokenizer
 
 from poprox_concepts import ArticleSet
+from poprox_recommender.datachecks import assert_tensor_size
 
 TITLE_LENGTH_LIMIT = 30
 
@@ -52,7 +53,7 @@ class ArticleEmbedder:
                     for article in uncached
                 ]
             )
-            assert uc_title_tokens == (len(uncached), TITLE_LENGTH_LIMIT)
+            assert_tensor_size(uc_title_tokens, len(uncached), TITLE_LENGTH_LIMIT)
 
             # Step 4: embed the uncached articles
             uc_embeddings = self.model.get_news_vector(uc_title_tokens)
