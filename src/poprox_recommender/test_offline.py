@@ -1,5 +1,8 @@
+import csv
+import json
 import logging
 import sys
+from itertools import islice
 
 from lenskit.metrics import topn
 from tqdm import tqdm
@@ -17,7 +20,7 @@ from safetensors.torch import load_file
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.default import personalized_pipeline
-from poprox_recommender.paths import model_file_path
+from poprox_recommender.paths import model_file_path, project_root
 
 logger = logging.getLogger("poprox_recommender.test_offline")
 
@@ -66,12 +69,18 @@ if __name__ == "__main__":
     nbad = 0
     ndcg5 = []
     ndcg10 = []
-    mrr = []
+    recip_rank = []
 
     pipeline = personalized_pipeline(TEST_REC_COUNT)
 
     logger.info("measuring recommendations")
-    for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
+    user_out_fn = project_root() / "outputs" / "user-metrics.csv"
+    user_out_fn.parent.mkdir(exist_ok=True, parents=True)
+    user_out = open(user_out_fn, "wt")
+    user_csv = csv.writer(user_out)
+    user_csv.writerow(["user_id", "NDCG@5", "NDCG@10", "RecipRank"])
+
+    for request in tqdm(islice(mind_data.iter_users(), 25), total=mind_data.n_users, desc="recommend"):  # one by one
         logger.debug("recommending for user %s", request.interest_profile.profile_id)
         if request.num_recs != TEST_REC_COUNT:
             logger.warn(
@@ -89,26 +98,38 @@ if __name__ == "__main__":
             )
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
+            user_csv.writerow([request.interest_profile.profile_id, None, None, None])
             nbad += 1
             continue
 
         logger.debug("measuring for user %s", request.interest_profile.profile_id)
-        single_ndcg5, single_ndcg10, single_mrr = recsys_metric(mind_data, request, recommendations)
+        single_ndcg5, single_ndcg10, single_rr = recsys_metric(mind_data, request, recommendations)
+        user_csv.writerow([request.interest_profile.profile_id, single_ndcg5, single_ndcg10, single_rr])
         # recommendations {account id (uuid): LIST[Article]}
         print(
-            f"----------------evaluation for {request.interest_profile.profile_id} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_mrr}"  # noqa: E501
+            f"----------------evaluation for {request.interest_profile.profile_id} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_rr}"  # noqa: E501
         )
 
         ndcg5.append(single_ndcg5)
         ndcg10.append(single_ndcg10)
-        mrr.append(single_mrr)
+        recip_rank.append(single_rr)
         ngood += 1
+
+    user_out.close()
 
     logger.info("recommended for %d users", ngood)
     if nbad:
         logger.error("recommendation FAILED for %d users", nbad)
+    agg_metrics = {
+        "NDCG@5": np.mean(ndcg5),
+        "NDCG@10": np.mean(ndcg10),
+        "MRR": np.mean(recip_rank),
+    }
+    out_fn = project_root() / "outputs" / "metrics.json"
+    out_fn.parent.mkdir(exist_ok=True, parents=True)
+    out_fn.write_text(json.dumps(agg_metrics) + "\n")
     print(
-        f"Offline evaluation metrics on MIND data: NDCG@5 = {np.mean(ndcg5)}, NDCG@10 = {np.mean(ndcg10)}, MRR = {np.mean(mrr)}"  # noqa: E501
+        f"Offline evaluation metrics on MIND data: NDCG@5 = {np.mean(ndcg5)}, NDCG@10 = {np.mean(ndcg10)}, MRR = {np.mean(recip_rank)}"  # noqa: E501
     )
 
     # response = {"statusCode": 200, "body": json.dump(body, default=custom_encoder)}
