@@ -17,34 +17,16 @@ def select_articles(
     num_slots: int,
     algo_params: dict[str, Any] | None = None,
 ) -> ArticleSet:
-    algo_params = algo_params or {}
-    diversify = str(algo_params.get("diversity_algo", "pfar"))
+    """
+    Select articles with default recommender configuration.
+    """
+    pipeline = None
 
-    model = get_model()
+    if interest_profile.click_history.article_ids:
+        pipeline = personalized_pipeline(num_slots, algo_params)
 
-    if model and interest_profile.click_history.article_ids:
-        article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
-        user_embedder = UserEmbedder(model.model, model.device)
-        article_scorer = ArticleScorer(model.model)
-
-        if diversify == "mmr":
-            diversifier = MMRDiversifier(algo_params, num_slots)
-        elif diversify == "pfar":
-            diversifier = PFARDiversifier(algo_params, num_slots)
-
-        pipeline = RecommendationPipeline(name=diversify)
-        pipeline.add(article_embedder, inputs=["candidate"], output="candidate")
-        pipeline.add(article_embedder, inputs=["clicked"], output="clicked")
-        pipeline.add(user_embedder, inputs=["clicked", "profile"], output="profile")
-        pipeline.add(article_scorer, inputs=["candidate", "profile"], output="candidate")
-        pipeline.add(diversifier, inputs=["candidate", "profile"], output="recs")
-    else:
-        topic_filter = TopicFilter()
-        sampler = UniformSampler(num_slots=num_slots)
-
-        pipeline = RecommendationPipeline(name="random_topical")
-        pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
-        pipeline.add(sampler, inputs=["topical", "candidate"], output="recs")
+    if pipeline is None:
+        pipeline = fallback_pipeline(num_slots)
 
     return pipeline(
         {
@@ -53,3 +35,51 @@ def select_articles(
             "profile": interest_profile,
         }
     )
+
+
+def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = None) -> RecommendationPipeline | None:
+    """
+    Create the default personalized recommendation pipeline.
+
+    Args:
+        num_slots: The number of items to recommend.
+        algo_params: Additional parameters to the reocmmender algorithm.
+    """
+
+    model = get_model()
+    if model is None:
+        return None
+
+    diversify = str(algo_params.get("diversity_algo", "pfar")) if algo_params else "pfar"
+
+    article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
+    user_embedder = UserEmbedder(model.model, model.device)
+    article_scorer = ArticleScorer(model.model)
+
+    if diversify == "mmr":
+        diversifier = MMRDiversifier(algo_params, num_slots)
+    elif diversify == "pfar":
+        diversifier = PFARDiversifier(algo_params, num_slots)
+
+    pipeline = RecommendationPipeline(name=diversify)
+    pipeline.add(article_embedder, inputs=["candidate"], output="candidate")
+    pipeline.add(article_embedder, inputs=["clicked"], output="clicked")
+    pipeline.add(user_embedder, inputs=["clicked", "profile"], output="profile")
+    pipeline.add(article_scorer, inputs=["candidate", "profile"], output="candidate")
+    pipeline.add(diversifier, inputs=["candidate", "profile"], output="recs")
+    return pipeline
+
+
+def fallback_pipeline(num_slots: int) -> RecommendationPipeline:
+    """
+    Create the fallback (non-personalized) pipeline.
+
+    Args:
+        num_slots: The number of items to recommend.
+    """
+    topic_filter = TopicFilter()
+    sampler = UniformSampler(num_slots=num_slots)
+
+    pipeline = RecommendationPipeline(name="random_topical")
+    pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
+    pipeline.add(sampler, inputs=["topical", "candidate"], output="recs")
