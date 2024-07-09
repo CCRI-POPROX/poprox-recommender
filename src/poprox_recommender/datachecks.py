@@ -23,7 +23,7 @@ def assert_tensor_size(tensor: th.Tensor, *size: int, label: str | None = None, 
     if prefix and len(actual) > len(expected):
         actual = actual[: len(expected)]
     if actual != expected:
-        msg = f"unexpected tensor size {_size_string(actual)} (expected {_size_string(expected)})"
+        msg = f"unexpected tensor size {_size_string(tensor.shape)} (expected {_size_string(expected)})"
         if label:
             msg = f"{label}: {msg}"
         raise AssertionError(msg)

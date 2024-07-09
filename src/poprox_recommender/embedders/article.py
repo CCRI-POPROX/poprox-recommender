@@ -60,7 +60,7 @@ class ArticleEmbedder:
 
             # Step 4: embed the uncached articles
             uc_embeddings = self.model.get_news_vector(uc_title_tokens)
-            assert uc_embeddings.shape[0] == len(uncached)
+            assert_tensor_size(uc_embeddings, len(uncached))
 
             # Step 5: store embeddings to cache & result
             for i, uca in enumerate(uncached):
@@ -73,7 +73,7 @@ class ArticleEmbedder:
         embed_single_tensors = list(cached.values())
         assert not any(e is None for e in embed_single_tensors)
         embed_tensor = th.stack(embed_single_tensors)  # type: ignore
-        assert embed_tensor.shape[0] == len(article_set.articles)
+        assert_tensor_size(embed_tensor, len(article_set.articles))
 
         # Step 7: put the embedding tensor on the output
         article_set.embeddings = embed_tensor  # type: ignore
