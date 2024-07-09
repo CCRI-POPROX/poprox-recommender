@@ -45,12 +45,13 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
         num_slots: The number of items to recommend.
         algo_params: Additional parameters to the reocmmender algorithm.
     """
-
     model = get_model()
     if model is None:
         return None
 
-    diversify = str(algo_params.get("diversity_algo", "pfar")) if algo_params else "pfar"
+    if not algo_params:
+        algo_params = {}
+    diversify = str(algo_params.get("diversity_algo", "pfar"))
 
     article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
     user_embedder = UserEmbedder(model.model, model.device)
