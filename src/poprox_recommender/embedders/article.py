@@ -37,7 +37,7 @@ class ArticleEmbedder:
 
     def __call__(self, article_set: ArticleSet) -> ArticleSet:
         if not article_set.articles:
-            article_set.embedding = th.zeros((0, self.model.embedding_size))
+            article_set.embedding = th.zeros((0, self.model.embedding_size))  # type: ignore
             return article_set
 
         # Step 1: get the cached articles wherever possible.
