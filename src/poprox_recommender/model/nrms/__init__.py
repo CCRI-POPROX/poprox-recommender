@@ -42,13 +42,10 @@ class NRMS(torch.nn.Module):
 
         return click_probability
 
-    def get_news_vector(self, news):
+    def get_news_vector(self, news: torch.Tensor) -> torch.Tensor:
         """
         Args:
-            news:
-                {
-                    "title": batch_size * num_words_title
-                },
+            news: The encoded news content (currently just titles).
         Returns:
             (shape) batch_size, word_embedding_dim
         """

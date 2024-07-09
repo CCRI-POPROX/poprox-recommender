@@ -28,7 +28,7 @@ class NewsEncoder(torch.nn.Module):
 
         self.additive_attention = NewsAdditiveAttention(plm_hidden_size, self.config.additive_attn_hidden_dim)
 
-    def forward(self, news_input):
+    def forward(self, news_input: torch.Tensor) -> torch.Tensor:
         # batch_size, num_words_title, word_embedding_dim
 
         V = self.plm(news_input).last_hidden_state
