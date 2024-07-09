@@ -29,13 +29,13 @@ while [[ -n "$1" ]]; do
 done
 
 declare -a lock_args
-lock_args=(-f pyproject.toml -f dev/environment.yml -f dev/constraints.yml)
+lock_args=(-f pyproject.toml -f dev/environment.yml)
 
 # check if we want to freeze popropx-concepts
 if [[ $freeze_concepts = yes ]]; then
     declare -a concept_urls
     # extract the currently-locked POPROX URL
-    concept_urls=($(yq '.package |map(select(.name == "poprox-concepts")) | map(.url) | unique() | join("\n")' conda-lock.yml))
+    concept_urls=($(yq '.package | map(select(.name == "poprox-concepts")) | map(.url) | unique | join("\n")' conda-lock.yml))
     if [[ ${#concept_urls[@]} -eq 1 ]]; then
         echo "found locked poprox-concepts at $concept_urls"
     elif [[ ${#concept_urls[@]} -eq 0 ]]; then
@@ -64,5 +64,13 @@ fi
 export CONDA_CHANNEL_PRIORITY=flexible
 
 # and run conda-lock
-echo "+ conda-lock lock ${lock_args[*]}" >&2
-exec conda-lock lock "${lock_args[@]}"
+std_lock_args=("${lock_args[@]}" -f dev/constraints.yml)
+echo "locking for dev and deploy environments" >&2
+echo "+ conda-lock lock ${std_lock_args[*]}" >&2
+conda-lock lock "${std_lock_args[@]}" || exit 10
+
+echo "locking for CUDA environments"
+cuda_lock_args=("${lock_args[@]}" -f dev/cuda-constraints.yml)
+cuda_lock_args=("${cuda_lock_args[@]}" --lockfile conda-lock-cuda.yml)
+echo "+ conda-lock lock ${cuda_lock_args[*]}" >&2
+conda-lock lock "${cuda_lock_args[@]}" || exit 10
