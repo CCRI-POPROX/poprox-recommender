@@ -1,0 +1,18 @@
+schema: '2.0'
+stages:
+  measure-mind-val:
+    cmd: python -m poprox_recommender.test_offline
+    deps:
+    - path: data/MINDlarge_dev.zip
+      hash: md5
+      md5: c93fa1728e3537649b441c78cce5e6f1
+      size: 103456245
+    - path: src/poprox_recommender/test_offline.py
+      hash: md5
+      md5: 91f3765677c92c0b1df8b26051f20fd2
+      size: 4266
+    outs:
+    - path: outputs/metrics.json
+      hash: md5
+      md5: 6eca189ee010efa933d2bc9598435578
+      size: 89

@@ -1,0 +1,9 @@
+stages:
+  measure-mind-val:
+    cmd: python -m poprox_recommender.test_offline
+    deps:
+      - src/poprox_recommender/test_offline.py
+      - data/MINDlarge_dev.zip
+    metrics:
+      - outputs/metrics.json:
+          cache: false
