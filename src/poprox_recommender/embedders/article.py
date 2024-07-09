@@ -34,6 +34,10 @@ class ArticleEmbedder:
         self.embedding_cache = {}
 
     def __call__(self, article_set: ArticleSet) -> ArticleSet:
+        if not article_set.articles:
+            article_set.embedding = th.zeros((0, self.tokenizer.hidden_size))
+            return article_set
+
         # Step 1: get the cached articles wherever possible.
         # Since Python dictionaries preserve order, this keeps the order aligned with the
         # input article set.
