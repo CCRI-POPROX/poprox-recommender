@@ -2,7 +2,6 @@ import csv
 import json
 import logging
 import sys
-from itertools import islice
 
 from lenskit.metrics import topn
 from tqdm import tqdm
@@ -80,7 +79,7 @@ if __name__ == "__main__":
     user_csv = csv.writer(user_out)
     user_csv.writerow(["user_id", "NDCG@5", "NDCG@10", "RecipRank"])
 
-    for request in tqdm(islice(mind_data.iter_users(), 25), total=mind_data.n_users, desc="recommend"):  # one by one
+    for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
         logger.debug("recommending for user %s", request.interest_profile.profile_id)
         if request.num_recs != TEST_REC_COUNT:
             logger.warn(
