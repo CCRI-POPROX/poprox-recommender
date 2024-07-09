@@ -3,6 +3,7 @@
 # TODO: add option to update only our dependencies once conda-lock bug is fixed
 # bug url: https://github.com/conda/conda-lock/issues/652
 
+std_platforms=(linux-64 osx-arm64 win-64)
 freeze_concepts=no
 
 # make sure we're in the right directory
@@ -65,12 +66,15 @@ export CONDA_CHANNEL_PRIORITY=flexible
 
 # and run conda-lock
 std_lock_args=("${lock_args[@]}" -f dev/constraints.yml)
+for plat in "${std_platforms[@]}"; do
+    std_lock_args=("${std_lock_args[@]}" -p "$plat")
+done
 echo "locking for dev and deploy environments" >&2
 echo "+ conda-lock lock ${std_lock_args[*]}" >&2
 conda-lock lock "${std_lock_args[@]}" || exit 10
 
 echo "locking for CUDA environments"
 cuda_lock_args=("${lock_args[@]}" -f dev/cuda-constraints.yml)
-cuda_lock_args=("${cuda_lock_args[@]}" --lockfile conda-lock-cuda.yml)
+cuda_lock_args=("${cuda_lock_args[@]}" -p linux-64 --lockfile conda-lock-cuda.yml)
 echo "+ conda-lock lock ${cuda_lock_args[*]}" >&2
 conda-lock lock "${cuda_lock_args[@]}" || exit 10
