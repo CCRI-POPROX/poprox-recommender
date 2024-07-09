@@ -1,4 +1,5 @@
 # pyright: basic
+import logging
 from typing import Protocol
 from uuid import UUID
 
@@ -8,6 +9,7 @@ from transformers import PreTrainedTokenizer
 from poprox_concepts import ArticleSet
 from poprox_recommender.datachecks import assert_tensor_size
 
+logger = logging.getLogger(__name__)
 TITLE_LENGTH_LIMIT = 30
 
 
@@ -41,6 +43,7 @@ class ArticleEmbedder:
         uncached = [article for article in article_set.articles if cached[article.article_id] is None]
 
         if uncached:
+            logger.debug("need to embed %d of %d articles", len(uncached), len(cached))
             # Step 3: tokenize the uncached articles
             uc_title_tokens = th.stack(
                 [
