@@ -1,3 +1,4 @@
+import csv
 import json
 import logging
 import sys
@@ -73,6 +74,12 @@ if __name__ == "__main__":
     pipeline = personalized_pipeline(TEST_REC_COUNT)
 
     logger.info("measuring recommendations")
+    user_out_fn = project_root() / "outputs" / "user-metrics.csv"
+    user_out_fn.parent.mkdir(exist_ok=True, parents=True)
+    user_out = open(user_out_fn, "wt")
+    user_csv = csv.writer(user_out)
+    user_csv.writerow(["user_id", "NDCG@5", "NDCG@10", "RecipRank"])
+
     for request in tqdm(islice(mind_data.iter_users(), 25), total=mind_data.n_users, desc="recommend"):  # one by one
         logger.debug("recommending for user %s", request.interest_profile.profile_id)
         if request.num_recs != TEST_REC_COUNT:
@@ -91,11 +98,13 @@ if __name__ == "__main__":
             )
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
+            user_csv.writerow([request.interest_profile.profile_id, None, None, None])
             nbad += 1
             continue
 
         logger.debug("measuring for user %s", request.interest_profile.profile_id)
         single_ndcg5, single_ndcg10, single_rr = recsys_metric(mind_data, request, recommendations)
+        user_csv.writerow([request.interest_profile.profile_id, single_ndcg5, single_ndcg10, single_rr])
         # recommendations {account id (uuid): LIST[Article]}
         print(
             f"----------------evaluation for {request.interest_profile.profile_id} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_rr}"  # noqa: E501
@@ -105,6 +114,8 @@ if __name__ == "__main__":
         ndcg10.append(single_ndcg10)
         recip_rank.append(single_rr)
         ngood += 1
+
+    user_out.close()
 
     logger.info("recommended for %d users", ngood)
     if nbad:
@@ -116,7 +127,7 @@ if __name__ == "__main__":
     }
     out_fn = project_root() / "outputs" / "metrics.json"
     out_fn.parent.mkdir(exist_ok=True, parents=True)
-    out_fn.write_text(json.dumps(agg_metrics))
+    out_fn.write_text(json.dumps(agg_metrics) + "\n")
     print(
         f"Offline evaluation metrics on MIND data: NDCG@5 = {np.mean(ndcg5)}, NDCG@10 = {np.mean(ndcg10)}, MRR = {np.mean(recip_rank)}"  # noqa: E501
     )
