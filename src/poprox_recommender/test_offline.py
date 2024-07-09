@@ -97,7 +97,7 @@ if __name__ == "__main__":
                 }
             )
         except Exception as e:
-            logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
+            logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e, exc_info=e)
             user_csv.writerow([request.interest_profile.profile_id, None, None, None])
             nbad += 1
             continue
