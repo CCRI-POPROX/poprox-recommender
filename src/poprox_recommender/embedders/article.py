@@ -6,6 +6,8 @@ from transformers import PreTrainedTokenizer
 
 from poprox_concepts import ArticleSet
 
+TITLE_LENGTH_LIMIT = 30
+
 
 class ArticleEmbeddingModel(Protocol):
     """
@@ -26,15 +28,18 @@ class ArticleEmbedder:
         self.device = device
 
     def __call__(self, article_set: ArticleSet) -> ArticleSet:
-        tokenized_titles = {}
-        for article in article_set.articles:
-            tokenized_titles[article.article_id] = self.tokenizer.encode(
-                article.title, padding="max_length", max_length=30, truncation=True
+        tokenized_titles = [
+            th.tensor(
+                self.tokenizer.encode(
+                    article.title, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
+                ),
+                dtype=th.int32,
             )
+            for article in article_set.articles
+        ]
 
-        title_tensor = th.tensor(list(tokenized_titles.values())).to(self.device)
-        if len(title_tensor.shape) == 1:
-            title_tensor = title_tensor.unsqueeze(dim=0)
+        title_tensor = th.stack(tokenized_titles).to(self.device)
+        assert title_tensor.shape == (len(article_set.articles), TITLE_LENGTH_LIMIT)
 
         article_set.embeddings = self.model.get_news_vector(title_tensor)  # type: ignore
 
