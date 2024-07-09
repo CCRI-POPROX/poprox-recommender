@@ -82,7 +82,7 @@ class ArticleEmbedder:
         # we do this with a list to properly deal with duplicate articles
         embed_single_tensors = [cached[article.article_id] for article in article_set.articles]
         assert not any(e is None for e in embed_single_tensors)
-        embed_tensor = th.stack(embed_single_tensors, dev=self.device)  # type: ignore
+        embed_tensor = th.stack(embed_single_tensors).to(self.device)  # type: ignore
         assert_tensor_size(
             embed_tensor, len(article_set.articles), self.model.embedding_size, label="final article embeddings"
         )
