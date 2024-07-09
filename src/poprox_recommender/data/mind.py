@@ -5,133 +5,135 @@ Support for loading MIND_ data for evaluation.
 """
 
 # pyright: basic
-import json
+from __future__ import annotations
+
 import logging
 import zipfile
-from datetime import datetime, timezone
-from typing import Any, List, NamedTuple, Optional
-from uuid import UUID, uuid4
+from typing import Generator, cast
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 import pandas as pd
-from pydantic import BaseModel
-from tqdm import tqdm
 
+from poprox_concepts import Article, ClickHistory, InterestProfile
+from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
+TEST_REC_COUNT = 10
 
 
-class MindTables(NamedTuple):
+class MindData:
     """
-    News and behavior data loaded from MIND (raw data frames).
-    """
-
-    news: pd.DataFrame
-    behaviors: pd.DataFrame
-
-
-class MindData(NamedTuple):
-    """
-    News and behavior data loaded from MIND (compiled dictionaries like original JSON).
+    News and behavior data loaded from MIND data.
     """
 
-    news_uuid_ID: dict[str, str]
-    behavior_uuid_ID: dict[str, str]
-    test_list: list[dict[str, Any]]
+    news_df: pd.DataFrame
+    news_id_map: dict[UUID, str]
+    behavior_df: pd.DataFrame
+    behavior_id_map: dict[UUID, str]
+
+    def __init__(self, archive: str = "MINDlarge_dev"):
+        news_df, behavior_df = load_mind_frames(archive)
+        # index data frames for quick lookup of users & articles
+        self.news_df = news_df.set_index("id")
+        if not self.news_df.index.unique:
+            logger.warn("news data has non-unique index")
+
+        self.behavior_df = behavior_df.set_index("impression_id")
+        if not self.behavior_df.index.unique:
+            logger.warn("behavior data has non-unique index")
+
+        # add and reverse-index the UUIDs
+        ns_article = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
+        self.news_df["uuid"] = [uuid5(ns_article, aid) for aid in self.news_df.index.values]
+        self.news_id_map = dict(zip(self.news_df["uuid"], self.news_df.index))
+
+        ns_impression = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/impression/")
+        self.behavior_df["uuid"] = [uuid5(ns_impression, str(iid)) for iid in self.behavior_df.index.values]
+        self.behavior_id_map = dict(zip(self.behavior_df["uuid"], self.behavior_df.index))
+
+    def news_id_for_uuid(self, uuid: UUID) -> str:
+        return self.news_id_map[uuid]
+
+    def news_uuid_for_id(self, id: str) -> UUID:
+        return cast(UUID, self.news_df.loc[id, "uuid"])
+
+    def behavior_id_for_uuid(self, uuid: UUID) -> str:
+        return self.behavior_id_map[uuid]
+
+    def behavior_uuid_for_id(self, id: str) -> UUID:
+        return cast(UUID, self.behavior_df.loc[id, "uuid"])
+
+    @property
+    def n_users(self) -> int:
+        return self.behavior_df.shape[0]
+
+    @property
+    def n_articles(self) -> int:
+        return self.news_df.shape[0]
+
+    def user_truth(self, user: UUID) -> pd.DataFrame | None:
+        """
+        Look up the ground-truth data for a particular user, in LensKit format,
+        with item UUIDs for item IDs.
+        """
+        try:
+            uid = self.behavior_id_for_uuid(user)
+            imp_log = str(self.behavior_df.loc[uid, "impressions"])
+        except KeyError:
+            raise ValueError(f"unknown user {user}")
+
+        truth = pd.DataFrame.from_records(
+            ((article.split("-")[0], int(article.split("-")[1])) for article in imp_log.split()),
+            columns=["mind_item_id", "rating"],
+        )
+        truth["item"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
+        return truth.set_index("item")
+
+    def iter_users(self) -> Generator[RecommendationRequest]:
+        for row in self.behavior_df.itertuples():
+            clicked_ids: list[str] = row.clicked_news.split()  # type: ignore
+            cand_pairs: list[str] = row.impressions.split()  # type: ignore
+
+            clicks = ClickHistory(
+                account_id=cast(UUID, row.uuid), article_ids=[self.news_uuid_for_id(aid) for aid in clicked_ids]
+            )
+            past = []
+            for aid in clicked_ids:
+                past.append(self.lookup_article(id=aid))
+
+            today = []
+            for pair in cand_pairs:
+                aid, _clicked = pair.split("-")
+                today.append(self.lookup_article(id=aid))
+
+            clicks = ClickHistory(
+                account_id=cast(UUID, row.uuid), article_ids=[self.news_uuid_for_id(aid) for aid in clicked_ids]
+            )
+            profile = InterestProfile(profile_id=clicks.account_id, click_history=clicks, onboarding_topics=[])
+            yield RecommendationRequest(
+                todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
+            )
+
+    def lookup_article(self, *, id: str | None = None, uuid: UUID | None = None):
+        if uuid is None:
+            if id:
+                uuid = self.news_uuid_for_id(id)
+            else:
+                raise ValueError("must provide one of uuid, id")
+        elif id is None:
+            id = self.news_id_for_uuid(uuid)
+
+        article = Article(
+            article_id=uuid,
+            url=f"urn:uuid:{uuid}",
+            title=str(self.news_df.loc[id, "title"]),
+        )
+        article.content = article.title
+        return article
 
 
-class Article(BaseModel):
-    article_id: UUID
-    title: str
-    content: str = ""
-    url: str
-    published_at: datetime = datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc)
-
-
-class ClickHistory(BaseModel):
-    account_id: Optional[UUID] = None
-    article_ids: List[UUID]
-
-
-def convert_to_Article(data: dict) -> Article:
-    if "published_at" not in data:
-        data["published_at"] = datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc)
-    return Article(**data)
-
-
-def convert_to_ClickHistory(data):
-    return ClickHistory(**data)
-
-
-def load_mind_data(archive="MINDlarge_dev") -> MindData:
-    frames = load_mind_frames(archive)
-    news_df = frames.news
-    behaviors_df = frames.behaviors
-
-    news_df["uuid"] = [str(uuid4()) for i in range(news_df.shape[0])]
-    behaviors_df["uuid"] = [str(uuid4()) for i in range(behaviors_df.shape[0])]
-
-    ID_title = dict(zip(news_df.id, news_df.title))
-    ID_newsuuid = dict(zip(news_df.id, news_df.uuid))
-
-    news_uuid_ID = dict(zip(news_df.uuid, news_df.id))  # uuid - news id
-    behavior_uuid_ID = dict(zip(behaviors_df.uuid, behaviors_df.impression_id))  # uuid - impression id
-
-    test_list = []
-
-    # todays_articles (candidates)
-    # ID_newsuuid
-
-    logger.info("converting MIND impressions to POPROX requests")
-    for i in tqdm(range(behaviors_df.shape[0]), desc="converting articles"):
-        test_json = {}
-        test_json["past_articles"] = []
-        test_json["num_recs"] = 10
-        test_json["todays_articles"] = []  # list of json
-
-        row = behaviors_df.iloc[i]
-
-        impression_uuid = row.uuid
-
-        for candidate_pair in row.impressions.split(" "):
-            single_news = {}
-            single_news["article_id"] = ID_newsuuid[candidate_pair.split("-")[0]]
-            single_news["url"] = str(ID_newsuuid[candidate_pair.split("-")[0]])
-            single_news["title"] = single_news["content"] = ID_title[candidate_pair.split("-")[0]]
-
-            single_news = convert_to_Article(single_news)
-            single_news = single_news.model_dump(mode="json")
-            test_json["todays_articles"].append(single_news)
-
-        for article in row.clicked_news.split():
-            single_news = {}
-            single_news["article_id"] = ID_newsuuid[article]
-            single_news["url"] = str(ID_newsuuid[article])
-            single_news["title"] = single_news["content"] = ID_title[article]
-
-            single_news = convert_to_Article(single_news)
-            single_news = single_news.model_dump(mode="json")
-            test_json["past_articles"].append(single_news)
-
-        click_data = {
-            "account_id": impression_uuid,
-            "article_ids": [ID_newsuuid[id] for id in row.clicked_news.split()],
-        }
-
-        click_data = convert_to_ClickHistory(click_data)
-
-        click_data = click_data.model_dump(mode="json")
-        test_json["click_data"] = click_data
-
-        test_list.append(test_json)
-
-    return MindData(news_uuid_ID, behavior_uuid_ID, test_list)
-
-
-def load_mind_frames(archive="MINDlarge_dev") -> MindTables:
-    """
-    Load the news and behavior data frames from MIND data.
-    """
+def load_mind_frames(archive: str = "MINDlarge_dev") -> tuple[pd.DataFrame, pd.DataFrame]:
     data = project_root() / "data"
     logger.info("loading MIND data from %s", archive)
     with zipfile.ZipFile(data / f"{archive}.zip") as zf:
@@ -148,7 +150,7 @@ def load_mind_frames(archive="MINDlarge_dev") -> MindTables:
         size = news_df.memory_usage(deep=True).sum()
         logger.info("loaded %d articles from %s (%.1f MiB)", len(news_df), archive, size / (1024 * 1024))
 
-    return MindTables(news_df, behavior_df)
+    return news_df, behavior_df
 
 
 def _read_zipped_tsv(zf: zipfile.ZipFile, name: str, columns: list[str]) -> pd.DataFrame:
@@ -167,23 +169,3 @@ def _read_zipped_tsv(zf: zipfile.ZipFile, name: str, columns: list[str]) -> pd.D
             usecols=range(len(columns)),
             names=columns,
         )
-
-
-def export_main():
-    logging.basicConfig(level=logging.INFO)
-    data = load_mind_data()
-    out = project_root() / "data" / "mind-converted"
-    out.mkdir(exist_ok=True, parents=True)
-    logger.info("saving news UUID-ID mapping")
-    with open(out / "news-uuid-id.json", "wt") as jsf:
-        json.dump(data.news_uuid_ID, jsf)
-    logger.info("saving behavior UUID-ID mapping")
-    with open(out / "behavior-uuid-id.json", "wt") as jsf:
-        json.dump(data.behavior_uuid_ID, jsf)
-    logger.info("saving test data")
-    with open(out / "test-data.json", "wt") as jsf:
-        json.dump(data.test_list, jsf)
-
-
-if __name__ == "__main__":
-    export_main()
