@@ -56,11 +56,11 @@ class ArticleEmbedder:
                     for article in uncached
                 ]
             )
-            assert_tensor_size(uc_title_tokens, len(uncached), TITLE_LENGTH_LIMIT)
+            assert_tensor_size(uc_title_tokens, len(uncached), TITLE_LENGTH_LIMIT, label="uncached title tokens")
 
             # Step 4: embed the uncached articles
             uc_embeddings = self.model.get_news_vector(uc_title_tokens)
-            assert_tensor_size(uc_embeddings, len(uncached))
+            assert_tensor_size(uc_embeddings, len(uncached), label="uncached article embeddings")
 
             # Step 5: store embeddings to cache & result
             for i, uca in enumerate(uncached):
@@ -70,10 +70,11 @@ class ArticleEmbedder:
                 self.embedding_cache[uca.article_id] = a_emb
 
         # Step 6: stack the embeddings into a single tensor
-        embed_single_tensors = list(cached.values())
+        # we do this with a list to properly deal with duplicate articles
+        embed_single_tensors = [cached[article.article_id] for article in article_set.articles]
         assert not any(e is None for e in embed_single_tensors)
         embed_tensor = th.stack(embed_single_tensors)  # type: ignore
-        assert_tensor_size(embed_tensor, len(article_set.articles))
+        assert_tensor_size(embed_tensor, len(article_set.articles), label="final article embeddings")
 
         # Step 7: put the embedding tensor on the output
         article_set.embeddings = embed_tensor  # type: ignore
