@@ -75,13 +75,14 @@ class ArticleEmbedder:
                 # copy the tensor so it isn't attached to excess memory
                 a_emb = uc_embeddings[i, :].clone()
                 cached[uca.article_id] = a_emb
-                self.embedding_cache[uca.article_id] = a_emb
+                # use CPU for cached articles to reduce CUDA memory usage
+                self.embedding_cache[uca.article_id] = a_emb.cpu()
 
         # Step 6: stack the embeddings into a single tensor
         # we do this with a list to properly deal with duplicate articles
         embed_single_tensors = [cached[article.article_id] for article in article_set.articles]
         assert not any(e is None for e in embed_single_tensors)
-        embed_tensor = th.stack(embed_single_tensors)  # type: ignore
+        embed_tensor = th.stack(embed_single_tensors, dev=self.device)  # type: ignore
         assert_tensor_size(
             embed_tensor, len(article_set.articles), self.model.embedding_size, label="final article embeddings"
         )
