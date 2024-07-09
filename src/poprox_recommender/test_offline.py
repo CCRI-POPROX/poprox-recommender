@@ -4,7 +4,7 @@ import sys
 from lenskit.metrics import topn
 from tqdm import tqdm
 
-from poprox_recommender.data.mind import MindData
+from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
 
 sys.path.append("src")
 from uuid import UUID
@@ -16,7 +16,7 @@ from safetensors.torch import load_file
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_recommender.default import select_articles
+from poprox_recommender.default import personalized_pipeline
 from poprox_recommender.paths import model_file_path
 
 logger = logging.getLogger("poprox_recommender.test_offline")
@@ -68,15 +68,24 @@ if __name__ == "__main__":
     ndcg10 = []
     mrr = []
 
+    pipeline = personalized_pipeline(TEST_REC_COUNT)
+
     logger.info("measuring recommendations")
     for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
         logger.debug("recommending for user %s", request.interest_profile.profile_id)
-        try:
-            recommendations = select_articles(
-                ArticleSet(articles=request.todays_articles),
-                ArticleSet(articles=request.past_articles),
-                request.interest_profile,
+        if request.num_recs != TEST_REC_COUNT:
+            logger.warn(
+                "request for %s had unexpected recommendation count %d",
+                request.interest_profile.profile_id,
                 request.num_recs,
+            )
+        try:
+            recommendations = pipeline(
+                {
+                    "candidate": ArticleSet(articles=request.todays_articles),
+                    "clicked": ArticleSet(articles=request.past_articles),
+                    "profile": request.interest_profile,
+                }
             )
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
