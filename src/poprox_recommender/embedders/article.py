@@ -52,7 +52,7 @@ class ArticleEmbedder:
                             article.title, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
                         ),
                         dtype=th.int32,
-                    )
+                    ).to(self.device)
                     for article in uncached
                 ]
             )
