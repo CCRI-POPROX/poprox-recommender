@@ -1,3 +1,4 @@
+# pyright: basic
 from typing import Any
 
 from poprox_concepts import ArticleSet, InterestProfile
@@ -84,3 +85,4 @@ def fallback_pipeline(num_slots: int) -> RecommendationPipeline:
     pipeline = RecommendationPipeline(name="random_topical")
     pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
     pipeline.add(sampler, inputs=["topical", "candidate"], output="recs")
+    return pipeline
