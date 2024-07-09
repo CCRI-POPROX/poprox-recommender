@@ -18,7 +18,7 @@ from safetensors.torch import load_file
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_recommender.default import personalized_pipeline
+from poprox_recommender.default import fallback_pipeline, personalized_pipeline
 from poprox_recommender.paths import model_file_path, project_root
 
 logger = logging.getLogger("poprox_recommender.test_offline")
@@ -71,13 +71,14 @@ if __name__ == "__main__":
     recip_rank = []
 
     pipeline = personalized_pipeline(TEST_REC_COUNT)
+    fallback = fallback_pipeline(TEST_REC_COUNT)
 
     logger.info("measuring recommendations")
     user_out_fn = project_root() / "outputs" / "user-metrics.csv"
     user_out_fn.parent.mkdir(exist_ok=True, parents=True)
     user_out = open(user_out_fn, "wt")
     user_csv = csv.writer(user_out)
-    user_csv.writerow(["user_id", "NDCG@5", "NDCG@10", "RecipRank"])
+    user_csv.writerow(["user_id", "personalized", "NDCG@5", "NDCG@10", "RecipRank"])
 
     for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
         logger.debug("recommending for user %s", request.interest_profile.profile_id)
@@ -88,20 +89,31 @@ if __name__ == "__main__":
                 request.num_recs,
             )
         try:
-            recommendations = pipeline(
-                {
-                    "candidate": ArticleSet(articles=request.todays_articles),
-                    "clicked": ArticleSet(articles=request.past_articles),
-                    "profile": request.interest_profile,
-                }
-            )
+            if request.interest_profile.click_history.article_ids:
+                recommendations = pipeline(
+                    {
+                        "candidate": ArticleSet(articles=request.todays_articles),
+                        "clicked": ArticleSet(articles=request.past_articles),
+                        "profile": request.interest_profile,
+                    }
+                )
+                personalized = 1
+            else:
+                recommendations = fallback(
+                    {
+                        "candidate": ArticleSet(articles=request.todays_articles),
+                        "clicked": ArticleSet(articles=request.past_articles),
+                        "profile": request.interest_profile,
+                    }
+                )
+                personalized = 0
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
             raise e
 
         logger.debug("measuring for user %s", request.interest_profile.profile_id)
         single_ndcg5, single_ndcg10, single_rr = recsys_metric(mind_data, request, recommendations)
-        user_csv.writerow([request.interest_profile.profile_id, single_ndcg5, single_ndcg10, single_rr])
+        user_csv.writerow([request.interest_profile.profile_id, personalized, single_ndcg5, single_ndcg10, single_rr])
         # recommendations {account id (uuid): LIST[Article]}
         logger.debug(
             "user %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f",
