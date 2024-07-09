@@ -6,6 +6,7 @@ from typing import Optional
 from safetensors.torch import load_file
 from transformers import AutoTokenizer
 
+from poprox_recommender.config import default_device
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
 
@@ -37,17 +38,15 @@ class RecommenderComponents:
     device: str | None
 
 
-def load_checkpoint(device_name=None):
+def load_checkpoint(device=None):
     checkpoint = None
-
-    if device_name is None:
-        # device_name = "cuda" if th.cuda.is_available() else "cpu"
-        device_name = "cpu"
+    if device is None:
+        device = default_device()
 
     load_path = model_file_path("model.safetensors")
 
     checkpoint = load_file(load_path)
-    return checkpoint, device_name
+    return checkpoint, device
 
 
 def load_model(checkpoint, device):
@@ -60,6 +59,9 @@ def load_model(checkpoint, device):
 
 def get_model(device=None) -> RecommenderComponents:
     global _cached_model
+    if device is None:
+        device = default_device()
+
     if _cached_model is None:
         tokenizer = AutoTokenizer.from_pretrained(model_file_path(LANG_MODEL_NAME), cache_dir="/tmp/")
         checkpoint, device = load_checkpoint(device)
