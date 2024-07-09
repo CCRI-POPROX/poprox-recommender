@@ -106,8 +106,12 @@ if __name__ == "__main__":
         single_ndcg5, single_ndcg10, single_rr = recsys_metric(mind_data, request, recommendations)
         user_csv.writerow([request.interest_profile.profile_id, single_ndcg5, single_ndcg10, single_rr])
         # recommendations {account id (uuid): LIST[Article]}
-        print(
-            f"----------------evaluation for {request.interest_profile.profile_id} is NDCG@5 = {single_ndcg5}, NDCG@10 = {single_ndcg10}, RR = {single_rr}"  # noqa: E501
+        logger.debug(
+            "user %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f",
+            request.interest_profile.profile_id,
+            single_ndcg5,
+            single_ndcg10,
+            single_rr,
         )
 
         ndcg5.append(single_ndcg5)
@@ -128,8 +132,8 @@ if __name__ == "__main__":
     out_fn = project_root() / "outputs" / "metrics.json"
     out_fn.parent.mkdir(exist_ok=True, parents=True)
     out_fn.write_text(json.dumps(agg_metrics) + "\n")
-    print(
-        f"Offline evaluation metrics on MIND data: NDCG@5 = {np.mean(ndcg5)}, NDCG@10 = {np.mean(ndcg10)}, MRR = {np.mean(recip_rank)}"  # noqa: E501
-    )
+    logger.info("Mean NDCG@5: %.3f", np.mean(ndcg5))
+    logger.info("Mean NDCG@10: %.3f", np.mean(ndcg10))
+    logger.info("Mean RR: %.3f", np.mean(recip_rank))
 
     # response = {"statusCode": 200, "body": json.dump(body, default=custom_encoder)}
