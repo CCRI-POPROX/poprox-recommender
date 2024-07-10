@@ -1,4 +1,5 @@
 import csv
+import gzip
 import json
 import logging
 import logging.config
@@ -83,9 +84,9 @@ if __name__ == "__main__":
     fallback = fallback_pipeline(TEST_REC_COUNT)
 
     logger.info("measuring recommendations")
-    user_out_fn = project_root() / "outputs" / "user-metrics.csv"
+    user_out_fn = project_root() / "outputs" / "user-metrics.csv.gz"
     user_out_fn.parent.mkdir(exist_ok=True, parents=True)
-    user_out = open(user_out_fn, "wt")
+    user_out = gzip.open(user_out_fn, "wt")
     user_csv = csv.writer(user_out)
     user_csv.writerow(["user_id", "personalized", "NDCG@5", "NDCG@10", "RecipRank"])
 
