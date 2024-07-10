@@ -12,7 +12,6 @@ from poprox_recommender.topics import extract_general_topics, normalized_topic_c
 # topic calibration
 class TopicCalibrator:
     def __init__(self, algo_params, num_slots):
-        self.alpha = float(algo_params.get("topic_calibration_alpha", 0.01))
         self.theta = float(algo_params.get("theta", 0.8))
         self.num_slots = num_slots
 
@@ -37,7 +36,6 @@ class TopicCalibrator:
             article_scores,
             candidate_articles.articles,
             normalized_topic_prefs,
-            self.alpha,
             self.theta,
             topk=self.num_slots,
         )
@@ -45,7 +43,7 @@ class TopicCalibrator:
         return ArticleSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 
 
-def topic_calibration(relevance_scores, articles, topic_preferences, alpha, theta, topk) -> list[Article]:
+def topic_calibration(relevance_scores, articles, topic_preferences, theta, topk) -> list[Article]:
     # MR_i = \theta * reward_i - (1 - \theta)*C(S + i) # C is calibration
     # R is all candidates (not selected yet)
 
@@ -64,7 +62,7 @@ def topic_calibration(relevance_scores, articles, topic_preferences, alpha, thet
                 continue
 
             normalized_S_count = get_normalized_S_count(S_distr, articles[i])
-            calibration = compute_kl_divergence(topic_preferences, normalized_S_count, alpha)
+            calibration = compute_kl_divergence(topic_preferences, normalized_S_count)
 
             mr_i = (1 - theta) * reward_i - (theta * calibration)
             if mr_i > best_MR:
@@ -94,7 +92,7 @@ def get_normalized_S_count(S_distr, article):
 
 
 # from https://github.com/CCRI-POPROX/poprox-recommender/blob/feature/experiment0/tests/test_calibration.ipynb
-def compute_kl_divergence(interacted_distr, reco_distr, alpha=0.01):
+def compute_kl_divergence(interacted_distr, reco_distr):
     """
     KL (p || q), the lower the better.
 
@@ -102,6 +100,7 @@ def compute_kl_divergence(interacted_distr, reco_distr, alpha=0.01):
     computation more numerically stable.
     """
     kl_div = 0.0
+    alpha = 0.01
     for genre, score in interacted_distr.items():
         reco_score = reco_distr.get(genre, 0.0)
         reco_score = (1 - alpha) * reco_score + alpha * score
