@@ -1,6 +1,7 @@
 import csv
 import json
 import logging
+import logging.config
 import sys
 
 from lenskit.metrics import topn
@@ -58,7 +59,15 @@ if __name__ == "__main__":
     """
     For offline evaluation, set theta in mmr_diversity = 1
     """
-    logging.basicConfig(level=logging.INFO, stream=sys.stderr)
+    logging.config.dictConfig(
+        {
+            "verion": 1,
+            "handlers": {
+                "console": {"class": logging.StreamHandler, "level": logging.INFO, "stream": sys.stderr},
+                "file": {"class": logging.FileHandler, "level": logging.DEBUG, "filename": "eval.log"},
+            },
+        }
+    )
     MODEL, DEVICE = load_model()
     TOKEN_MAPPING = "distilbert-base-uncased"  # can be modified
 
