@@ -1,6 +1,7 @@
 import torch as th
 
 from poprox_concepts import ArticleSet, ClickHistory, InterestProfile
+from poprox_recommender.torch.decorators import torch_inference
 
 
 class UserEmbedder:
@@ -9,6 +10,7 @@ class UserEmbedder:
         self.device = device
         self.max_clicks = max_clicks_per_user
 
+    @torch_inference
     def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
         embedding_lookup = {}
         for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):

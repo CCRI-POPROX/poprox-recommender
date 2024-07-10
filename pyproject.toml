@@ -118,9 +118,6 @@ exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.conda-lock]
 channels = ["pytorch", "conda-forge", "nodefaults"]
-# restrict to commonly-used platforms
-# if we need to add support for windows, we can try adding that here
-platforms = ["win-64", "linux-64", "osx-arm64"]
 # extra deps in the conda environment
 [tool.conda-lock.dependencies]
 # specify our Python version & make sure we have pip

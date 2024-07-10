@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Optional
 
 from safetensors.torch import load_file
 from transformers import AutoTokenizer
 
+from poprox_recommender.config import default_device
 from poprox_recommender.model.nrms import NRMS
 from poprox_recommender.paths import model_file_path
 
 LANG_MODEL_NAME = "distilbert-base-uncased"
 _cached_model: Optional[RecommenderComponents] = None
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -37,20 +40,20 @@ class RecommenderComponents:
     device: str | None
 
 
-def load_checkpoint(device_name=None):
+def load_checkpoint(device=None):
     checkpoint = None
-
-    if device_name is None:
-        # device_name = "cuda" if th.cuda.is_available() else "cpu"
-        device_name = "cpu"
+    if device is None:
+        device = default_device()
 
     load_path = model_file_path("model.safetensors")
+    logger.debug("loading model checkpoint from %s", load_path)
 
     checkpoint = load_file(load_path)
-    return checkpoint, device_name
+    return checkpoint, device
 
 
 def load_model(checkpoint, device):
+    logger.debug("instantiating NRMS model")
     model = NRMS(ModelConfig()).to(device)
     model.load_state_dict(checkpoint)
     model.eval()
@@ -60,8 +63,14 @@ def load_model(checkpoint, device):
 
 def get_model(device=None) -> RecommenderComponents:
     global _cached_model
+    if device is None:
+        device = default_device()
+    logger.debug("loading model components on device %s", device)
+
     if _cached_model is None:
-        tokenizer = AutoTokenizer.from_pretrained(model_file_path(LANG_MODEL_NAME), cache_dir="/tmp/")
+        plm_path = model_file_path(LANG_MODEL_NAME)
+        logger.debug("loading tokenizer from %s", plm_path)
+        tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/")
         checkpoint, device = load_checkpoint(device)
         model = load_model(checkpoint, device)
         _cached_model = RecommenderComponents(tokenizer, model, device)
