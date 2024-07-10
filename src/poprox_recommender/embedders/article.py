@@ -77,7 +77,7 @@ class ArticleEmbedder:
                 # copy the tensor so it isn't attached to excess memory
                 a_emb = uc_embeddings[i, :].clone()
                 cached[uca.article_id] = a_emb
-                self.embedding_cache[uca.article_id]
+                self.embedding_cache[uca.article_id] = a_emb
 
         # Step 6: stack the embeddings into a single tensor
         # we do this with a list to properly deal with duplicate articles
