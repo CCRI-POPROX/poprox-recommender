@@ -151,11 +151,11 @@ Silicon).  To make use of a GPU, do the following:
 
 Timing information for batch evaluation with the MIND validation set:
 
-| CPU              | GPU | Time   | Notes                            |
-| :--------------: | :-: | :----: | -------------------------------- |
-| EPYC 7662 (2GHz) | A40 | <1hr   |                                  |
-| Apple M2 Pro     | M2  | ~1 day | Estimated, not run to completion |
-| Apple M2 Pro     | -   | days   | Estimated, not run to completion |
+| CPU              | GPU        | Time   | Notes                            |
+| :--------------: | :--------: | :----: | -------------------------------- |
+| EPYC 7662 (2GHz) | A40 (CUDA) | <1hr   |                                  |
+| Apple M2 Pro     | M2 (MPS)   | ~1 day | Estimated, not run to completion |
+| Apple M2 Pro     | -          | days   | Estimated, not run to completion |
 
 ## Editor Setup
 
