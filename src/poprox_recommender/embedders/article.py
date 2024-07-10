@@ -7,7 +7,7 @@ import torch as th
 from transformers import PreTrainedTokenizer
 
 from poprox_concepts import ArticleSet
-from poprox_recommender.datachecks import assert_tensor_size
+from poprox_recommender.torch.datachecks import assert_tensor_size
 
 logger = logging.getLogger(__name__)
 TITLE_LENGTH_LIMIT = 30

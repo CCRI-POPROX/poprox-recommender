@@ -4,19 +4,24 @@ Data-checking routines.
 
 import torch as th
 
+__all__ = ["assert_tensor_size"]
+
 
 def assert_tensor_size(tensor: th.Tensor, *size: int, label: str | None = None, prefix: bool = True):
     """
-    Check that a tensor is of the expected size, and fail with an assertion error
-    if it is the incorrect size.
+    Check that a tensor is of the expected size, and fail with an assertion
+    error if it is the incorrect size.
 
     Args:
-        tensor: The tensor to check.
-        *size: The expected size of the tensor.
-        label: A label for the tensor.
+        tensor:
+            The tensor to check.
+        *size:
+            The expected size of the tensor.
+        label:
+            A label for the tensor.
         prefix:
-            If ``True`` and the tensor has more dimensions than the expected size, only match the common prefix of
-            dimensions.
+            If ``True`` and the tensor has more dimensions than the expected
+            size, only match the common prefix of dimensions.
     """
     actual = tensor.shape
     expected = th.Size(size)
