@@ -134,6 +134,29 @@ $ curl -X POST -H "Content-Type: application/json" -d @tests/basic-request.json 
 {"recommendations": {"977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [{"article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff", "title": "title 2", "content": "content 2", "url": "url 2", "published_at": "1970-01-01T00:00:00Z", "mentions": []}]}}
 ```
 
+## Running the Evaluation
+
+The default setup for this package is CPU-only, which works for basic testing
+and for deployment, but is very inefficient for evaluation.  The current set of
+models work on both CUDA (on Linux with NVidia cards) and MPS (macOS on Apple
+Silicon).  To make use of a GPU, do the following:
+
+1.  If on Linux, install the CUDA-based Conda environment:
+
+    ```console
+    conda-lock install -n poprox-recs --dev conda-lock-cuda.yml
+    ```
+
+2.  Set the `POPROX_REC_DEVICE` environment variable to `cuda` or `mps`.
+
+Timing information for batch evaluation with the MIND validation set:
+
+| CPU              | GPU | Time   | Notes                            |
+| :--------------: | :-: | :----: | -------------------------------- |
+| EPYC 7662 (2GHz) | A40 | <1hr   |                                  |
+| Apple M2 Pro     | M2  | ~1 day | Estimated, not run to completion |
+| Apple M2 Pro     | -   | days   | Estimated, not run to completion |
+
 ## Editor Setup
 
 If you are using VSCode, you should install the following plugins for best success with this repository:
