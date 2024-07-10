@@ -12,22 +12,6 @@ from colorlog import ColoredFormatter
 
 logger = logging.getLogger(__name__)
 
-term_fmt = ColoredFormatter(
-    "[%(blue)s%(asctime)s%(reset)s] %(log_color)s%(levelname)8s%(reset)s %(cyan)s%(name)s %(reset)s%(message)s",  # noqa: E501
-    datefmt="%H:%M:%S",
-    reset=True,
-    log_colors={
-        "DEBUG": "cyan",
-        "INFO": "green",
-        "WARNING": "yellow",
-        "ERROR": "red",
-        "CRITICAL": "red,bg_white",
-    },
-    secondary_log_colors={},
-    style="%",
-)
-file_fmt = logging.Formatter("[%(asctime)s] %(levelname)s %(name)s: %(message)s")
-
 
 def setup_logging(*, verbose: bool | None = False, log_file: str | Path | None = None):
     """
@@ -64,7 +48,27 @@ def setup_logging(*, verbose: bool | None = False, log_file: str | Path | None =
     # set up the terminal logging
     term_h = logging.StreamHandler(sys.stderr)
     term_h.setLevel(term_level)
+
+    term_fmt = ColoredFormatter(
+        "[%(blue)s%(asctime)s%(reset)s] %(log_color)s%(levelname)8s%(reset)s %(cyan)s%(name)s%(reset)s %(message)s",  # noqa: E501
+        datefmt="%H:%M:%S",
+        reset=True,
+        log_colors={
+            "DEBUG": "cyan",
+            "INFO": "green",
+            "WARNING": "yellow",
+            "ERROR": "red",
+            "CRITICAL": "red,bg_white",
+        },
+        secondary_log_colors={},
+        style="%",
+        # options to detect whether to colorize
+        stream=sys.stderr,
+        no_color=os.environ.get("NO_COLOR", "") != "",
+        force_color=os.environ.get("FORCE_COLOR", "") != "",
+    )
     term_h.setFormatter(term_fmt)
+
     root.addHandler(term_h)
 
     # set up the log file (if any)
@@ -72,7 +76,10 @@ def setup_logging(*, verbose: bool | None = False, log_file: str | Path | None =
         logger.debug("copying logs to %s", log_file)
         file_h = logging.FileHandler(log_file, "w")
         file_h.setLevel(logging.DEBUG)
+
+        file_fmt = logging.Formatter("[%(asctime)s] %(levelname)s %(name)s: %(message)s")
         file_h.setFormatter(file_fmt)
+
         root.addHandler(file_h)
 
     logger.info("logging initialized")
