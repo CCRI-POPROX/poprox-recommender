@@ -62,6 +62,8 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
         diversifier = MMRDiversifier(algo_params, num_slots)
     elif diversify == "pfar":
         diversifier = PFARDiversifier(algo_params, num_slots)
+    elif diversify == "topic-cali":
+        diversifier = TopicCalibrator(algo_params, num_slots)
 
     pipeline = RecommendationPipeline(name=diversify)
     pipeline.add(article_embedder, inputs=["candidate"], output="candidate")

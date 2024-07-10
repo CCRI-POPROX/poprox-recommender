@@ -1824,12 +1824,18 @@
         {
             "account_id": "8d022e4f-382a-4cd4-a9c9-14ce7ed8e1c0",
             "article_ids": [
-                "352a67b6-153d-4835-af7c-560ad795f67a",
+                "1410985c-f52a-4b0b-a7ac-2aa046ecdd29",
                 "9cd74855-f983-4d32-bb6c-3bc14e93f147",
                 "50551b08-1f74-4b3f-8183-96ac57b0ed6d"
             ]
         },
+        "click_topic_counts": {
+            "World news": 2,
+            "Health": 1,
+            "U.S. news": 1,
+            "Sports": 1
+        },
         "onboarding_topics": []
     },
-    "num_recs": 2
+    "num_recs": 4
 }
