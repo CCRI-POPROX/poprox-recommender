@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import Optional
 
@@ -12,6 +13,7 @@ from poprox_recommender.paths import model_file_path
 
 LANG_MODEL_NAME = "distilbert-base-uncased"
 _cached_model: Optional[RecommenderComponents] = None
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -44,12 +46,14 @@ def load_checkpoint(device=None):
         device = default_device()
 
     load_path = model_file_path("model.safetensors")
+    logger.debug("loading model checkpoint from %s", load_path)
 
     checkpoint = load_file(load_path)
     return checkpoint, device
 
 
 def load_model(checkpoint, device):
+    logger.debug("instantiating NRMS model")
     model = NRMS(ModelConfig()).to(device)
     model.load_state_dict(checkpoint)
     model.eval()
@@ -61,9 +65,12 @@ def get_model(device=None) -> RecommenderComponents:
     global _cached_model
     if device is None:
         device = default_device()
+    logger.debug("loading model components on device %s", device)
 
     if _cached_model is None:
-        tokenizer = AutoTokenizer.from_pretrained(model_file_path(LANG_MODEL_NAME), cache_dir="/tmp/")
+        plm_path = model_file_path(LANG_MODEL_NAME)
+        logger.debug("loading tokenizer from %s", plm_path)
+        tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/")
         checkpoint, device = load_checkpoint(device)
         model = load_model(checkpoint, device)
         _cached_model = RecommenderComponents(tokenizer, model, device)
