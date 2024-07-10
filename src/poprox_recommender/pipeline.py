@@ -2,8 +2,6 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Callable
 
-import torch
-
 from poprox_concepts import ArticleSet, InterestProfile
 
 
@@ -26,10 +24,9 @@ class RecommendationPipeline:
         # Avoid modifying the inputs
         state = deepcopy(inputs)
 
-        with torch.inference_mode():
-            # Run each component in the order it was added
-            for component_spec in self.components:
-                state = self.run_component(component_spec, state)
+        # Run each component in the order it was added
+        for component_spec in self.components:
+            state = self.run_component(component_spec, state)
 
         recs = state[self.components[-1].output]
 

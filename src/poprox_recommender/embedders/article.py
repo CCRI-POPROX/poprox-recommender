@@ -8,6 +8,7 @@ from transformers import PreTrainedTokenizer
 
 from poprox_concepts import ArticleSet
 from poprox_recommender.torch.datachecks import assert_tensor_size
+from poprox_recommender.torch.decorators import torch_inference
 
 logger = logging.getLogger(__name__)
 TITLE_LENGTH_LIMIT = 30
@@ -35,6 +36,7 @@ class ArticleEmbedder:
         self.device = device
         self.embedding_cache = {}
 
+    @torch_inference
     def __call__(self, article_set: ArticleSet) -> ArticleSet:
         if not article_set.articles:
             article_set.embeddings = th.zeros((0, self.model.embedding_size))  # type: ignore

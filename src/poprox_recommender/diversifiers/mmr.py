@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 from poprox_concepts import ArticleSet
+from poprox_recommender.torch.decorators import torch_inference
 
 
 class MMRDiversifier:
@@ -11,6 +12,7 @@ class MMRDiversifier:
         self.theta = float(algo_params.get("theta", 0.8))
         self.num_slots = num_slots
 
+    @torch_inference
     def __call__(self, candidate_articles: ArticleSet) -> ArticleSet:
         similarity_matrix = compute_similarity_matrix(candidate_articles.embeddings)
 
