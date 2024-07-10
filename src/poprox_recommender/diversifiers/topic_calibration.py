@@ -72,11 +72,8 @@ def topic_calibration(relevance_scores, articles, topic_preferences, theta, topk
         if candidate is not None:
             S.append(candidate)
             update_S_distr(S_distr, articles[candidate])
-    return S
 
-    # take articles and construct frequency dictionary
-    # then normalized topic count
-    return []
+    return S
 
 
 def update_S_distr(S_distr, article):
