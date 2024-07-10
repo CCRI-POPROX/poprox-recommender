@@ -2,7 +2,7 @@
 from typing import Any
 
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
+from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.filters import TopicFilter
 from poprox_recommender.model import get_model
