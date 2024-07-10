@@ -8,6 +8,7 @@ from lenskit.metrics import topn
 from tqdm import tqdm
 
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.logging import setup_logging
 
 sys.path.append("src")
 from uuid import UUID
@@ -59,15 +60,8 @@ if __name__ == "__main__":
     """
     For offline evaluation, set theta in mmr_diversity = 1
     """
-    logging.config.dictConfig(
-        {
-            "version": 1,
-            "handlers": {
-                "console": {"class": "logging.StreamHandler", "level": "INFO", "stream": "ext://sys.stderr"},
-                "file": {"class": "logging.FileHandler", "level": "DEBUG", "filename": "eval.log"},
-            },
-        }
-    )
+    setup_logging(log_file="eval.log")
+
     MODEL, DEVICE = load_model()
     TOKEN_MAPPING = "distilbert-base-uncased"  # can be modified
 
