@@ -4,6 +4,7 @@ import torch as th
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_topic_count
+from poprox_recommender.torch.decorators import torch_inference
 
 
 class PFARDiversifier:
@@ -12,6 +13,7 @@ class PFARDiversifier:
         self.tau = algo_params.get("pfar_tau", None)
         self.num_slots = num_slots
 
+    @torch_inference
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
         article_scores = th.sigmoid(th.tensor(candidate_articles.scores)).cpu().detach().numpy()
 

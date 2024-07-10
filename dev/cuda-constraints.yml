@@ -1,0 +1,5 @@
+# Mixin environment file for the conda-lock process generate a Cuda
+# environment (on Linux, other platforms are still CPU).
+dependencies:
+  - pytorch-gpu
+  - libblas=*=*mkl*

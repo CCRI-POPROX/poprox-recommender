@@ -3,6 +3,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-added-large-files
+        exclude: conda-lock.*\.yml
       - id: check-json
         exclude: outputs/.*\.json
       - id: check-merge-conflict
@@ -17,7 +18,7 @@ repos:
     hooks:
       - id: yamlfmt
         name: format yaml files
-        exclude: conda-lock.yml
+        exclude: conda-lock.*\.yml
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.4.8
