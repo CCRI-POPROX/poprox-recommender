@@ -61,10 +61,10 @@ if __name__ == "__main__":
     """
     logging.config.dictConfig(
         {
-            "verion": 1,
+            "version": 1,
             "handlers": {
-                "console": {"class": logging.StreamHandler, "level": logging.INFO, "stream": sys.stderr},
-                "file": {"class": logging.FileHandler, "level": logging.DEBUG, "filename": "eval.log"},
+                "console": {"class": "logging.StreamHandler", "level": "INFO", "stream": "ext://sys.stderr"},
+                "file": {"class": "logging.FileHandler", "level": "DEBUG", "filename": "eval.log"},
             },
         }
     )
