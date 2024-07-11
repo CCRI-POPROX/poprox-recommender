@@ -2,7 +2,7 @@
 from typing import Any
 
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier
+from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.filters import TopicFilter
 from poprox_recommender.model import get_model
@@ -62,6 +62,8 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
         diversifier = MMRDiversifier(algo_params, num_slots)
     elif diversify == "pfar":
         diversifier = PFARDiversifier(algo_params, num_slots)
+    elif diversify == "topic-cali":
+        diversifier = TopicCalibrator(algo_params, num_slots)
 
     pipeline = RecommendationPipeline(name=diversify)
     pipeline.add(article_embedder, inputs=["candidate"], output="candidate")
