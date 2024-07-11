@@ -15,7 +15,7 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: d4072e7d3e4e7e74874b79bc5e775b7db72d02a3319caff1b7f48fbf124bdc1a
+    linux-64: 1f015d17035412444ef561a1c364f523fb8be32201a654b3a84dd3e030219ae6
   channels:
   - url: pytorch
     used_env_vars: []
@@ -1090,6 +1090,19 @@ package:
   hash:
     md5: 3faab06a954c2a04039983f2c4a50d99
     sha256: 2c1b2e9755ce3102bca8d69e8f26e4f087ece73f50418186aee7c74bef8e1698
+  category: main
+  optional: false
+- name: colorlog
+  version: 6.8.2
+  manager: conda
+  platform: linux-64
+  dependencies:
+    python: '>=3.11,<3.12.0a0'
+    python_abi: 3.11.*
+  url: https://conda.anaconda.org/conda-forge/linux-64/colorlog-6.8.2-py311h38be061_0.conda
+  hash:
+    md5: 69ddfed4db722e2b6ab93dd6c66df163
+    sha256: 35cbf352c45b158c1d421c0896efc2d59f75cb1751bc9cebd2ed19468067174e
   category: main
   optional: false
 - name: comm
@@ -4926,7 +4939,7 @@ package:
   category: dev
   optional: true
 - name: pyright
-  version: 1.1.370
+  version: 1.1.371
   manager: conda
   platform: linux-64
   dependencies:
@@ -4936,10 +4949,10 @@ package:
     nodejs: ''
     python: '>=3.11,<3.12.0a0'
     python_abi: 3.11.*
-  url: https://conda.anaconda.org/conda-forge/linux-64/pyright-1.1.370-py311h61187de_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/pyright-1.1.371-py311h61187de_0.conda
   hash:
-    md5: 1bd5c01edb7113072972aa9c2f69efbe
-    sha256: 8a3387cf8748c3db5125381c9e254ce6ceb0e905fedd62a6e07f4293566eba0c
+    md5: a9c2c3c8590f4f3abbc094e9a426ee91
+    sha256: 6a7ec465ab63429329248f85c66b2df829e25dbcf55f8e29e84275dbfa35c868
   category: dev
   optional: true
 - name: pysocks
@@ -5536,15 +5549,15 @@ package:
   category: dev
   optional: true
 - name: setuptools
-  version: 70.1.1
+  version: 70.2.0
   manager: conda
   platform: linux-64
   dependencies:
     python: '>=3.8'
-  url: https://conda.anaconda.org/conda-forge/noarch/setuptools-70.1.1-pyhd8ed1ab_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/setuptools-70.2.0-pyhd8ed1ab_0.conda
   hash:
-    md5: 985e9e86e1b0fc75a74a9bfab9309ef7
-    sha256: 34ecbc63df6052a320838335a0e594b60050c92de79254045e52095bc27dde03
+    md5: 10170a48c48cfe65eab923f76f982087
+    sha256: 354781a1ce4f8f229bf4a19fe48550d5f73d5b511df78a07b1b78fb2c78e52ad
   category: main
   optional: false
 - name: shellingham
@@ -5849,15 +5862,15 @@ package:
   category: dev
   optional: true
 - name: tomlkit
-  version: 0.12.5
+  version: 0.13.0
   manager: conda
   platform: linux-64
   dependencies:
-    python: '>=3.7'
-  url: https://conda.anaconda.org/conda-forge/noarch/tomlkit-0.12.5-pyha770c72_0.conda
+    python: '>=3.8'
+  url: https://conda.anaconda.org/conda-forge/noarch/tomlkit-0.13.0-pyha770c72_0.conda
   hash:
-    md5: e5dde5caf905e9d95895e05f94967e14
-    sha256: 5117eff35992d896ca177dfffc08be8a9b3bf3d306ddc3d8bf4b699cdf1e1b79
+    md5: 810ba6f354ddef812d0ddc4669cc8de6
+    sha256: 8e61623213c620776f1328da4bee03f8828dbf2730f1a4fbd9b8af5398f5848e
   category: dev
   optional: true
 - name: toolz
