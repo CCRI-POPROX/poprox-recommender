@@ -52,7 +52,7 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
 
     if not algo_params:
         algo_params = {}
-    diversify = str(algo_params.get("diversity_algo", "pfar"))
+    diversify = str(algo_params.get("diversity_algo", "topic-cali"))
 
     article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
     user_embedder = UserEmbedder(model.model, model.device)
