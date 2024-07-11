@@ -12,7 +12,10 @@ from poprox_recommender.topics import extract_general_topics, normalized_topic_c
 # topic calibration
 class TopicCalibrator:
     def __init__(self, algo_params, num_slots):
-        self.theta = float(algo_params.get("theta", 0.8))
+        # Theta term controls the score and calibration tradeoff, the higher
+        # the theta the higher the resulting recommendation will be calibrated.
+        # We choose the binary search way to start in the middle
+        self.theta = float(algo_params.get("theta", 0.5))
         self.num_slots = num_slots
 
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
