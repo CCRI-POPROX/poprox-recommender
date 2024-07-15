@@ -4,6 +4,8 @@ from typing import Callable
 
 from poprox_concepts import ArticleSet, InterestProfile
 
+PipelineState = dict[str, ArticleSet | InterestProfile]
+
 
 @dataclass
 class ComponentSpec:
@@ -20,7 +22,7 @@ class RecommendationPipeline:
     def add(self, component: Callable, inputs: list[str], output: str):
         self.components.append(ComponentSpec(component, inputs, output))
 
-    def __call__(self, inputs: dict[str, ArticleSet | InterestProfile]) -> ArticleSet:
+    def __call__(self, inputs: PipelineState) -> PipelineState:
         # Avoid modifying the inputs
         state = deepcopy(inputs)
 
@@ -28,14 +30,18 @@ class RecommendationPipeline:
         for component_spec in self.components:
             state = self.run_component(component_spec, state)
 
-        recs = state[self.components[-1].output]
+        recs = state[self.last_output]
 
         # Double check that we're returning the right type for recs
         if not isinstance(recs, ArticleSet):
             msg = f"The final pipeline component must return ArticleSet, but received {type(recs)}"
             raise TypeError(msg)
 
-        return recs
+        return state
+
+    @property
+    def last_output(self):
+        return self.components[-1].output
 
     def run_component(self, component_spec: ComponentSpec, state: dict[str, ArticleSet | InterestProfile]):
         arguments = []

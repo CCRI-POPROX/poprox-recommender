@@ -67,6 +67,11 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
     article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
     user_embedder = UserEmbedder(model.model, model.device)
     article_scorer = ArticleScorer(model.model)
+    topk_ranker = TopkRanker(algo_params={}, num_slots=num_slots)
+
+    # topic_filter = TopicFilter()
+    # sampler = UniformSampler(num_slots=num_slots)
+    # fallback = Fallback(num_slots=num_slots)
 
     if diversify == "mmr":
         logger.info("Recommendations will be re-ranked with mmr.")
@@ -87,6 +92,16 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
     pipeline.add(user_embedder, inputs=["clicked", "profile"], output="profile")
     pipeline.add(article_scorer, inputs=["candidate", "profile"], output="candidate")
     pipeline.add(ranker, inputs=["candidate", "profile"], output="recs")
+    pipeline.add(topk_ranker, inputs=["candidate"], output="ranked")
+    pipeline.add(diversifier, inputs=["candidate", "profile"], output="reranked")
+
+    # TODO: Create a component that takes two ArticleSets and fills in any empty slots
+    #       in the first one from the second one
+
+    # pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
+    # pipeline.add(sampler, inputs=["topical", "candidate"], output="sampled")
+    # pipeline.add(fallback, inputs=["recs", "sampled"], output="recs")
+
     return pipeline
 
 
