@@ -30,7 +30,13 @@ def generate_recs(event, context):
     else:
         logger.info("Using default parameters")
 
-    logger.info("Selecting articles...")
+    num_candidates = len(req.todays_articles)
+
+    if num_candidates < req.num_recs:
+        msg = f"Received insufficient candidates ({num_candidates}) in a request for {req.num_recs} recommendations."
+        raise ValueError(msg)
+
+    logger.info(f"Selecting articles from {num_candidates} candidates...")
 
     # The platform should send an ArticleSet but we'll do it here for now
     candidate_articles = ArticleSet(articles=req.todays_articles)
