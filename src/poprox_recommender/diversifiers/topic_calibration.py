@@ -1,21 +1,28 @@
+import logging
 from collections import defaultdict
 
 import numpy as np
 import torch as th
-
 from poprox_concepts import Article, ArticleSet, InterestProfile
-from poprox_recommender.topics import extract_general_topics, normalized_topic_count
 
+from poprox_recommender.rankers import Ranker
+from poprox_recommender.topics import (extract_general_topics,
+                                       normalized_topic_count)
+
+logger = logging.getLogger("topic_calibration")
+logger.setLevel(logging.DEBUG)
 
 # Topic Calibration uses MMR
 # to rerank recommendations according to
 # topic calibration
-class TopicCalibrator:
-    def __init__(self, algo_params, num_slots):
+class TopicCalibrator(Ranker):
+    def __init__(self, algo_params, num_slots=10):
+        self.validate_algo_params(algo_params, ["theta"])
+
         # Theta term controls the score and calibration tradeoff, the higher
         # the theta the higher the resulting recommendation will be calibrated.
         # We choose the binary search way to start in the middle
-        self.theta = float(algo_params.get("theta", 0.5))
+        self.theta = float(algo_params.get("theta", 0.1))
         self.num_slots = num_slots
 
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
@@ -23,15 +30,12 @@ class TopicCalibrator:
 
         topic_preferences: dict[str, int] = {}
 
+        for interest in interest_profile.onboarding_topics:
+            topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
+
         if interest_profile.click_topic_counts:
             for topic, click_count in interest_profile.click_topic_counts.items():
                 topic_preferences[topic] = click_count
-
-        else:
-            # if click history does not exist we cannot compute
-            # topic calibration, so return the top k articles based on original relevance score
-            article_indices = article_scores.argsort()[-self.num_slots :][::-1]
-            return ArticleSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 
         normalized_topic_prefs = normalized_topic_count(topic_preferences)
 
@@ -50,45 +54,45 @@ def topic_calibration(relevance_scores, articles, topic_preferences, theta, topk
     # MR_i = \theta * reward_i - (1 - \theta)*C(S + i) # C is calibration
     # R is all candidates (not selected yet)
 
-    S = []  # final recommendation (topk index)
-    S_distr = defaultdict(int)  # frequency distribution of topics of S
+    recommendations = []  # final recommendation (topk index)
+    rec_topics = defaultdict(int)  # frequency distribution of topics of S
     # first recommended item
-    S.append(relevance_scores.argmax())
-    update_S_distr(S_distr, articles[int(relevance_scores.argmax())])
+    recommendations.append(relevance_scores.argmax())
+    add_article_to_topics(rec_topics, articles[int(relevance_scores.argmax())])
 
     for k in range(topk - 1):
         candidate = None  # next item
-        best_MR = float("-inf")
+        best_candidate_score = float("-inf")
 
-        for i, reward_i in enumerate(relevance_scores):  # iterate R for next item
-            if i in S:
+        for article_idx, article_score in enumerate(relevance_scores):  # iterate R for next item
+            if article_idx in recommendations:
                 continue
 
-            normalized_S_count = get_normalized_S_count(S_distr, articles[i])
-            calibration = compute_kl_divergence(topic_preferences, normalized_S_count)
+            normalized_candidate_topics = normalized_topics_with_candidate(rec_topics, articles[article_idx])
+            calibration = compute_kl_divergence(topic_preferences, normalized_candidate_topics)
 
-            mr_i = (1 - theta) * reward_i - (theta * calibration)
-            if mr_i > best_MR:
-                best_MR = mr_i
-                candidate = i
+            adjusted_candidate_score = (1 - theta) * article_score - (theta * calibration)
+            if adjusted_candidate_score > best_candidate_score:
+                best_candidate_score = adjusted_candidate_score
+                candidate = article_idx
 
         if candidate is not None:
-            S.append(candidate)
-            update_S_distr(S_distr, articles[candidate])
+            recommendations.append(candidate)
+            add_article_to_topics(rec_topics, articles[candidate])
 
-    return S
+    return recommendations
 
 
-def update_S_distr(S_distr, article):
+def add_article_to_topics(rec_topics, article):
     topics = extract_general_topics(article)
     for topic in topics:
-        S_distr[topic] += S_distr.get(topic, 0) + 1
+        rec_topics[topic] = rec_topics.get(topic, 0) + 1
 
 
-def get_normalized_S_count(S_distr, article):
-    S_distr_with_candidate = S_distr.copy()
-    update_S_distr(S_distr_with_candidate, article)
-    return normalized_topic_count(S_distr_with_candidate)
+def normalized_topics_with_candidate(rec_topics, article):
+    rec_topics_with_candidate = rec_topics.copy()
+    add_article_to_topics(rec_topics_with_candidate, article)
+    return normalized_topic_count(rec_topics_with_candidate)
 
 
 # from https://github.com/CCRI-POPROX/poprox-recommender/blob/feature/experiment0/tests/test_calibration.ipynb
