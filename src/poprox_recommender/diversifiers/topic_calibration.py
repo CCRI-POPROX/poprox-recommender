@@ -9,8 +9,6 @@ from poprox_recommender.rankers import Ranker
 from poprox_recommender.topics import (extract_general_topics,
                                        normalized_topic_count)
 
-logger = logging.getLogger("topic_calibration")
-logger.setLevel(logging.DEBUG)
 
 # Topic Calibration uses MMR
 # to rerank recommendations according to
