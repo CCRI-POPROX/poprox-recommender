@@ -31,7 +31,7 @@ class TopicCalibrator(Ranker):
 
         if interest_profile.click_topic_counts:
             for topic, click_count in interest_profile.click_topic_counts.items():
-                topic_preferences[topic] = click_count
+                topic_preferences[topic] += click_count
 
         normalized_topic_prefs = normalized_topic_count(topic_preferences)
 
