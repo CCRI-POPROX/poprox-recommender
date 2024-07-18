@@ -18,13 +18,13 @@ def test_request_with_topic_calibrator():
     req_f = test_dir.parent / "medium_request.json"
     req = RecommendationRequest.model_validate_json(req_f.read_text())
 
-    base_recs = select_articles(
+    base_outputs = select_articles(
         ArticleSet(articles=req.todays_articles),
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
         req.num_recs,
     )
-    topic_calibrated_recs = select_articles(
+    topic_calibrated_outputs = select_articles(
         ArticleSet(articles=req.todays_articles),
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
@@ -33,11 +33,11 @@ def test_request_with_topic_calibrator():
     )
 
     # do we get recommendations?
-    assert len(topic_calibrated_recs.articles) > 0
-    assert len(base_recs.articles) == len(topic_calibrated_recs.articles)
+    assert len(topic_calibrated_outputs.recs.articles) > 0
+    assert len(base_outputs.recs.articles) == len(topic_calibrated_outputs.recs.articles)
 
-    base_article_ids = [article.article_id for article in base_recs.articles]
-    calibrated_article_ids = [article.article_id for article in topic_calibrated_recs.articles]
+    base_article_ids = [article.article_id for article in base_outputs.recs.articles]
+    calibrated_article_ids = [article.article_id for article in topic_calibrated_outputs.recs.articles]
 
     # are the recommendation lists different?
     assert base_article_ids != calibrated_article_ids

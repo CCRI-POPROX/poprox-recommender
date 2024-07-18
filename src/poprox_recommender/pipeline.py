@@ -4,14 +4,22 @@ from typing import Callable
 
 from poprox_concepts import ArticleSet, InterestProfile
 
-PipelineState = dict[str, ArticleSet | InterestProfile]
-
 
 @dataclass
 class ComponentSpec:
     component: Callable
     inputs: list[str]
     output: str
+
+
+@dataclass
+class PipelineState:
+    values: dict[str, ArticleSet | InterestProfile]
+    last: str | None = None
+
+    @property
+    def recs(self) -> ArticleSet:
+        return self.values[self.last]
 
 
 class RecommendationPipeline:
@@ -30,11 +38,9 @@ class RecommendationPipeline:
         for component_spec in self.components:
             state = self.run_component(component_spec, state)
 
-        recs = state[self.last_output]
-
         # Double check that we're returning the right type for recs
-        if not isinstance(recs, ArticleSet):
-            msg = f"The final pipeline component must return ArticleSet, but received {type(recs)}"
+        if not isinstance(state.recs, ArticleSet):
+            msg = f"The final pipeline component must return ArticleSet, but received {type(state.recs)}"
             raise TypeError(msg)
 
         return state
@@ -43,10 +49,10 @@ class RecommendationPipeline:
     def last_output(self):
         return self.components[-1].output
 
-    def run_component(self, component_spec: ComponentSpec, state: dict[str, ArticleSet | InterestProfile]):
+    def run_component(self, component_spec: ComponentSpec, state: PipelineState):
         arguments = []
         for input_name in component_spec.inputs:
-            arguments.append(state[input_name])
+            arguments.append(state.values[input_name])
 
         output = component_spec.component(*arguments)
 
@@ -57,6 +63,7 @@ class RecommendationPipeline:
             )
             raise TypeError(msg)
 
-        state[component_spec.output] = output
+        state.last = component_spec.output
+        state.values[state.last] = output
 
         return state
