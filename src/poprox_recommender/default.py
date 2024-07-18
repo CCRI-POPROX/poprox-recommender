@@ -3,9 +3,7 @@ import logging
 from typing import Any
 
 from poprox_concepts import ArticleSet, InterestProfile
-
-from poprox_recommender.diversifiers import (MMRDiversifier, PFARDiversifier,
-                                             TopicCalibrator)
+from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
 from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.filters import TopicFilter
 from poprox_recommender.model import get_model
@@ -16,6 +14,7 @@ from poprox_recommender.scorers import ArticleScorer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
 
 def select_articles(
     candidate_articles: ArticleSet,
@@ -55,7 +54,7 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
     model = get_model()
     if model is None:
         return None
-    
+
     if not algo_params:
         algo_params = {}
 
@@ -70,16 +69,16 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
     article_scorer = ArticleScorer(model.model)
 
     if diversify == "mmr":
-        logger.info(f"Recommendations will be re-ranked with mmr.")
+        logger.info("Recommendations will be re-ranked with mmr.")
         ranker = MMRDiversifier(algo_params, num_slots)
     elif diversify == "pfar":
-        logger.info(f"Recommendations will be re-ranked with pfar.")
+        logger.info("Recommendations will be re-ranked with pfar.")
         ranker = PFARDiversifier(algo_params, num_slots)
     elif diversify == "topic-cali":
-        logger.info(f"Recommendations will be re-ranked with topic calibration.")
+        logger.info("Recommendations will be re-ranked with topic calibration.")
         ranker = TopicCalibrator(algo_params, num_slots)
     else:
-        logger.info(f"Recommendations will be ranked with plain top-k.")
+        logger.info("Recommendations will be ranked with plain top-k.")
         ranker = TopkRanker(algo_params, num_slots)
 
     pipeline = RecommendationPipeline(name=diversify)

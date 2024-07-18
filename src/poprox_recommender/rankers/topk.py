@@ -1,8 +1,8 @@
 from typing import Any
 
 import numpy as np
-from poprox_concepts import ArticleSet, InterestProfile
 
+from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.rankers import Ranker
 
 

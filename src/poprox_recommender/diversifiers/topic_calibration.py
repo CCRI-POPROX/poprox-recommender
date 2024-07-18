@@ -1,13 +1,11 @@
-import logging
 from collections import defaultdict
 
 import numpy as np
 import torch as th
-from poprox_concepts import Article, ArticleSet, InterestProfile
 
+from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.rankers import Ranker
-from poprox_recommender.topics import (extract_general_topics,
-                                       normalized_topic_count)
+from poprox_recommender.topics import extract_general_topics, normalized_topic_count
 
 
 # Topic Calibration uses MMR

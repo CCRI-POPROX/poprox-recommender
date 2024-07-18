@@ -1,11 +1,10 @@
 import math
 
 import torch as th
-from poprox_concepts import Article, ArticleSet, InterestProfile
 
+from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.rankers import Ranker
-from poprox_recommender.topics import (GENERAL_TOPICS, extract_general_topics,
-                                       normalized_topic_count)
+from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_topic_count
 from poprox_recommender.torch.decorators import torch_inference
 
 

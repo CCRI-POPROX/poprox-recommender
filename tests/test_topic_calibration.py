@@ -7,7 +7,6 @@ from pathlib import Path
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
-
 from poprox_recommender.default import select_articles
 
 logger = logging.getLogger(__name__)
