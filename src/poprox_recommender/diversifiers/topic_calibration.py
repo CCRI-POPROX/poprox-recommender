@@ -24,7 +24,7 @@ class TopicCalibrator(Ranker):
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
         article_scores = th.sigmoid(th.tensor(candidate_articles.scores)).cpu().detach().numpy()
 
-        topic_preferences: dict[str, int] = {}
+        topic_preferences: dict[str, int] = defaultdict(int)
 
         for interest in interest_profile.onboarding_topics:
             topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
