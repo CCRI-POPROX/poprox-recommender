@@ -1,4 +1,5 @@
 # pyright: basic
+import logging
 from typing import Any
 
 from poprox_concepts import ArticleSet, InterestProfile
@@ -7,8 +8,12 @@ from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.filters import TopicFilter
 from poprox_recommender.model import get_model
 from poprox_recommender.pipeline import RecommendationPipeline
+from poprox_recommender.rankers.topk import TopkRanker
 from poprox_recommender.samplers import UniformSampler
 from poprox_recommender.scorers import ArticleScorer
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def select_articles(
@@ -52,25 +57,36 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
 
     if not algo_params:
         algo_params = {}
-    diversify = str(algo_params.get("diversity_algo", "topic-cali"))
+
+    if "diversity_algo" in algo_params:
+        diversify = algo_params["diversity_algo"]
+        del algo_params["diversity_algo"]
+    else:
+        diversify = None
 
     article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
     user_embedder = UserEmbedder(model.model, model.device)
     article_scorer = ArticleScorer(model.model)
 
     if diversify == "mmr":
-        diversifier = MMRDiversifier(algo_params, num_slots)
+        logger.info("Recommendations will be re-ranked with mmr.")
+        ranker = MMRDiversifier(algo_params, num_slots)
     elif diversify == "pfar":
-        diversifier = PFARDiversifier(algo_params, num_slots)
+        logger.info("Recommendations will be re-ranked with pfar.")
+        ranker = PFARDiversifier(algo_params, num_slots)
     elif diversify == "topic-cali":
-        diversifier = TopicCalibrator(algo_params, num_slots)
+        logger.info("Recommendations will be re-ranked with topic calibration.")
+        ranker = TopicCalibrator(algo_params, num_slots)
+    else:
+        logger.info("Recommendations will be ranked with plain top-k.")
+        ranker = TopkRanker(algo_params, num_slots)
 
     pipeline = RecommendationPipeline(name=diversify)
     pipeline.add(article_embedder, inputs=["candidate"], output="candidate")
     pipeline.add(article_embedder, inputs=["clicked"], output="clicked")
     pipeline.add(user_embedder, inputs=["clicked", "profile"], output="profile")
     pipeline.add(article_scorer, inputs=["candidate", "profile"], output="candidate")
-    pipeline.add(diversifier, inputs=["candidate", "profile"], output="recs")
+    pipeline.add(ranker, inputs=["candidate", "profile"], output="recs")
     return pipeline
 
 

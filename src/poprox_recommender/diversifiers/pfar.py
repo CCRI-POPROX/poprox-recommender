@@ -3,14 +3,17 @@ import math
 import torch as th
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_recommender.rankers import Ranker
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_topic_count
 from poprox_recommender.torch.decorators import torch_inference
 
 
-class PFARDiversifier:
-    def __init__(self, algo_params, num_slots):
-        self.lamb = float(algo_params.get("pfar_lamb", 1))
-        self.tau = algo_params.get("pfar_tau", None)
+class PFARDiversifier(Ranker):
+    def __init__(self, algo_params, num_slots=10):
+        self.validate_algo_params(algo_params, ["lambda", "tau"])
+
+        self.lamb = float(algo_params.get("lambda", 1))
+        self.tau = algo_params.get("tau", None)
         self.num_slots = num_slots
 
     @torch_inference
