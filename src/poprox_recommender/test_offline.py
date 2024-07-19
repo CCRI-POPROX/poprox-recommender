@@ -8,7 +8,7 @@ from lenskit.metrics import topn
 from tqdm import tqdm
 
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
-from poprox_recommender.logging import setup_logging
+from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.pipeline import RecommendationPipeline
 
 sys.path.append("src")
