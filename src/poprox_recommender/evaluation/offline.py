@@ -22,7 +22,7 @@ from safetensors.torch import load_file
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
 from poprox_recommender.default import fallback_pipeline, personalized_pipeline
-from poprox_recommender.metrics import rank_biased_overlap
+from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.paths import model_file_path, project_root
 from poprox_recommender.pipeline import PipelineState
 
