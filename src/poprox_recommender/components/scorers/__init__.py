@@ -1,3 +1,3 @@
-from poprox_recommender.scorers.article import ArticleScorer
+from poprox_recommender.components.scorers.article import ArticleScorer
 
 __all__ = ["ArticleScorer"]

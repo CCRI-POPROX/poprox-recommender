@@ -1,3 +1,3 @@
-from poprox_recommender.samplers.uniform import UniformSampler
+from poprox_recommender.components.samplers.uniform import UniformSampler
 
 __all__ = ["UniformSampler"]

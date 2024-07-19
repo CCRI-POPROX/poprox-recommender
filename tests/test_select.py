@@ -2,9 +2,9 @@ from uuid import uuid4
 
 from poprox_concepts import Article, ArticleSet, ClickHistory, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
-from poprox_recommender.filters import TopicFilter
+from poprox_recommender.components.filters import TopicFilter
+from poprox_recommender.components.samplers import UniformSampler
 from poprox_recommender.pipeline import RecommendationPipeline
-from poprox_recommender.samplers import UniformSampler
 
 
 def test_select_by_topic_filters_articles():

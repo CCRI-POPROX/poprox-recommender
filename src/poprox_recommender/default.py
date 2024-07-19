@@ -3,14 +3,14 @@ import logging
 from typing import Any
 
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
-from poprox_recommender.embedders import ArticleEmbedder, UserEmbedder
-from poprox_recommender.filters import TopicFilter
+from poprox_recommender.components.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
+from poprox_recommender.components.embedders import ArticleEmbedder, UserEmbedder
+from poprox_recommender.components.filters import TopicFilter
+from poprox_recommender.components.rankers.topk import TopkRanker
+from poprox_recommender.components.samplers import UniformSampler
+from poprox_recommender.components.scorers import ArticleScorer
 from poprox_recommender.model import get_model
 from poprox_recommender.pipeline import PipelineState, RecommendationPipeline
-from poprox_recommender.rankers.topk import TopkRanker
-from poprox_recommender.samplers import UniformSampler
-from poprox_recommender.scorers import ArticleScorer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
