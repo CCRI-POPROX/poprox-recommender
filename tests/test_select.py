@@ -52,18 +52,18 @@ def test_select_by_topic_filters_articles():
         "clicked": ArticleSet(articles=[]),
         "profile": profile,
     }
-    recs = pipeline(inputs)
+    outputs = pipeline(inputs)
 
-    for article in recs.articles:
+    for article in outputs.recs.articles:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
     sampler.num_slots = 3
-    recs = pipeline(inputs)
+    outputs = pipeline(inputs)
 
-    assert len(recs.articles) == 3
+    assert len(outputs.recs.articles) == 3
 
-    for article in recs.articles[:2]:
+    for article in outputs.recs.articles[:2]:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics

@@ -4,6 +4,8 @@ from typing import Callable
 
 from poprox_concepts import ArticleSet, InterestProfile
 
+StateDict = dict[str, ArticleSet | InterestProfile]
+
 
 @dataclass
 class ComponentSpec:
@@ -14,12 +16,12 @@ class ComponentSpec:
 
 @dataclass
 class PipelineState:
-    values: dict[str, ArticleSet | InterestProfile]
+    elements: StateDict
     last: str | None = None
 
     @property
     def recs(self) -> ArticleSet:
-        return self.values[self.last]
+        return self.elements[self.last]
 
 
 class RecommendationPipeline:
@@ -30,9 +32,11 @@ class RecommendationPipeline:
     def add(self, component: Callable, inputs: list[str], output: str):
         self.components.append(ComponentSpec(component, inputs, output))
 
-    def __call__(self, inputs: PipelineState) -> PipelineState:
+    def __call__(self, inputs: PipelineState | StateDict) -> PipelineState:
         # Avoid modifying the inputs
         state = deepcopy(inputs)
+        if isinstance(state, dict):
+            state = PipelineState(state)
 
         # Run each component in the order it was added
         for component_spec in self.components:
@@ -52,7 +56,7 @@ class RecommendationPipeline:
     def run_component(self, component_spec: ComponentSpec, state: PipelineState):
         arguments = []
         for input_name in component_spec.inputs:
-            arguments.append(state.values[input_name])
+            arguments.append(state.elements[input_name])
 
         output = component_spec.component(*arguments)
 
@@ -64,6 +68,6 @@ class RecommendationPipeline:
             raise TypeError(msg)
 
         state.last = component_spec.output
-        state.values[state.last] = output
+        state.elements[state.last] = output
 
         return state

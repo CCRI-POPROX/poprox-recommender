@@ -34,13 +34,11 @@ def select_articles(
     if pipeline is None:
         pipeline = fallback_pipeline(num_slots)
 
-    inputs = PipelineState(
-        values={
-            "candidate": candidate_articles,
-            "clicked": clicked_articles,
-            "profile": interest_profile,
-        }
-    )
+    inputs = {
+        "candidate": candidate_articles,
+        "clicked": clicked_articles,
+        "profile": interest_profile,
+    }
 
     return pipeline(inputs)
 
