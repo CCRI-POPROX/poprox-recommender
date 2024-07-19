@@ -4,7 +4,8 @@ from typing import Callable
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
 
-StateDict = dict[str, ArticleSet | InterestProfile]
+StateValue = ArticleSet | InterestProfile
+StateDict = dict[str, StateValue]
 
 
 @dataclass
@@ -17,11 +18,21 @@ class ComponentSpec:
 @dataclass
 class PipelineState:
     elements: StateDict
-    last: str | None = None
+    _last: str | None = None
+
+    def __getitem__(self, key):
+        return self.elements[key]
+
+    def __setitem__(self, key, value):
+        self.elements[key] = value
+
+    @property
+    def last(self) -> StateValue:
+        return self.elements[self._last]
 
     @property
     def recs(self) -> list[Article]:
-        return self.elements[self.last].articles
+        return self.last.articles
 
 
 class RecommendationPipeline:
@@ -43,7 +54,7 @@ class RecommendationPipeline:
             state = self.run_component(component_spec, state)
 
         # Double check that we're returning the right type for recs
-        if not isinstance(state.recs, ArticleSet):
+        if not isinstance(state.last, ArticleSet):
             msg = f"The final pipeline component must return ArticleSet, but received {type(state.recs)}"
             raise TypeError(msg)
 
@@ -67,7 +78,7 @@ class RecommendationPipeline:
             )
             raise TypeError(msg)
 
-        state.last = component_spec.output
-        state.elements[state.last] = output
+        state._last = component_spec.output
+        state[state._last] = output
 
         return state
