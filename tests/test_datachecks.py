@@ -1,7 +1,7 @@
 import torch as th
 from pytest import raises
 
-from poprox_recommender.torch.datachecks import assert_tensor_size
+from poprox_recommender.pytorch.datachecks import assert_tensor_size
 
 
 def test_tensor_size_ok():
