@@ -19,9 +19,10 @@ import pandas as pd
 import torch as th
 from safetensors.torch import load_file
 
-from poprox_concepts import ArticleSet, InterestProfile
 from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.domain import ArticleSet, InterestProfile
 from poprox_recommender.default import fallback_pipeline, personalized_pipeline
+from poprox_recommender.metrics import rank_biased_overlap
 from poprox_recommender.paths import model_file_path, project_root
 
 logger = logging.getLogger("poprox_recommender.test_offline")
@@ -61,25 +62,10 @@ def recsys_metric(
 
     ranked = pipeline_state["ranked"]
     reranked = pipeline_state["reranked"]
-    single_rbo5 = rank_bias_overlap(ranked, reranked, k=5)
-    single_rbo10 = rank_bias_overlap(ranked, reranked, k=10)
+    single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
+    single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
 
     return single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10
-
-
-def rank_bias_overlap(recs_list_a: ArticleSet, recs_list_b: ArticleSet, p: float = 0.9, k: int = 10) -> float:
-    """Compute RBO"""
-    summands = []
-    for d in range(1, k + 1):
-        set_a = set([a.article_id for a in recs_list_a.articles[:d]])
-        set_b = set([b.article_id for b in recs_list_b.articles[:d]])
-        overlap = len(set_a.intersection(set_b))
-        agreement = overlap / d
-        summands.append(agreement * np.power(p, d))
-
-    rbo = (1 - p) / p * sum(summands)
-
-    return rbo
 
 
 if __name__ == "__main__":
