@@ -33,11 +33,11 @@ def test_request_with_topic_calibrator():
     )
 
     # do we get recommendations?
-    assert len(topic_calibrated_outputs.recs.articles) > 0
-    assert len(base_outputs.recs.articles) == len(topic_calibrated_outputs.recs.articles)
+    assert len(topic_calibrated_outputs.recs) > 0
+    assert len(base_outputs.recs) == len(topic_calibrated_outputs.recs)
 
-    base_article_ids = [article.article_id for article in base_outputs.recs.articles]
-    calibrated_article_ids = [article.article_id for article in topic_calibrated_outputs.recs.articles]
+    base_article_ids = [article.article_id for article in base_outputs.recs]
+    calibrated_article_ids = [article.article_id for article in topic_calibrated_outputs.recs]
 
     # are the recommendation lists different?
     assert base_article_ids != calibrated_article_ids

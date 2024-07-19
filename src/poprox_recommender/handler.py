@@ -62,7 +62,7 @@ def generate_recs(event, context):
     logger.info("Constructing response...")
     resp_body = RecommendationResponse.model_validate(
         {
-            "recommendations": {profile.profile_id: outputs.recs.articles},
+            "recommendations": {profile.profile_id: outputs.recs},
         }
     )
 

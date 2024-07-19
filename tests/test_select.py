@@ -54,7 +54,7 @@ def test_select_by_topic_filters_articles():
     }
     outputs = pipeline(inputs)
 
-    for article in outputs.recs.articles:
+    for article in outputs.recs:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
 
@@ -62,8 +62,8 @@ def test_select_by_topic_filters_articles():
     sampler.num_slots = 3
     outputs = pipeline(inputs)
 
-    assert len(outputs.recs.articles) == 3
+    assert len(outputs.recs) == 3
 
-    for article in outputs.recs.articles[:2]:
+    for article in outputs.recs[:2]:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics

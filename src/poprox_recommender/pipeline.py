@@ -2,7 +2,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Callable
 
-from poprox_concepts import ArticleSet, InterestProfile
+from poprox_concepts import Article, ArticleSet, InterestProfile
 
 StateDict = dict[str, ArticleSet | InterestProfile]
 
@@ -20,8 +20,8 @@ class PipelineState:
     last: str | None = None
 
     @property
-    def recs(self) -> ArticleSet:
-        return self.elements[self.last]
+    def recs(self) -> list[Article]:
+        return self.elements[self.last].articles
 
 
 class RecommendationPipeline:

@@ -25,7 +25,7 @@ def test_direct_basic_request():
         req.num_recs,
     )
     # do we get recommendations?
-    assert len(outputs.recs.articles) > 0
+    assert len(outputs.recs) > 0
 
 
 def test_direct_basic_request_without_clicks():
@@ -44,4 +44,4 @@ def test_direct_basic_request_without_clicks():
         req.num_recs,
     )
     # do we get recommendations?
-    assert len(outputs.recs.articles) > 0
+    assert len(outputs.recs) > 0
