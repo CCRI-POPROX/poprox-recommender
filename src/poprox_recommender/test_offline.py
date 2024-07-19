@@ -20,10 +20,11 @@ import torch as th
 from safetensors.torch import load_file
 
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_concepts.domain import ArticleSet, InterestProfile
+from poprox_concepts.domain import ArticleSet
 from poprox_recommender.default import fallback_pipeline, personalized_pipeline
 from poprox_recommender.metrics import rank_biased_overlap
 from poprox_recommender.paths import model_file_path, project_root
+from poprox_recommender.pipeline import PipelineState
 
 logger = logging.getLogger("poprox_recommender.test_offline")
 
@@ -46,13 +47,12 @@ def custom_encoder(obj):
 def recsys_metric(
     mind_data: MindData,
     request: RecommendationRequest,
-    recommendations: ArticleSet,
-    pipeline_state: dict[str, ArticleSet | InterestProfile],
+    pipeline_state: PipelineState,
 ):
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
 
-    recs = pd.DataFrame({"item": [a.article_id for a in recommendations.articles]})
+    recs = pd.DataFrame({"item": [a.article_id for a in pipeline_state.recs]})
     truth = mind_data.user_truth(request.interest_profile.profile_id)
 
     # RR should look for *clicked* articles, not just all impression articles
@@ -116,21 +116,17 @@ if __name__ == "__main__":
                 "profile": request.interest_profile,
             }
             if request.interest_profile.click_history.article_ids:
-                pipeline_state = pipeline(inputs)
-                recs = pipeline_state[pipeline.last_output]
+                outputs = pipeline(inputs)
                 personalized = 1
             else:
-                pipeline_state = fallback(inputs)
-                recs = pipeline_state[fallback.last_output]
+                outputs = fallback(inputs)
                 personalized = 0
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
             raise e
 
         logger.debug("measuring for user %s", request.interest_profile.profile_id)
-        single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10 = recsys_metric(
-            mind_data, request, recs, pipeline_state
-        )
+        single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10 = recsys_metric(mind_data, request, outputs)
         user_csv.writerow(
             [
                 request.interest_profile.profile_id,
