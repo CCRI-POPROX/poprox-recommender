@@ -76,13 +76,7 @@ class RecommendationPipeline:
 
         output = component_spec.component(*arguments)
 
-        if not isinstance(output, (ArticleSet, InterestProfile)):
-            msg = (
-                f"Pipeline components must return ArticleSet or InterestProfile, "
-                f"but received {type(output)} from {type(component_spec.component)}"
-            )
-            raise TypeError(msg)
-
+        self._validate_return_type(component_spec, output)
         state._last = component_spec.output
         state[state._last] = output
 
@@ -112,6 +106,14 @@ class RecommendationPipeline:
 
         state_type = self._state_types.get(output_name, None)
         output_type = sig.return_annotation
+
+        if output_type is not _empty and output_type not in (ArticleSet, InterestProfile):
+            msg = (
+                f"Pipeline components must return ArticleSet or InterestProfile, "
+                f"but received {type(output_type)} from {type(spec.component)}"
+            )
+            raise TypeError(msg)
+
         if state_type and output_type is not _empty and state_type != output_type:
             msg = (
                 f"Component {spec.component} returns output with type {output_type} "
@@ -121,3 +123,12 @@ class RecommendationPipeline:
             raise TypeError(msg)
 
         return output_type
+
+    def _validate_return_type(self, component_spec, output):
+        expected_type = self._state_types.get(component_spec.output, None)
+        if expected_type and not isinstance(output, expected_type):
+            msg = (
+                f"{type(component_spec.component)} is expected to return {expected_type}, "
+                f"but received {type(output)}"
+            )
+            raise TypeError(msg)
