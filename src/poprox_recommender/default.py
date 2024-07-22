@@ -89,10 +89,12 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
     pipeline.add(article_embedder, inputs=["clicked"], output="clicked")
     pipeline.add(user_embedder, inputs=["clicked", "profile"], output="profile")
 
-    # Score and rank articles
+    # Score and rank articles with diversification/calibration reranking
     pipeline.add(article_scorer, inputs=["candidate", "profile"], output="candidate")
-    pipeline.add(topk_ranker, inputs=["candidate", "profile"], output="ranked")
     pipeline.add(ranker, inputs=["candidate", "profile"], output="reranked")
+
+    # Output the plain descending-by-score ranking for comparison
+    pipeline.add(topk_ranker, inputs=["candidate", "profile"], output="ranked")
 
     # Fallback in case not enough articles came from the ranker
     pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
