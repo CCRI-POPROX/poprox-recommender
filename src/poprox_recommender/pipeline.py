@@ -1,7 +1,8 @@
 from copy import deepcopy
 from dataclasses import dataclass
 from inspect import _empty, signature
-from typing import Callable
+from types import UnionType
+from typing import Any, Callable, Union, get_args, get_origin
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
 
@@ -90,7 +91,7 @@ class RecommendationPipeline:
         for input_name, sig_param in zip(spec.inputs, sig_params):
             input_type = state_types[input_name]
             sig_param_type = sig_param.annotation
-            if sig_param_type is not _empty and input_type != sig_param_type:
+            if not included_in(input_type, sig_param_type):
                 msg = (
                     f"Component {spec.component} expected inputs with types {[p.annotation for p in sig_params]} "
                     f"but received inputs with types {[state_types[i] for i in spec.inputs]}"
@@ -114,7 +115,7 @@ class RecommendationPipeline:
             )
             raise TypeError(msg)
 
-        if state_type and output_type is not _empty and state_type != output_type:
+        if output_type is not _empty and not included_in(output_type, state_type):
             msg = (
                 f"Component {spec.component} returns output with type {output_type} "
                 f"but would need to return {state_type} in order to overwrite {output_name}"
@@ -126,9 +127,28 @@ class RecommendationPipeline:
 
     def _validate_return_type(self, component_spec, output):
         expected_type = self._state_types.get(component_spec.output, None)
-        if expected_type and not isinstance(output, expected_type):
+        output_type = type(output)
+        if not included_in(output_type, expected_type):
             msg = (
                 f"{type(component_spec.component)} is expected to return {expected_type}, "
                 f"but received {type(output)}"
             )
             raise TypeError(msg)
+
+
+def is_union(t: Any) -> bool:
+    origin = get_origin(t)
+    return origin is Union or origin is UnionType
+
+
+def included_in(object_type: type, t: Any):
+    if t == _empty or t is None:
+        return True
+
+    if object_type == t:
+        return True
+
+    if not is_union(t):
+        return False
+
+    return object_type in get_args(t)
