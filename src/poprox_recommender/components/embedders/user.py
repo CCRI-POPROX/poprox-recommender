@@ -1,7 +1,7 @@
 import torch as th
 
 from poprox_concepts import ArticleSet, ClickHistory, InterestProfile
-from poprox_recommender.torch.decorators import torch_inference
+from poprox_recommender.pytorch.decorators import torch_inference
 
 
 class UserEmbedder:

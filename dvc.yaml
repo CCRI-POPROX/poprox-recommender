@@ -1,8 +1,8 @@
 stages:
   measure-mind-val:
-    cmd: python -m poprox_recommender.test_offline
+    cmd: python -m poprox_recommender.evaluation.offline
     deps:
-      - src/poprox_recommender/test_offline.py
+      - src/poprox_recommender/evaluation/offline.py
       - data/MINDlarge_dev.zip
     outs:
       - outputs/user-metrics.csv

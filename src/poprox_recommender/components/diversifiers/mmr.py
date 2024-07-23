@@ -4,8 +4,8 @@ import numpy as np
 from tqdm import tqdm
 
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.rankers import Ranker
-from poprox_recommender.torch.decorators import torch_inference
+from poprox_recommender.components.rankers import Ranker
+from poprox_recommender.pytorch.decorators import torch_inference
 
 
 class MMRDiversifier(Ranker):
