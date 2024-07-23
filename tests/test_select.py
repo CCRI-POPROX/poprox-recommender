@@ -2,9 +2,9 @@ from uuid import uuid4
 
 from poprox_concepts import Article, ArticleSet, ClickHistory, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
-from poprox_recommender.filters import TopicFilter
+from poprox_recommender.components.filters import TopicFilter
+from poprox_recommender.components.samplers import UniformSampler
 from poprox_recommender.pipeline import RecommendationPipeline
-from poprox_recommender.samplers import UniformSampler
 
 
 def test_select_by_topic_filters_articles():
@@ -52,18 +52,18 @@ def test_select_by_topic_filters_articles():
         "clicked": ArticleSet(articles=[]),
         "profile": profile,
     }
-    recs = pipeline(inputs)
+    outputs = pipeline(inputs)
 
-    for article in recs.articles:
+    for article in outputs.recs:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
     sampler.num_slots = 3
-    recs = pipeline(inputs)
+    outputs = pipeline(inputs)
 
-    assert len(recs.articles) == 3
+    assert len(outputs.recs) == 3
 
-    for article in recs.articles[:2]:
+    for article in outputs.recs[:2]:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics

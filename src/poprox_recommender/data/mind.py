@@ -95,9 +95,7 @@ class MindData:
             clicked_ids: list[str] = row.clicked_news.split()  # type: ignore
             cand_pairs: list[str] = row.impressions.split()  # type: ignore
 
-            clicks = ClickHistory(
-                account_id=cast(UUID, row.uuid), article_ids=[self.news_uuid_for_id(aid) for aid in clicked_ids]
-            )
+            clicks = ClickHistory(article_ids=[self.news_uuid_for_id(aid) for aid in clicked_ids])
             past = []
             for aid in clicked_ids:
                 past.append(self.lookup_article(id=aid))
@@ -107,10 +105,8 @@ class MindData:
                 aid, _clicked = pair.split("-")
                 today.append(self.lookup_article(id=aid))
 
-            clicks = ClickHistory(
-                account_id=cast(UUID, row.uuid), article_ids=[self.news_uuid_for_id(aid) for aid in clicked_ids]
-            )
-            profile = InterestProfile(profile_id=clicks.account_id, click_history=clicks, onboarding_topics=[])
+            clicks = ClickHistory(article_ids=[self.news_uuid_for_id(aid) for aid in clicked_ids])
+            profile = InterestProfile(profile_id=cast(UUID, row.uuid), click_history=clicks, onboarding_topics=[])
             yield RecommendationRequest(
                 todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
             )

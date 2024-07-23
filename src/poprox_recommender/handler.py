@@ -51,7 +51,7 @@ def generate_recs(event, context):
 
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
 
-    recommendations = select_articles(
+    outputs = select_articles(
         candidate_articles,
         clicked_articles,
         profile,
@@ -61,7 +61,9 @@ def generate_recs(event, context):
 
     logger.info("Constructing response...")
     resp_body = RecommendationResponse.model_validate(
-        {"recommendations": {profile.profile_id: recommendations.articles}}
+        {
+            "recommendations": {profile.profile_id: outputs.recs},
+        }
     )
 
     logger.info("Serializing response...")
