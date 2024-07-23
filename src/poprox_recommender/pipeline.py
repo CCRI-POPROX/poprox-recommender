@@ -121,9 +121,6 @@ class RecommendationPipeline:
                 f"but would need to return {state_type} in order to overwrite {output_name}"
             )
 
-        state._last = component_spec.output
-        state[state._last] = output
-
             raise TypeError(msg)
 
         return output_type
