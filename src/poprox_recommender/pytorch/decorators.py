@@ -5,6 +5,7 @@ Decorators to help with Torch usage.
 # pyright: strict
 from __future__ import annotations
 
+from functools import wraps
 from typing import Callable, ParamSpec, TypeVar
 
 import torch
@@ -26,6 +27,7 @@ def torch_inference(func: Callable[P, R]) -> Callable[P, R]:
         func: the function to wrap.
     """
 
+    @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         with torch.inference_mode():
             return func(*args, **kwargs)
