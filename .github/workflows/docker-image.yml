@@ -52,7 +52,7 @@ jobs:
 
       - name: Submit test request
         run: |
-          python ./tests/test-docker-lambda.py
+          python ./tests/integration/test-docker-lambda.py
 
       - name: Dump Docker logs
         if: always()
