@@ -61,10 +61,14 @@ def recsys_metric(
     single_ndcg5 = topn.ndcg(recs, truth, k=5)
     single_ndcg10 = topn.ndcg(recs, truth, k=10)
 
-    ranked = pipeline_state["ranked"]
-    reranked = pipeline_state["reranked"]
-    single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
-    single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
+    ranked = pipeline_state.elements.get("ranked", None)
+    reranked = pipeline_state.elements.get("reranked", None)
+    if ranked and reranked:
+        single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
+        single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
+    else:
+        single_rbo5 = None
+        single_rbo10 = None
 
     return single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10
 
@@ -142,8 +146,8 @@ if __name__ == "__main__":
             single_ndcg5,
             single_ndcg10,
             single_rr,
-            single_rbo5,
-            single_rbo10,
+            single_rbo5 or -1.0,
+            single_rbo10 or -1.0,
         )
 
         ndcg5.append(single_ndcg5)
@@ -162,8 +166,8 @@ if __name__ == "__main__":
         "NDCG@5": np.mean(ndcg5),
         "NDCG@10": np.mean(ndcg10),
         "MRR": np.mean(recip_rank),
-        "RBO@5": np.mean(rbo5),
-        "RBO@10": np.mean(rbo10),
+        "RBO@5": np.nanmean(rbo5),
+        "RBO@10": np.nanmean(rbo10),
     }
     out_fn = project_root() / "outputs" / "metrics.json"
     out_fn.parent.mkdir(exist_ok=True, parents=True)
