@@ -108,7 +108,7 @@ class RecommendationPipeline:
         state_type = self._state_types.get(output_name, None)
         output_type = sig.return_annotation
 
-        if output_type is not _empty and output_type not in (ArticleSet, InterestProfile):
+        if output_type is not _empty and not issubclass(output_type, (ArticleSet, InterestProfile)):
             msg = (
                 f"Pipeline components must return ArticleSet or InterestProfile, "
                 f"but received {type(output_type)} from {type(spec.component)}"
@@ -127,8 +127,7 @@ class RecommendationPipeline:
 
     def _validate_return_type(self, component_spec, output):
         expected_type = self._state_types.get(component_spec.output, None)
-        output_type = type(output)
-        if not included_in(output_type, expected_type):
+        if not isinstance(output, expected_type):
             msg = (
                 f"{type(component_spec.component)} is expected to return {expected_type}, "
                 f"but received {type(output)}"
@@ -145,7 +144,7 @@ def included_in(object_type: type, t: Any):
     if t == _empty or t is None:
         return True
 
-    if object_type == t:
+    if issubclass(object_type, t):
         return True
 
     if not is_union(t):
