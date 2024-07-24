@@ -5,12 +5,13 @@ Test the POPROX endpoint running under Serverless Offline.
 import logging
 import os
 import sys
-from pathlib import Path
 from threading import Condition, Lock, Thread
 
 import requests
 from pexpect import EOF, spawn
 from pytest import fail, fixture, mark
+
+from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +58,8 @@ class ServerlessBackground(Thread):
 
 @mark.serverless
 def test_basic_request(sl_listener):
-    test_dir = Path(__file__)
-    req_f = test_dir.parent / "basic-request.json"
+    test_dir = project_root() / "tests"
+    req_f = test_dir / "request_data" / "basic-request.json"
     req_body = req_f.read_text()
 
     logger.info("sending request")
