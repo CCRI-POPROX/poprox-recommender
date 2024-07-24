@@ -7,7 +7,7 @@ class UniformSampler:
     def __init__(self, num_slots):
         self.num_slots = num_slots
 
-    def __call__(self, candidate: ArticleSet, backup: ArticleSet | None = None):
+    def __call__(self, candidate: ArticleSet, backup: ArticleSet | None = None) -> ArticleSet:
         backup_articles = list(filter(lambda article: article not in candidate.articles, backup.articles))
 
         num_backups = (

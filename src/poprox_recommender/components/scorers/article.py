@@ -1,5 +1,5 @@
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.torch.decorators import torch_inference
+from poprox_recommender.pytorch.decorators import torch_inference
 
 
 class ArticleScorer:

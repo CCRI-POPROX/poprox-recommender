@@ -30,7 +30,13 @@ def generate_recs(event, context):
     else:
         logger.info("Using default parameters")
 
-    logger.info("Selecting articles...")
+    num_candidates = len(req.todays_articles)
+
+    if num_candidates < req.num_recs:
+        msg = f"Received insufficient candidates ({num_candidates}) in a request for {req.num_recs} recommendations."
+        raise ValueError(msg)
+
+    logger.info(f"Selecting articles from {num_candidates} candidates...")
 
     # The platform should send an ArticleSet but we'll do it here for now
     candidate_articles = ArticleSet(articles=req.todays_articles)
@@ -45,7 +51,7 @@ def generate_recs(event, context):
 
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
 
-    recommendations = select_articles(
+    outputs = select_articles(
         candidate_articles,
         clicked_articles,
         profile,
@@ -55,7 +61,9 @@ def generate_recs(event, context):
 
     logger.info("Constructing response...")
     resp_body = RecommendationResponse.model_validate(
-        {"recommendations": {profile.profile_id: recommendations.articles}}
+        {
+            "recommendations": {profile.profile_id: outputs.recs},
+        }
     )
 
     logger.info("Serializing response...")

@@ -1,0 +1,1841 @@
+{
+    "todays_articles": [
+        {
+            "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
+            "title": "US job openings fall to 8.1 million, lowest since 2021, but remain at historically high levels",
+            "content": "U.S. job openings fell in April to the lowest level since 2021",
+            "url": "https://apnews.com/article/job-openings-unemployment-economy-inflation-interest-rates-81dae65f447ae75165b9eed8278cd424",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
+                    "mention_id": "604913bb-f804-408f-aba5-025662ea8f1a",
+                    "source": "AP-Machine",
+                    "relevance": 36,
+                    "entity": {
+                        "entity_id": "1d1bbaf5-b690-4b2b-9b98-f99f3a4c3cd5",
+                        "external_id": "b17e2751b26d4523a2c99d79e04747ee",
+                        "name": "COVID-19 pandemic",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "b17e2751b26d4523a2c99d79e04747ee",
+                            "name": "COVID-19 pandemic",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 36
+                        }
+                    }
+                },
+                {
+                    "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
+                    "mention_id": "6a31a046-2bbc-4af4-8cbc-c1c50ac079fc",
+                    "source": "AP-Machine",
+                    "relevance": 63,
+                    "entity": {
+                        "entity_id": "4700a8cc-153d-45a9-a374-d8b351f8a504",
+                        "external_id": "ec2db49888e810048c93f8851349f9bd",
+                        "name": "Labor",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "ec2db49888e810048c93f8851349f9bd",
+                            "name": "Labor",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 63
+                        }
+                    }
+                },
+                {
+                    "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
+                    "mention_id": "4ff168a3-5b6e-478a-a1ee-0e8e40824537",
+                    "source": "AP-Machine",
+                    "relevance": 71,
+                    "entity": {
+                        "entity_id": "71517262-cbc3-45e0-b396-4ed5cbf2a9a8",
+                        "external_id": "4f7e0448857510048d0aff2260dd383e",
+                        "name": "Economy",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "4f7e0448857510048d0aff2260dd383e",
+                            "name": "Economy",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 71
+                        }
+                    }
+                },
+                {
+                    "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
+                    "mention_id": "c1029e6f-571d-42cd-98d8-9644d347c614",
+                    "source": "AP-Machine",
+                    "relevance": 36,
+                    "entity": {
+                        "entity_id": "d91dd8b1-b57d-4108-8a2c-9da84cf0131b",
+                        "external_id": "ec3142c088e810048cbaf8851349f9bd",
+                        "name": "Inflation",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "ec3142c088e810048cbaf8851349f9bd",
+                            "name": "Inflation",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 36
+                        }
+                    }
+                },
+                {
+                    "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
+                    "mention_id": "13c84982-607c-4158-9662-134a14bf8127",
+                    "source": "AP-Machine",
+                    "relevance": 82,
+                    "entity": {
+                        "entity_id": "c7707573-1a18-4e5e-8f79-a3aa8891d6a5",
+                        "external_id": "e00eb978850a1004895591f43387513e",
+                        "name": "Jobs and careers",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "e00eb978850a1004895591f43387513e",
+                            "name": "Jobs and careers",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 59
+                        }
+                    }
+                },
+                {
+                    "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
+                    "mention_id": "9d3aa79e-a5c5-4860-bac0-b6eb1c6953f7",
+                    "source": "AP-Machine",
+                    "relevance": 97,
+                    "entity": {
+                        "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
+                        "external_id": "c8e409f8858510048872ff2260dd383e",
+                        "name": "Business",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "c8e409f8858510048872ff2260dd383e",
+                            "name": "Business",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 50
+                        }
+                    }
+                },
+                {
+                    "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
+                    "mention_id": "049e217c-b151-4a59-b8c4-3426a1300384",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
+                        "external_id": "c8e409f8858510048872ff2260dd383e",
+                        "name": "Business",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "c8e409f8858510048872ff2260dd383e",
+                            "name": "Business",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 50
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "469e1b02-4d72-42d8-a520-a40a85c79610",
+            "title": "How Trump's deny-everything strategy could hurt him at sentencing",
+            "content": "Donald Trump has had plenty to say since his hush money trial conviction last week",
+            "url": "https://apnews.com/article/trump-hush-money-stormy-daniels-sentencing-66dbfa66613aaae29a3959e619b7593c",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "469e1b02-4d72-42d8-a520-a40a85c79610",
+                    "mention_id": "49ef1187-c514-4724-affe-8f16436d4fe6",
+                    "source": "AP-Machine",
+                    "relevance": 58,
+                    "entity": {
+                        "entity_id": "b688c6b1-bc92-493a-a267-f46a03bbbd14",
+                        "external_id": "78c99fe8829f100481b5df092526b43e",
+                        "name": "Trials",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "78c99fe8829f100481b5df092526b43e",
+                            "name": "Trials",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 68
+                        }
+                    }
+                },
+                {
+                    "article_id": "469e1b02-4d72-42d8-a520-a40a85c79610",
+                    "mention_id": "afc3a338-4507-41a8-9b43-ce40af628116",
+                    "source": "AP-Machine",
+                    "relevance": 89,
+                    "entity": {
+                        "entity_id": "128cc425-bfbe-4c05-9a25-76f34f0fd844",
+                        "external_id": "4626a38a1b52454ca5d01755d14f1dc9",
+                        "name": "Legal proceedings",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "4626a38a1b52454ca5d01755d14f1dc9",
+                            "name": "Legal proceedings",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 62
+                        }
+                    }
+                },
+                {
+                    "article_id": "469e1b02-4d72-42d8-a520-a40a85c79610",
+                    "mention_id": "72f28ea3-527b-4e7d-8e4c-50f6fa3e297f",
+                    "source": "AP-Machine",
+                    "relevance": 75,
+                    "entity": {
+                        "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
+                        "external_id": "86aad5207dac100488ecba7fa5283c3e",
+                        "name": "Politics",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "86aad5207dac100488ecba7fa5283c3e",
+                            "name": "Politics",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 99,
+                            "editorial_subject": "Politics"
+                        }
+                    }
+                },
+                {
+                    "article_id": "469e1b02-4d72-42d8-a520-a40a85c79610",
+                    "mention_id": "53e4e655-7455-4ea8-8dd3-f4e25b205eb1",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
+                        "external_id": "a4677d70863b4012b846a1b00f5079f5",
+                        "name": "U.S. news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "a4677d70863b4012b846a1b00f5079f5",
+                            "name": "U.S. news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "U.S. news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "469e1b02-4d72-42d8-a520-a40a85c79610",
+                    "mention_id": "e81e941f-7123-4601-bbac-928558f49d82",
+                    "source": "AP-Editorial",
+                    "relevance": 50,
+                    "entity": {
+                        "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
+                        "external_id": "f25af2d07e4e100484f5df092526b43e",
+                        "name": "General news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "f25af2d07e4e100484f5df092526b43e",
+                            "name": "General news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 50,
+                            "editorial_subject": "General news"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
+            "title": "Idris Elba helps uncover the WWII soldiers of color who never got their due",
+            "content": "More than 8 million people of color served with the Allies but little is known of their sacrifices",
+            "url": "https://apnews.com/article/erased-idris-elba-ww2-soldiers-5b8163286bfdd17d4ee7dff9c9df744c",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
+                    "mention_id": "ebd4e35e-6ce3-4b90-b4dc-50a146262ebc",
+                    "source": "AP-Machine",
+                    "relevance": 71,
+                    "entity": {
+                        "entity_id": "00a1d691-9fbf-4fe7-a2ea-3732d94a99ab",
+                        "external_id": "74bbae4a3d914703acc9581f89305a62",
+                        "name": "Black people",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "74bbae4a3d914703acc9581f89305a62",
+                            "name": "Black people",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 56
+                        }
+                    }
+                },
+                {
+                    "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
+                    "mention_id": "94643253-2cdd-4cf3-b67c-169fec921e91",
+                    "source": "AP-Machine",
+                    "relevance": 46,
+                    "entity": {
+                        "entity_id": "020b3273-2d8a-48bb-8288-453eec248321",
+                        "external_id": "3b7438807d7010048477ba7fa5283c3e",
+                        "name": "Military and defense",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "3b7438807d7010048477ba7fa5283c3e",
+                            "name": "Military and defense",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 98
+                        }
+                    }
+                },
+                {
+                    "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
+                    "mention_id": "a6ba0c95-afbf-4f73-b604-677798dfefbc",
+                    "source": "AP-Machine",
+                    "relevance": 64,
+                    "entity": {
+                        "entity_id": "0a2eb950-a26b-4847-9b41-6e9adc58179a",
+                        "external_id": "7cf243908830100481e9ae2ac3a6923e",
+                        "name": "War and unrest",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "7cf243908830100481e9ae2ac3a6923e",
+                            "name": "War and unrest",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 50
+                        }
+                    }
+                },
+                {
+                    "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
+                    "mention_id": "a00c51f0-ad89-4ba1-afe4-521abf9a0da1",
+                    "source": "AP-Machine",
+                    "relevance": 46,
+                    "entity": {
+                        "entity_id": "8dce31f5-c218-4009-8bf7-ad0ef9c9b68e",
+                        "external_id": "58ad538091c7100480a9a55c96277d3e",
+                        "name": "Evacuations",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "58ad538091c7100480a9a55c96277d3e",
+                            "name": "Evacuations",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 46
+                        }
+                    }
+                },
+                {
+                    "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
+                    "mention_id": "5915fbd7-adce-474d-9a88-c4d84270f052",
+                    "source": "AP-Machine",
+                    "relevance": 85,
+                    "entity": {
+                        "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
+                        "external_id": "86aad5207dac100488ecba7fa5283c3e",
+                        "name": "Politics",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "86aad5207dac100488ecba7fa5283c3e",
+                            "name": "Politics",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 99,
+                            "editorial_subject": "Politics"
+                        }
+                    }
+                },
+                {
+                    "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
+                    "mention_id": "f84a7d92-cd76-4953-a277-3902dee1d2de",
+                    "source": "AP-Editorial",
+                    "relevance": 75,
+                    "entity": {
+                        "entity_id": "14906f89-4474-4c65-bb16-ddf203a38a24",
+                        "external_id": "ec28dcdfc4ca4ac9918d3b61427e65c3",
+                        "name": "Race and ethnicity",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "ec28dcdfc4ca4ac9918d3b61427e65c3",
+                            "name": "Race and ethnicity",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Race and ethnicity"
+                        }
+                    }
+                },
+                {
+                    "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
+                    "mention_id": "5930f778-21e6-46e1-99bf-76b99b6c57f6",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
+                        "external_id": "16cb0ba3e6d24d97ace39f5a1924669a",
+                        "name": "Entertainment",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "16cb0ba3e6d24d97ace39f5a1924669a",
+                            "name": "Entertainment",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Entertainment"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
+            "title": "CEO pay is rising, widening the gap between top executives and workers. What to know, by the numbers",
+            "content": "The typical compensation for CEOs of S&P 500 companies keeps climber higher \u2014 and outpacing the wages of average workers today",
+            "url": "https://apnews.com/article/ceo-pay-packages-2023-numbers-acf14f0a4dc4f8e64aabaa1f0e4632ef",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
+                    "mention_id": "33c5e156-1ac0-465d-8811-6f3f5815fbe3",
+                    "source": "AP-Machine",
+                    "relevance": 78,
+                    "entity": {
+                        "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
+                        "external_id": "c8e409f8858510048872ff2260dd383e",
+                        "name": "Business",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "c8e409f8858510048872ff2260dd383e",
+                            "name": "Business",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 50
+                        }
+                    }
+                },
+                {
+                    "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
+                    "mention_id": "83fe6078-d5ee-4da2-a387-906b21fda98e",
+                    "source": "AP-Machine",
+                    "relevance": 58,
+                    "entity": {
+                        "entity_id": "4700a8cc-153d-45a9-a374-d8b351f8a504",
+                        "external_id": "ec2db49888e810048c93f8851349f9bd",
+                        "name": "Labor",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "ec2db49888e810048c93f8851349f9bd",
+                            "name": "Labor",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 63
+                        }
+                    }
+                },
+                {
+                    "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
+                    "mention_id": "fb4031bf-b5db-46f0-8bbe-5dac76567015",
+                    "source": "AP-Machine",
+                    "relevance": 92,
+                    "entity": {
+                        "entity_id": "2a08e147-0a9f-47c4-8fe3-7079fc0760fa",
+                        "external_id": "5238090088e910048f5ef8851349f9bd",
+                        "name": "Compensation and benefits",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "5238090088e910048f5ef8851349f9bd",
+                            "name": "Compensation and benefits",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 81
+                        }
+                    }
+                },
+                {
+                    "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
+                    "mention_id": "c8a57dbf-55f6-4e99-8195-a72e10d60097",
+                    "source": "AP-Editorial",
+                    "relevance": 75,
+                    "entity": {
+                        "entity_id": "606afcb8-3fc1-47a7-9da7-3d95115373a3",
+                        "external_id": "455ef2b87df7100483d8df092526b43e",
+                        "name": "Technology",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "455ef2b87df7100483d8df092526b43e",
+                            "name": "Technology",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Technology"
+                        }
+                    }
+                },
+                {
+                    "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
+                    "mention_id": "3889d74a-bc34-4ebb-9b15-cae27c580b11",
+                    "source": "AP-Editorial",
+                    "relevance": 75,
+                    "entity": {
+                        "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
+                        "external_id": "a4677d70863b4012b846a1b00f5079f5",
+                        "name": "U.S. news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "a4677d70863b4012b846a1b00f5079f5",
+                            "name": "U.S. news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "U.S. news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
+                    "mention_id": "93cb264e-a954-410b-a0be-c6794cb6c3d9",
+                    "source": "AP-Editorial",
+                    "relevance": 50,
+                    "entity": {
+                        "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
+                        "external_id": "f25af2d07e4e100484f5df092526b43e",
+                        "name": "General news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "f25af2d07e4e100484f5df092526b43e",
+                            "name": "General news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 50,
+                            "editorial_subject": "General news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
+                    "mention_id": "16eddb7d-dae7-4d90-8f85-4c9fd8fa86cc",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
+                        "external_id": "c8e409f8858510048872ff2260dd383e",
+                        "name": "Business",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "c8e409f8858510048872ff2260dd383e",
+                            "name": "Business",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 50
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "cbc30136-7fdc-4627-a4e0-66294fea6066",
+            "title": "Taraji P. Henson will host the 2024 BET Awards. Here's what to know about the show",
+            "content": "The 2024 BET Awards are fast approaching",
+            "url": "https://apnews.com/article/bet-awards-2024-what-to-know-e7aabec1241bd72911c390baf2ad5ca4",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "cbc30136-7fdc-4627-a4e0-66294fea6066",
+                    "mention_id": "0492952c-2761-4f4d-80de-b594a6a506eb",
+                    "source": "AP-Machine",
+                    "relevance": 52,
+                    "entity": {
+                        "entity_id": "53b45dcf-3625-4494-ba5a-02b898751baf",
+                        "external_id": "b4ed19d87e5c10048565df092526b43e",
+                        "name": "Celebrity",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "b4ed19d87e5c10048565df092526b43e",
+                            "name": "Celebrity",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 95
+                        }
+                    }
+                },
+                {
+                    "article_id": "cbc30136-7fdc-4627-a4e0-66294fea6066",
+                    "mention_id": "2c17bdf7-227d-4460-a596-00c2855f76f9",
+                    "source": "AP-Machine",
+                    "relevance": 89,
+                    "entity": {
+                        "entity_id": "05e3ba5b-3200-4886-8055-1b3853084b2f",
+                        "external_id": "533056429d224434859d3b570c6359fd",
+                        "name": "BET Awards",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "533056429d224434859d3b570c6359fd",
+                            "name": "BET Awards",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 89
+                        }
+                    }
+                },
+                {
+                    "article_id": "cbc30136-7fdc-4627-a4e0-66294fea6066",
+                    "mention_id": "10e687d4-946d-4009-8036-ce440a86acaa",
+                    "source": "AP-Machine",
+                    "relevance": 71,
+                    "entity": {
+                        "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
+                        "external_id": "16cb0ba3e6d24d97ace39f5a1924669a",
+                        "name": "Entertainment",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "16cb0ba3e6d24d97ace39f5a1924669a",
+                            "name": "Entertainment",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Entertainment"
+                        }
+                    }
+                },
+                {
+                    "article_id": "cbc30136-7fdc-4627-a4e0-66294fea6066",
+                    "mention_id": "cb4396a2-81c4-49fb-b4eb-7317cc690085",
+                    "source": "AP-Editorial",
+                    "relevance": 75,
+                    "entity": {
+                        "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
+                        "external_id": "a4677d70863b4012b846a1b00f5079f5",
+                        "name": "U.S. news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "a4677d70863b4012b846a1b00f5079f5",
+                            "name": "U.S. news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "U.S. news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "cbc30136-7fdc-4627-a4e0-66294fea6066",
+                    "mention_id": "e41dc54d-12ad-472a-8fb2-429d3f30437a",
+                    "source": "AP-Editorial",
+                    "relevance": 50,
+                    "entity": {
+                        "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
+                        "external_id": "f25af2d07e4e100484f5df092526b43e",
+                        "name": "General news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "f25af2d07e4e100484f5df092526b43e",
+                            "name": "General news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 50,
+                            "editorial_subject": "General news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "cbc30136-7fdc-4627-a4e0-66294fea6066",
+                    "mention_id": "40be19be-46bb-4cef-b257-16ea15a4a10b",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
+                        "external_id": "16cb0ba3e6d24d97ace39f5a1924669a",
+                        "name": "Entertainment",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "16cb0ba3e6d24d97ace39f5a1924669a",
+                            "name": "Entertainment",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Entertainment"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "4a5d577f-b4b9-46b8-aae8-9233f7228669",
+            "title": "Mired in disappointing season, Atlanta United fires coach Gonzalo Pineda",
+            "content": "Atlanta United has fired coach Gonzalo Pineda, less than 24 hours after another loss dropped the team farther from playoff contention in Major League Soccer",
+            "url": "https://apnews.com/article/atlanta-united-mls-coach-pineda-fired-b75d4dc5bb437342014fecfe15b077f4",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "4a5d577f-b4b9-46b8-aae8-9233f7228669",
+                    "mention_id": "2aacd261-0bae-4892-aca4-21b2b0eccff2",
+                    "source": "AP-Machine",
+                    "relevance": 37,
+                    "entity": {
+                        "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
+                        "external_id": "54df6c687df7100483dedf092526b43e",
+                        "name": "Sports",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "54df6c687df7100483dedf092526b43e",
+                            "name": "Sports",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Sports"
+                        }
+                    }
+                },
+                {
+                    "article_id": "4a5d577f-b4b9-46b8-aae8-9233f7228669",
+                    "mention_id": "46d11224-2999-4782-b18d-5cbbe2399ac3",
+                    "source": "AP-Machine",
+                    "relevance": 37,
+                    "entity": {
+                        "entity_id": "281adbd8-b522-4ba5-95a6-79eaf03bcad5",
+                        "external_id": "49e9acf88c87100481eda07ca041d23e",
+                        "name": "Sports transactions",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "49e9acf88c87100481eda07ca041d23e",
+                            "name": "Sports transactions",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 58
+                        }
+                    }
+                },
+                {
+                    "article_id": "4a5d577f-b4b9-46b8-aae8-9233f7228669",
+                    "mention_id": "4e555541-3198-4af7-8e4e-55bf63ffda32",
+                    "source": "AP-Machine",
+                    "relevance": 74,
+                    "entity": {
+                        "entity_id": "06f3b956-0ad6-4a06-b510-8760b63a861f",
+                        "external_id": "bea8168c30d64406819526e1d11f2041",
+                        "name": "MLS soccer",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "bea8168c30d64406819526e1d11f2041",
+                            "name": "MLS soccer",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 74
+                        }
+                    }
+                },
+                {
+                    "article_id": "4a5d577f-b4b9-46b8-aae8-9233f7228669",
+                    "mention_id": "e1e98bdb-240b-4824-b098-d807a44a953a",
+                    "source": "AP-Machine",
+                    "relevance": 64,
+                    "entity": {
+                        "entity_id": "dc7b0ed2-bf54-42aa-b931-ad433cb6af3b",
+                        "external_id": "20dbbcf87e4e100488c9d0913b2d075c",
+                        "name": "Soccer",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "20dbbcf87e4e100488c9d0913b2d075c",
+                            "name": "Soccer",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 61
+                        }
+                    }
+                },
+                {
+                    "article_id": "4a5d577f-b4b9-46b8-aae8-9233f7228669",
+                    "mention_id": "d954a3e6-1bc3-49f2-9db3-c97829ebaf85",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
+                        "external_id": "54df6c687df7100483dedf092526b43e",
+                        "name": "Sports",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "54df6c687df7100483dedf092526b43e",
+                            "name": "Sports",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Sports"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+            "title": "A Black medic wounded on D-Day saved dozens of lives. He's finally being posthumously honored",
+            "content": "Waverly Woodson Jr., a medic who was part of the only Black combat unit to take part in the D-Day invasion of France, is being posthumously awarded the Distinguished Service Cross",
+            "url": "https://apnews.com/article/dday-black-medic-woodson-distinguished-cross-14062c686b897fe6c40a3734f28b871a",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "e44d42b7-c7a3-4b9e-9f62-49e1eacee8d4",
+                    "source": "AP-Machine",
+                    "relevance": 62,
+                    "entity": {
+                        "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
+                        "external_id": "f25af2d07e4e100484f5df092526b43e",
+                        "name": "General news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "f25af2d07e4e100484f5df092526b43e",
+                            "name": "General news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 50,
+                            "editorial_subject": "General news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "70bb52f6-4058-4968-97c5-64eebc6a1141",
+                    "source": "AP-Machine",
+                    "relevance": 37,
+                    "entity": {
+                        "entity_id": "8697f7d9-25cb-4161-a8c8-9b94bbd287e7",
+                        "external_id": "5934f1087e87100487e3df092526b43e",
+                        "name": "Injuries",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "5934f1087e87100487e3df092526b43e",
+                            "name": "Injuries",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 37
+                        }
+                    }
+                },
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "6778e2b9-b1f0-443f-af94-931bf055663e",
+                    "source": "AP-Machine",
+                    "relevance": 54,
+                    "entity": {
+                        "entity_id": "46730aeb-4edb-4da9-86c7-030b8ea4c522",
+                        "external_id": "9bec03a0883310048673ae2ac3a6923e",
+                        "name": "Military occupations",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "9bec03a0883310048673ae2ac3a6923e",
+                            "name": "Military occupations",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 34
+                        }
+                    }
+                },
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "af187d01-79df-4ad1-8dd8-3a3d84ceae79",
+                    "source": "AP-Machine",
+                    "relevance": 62,
+                    "entity": {
+                        "entity_id": "0a2eb950-a26b-4847-9b41-6e9adc58179a",
+                        "external_id": "7cf243908830100481e9ae2ac3a6923e",
+                        "name": "War and unrest",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "7cf243908830100481e9ae2ac3a6923e",
+                            "name": "War and unrest",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 50
+                        }
+                    }
+                },
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "ca2a9c7c-6c7d-4823-a366-d69569cd2f0d",
+                    "source": "AP-Machine",
+                    "relevance": 82,
+                    "entity": {
+                        "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
+                        "external_id": "86aad5207dac100488ecba7fa5283c3e",
+                        "name": "Politics",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "86aad5207dac100488ecba7fa5283c3e",
+                            "name": "Politics",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 99,
+                            "editorial_subject": "Politics"
+                        }
+                    }
+                },
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "734ef824-d964-4a3e-b292-b74743fd3ab9",
+                    "source": "AP-Machine",
+                    "relevance": 74,
+                    "entity": {
+                        "entity_id": "00a1d691-9fbf-4fe7-a2ea-3732d94a99ab",
+                        "external_id": "74bbae4a3d914703acc9581f89305a62",
+                        "name": "Black people",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "74bbae4a3d914703acc9581f89305a62",
+                            "name": "Black people",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 56
+                        }
+                    }
+                },
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "c36795bd-0a3c-4c7d-a7e8-4b5c373a5ccb",
+                    "source": "AP-Editorial",
+                    "relevance": 75,
+                    "entity": {
+                        "entity_id": "eac0ee8f-1a56-4006-b0c5-4d2c54a5fe21",
+                        "external_id": "abfca78268874726966cdad8c35c4ae3",
+                        "name": "Washington news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "abfca78268874726966cdad8c35c4ae3",
+                            "name": "Washington news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 99,
+                            "editorial_subject": "Washington news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "76a5b48f-3914-41bc-964a-dafbbc758aba",
+                    "source": "AP-Editorial",
+                    "relevance": 50,
+                    "entity": {
+                        "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
+                        "external_id": "f25af2d07e4e100484f5df092526b43e",
+                        "name": "General news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "f25af2d07e4e100484f5df092526b43e",
+                            "name": "General news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 50,
+                            "editorial_subject": "General news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
+                    "mention_id": "ffb9badc-02ef-44b5-8d0f-6681529c5e8a",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
+                        "external_id": "a4677d70863b4012b846a1b00f5079f5",
+                        "name": "U.S. news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "a4677d70863b4012b846a1b00f5079f5",
+                            "name": "U.S. news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "U.S. news"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "ea52aa04-5522-433e-88bb-195ce47f1611",
+            "title": "Mother of airman killed by Florida deputy says his firing, alone, won't cut it",
+            "content": "The mother of an airman who was shot and killed by a Florida sheriff\u2019s deputy says the deputy\u2019s firing was not justice for her son\u2019s killing",
+            "url": "https://apnews.com/article/roger-fortson-florida-deputy-fired-charges-89c843dba31845df1c82415238179615",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "ea52aa04-5522-433e-88bb-195ce47f1611",
+                    "mention_id": "203818f9-6dc0-4068-a591-1007bbb4f9d0",
+                    "source": "AP-Machine",
+                    "relevance": 32,
+                    "entity": {
+                        "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
+                        "external_id": "86aad5207dac100488ecba7fa5283c3e",
+                        "name": "Politics",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "86aad5207dac100488ecba7fa5283c3e",
+                            "name": "Politics",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 99,
+                            "editorial_subject": "Politics"
+                        }
+                    }
+                },
+                {
+                    "article_id": "ea52aa04-5522-433e-88bb-195ce47f1611",
+                    "mention_id": "86dd216d-6d1e-4fa4-b02b-66b6bdb0ba34",
+                    "source": "AP-Machine",
+                    "relevance": 43,
+                    "entity": {
+                        "entity_id": "76b1df08-8a91-42b4-8b56-26b34243af38",
+                        "external_id": "48612b807c2b4b93bbbacbf54f547ad5",
+                        "name": "Crime",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "48612b807c2b4b93bbbacbf54f547ad5",
+                            "name": "Crime",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 37
+                        }
+                    }
+                },
+                {
+                    "article_id": "ea52aa04-5522-433e-88bb-195ce47f1611",
+                    "mention_id": "85f2da51-94b0-49cf-afe5-196311d0a204",
+                    "source": "AP-Machine",
+                    "relevance": 92,
+                    "entity": {
+                        "entity_id": "3ed7f2ab-8e71-49b5-96b9-b3ada2e5e1fb",
+                        "external_id": "5018b8f4ded948128561c5af2144ca66",
+                        "name": "Shootings",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "5018b8f4ded948128561c5af2144ca66",
+                            "name": "Shootings",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 79
+                        }
+                    }
+                },
+                {
+                    "article_id": "ea52aa04-5522-433e-88bb-195ce47f1611",
+                    "mention_id": "a677545b-38d3-41d6-8fff-0518b3ffb233",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
+                        "external_id": "a4677d70863b4012b846a1b00f5079f5",
+                        "name": "U.S. news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "a4677d70863b4012b846a1b00f5079f5",
+                            "name": "U.S. news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "U.S. news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "ea52aa04-5522-433e-88bb-195ce47f1611",
+                    "mention_id": "ede8caeb-8921-4b6f-a463-0154c591bcd4",
+                    "source": "AP-Editorial",
+                    "relevance": 50,
+                    "entity": {
+                        "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
+                        "external_id": "f25af2d07e4e100484f5df092526b43e",
+                        "name": "General news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "f25af2d07e4e100484f5df092526b43e",
+                            "name": "General news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 50,
+                            "editorial_subject": "General news"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+            "title": "Rapper Sean Kingston booked into Florida jail, where he and mother are charged with $1M in fraud",
+            "content": "Rapper and singer Sean Kingston is back in South Florida, where he and his mother are charged with committing more than a million dollars worth of fraud",
+            "url": "https://apnews.com/article/sean-kingston-arrest-jail-florida-cf7eb4dd744fdeb15bf1a452f466b534",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+                    "mention_id": "a30fcfb1-600f-422b-bb0b-921085f22c0b",
+                    "source": "AP-Machine",
+                    "relevance": 38,
+                    "entity": {
+                        "entity_id": "32ff9e3c-4025-4eef-9eb6-e4606d985b9c",
+                        "external_id": "aa719a8ade994c3faa014cb52a2f1411",
+                        "name": "Theft",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "aa719a8ade994c3faa014cb52a2f1411",
+                            "name": "Theft",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 38
+                        }
+                    }
+                },
+                {
+                    "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+                    "mention_id": "1217957a-4224-4b20-a9a1-c970f2dbfac0",
+                    "source": "AP-Machine",
+                    "relevance": 38,
+                    "entity": {
+                        "entity_id": "5ea9c71c-d949-484b-b002-f0b4b67e40e6",
+                        "external_id": "a37eab90831510048fcfdf092526b43e",
+                        "name": "Law enforcement",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "a37eab90831510048fcfdf092526b43e",
+                            "name": "Law enforcement",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 75
+                        }
+                    }
+                },
+                {
+                    "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+                    "mention_id": "1aa286f3-2f7e-4d4d-87c6-edf544f88499",
+                    "source": "AP-Machine",
+                    "relevance": 64,
+                    "entity": {
+                        "entity_id": "c27b59df-7cf0-407d-8f39-1de79888fbe4",
+                        "external_id": "4c96e8e92e0441579dbce2f9e8d06493",
+                        "name": "Prisons",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "4c96e8e92e0441579dbce2f9e8d06493",
+                            "name": "Prisons",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 64
+                        }
+                    }
+                },
+                {
+                    "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+                    "mention_id": "fd0b6e75-2034-4dca-9a30-5220d835e2fb",
+                    "source": "AP-Machine",
+                    "relevance": 54,
+                    "entity": {
+                        "entity_id": "76b1df08-8a91-42b4-8b56-26b34243af38",
+                        "external_id": "48612b807c2b4b93bbbacbf54f547ad5",
+                        "name": "Crime",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "48612b807c2b4b93bbbacbf54f547ad5",
+                            "name": "Crime",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 37
+                        }
+                    }
+                },
+                {
+                    "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+                    "mention_id": "acf2c77c-5df0-4ec8-90cc-4657d5e889d2",
+                    "source": "AP-Machine",
+                    "relevance": 73,
+                    "entity": {
+                        "entity_id": "547ed7b8-6699-473f-96c7-4c76636701f4",
+                        "external_id": "42c5b4aa33fe47f99018a0a7f866bf99",
+                        "name": "Fraud",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "42c5b4aa33fe47f99018a0a7f866bf99",
+                            "name": "Fraud",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 94
+                        }
+                    }
+                },
+                {
+                    "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+                    "mention_id": "9068231e-e356-41e9-a577-2507c641fbe3",
+                    "source": "AP-Editorial",
+                    "relevance": 75,
+                    "entity": {
+                        "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
+                        "external_id": "16cb0ba3e6d24d97ace39f5a1924669a",
+                        "name": "Entertainment",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "16cb0ba3e6d24d97ace39f5a1924669a",
+                            "name": "Entertainment",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Entertainment"
+                        }
+                    }
+                },
+                {
+                    "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+                    "mention_id": "c2a403af-6084-4ac9-8a76-2d3c46219805",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
+                        "external_id": "a4677d70863b4012b846a1b00f5079f5",
+                        "name": "U.S. news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "a4677d70863b4012b846a1b00f5079f5",
+                            "name": "U.S. news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "U.S. news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
+                    "mention_id": "a87cdaf9-af3a-45cd-9883-de554be62eac",
+                    "source": "AP-Editorial",
+                    "relevance": 50,
+                    "entity": {
+                        "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
+                        "external_id": "f25af2d07e4e100484f5df092526b43e",
+                        "name": "General news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "f25af2d07e4e100484f5df092526b43e",
+                            "name": "General news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 50,
+                            "editorial_subject": "General news"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "946444f3-f21f-43c7-a6c1-684cb0ba02fb",
+            "title": "Atlanta water woes extend into fourth day as city finally cuts off leak gushing into streets",
+            "content": "For at least some residents, Atlanta\u2019s water problems aren't over",
+            "url": "https://apnews.com/article/atlanta-water-outage-woes-andre-dickens-c02d45a4c3e2b02a413189f9d417e55e",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "946444f3-f21f-43c7-a6c1-684cb0ba02fb",
+                    "mention_id": "1f5386a5-d9be-4a06-8117-4b1da61ea66c",
+                    "source": "AP-Machine",
+                    "relevance": 60,
+                    "entity": {
+                        "entity_id": "62f25891-ac05-4142-b010-a9e1ab330d3e",
+                        "external_id": "3b6ef8c07d7010048463ba7fa5283c3e",
+                        "name": "Disaster planning and response",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "3b6ef8c07d7010048463ba7fa5283c3e",
+                            "name": "Disaster planning and response",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 41
+                        }
+                    }
+                },
+                {
+                    "article_id": "946444f3-f21f-43c7-a6c1-684cb0ba02fb",
+                    "mention_id": "5e4e62f3-921f-48c8-a37d-538d3ca9d1bc",
+                    "source": "AP-Editorial",
+                    "relevance": 75,
+                    "entity": {
+                        "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
+                        "external_id": "c8e409f8858510048872ff2260dd383e",
+                        "name": "Business",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "c8e409f8858510048872ff2260dd383e",
+                            "name": "Business",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 50
+                        }
+                    }
+                },
+                {
+                    "article_id": "946444f3-f21f-43c7-a6c1-684cb0ba02fb",
+                    "mention_id": "c16f4251-0ef5-4a17-991f-e60758ad04d6",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
+                        "external_id": "a4677d70863b4012b846a1b00f5079f5",
+                        "name": "U.S. news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "a4677d70863b4012b846a1b00f5079f5",
+                            "name": "U.S. news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "U.S. news"
+                        }
+                    }
+                },
+                {
+                    "article_id": "946444f3-f21f-43c7-a6c1-684cb0ba02fb",
+                    "mention_id": "27b197b8-cd46-4eaf-bc9a-72084a3ed88b",
+                    "source": "AP-Editorial",
+                    "relevance": 50,
+                    "entity": {
+                        "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
+                        "external_id": "f25af2d07e4e100484f5df092526b43e",
+                        "name": "General news",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "f25af2d07e4e100484f5df092526b43e",
+                            "name": "General news",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 50,
+                            "editorial_subject": "General news"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "article_id": "ab4fcd39-00b2-443a-8c48-4ebc5742a9cc",
+            "title": "Larry Allen, a Hall of Fame offensive lineman for the Dallas Cowboys, dies suddenly at 52",
+            "content": "Larry Allen, one of the most dominant offensive linemen in the NFL during a 12-year career spent mostly with the Dallas Cowboys, has died",
+            "url": "https://apnews.com/article/larry-allen-dead-cowboys-3f87778f6777b4de2b82106801808e38",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": [
+                {
+                    "article_id": "ab4fcd39-00b2-443a-8c48-4ebc5742a9cc",
+                    "mention_id": "df014f6a-218b-40c4-a615-ebded05e5954",
+                    "source": "AP-Machine",
+                    "relevance": 67,
+                    "entity": {
+                        "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
+                        "external_id": "54df6c687df7100483dedf092526b43e",
+                        "name": "Sports",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "54df6c687df7100483dedf092526b43e",
+                            "name": "Sports",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Sports"
+                        }
+                    }
+                },
+                {
+                    "article_id": "ab4fcd39-00b2-443a-8c48-4ebc5742a9cc",
+                    "mention_id": "1c6d40fc-768c-448c-85d4-595278c7b6b3",
+                    "source": "AP-Machine",
+                    "relevance": 95,
+                    "entity": {
+                        "entity_id": "d73d61cf-737c-49a6-bb21-c321a2e6db8e",
+                        "external_id": "20dde3c07e4e100488f6d0913b2d075c",
+                        "name": "NFL football",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "20dde3c07e4e100488f6d0913b2d075c",
+                            "name": "NFL football",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Machine",
+                            "relevance": 97
+                        }
+                    }
+                },
+                {
+                    "article_id": "ab4fcd39-00b2-443a-8c48-4ebc5742a9cc",
+                    "mention_id": "ba0d119a-8dbf-4f83-a623-daac58dc6362",
+                    "source": "AP-Editorial",
+                    "relevance": 99,
+                    "entity": {
+                        "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
+                        "external_id": "54df6c687df7100483dedf092526b43e",
+                        "name": "Sports",
+                        "entity_type": "subject",
+                        "source": "http://cv.ap.org/id/",
+                        "raw_data": {
+                            "code": "54df6c687df7100483dedf092526b43e",
+                            "name": "Sports",
+                            "rels": [
+                                "direct"
+                            ],
+                            "scheme": "http://cv.ap.org/id/",
+                            "creator": "Editorial",
+                            "relevance": 75,
+                            "editorial_subject": "Sports"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "past_articles": [
+        {
+            "article_id": "50551b08-1f74-4b3f-8183-96ac57b0ed6d",
+            "title": "A foreign armed force to fight gangs makes many in Haiti celebrate, while others worry",
+            "content": "Foreigners with guns are met with hostility in most countries in the world. But the departure of armed soldiers and police from Haiti in 2017 after nearly two decades on the streets helped criminals seize control of much of the country.",
+            "url": "https://apnews.com/article/haiti-un-armed-force-deployment-f1a6e60688502a2e8a13ad8282869e56",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "9faaf1ec-53d0-46c1-9116-7869eebf63e6",
+            "title": "No. 10 Alabama looks to rebound from loss to Texas when Crimson Tide visits rebuilding South Florida",
+            "content": "The daunting challenge South Florida faces hosting 10th-ranked Alabama isn\u2019t lost on Alex Golesh. The first-year coach is rebuilding USF\u2019s once-thriving program and understands Saturday\u2019s nationally televised game against the Crimson Tide offers an opportunity to showcase what he\u2019s trying to accompl",
+            "url": "https://apnews.com/article/alabama-usf-crimson-tide-a0611d3a9b6b5ec169d7a50447737d0e",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "ad5c8152-5d8d-4bb8-980b-1171517f740e",
+            "title": "Pro Picks: Eagles' talent over Chiefs' experience",
+            "content": "The Philadelphia Eagles left their dog masks at home. Back in the Super Bowl five years after winning the first Lombardi Trophy in franchise history, the Eagles took a different path to reach this one.",
+            "url": "https://apnews.com/article/tom-brady-new-england-patriots-kansas-city-chiefs-minnesota-vikings-san-francisco-49ers-228cda4a6c5db4021d6b97db418b25dc",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "6ee05f9c-0f97-406a-a471-f37a2acdbb13",
+            "title": "Vanna White extends her time at the puzzle board on 'Wheel of Fortune' for two additional seasons",
+            "content": "Vanna White will remain with \"Wheel of Fortune'' for two additional seasons. Followig the announcement earlier this year that Pat Sajak would make season 41 of \u201cWheel of Fortune\u201d his last, White's future with the show was uncertain.",
+            "url": "https://apnews.com/article/vanna-white-wheel-of-fortune-pat-sajak-5603a165f731ae1ce426ba197b64873c",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "8818b13c-c99c-4e6a-88a7-6db36af5e40b",
+            "title": "Capitals' 5-foot 7, 140-pound Matthew Phillips tops the list of season-opening NHL roster surprises",
+            "content": "Matthew Phillips making the Washington Capitals season-opening roster is one of the biggest surprises around the NHL.",
+            "url": "https://apnews.com/article/matthew-phillips-capitals-bruins-poitras-231c0c1fdf720423617db43dba8b80d4",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "999563d9-b2d0-4ca9-8f6e-793ac5c5ae4a",
+            "title": "Coach Eddie Jones backed by union amid Australia's worst Rugby World Cup campaign",
+            "content": "Rugby Australia has doubled down on backing coach Eddie Jones while the Wallabies are on the brink of missing the Rugby World Cup quarterfinals for the first time.",
+            "url": "https://apnews.com/article/australia-jones-rugby-world-cup-d8e4bbc19f0cea8842356b99719fcbda",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "2b9cc70f-2d64-4b34-b26d-6d7bf908524d",
+            "title": "Inflation is slowing, but still high. What you need to know",
+            "content": "After reaching 40-year highs over the summer, price increases in the U.S. are now steadily easing. Consumer inflation slowed to 7.1% in November from a year earlier and to 0.1% from October, the government said Tuesday.",
+            "url": "https://apnews.com/article/inflation-business-149cec9fb85f97f97f5d39e6b6e686d3",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "41475605-f8ae-4a9d-9565-063a55c2e5ad",
+            "title": "Injunction blocking Florida law targeting drag shows applies to all venues, judge says",
+            "content": "A federal judge says that his order blocking a Florida law targeting drag shows doesn\u2019t just apply to the restaurant that brought a lawsuit challenging it but other venues in the state.",
+            "url": "https://apnews.com/article/lgbtq-desantis-florida-drag-shows-89cc68eb3a34ceead38ec00831817eb9",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "9cd74855-f983-4d32-bb6c-3bc14e93f147",
+            "title": "Texans place Stingley on injured list, say Tunsil won't travel to Jacksonville",
+            "content": "The Houston Texans have placed cornerback Derek Stingley Jr. on the injured reserve with a hamstring injury and said Saturday left tackle Laremy Tunsil won\u2019t travel to Jacksonville because of a knee injury.",
+            "url": "https://apnews.com/article/texans-stingley-tunsil-houston-injured-d935c032468c05236cd5d766b2cea652",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "29328848-7cae-432a-84da-9c9b282be4c6",
+            "title": "Former Texas Rep. Will Hurd suspends long-shot GOP 2024 presidential bid, endorses Nikki Haley",
+            "content": "Former Texas congressman Will Hurd has suspended his Republican presidential bid, abandoning a brief campaign built on criticizing Donald Trump at a time when his party seems even more determined to embrace the former president.",
+            "url": "https://apnews.com/article/will-hurd-ends-2024-presidential-campaign-c34b3c8d9ef44126e8e36623b1dc3021",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "8a6f5e08-9e4e-4598-be3e-8bde809c7092",
+            "title": "Deep-sea 'hot tubs' help octopus moms hatch their eggs faster",
+            "content": "A new study suggests that deep-sea \u201chot tubs\u201d may help octopus eggs hatch faster. Octopus usually live solitary lives.",
+            "url": "https://apnews.com/article/octopus-deepsea-garden-eggs-nest-6ef8d8b464d49bda4cda27b7eda270c9",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "544b7ef2-07ae-45f3-9f32-383380139956",
+            "title": "Seahawks expect to have Jamal Adams and several others back in time to face Bengals",
+            "content": "The Seattle Seahawks expect safety Jamal Adams to be cleared from the concussion protocol in the next couple of days and to play this week against Cincinnati.",
+            "url": "https://apnews.com/article/seahawks-jamal-adams-concussion-return-4b106add2315c6de1b210b597af8f05b",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "2cb543da-64a3-4640-a18b-dd84ef1e8dd9",
+            "title": "Kansas college reaches settlement in lawsuit alleging discrimination against Black athletes",
+            "content": "A Kansas community college that was accused of discriminating against Black student-athletes has agreed to a settlement. The U.S.",
+            "url": "https://apnews.com/article/kansas-college-black-athletes-8d354add43b95bb90082a09f5a850fe8",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "ea8bd1fd-2fc2-4195-aeef-04f6a4197a28",
+            "title": "Dillon Gabriel throws for 5 TDs as No. 19 Oklahoma rolls past Tulsa 66-17",
+            "content": "Dillon Gabriel threw for 421 yards and five touchdowns, three of them to Nic Anderson, and No. 19 Oklahoma rolled to a 66-17 victory over in-state rival Tulsa.",
+            "url": "https://apnews.com/article/oklahoma-tulsa-dillon-gabriel-da24b20a2a19c93f68115613a1e5fb2d",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "98a39396-6705-4705-8307-3a618d4f63f5",
+            "title": "DeSantis' retaliation against Disney hurts Florida, former governors and lawmakers say",
+            "content": "A group of mostly Republican former high-level government officials is calling Gov. Ron DeSantis' takeover of Disney World\u2019s governing district \u201cseverely damaging to the political, social, and economic fabric of the State.\u201d",
+            "url": "https://apnews.com/article/disney-desantis-feud-lgbtq-74591d962dc30065fe2dd6947bf12d2e",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "e1e93d47-68e0-451e-a3d1-5233a162ebde",
+            "title": "They shared a name \u2014 but not a future. How two kids fought to escape poverty in Baltimore",
+            "content": "Two kids named Antonio grew up together in the streets of east Baltimore surrounded by poverty and gun violence",
+            "url": "https://apnews.com/article/baltimore-youth-gun-violence-poverty-entrepreneurship-1cb941be0cd302df626f7ba38bb96df6",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "bffa0189-5f00-429f-a191-7ca8fcc29b85",
+            "title": "STAT WATCH: Davis' FBS season-best rushing game for Kentucky pushes him over 3,000 career yards",
+            "content": "Kentucky\u2019s Ray Davis became the fourth active player in the Football Bowl Subdivision to go over 3,000 career rushing yards.",
+            "url": "https://apnews.com/article/kentucky-wildcats-ray-davis-3d283a123843410363b577d7f22c8296",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "1410985c-f52a-4b0b-a7ac-2aa046ecdd29",
+            "title": "Hong Kong's top court rules in favor of recognizing same-sex partnerships in a landmark case",
+            "content": "Hong Kong\u2019s top court has ruled the government should provide a framework for recognizing same-sex partnerships in a landmark decision for the city\u2019s LGBTQ+ community.",
+            "url": "https://apnews.com/article/hong-kong-same-sex-marriage-e32da67e8d4b364cb156a2e2ec526850",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "352a67b6-153d-4835-af7c-560ad795f67a",
+            "title": "Movie Review: Horror flick 'Talk to Me' is a hand-some high-five for twin Australian filmmakers",
+            "content": "You\u2019ve got to hand it to the Philippou brothers. They\u2019ve taken the old horror cliche of a severed hand and made something worth, well, applauding, says Associated Press critic Mark Kennedy.",
+            "url": "https://apnews.com/article/talk-to-me-movie-review-6e28141ea4a6d2480a504016c2a9ea8d",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "a1bdee8c-2e75-4e50-a75d-ff48d44fe6d3",
+            "title": "Starting next year, child influencers can sue if earnings aren't set aside, says new Illinois law",
+            "content": "Illinois is the first state in the U.S. to ensure child social media influencers are compensated for their work. That's according to Sen.",
+            "url": "https://apnews.com/article/tiktok-child-influencer-illinois-social-media-f784b4bc52cb75ad1e0d28785993b1c5",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        },
+        {
+            "article_id": "c4d45ecf-2d86-4419-931a-4bf76bcd0305",
+            "title": "Stock market today: Asian shares mostly higher after US inflation data ease rate hike worries",
+            "content": "Shares are mostly higher in Asia after a highly anticipated report showed inflation accelerated across the U.S. in August, but not by much more than expected.",
+            "url": "https://apnews.com/article/stock-market-inflation-rates-oil-c6706a055c002e5d858d3591a6d3bddc",
+            "published_at": "1970-01-01T00:00:00Z",
+            "mentions": []
+        }
+    ],
+    "interest_profile": {
+        "profile_id": "28838f05-23f5-4f23-bea2-30b51f67c538",
+        "click_history":
+        {
+            "account_id": "8d022e4f-382a-4cd4-a9c9-14ce7ed8e1c0",
+            "article_ids": [
+                "1410985c-f52a-4b0b-a7ac-2aa046ecdd29",
+                "9cd74855-f983-4d32-bb6c-3bc14e93f147",
+                "50551b08-1f74-4b3f-8183-96ac57b0ed6d"
+            ]
+        },
+        "click_topic_counts": {
+            "World news": 2,
+            "Health": 1,
+            "U.S. news": 1,
+            "Sports": 1
+        },
+        "onboarding_topics": []
+    },
+    "num_recs": 4
+}
