@@ -98,11 +98,7 @@ if __name__ == "__main__":
     user_csv = csv.writer(user_out)
     user_csv.writerow(["user_id", "personalized", "NDCG@5", "NDCG@10", "RecipRank", "RBO@5", "RBO@10"])
 
-    from itertools import islice
-
-    user_subset = list(islice(mind_data.iter_users(), 5))
-
-    for request in tqdm(user_subset, total=len(user_subset), desc="recommend"):  # one by one
+    for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
         logger.debug("recommending for user %s", request.interest_profile.profile_id)
         if request.num_recs != TEST_REC_COUNT:
             logger.warn(
