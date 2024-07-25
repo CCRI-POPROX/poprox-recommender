@@ -5,7 +5,7 @@ stages:
       - src/poprox_recommender/evaluation/offline.py
       - data/MINDlarge_dev.zip
     outs:
-      - outputs/user-metrics.csv
+      - outputs/user-metrics.csv.gz
     metrics:
       - outputs/metrics.json:
           cache: false
