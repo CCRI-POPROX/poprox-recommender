@@ -9,14 +9,14 @@ stages:
       size: 103456245
     - path: src/poprox_recommender/evaluation/offline.py
       hash: md5
-      md5: 7fef704fcb0174a79a7502efac53f95b
-      size: 6090
+      md5: c4b4e5bca641fd5de881fac1d860aa27
+      size: 6210
     outs:
     - path: outputs/metrics.json
       hash: md5
-      md5: 2071c8c99d5c2550935d354a373741fc
-      size: 135
-    - path: outputs/user-metrics.csv
+      md5: 3f63cdac8fd140b1e991e7defaf1e50e
+      size: 148
+    - path: outputs/user-metrics.csv.gz
       hash: md5
-      md5: b1dd1cf4705ecfc71e143541c278ad23
-      size: 534
+      md5: 808ccb1d143a3c6930ae2cf8722492c0
+      size: 9816580

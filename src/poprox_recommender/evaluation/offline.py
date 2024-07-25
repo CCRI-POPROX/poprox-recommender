@@ -1,4 +1,5 @@
 import csv
+import gzip
 import json
 import logging
 import logging.config
@@ -60,10 +61,14 @@ def recsys_metric(
     single_ndcg5 = topn.ndcg(recs, truth, k=5)
     single_ndcg10 = topn.ndcg(recs, truth, k=10)
 
-    ranked = pipeline_state["ranked"]
-    reranked = pipeline_state["reranked"]
-    single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
-    single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
+    ranked = pipeline_state.elements.get("ranked", None)
+    reranked = pipeline_state.elements.get("reranked", None)
+    if ranked and reranked:
+        single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
+        single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
+    else:
+        single_rbo5 = None
+        single_rbo10 = None
 
     return single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10
 
@@ -91,17 +96,13 @@ if __name__ == "__main__":
     fallback: RecommendationPipeline = fallback_pipeline(TEST_REC_COUNT)
 
     logger.info("measuring recommendations")
-    user_out_fn = project_root() / "outputs" / "user-metrics.csv"
+    user_out_fn = project_root() / "outputs" / "user-metrics.csv.gz"
     user_out_fn.parent.mkdir(exist_ok=True, parents=True)
-    user_out = open(user_out_fn, "wt")
+    user_out = gzip.open(user_out_fn, "wt")
     user_csv = csv.writer(user_out)
     user_csv.writerow(["user_id", "personalized", "NDCG@5", "NDCG@10", "RecipRank", "RBO@5", "RBO@10"])
 
-    from itertools import islice
-
-    user_subset = list(islice(mind_data.iter_users(), 5))
-
-    for request in tqdm(user_subset, total=len(user_subset), desc="recommend"):  # one by one
+    for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
         logger.debug("recommending for user %s", request.interest_profile.profile_id)
         if request.num_recs != TEST_REC_COUNT:
             logger.warn(
@@ -145,15 +146,15 @@ if __name__ == "__main__":
             single_ndcg5,
             single_ndcg10,
             single_rr,
-            single_rbo5,
-            single_rbo10,
+            single_rbo5 or -1.0,
+            single_rbo10 or -1.0,
         )
 
         ndcg5.append(single_ndcg5)
         ndcg10.append(single_ndcg10)
         recip_rank.append(single_rr)
-        rbo5.append(single_rbo5)
-        rbo10.append(single_rbo10)
+        rbo5.append(single_rbo5 or np.nan)
+        rbo10.append(single_rbo10 or np.nan)
         ngood += 1
 
     user_out.close()
@@ -165,8 +166,8 @@ if __name__ == "__main__":
         "NDCG@5": np.mean(ndcg5),
         "NDCG@10": np.mean(ndcg10),
         "MRR": np.mean(recip_rank),
-        "RBO@5": np.mean(rbo5),
-        "RBO@10": np.mean(rbo10),
+        "RBO@5": np.nanmean(rbo5),
+        "RBO@10": np.nanmean(rbo10),
     }
     out_fn = project_root() / "outputs" / "metrics.json"
     out_fn.parent.mkdir(exist_ok=True, parents=True)
