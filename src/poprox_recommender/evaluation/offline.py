@@ -153,8 +153,8 @@ if __name__ == "__main__":
         ndcg5.append(single_ndcg5)
         ndcg10.append(single_ndcg10)
         recip_rank.append(single_rr)
-        rbo5.append(single_rbo5)
-        rbo10.append(single_rbo10)
+        rbo5.append(single_rbo5 or np.nan)
+        rbo10.append(single_rbo10 or np.nan)
         ngood += 1
 
     user_out.close()
