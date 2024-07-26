@@ -1,20 +1,18 @@
 import json
 import logging
 import random
-from pathlib import Path
 
 from poprox_concepts import Article, ArticleSet, ClickHistory
-from poprox_recommender.topics import (
-    GENERAL_TOPICS,
-    extract_general_topics,
-    match_news_topics_to_general,
-)
+from poprox_recommender.paths import project_root
+from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, match_news_topics_to_general
 
 logger = logging.getLogger(__name__)
 
 
 def load_test_articles():
-    event_path = Path(__file__).parent / "request_body.json"
+    test_dir = project_root() / "tests"
+    event_path = test_dir / "request_data" / "request_body.json"
+
     with open(event_path, "r") as j:
         req_body = json.loads(j.read())
 
