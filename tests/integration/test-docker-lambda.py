@@ -11,7 +11,7 @@ Args:
     -p PORT, --port=PORT
         the port number where Docker is listening [default: 9000]
     -r FILE, --request=FILE
-        load request payload from FILE [default: tests/basic-request.json]
+        load request payload from FILE [default: tests/request_data/basic-request.json]
 """
 
 # metadata so this script can be run with 'pipx'
