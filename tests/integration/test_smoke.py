@@ -3,18 +3,18 @@ Test the POPROX API through direct call.
 """
 
 import logging
-from pathlib import Path
 
 from poprox_concepts import ArticleSet, ClickHistory
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.default import select_articles
+from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 
 
 def test_direct_basic_request():
-    test_dir = Path(__file__)
-    req_f = test_dir.parent / "basic-request.json"
+    test_dir = project_root() / "tests"
+    req_f = test_dir / "request_data" / "basic-request.json"
     req = RecommendationRequest.model_validate_json(req_f.read_text())
 
     logger.info("generating recommendations")
@@ -29,8 +29,8 @@ def test_direct_basic_request():
 
 
 def test_direct_basic_request_without_clicks():
-    test_dir = Path(__file__)
-    req_f = test_dir.parent / "basic-request.json"
+    test_dir = project_root() / "tests"
+    req_f = test_dir / "request_data" / "basic-request.json"
     req = RecommendationRequest.model_validate_json(req_f.read_text())
 
     logger.info("generating recommendations")
