@@ -20,3 +20,19 @@ stages:
       hash: md5
       md5: 808ccb1d143a3c6930ae2cf8722492c0
       size: 9816580
+  recommend-mind-val:
+    cmd: python -m poprox_recommender.evaluation.generate -o outputs/mind-val-recommendations.parquet
+    deps:
+    - path: data/MINDlarge_dev.zip
+      hash: md5
+      md5: c93fa1728e3537649b441c78cce5e6f1
+      size: 103456245
+    - path: src/poprox_recommender/evaluation/generate.py
+      hash: md5
+      md5: 64e0ee0bf2470461d02ce868de02bd7c
+      size: 4719
+    outs:
+    - path: outputs/mind-val-recommendations.parquet
+      hash: md5
+      md5: 559b78344f75db1fdd964907c35d9622
+      size: 13815521
