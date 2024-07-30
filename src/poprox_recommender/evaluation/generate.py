@@ -136,6 +136,6 @@ if __name__ == "__main__":
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]
     logger.info("saving recommendations to %s", out_fn)
-    all_recs.to_parquet(out_fn, compression="zstd")
+    all_recs.to_parquet(out_fn, compression="zstd", index=False)
 
     # response = {"statusCode": 200, "body": json.dump(body, default=custom_encoder)}
