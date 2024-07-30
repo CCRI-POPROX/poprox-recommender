@@ -47,12 +47,14 @@ def extract_recs(
 ) -> pd.DataFrame:
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
+    user = request.interest_profile.profile_id
+    assert user is not None
 
     # get the different recommendation lists to record
     rec_lists = [
         pd.DataFrame(
             {
-                "user": request.interest_profile.profile_id,
+                "user": user.hex,
                 "stage": "final",
                 "item": [a.article_id for a in pipeline_state.recs],
             }
@@ -64,7 +66,7 @@ def extract_recs(
         rec_lists.append(
             pd.DataFrame(
                 {
-                    "user": request.interest_profile.profile_id,
+                    "user": user.hex,
                     "stage": "ranked",
                     "item": [a.article_id for a in ranked.articles],
                 }
@@ -76,7 +78,7 @@ def extract_recs(
         rec_lists.append(
             pd.DataFrame(
                 {
-                    "user": request.interest_profile.profile_id,
+                    "user": user.hex,
                     "stage": "reranked",
                     "item": [a.article_id for a in reranked.articles],
                 }
