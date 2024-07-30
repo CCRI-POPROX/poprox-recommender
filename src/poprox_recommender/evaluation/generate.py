@@ -85,7 +85,6 @@ def extract_recs(
             )
         )
     output_df = pd.concat(rec_lists, ignore_index=True)
-    print(output_df)
     # make stage a categorical to save memory + disk
     output_df["stage"] = output_df["stage"] = pd.Categorical(
         output_df["stage"], categories=["final", "ranked", "reranked"]
