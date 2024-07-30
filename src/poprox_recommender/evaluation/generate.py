@@ -129,7 +129,7 @@ if __name__ == "__main__":
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
             raise e
 
-        user_recs.append(outputs)
+        user_recs.append(extract_recs(request, outputs))
 
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]
