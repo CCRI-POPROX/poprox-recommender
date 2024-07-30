@@ -54,9 +54,9 @@ def extract_recs(
     rec_lists = [
         pd.DataFrame(
             {
-                "user": user.hex,
+                "user": str(user),
                 "stage": "final",
-                "item": [a.article_id for a in pipeline_state.recs],
+                "item": [str(a.article_id) for a in pipeline_state.recs],
             }
         )
     ]
@@ -66,9 +66,9 @@ def extract_recs(
         rec_lists.append(
             pd.DataFrame(
                 {
-                    "user": user.hex,
+                    "user": str(user),
                     "stage": "ranked",
-                    "item": [a.article_id for a in ranked.articles],
+                    "item": [str(a.article_id) for a in ranked.articles],
                 }
             )
         )
@@ -78,13 +78,14 @@ def extract_recs(
         rec_lists.append(
             pd.DataFrame(
                 {
-                    "user": user.hex,
+                    "user": str(user),
                     "stage": "reranked",
-                    "item": [a.article_id for a in reranked.articles],
+                    "item": [str(a.article_id) for a in reranked.articles],
                 }
             )
         )
     output_df = pd.concat(rec_lists, ignore_index=True)
+    print(output_df)
     # make stage a categorical to save memory + disk
     output_df["stage"] = output_df["stage"] = pd.Categorical(
         output_df["stage"], categories=["final", "ranked", "reranked"]
