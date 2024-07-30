@@ -1,3 +1,18 @@
+"""
+Generate recommendations for offline test data.
+
+Usage:
+    poprox_recommender.evaluation.generate [options]
+
+Options:
+    -v, --verbose
+            enable verbose diagnostic logs
+    --log-file=FILE
+            write log messages to FILE
+    -o FILE, --output=FILE
+            write output to FILE [default: outputs/recommendations.parquet]
+"""
+
 # pyright: basic
 from __future__ import annotations
 
@@ -5,6 +20,7 @@ import logging
 import logging.config
 
 import pandas as pd
+from docopt import docopt
 from tqdm import tqdm
 
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -12,10 +28,17 @@ from poprox_concepts.domain import ArticleSet
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
 from poprox_recommender.default import fallback_pipeline, personalized_pipeline
 from poprox_recommender.logging_config import setup_logging
-from poprox_recommender.paths import project_root
 from poprox_recommender.pipeline import PipelineState, RecommendationPipeline
 
 logger = logging.getLogger("poprox_recommender.test_offline")
+
+# next steps TODO:
+# - refactor into functions instead of one block in 'if:'
+# - add command-line options for output file, logging, etc.
+# - build measurement script
+# long-term TODO:
+# - support other MIND data (test?)
+# - support our data
 
 
 def extract_recs(
@@ -71,7 +94,8 @@ if __name__ == "__main__":
     """
     For offline evaluation, set theta in mmr_diversity = 1
     """
-    setup_logging(log_file="eval-generate.log")
+    options = docopt(__doc__)
+    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
     mind_data = MindData()
 
@@ -108,7 +132,7 @@ if __name__ == "__main__":
         user_recs.append(outputs)
 
     all_recs = pd.concat(user_recs, ignore_index=True)
-    out_fn = project_root() / "outputs" / "recommendations.parquet"
+    out_fn = options["--output"]
     logger.info("saving recommendations to %s", out_fn)
     all_recs.to_parquet(out_fn, compression="zstd")
 
