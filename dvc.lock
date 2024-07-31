@@ -29,10 +29,10 @@ stages:
       size: 103456245
     - path: src/poprox_recommender/evaluation/generate.py
       hash: md5
-      md5: 64e0ee0bf2470461d02ce868de02bd7c
-      size: 4719
+      md5: 606bb643eb13d8a14ce0a9e93a87b112
+      size: 4732
     outs:
     - path: outputs/mind-val-recommendations.parquet
       hash: md5
-      md5: 559b78344f75db1fdd964907c35d9622
-      size: 13815521
+      md5: ee13aa51c26ca9db3b218ebc117e2d51
+      size: 13813085
