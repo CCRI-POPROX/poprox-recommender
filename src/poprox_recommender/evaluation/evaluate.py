@@ -12,6 +12,7 @@ from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import Article, ArticleSet
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.evaluation.metrics import rank_biased_overlap
+from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.measurement_offline")
@@ -50,6 +51,8 @@ def compute_rec_metric(recs_df: pd.DataFrame, request: RecommendationRequest):
 
 def main():
     global mind_data
+    setup_logging()
+
     mind_data = MindData()
 
     recs_fn = project_root() / "outputs" / "mind-val-recommendations.parquet"
