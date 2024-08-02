@@ -2,6 +2,7 @@ import csv
 import gzip
 import json
 import logging
+from uuid import UUID
 
 import numpy as np
 import pandas as pd
@@ -25,9 +26,9 @@ def convert_df_to_article_set(rec_df):
     return ArticleSet(articles=articles)
 
 
-def compute_rec_metric(recs_df: pd.DataFrame, request: RecommendationRequest):
+def compute_rec_metric(user_recs: dict[UUID, pd.DataFrame], request: RecommendationRequest):
     # Make sure you run generate.py first to get the recommendations data file
-    recs = recs_df.loc[str(request.interest_profile.profile_id)]
+    recs = user_recs[request.interest_profile.profile_id]
     truth = mind_data.user_truth(request.interest_profile.profile_id)
 
     personalized = 1 if request.interest_profile.click_history.article_ids else 0
@@ -55,8 +56,12 @@ def main():
 
     mind_data = MindData()
 
+    logger.info("loading recommendations")
     recs_fn = project_root() / "outputs" / "mind-val-recommendations.parquet"
     recs_df = pd.read_parquet(recs_fn)
+    user_recs = dict((UUID(u), df) for (u, df) in recs_df.groupby("user"))
+    del recs_df
+    logger.info("loaded recommendations for %d users", len(user_recs))
 
     logger.info("measuring recommendations")
     user_out_fn = project_root() / "outputs" / "user-metrics-test.csv.gz"
@@ -73,10 +78,9 @@ def main():
     rbo5 = []
     rbo10 = []
 
-    recs_df.set_index("user", inplace=True)
     for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="evaluate"):
         single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10, personalized = compute_rec_metric(
-            recs_df, request
+            user_recs, request
         )
         user_csv.writerow(
             [
