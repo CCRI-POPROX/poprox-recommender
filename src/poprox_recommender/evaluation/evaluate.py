@@ -64,7 +64,7 @@ def main():
     logger.info("loaded recommendations for %d users", len(user_recs))
 
     logger.info("measuring recommendations")
-    user_out_fn = project_root() / "outputs" / "user-metrics-test.csv.gz"
+    user_out_fn = project_root() / "outputs" / "mind-val-user-metrics.csv.gz"
     user_out_fn.parent.mkdir(exist_ok=True, parents=True)
     user_out = gzip.open(user_out_fn, "wt")
     user_csv = csv.writer(user_out)
@@ -123,7 +123,7 @@ def main():
         "RBO@5": np.nanmean(rbo5),
         "RBO@10": np.nanmean(rbo10),
     }
-    out_fn = project_root() / "outputs" / "metrics-test.json"
+    out_fn = project_root() / "outputs" / "mind-val-metrics.json"
     out_fn.parent.mkdir(exist_ok=True, parents=True)
     out_fn.write_text(json.dumps(agg_metrics) + "\n")
     logger.info("Mean NDCG@5: %.3f", np.mean(ndcg5))

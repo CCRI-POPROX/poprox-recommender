@@ -7,12 +7,13 @@ stages:
     outs:
       - outputs/mind-val-recommendations.parquet
   measure-mind-val:
-    cmd: python -m poprox_recommender.evaluation.offline
+    cmd: python -m poprox_recommender.evaluation.evaluate
     deps:
-      - src/poprox_recommender/evaluation/offline.py
+      - src/poprox_recommender/evaluation/evaluate.py
       - data/MINDlarge_dev.zip
+      - outputs/mind-val-recommendations.parquet
     outs:
-      - outputs/user-metrics.csv.gz
+      - outputs/mind-val-user-metrics.csv.gz
     metrics:
-      - outputs/metrics.json:
+      - outputs/mind-val-metrics.json:
           cache: false
