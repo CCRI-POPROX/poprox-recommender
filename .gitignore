@@ -107,45 +107,9 @@ dmypy.json
 .serverless
 .requirements*
 
-# Logs and profiler output
-logs/
-*.log*
+# Logs and profiler data
+*.log
 *.prof
 *.lprof
-perf.data*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Node-related runtime things
-node_modules/
-jspm_packages/
-web_modules/
-bower_components/
-*.tsbuildinfo
-.eslintcache
-.npm
-.node_repl_history
-.cache/
-
-# Web-related things
-.stylelintcache
-.rpt2_cache/
-.rts2_cache_*/
-.next
-.nuxt
-
-# Editors
-.idea
-
-# OS junk
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-Thumbs.db
-[Dd]esktop.ini
-$RECYCLE.BIN/
+perf_data*/
+node_modules
