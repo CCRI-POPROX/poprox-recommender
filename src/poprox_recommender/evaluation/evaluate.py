@@ -6,7 +6,6 @@ import logging
 import numpy as np
 import pandas as pd
 from lenskit.metrics import topn
-from line_profiler import LineProfiler
 from tqdm import tqdm
 
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -49,7 +48,8 @@ def compute_rec_metric(recs_df: pd.DataFrame, request: RecommendationRequest):
     return single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10, personalized
 
 
-if __name__ == "__main__":
+def main():
+    global mind_data
     mind_data = MindData()
 
     recs_fn = project_root() / "outputs" / "mind-val-recommendations.parquet"
@@ -72,9 +72,6 @@ if __name__ == "__main__":
 
     recs_df.set_index("user", inplace=True)
     for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="evaluate"):
-        lp = LineProfiler()
-        lp_wrapper = lp(compute_rec_metric)
-        lp.print_stats()
         single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10, personalized = compute_rec_metric(
             recs_df, request
         )
@@ -127,3 +124,7 @@ if __name__ == "__main__":
     logger.info("Mean RR: %.3f", np.mean(recip_rank))
     logger.info("Mean RBO@5: %.3f", np.mean(rbo5))
     logger.info("Mean RBO@10: %.3f", np.mean(rbo10))
+
+
+if __name__ == "__main__":
+    main()
