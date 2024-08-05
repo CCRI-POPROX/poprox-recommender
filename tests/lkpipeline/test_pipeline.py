@@ -466,6 +466,7 @@ def test_fallback_fail_with_missing_options():
     with raises(RuntimeError, match="no alternative"):
         pipe.run(na, a=3)
 
+
 def test_fallback_transitive():
     "test that a fallback works if a dependency's dependency fails"
     pipe = Pipeline()

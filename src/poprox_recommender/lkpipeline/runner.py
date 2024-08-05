@@ -125,8 +125,7 @@ class PipelineRunner:
 
             if itype and not is_compatible_data(ival, itype):
                 raise TypeError(
-                    f"input {iname} for component {name}"
-                    f" has invalid type {type(ival)} (expected {itype})"
+                    f"input {iname} for component {name}" f" has invalid type {type(ival)} (expected {itype})"
                 )
 
             in_data[iname] = ival
