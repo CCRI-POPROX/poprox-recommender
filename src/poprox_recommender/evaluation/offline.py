@@ -25,7 +25,6 @@ from poprox_concepts.domain import ArticleSet
 from poprox_recommender.default import fallback_pipeline, personalized_pipeline
 from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.paths import model_file_path, project_root
-from poprox_recommender.pipeline import PipelineState
 
 logger = logging.getLogger("poprox_recommender.test_offline")
 
@@ -48,12 +47,13 @@ def custom_encoder(obj):
 def recsys_metric(
     mind_data: MindData,
     request: RecommendationRequest,
-    pipeline_state: PipelineState,
+    final: ArticleSet,
+    topk: ArticleSet | None,
 ):
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
 
-    recs = pd.DataFrame({"item": [a.article_id for a in pipeline_state.recs]})
+    recs = pd.DataFrame({"item": [a.article_id for a in final.articles]})
     truth = mind_data.user_truth(request.interest_profile.profile_id)
 
     # RR should look for *clicked* articles, not just all impression articles
@@ -61,11 +61,9 @@ def recsys_metric(
     single_ndcg5 = topn.ndcg(recs, truth, k=5)
     single_ndcg10 = topn.ndcg(recs, truth, k=10)
 
-    ranked = pipeline_state.elements.get("ranked", None)
-    reranked = pipeline_state.elements.get("reranked", None)
-    if ranked and reranked:
-        single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
-        single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
+    if topk and final:
+        single_rbo5 = rank_biased_overlap(topk, final, k=5)
+        single_rbo10 = rank_biased_overlap(topk, final, k=10)
     else:
         single_rbo5 = None
         single_rbo10 = None
@@ -117,17 +115,20 @@ if __name__ == "__main__":
                 "profile": request.interest_profile,
             }
             if request.interest_profile.click_history.article_ids:
-                outputs = pipeline(inputs)
+                topk, ranked = pipeline.run("rank-topk", "rank", **inputs)
                 personalized = 1
             else:
-                outputs = fallback(inputs)
+                topk = None
+                ranked = fallback.run("rank", **inputs)
                 personalized = 0
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
             raise e
 
         logger.debug("measuring for user %s", request.interest_profile.profile_id)
-        single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10 = recsys_metric(mind_data, request, outputs)
+        single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10 = recsys_metric(
+            mind_data, request, ranked, topk
+        )
         user_csv.writerow(
             [
                 request.interest_profile.profile_id,
