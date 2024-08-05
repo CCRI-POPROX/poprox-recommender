@@ -4,14 +4,15 @@ from typing import Any
 
 from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.components.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
-from poprox_recommender.components.embedders import ArticleEmbedder, UserEmbedder
+from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Fill
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers.uniform import UniformSampler
 from poprox_recommender.components.scorers import ArticleScorer
+from poprox_recommender.config import default_device
 from poprox_recommender.lkpipeline import Pipeline, PipelineState
-from poprox_recommender.model import get_model
+from poprox_recommender.paths import model_file_path
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -51,10 +52,6 @@ def personalized_pipeline(num_slots: int, pipeline_params: dict[str, Any] | None
         num_slots: The number of items to recommend.
         pipeline_params: Additional parameters to the reocmmender algorithm.
     """
-    model = get_model()
-    if model is None:
-        return None
-
     if not pipeline_params:
         pipeline_params = {}
 
@@ -64,9 +61,9 @@ def personalized_pipeline(num_slots: int, pipeline_params: dict[str, Any] | None
     else:
         pipeline_name = None
 
-    article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
-    user_embedder = UserEmbedder(model.model, model.device)
-    article_scorer = ArticleScorer(model.model)
+    article_embedder = NRMSArticleEmbedder(model_file_path("news_encoder.safetensors"), default_device())
+    user_embedder = NRMSUserEmbedder(model_file_path("user_encoder.safetensors"), default_device())
+    article_scorer = ArticleScorer()
     topk_ranker = TopkRanker(algo_params={}, num_slots=num_slots)
     topic_filter = TopicFilter()
     sampler = UniformSampler(num_slots=num_slots)
