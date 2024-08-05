@@ -12,20 +12,23 @@ class UserEmbedder:
 
     @torch_inference
     def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
-        embedding_lookup = {}
-        for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):
-            if article.article_id not in embedding_lookup:
-                embedding_lookup[article.article_id] = article_vector
+        if len(clicked_articles.articles) == 0:
+            interest_profile.embedding = None
+        else:
+            embedding_lookup = {}
+            for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):
+                if article.article_id not in embedding_lookup:
+                    embedding_lookup[article.article_id] = article_vector
 
-        embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
+            embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
-        interest_profile.embedding = build_user_embedding(
-            interest_profile.click_history,
-            embedding_lookup,
-            self.model,
-            self.device,
-            self.max_clicks,
-        )
+            interest_profile.embedding = build_user_embedding(
+                interest_profile.click_history,
+                embedding_lookup,
+                self.model,
+                self.device,
+                self.max_clicks,
+            )
 
         return interest_profile
 
