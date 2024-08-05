@@ -1,14 +1,20 @@
 import torch as th
+from safetensors.torch import load_file
 
 from poprox_concepts import ArticleSet, ClickHistory, InterestProfile
+from poprox_recommender.model import ModelConfig
+from poprox_recommender.model.nrms.user_encoder import UserEncoder
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
-class UserEmbedder:
-    def __init__(self, model, device, max_clicks_per_user: int = 50):
-        self.model = model
+class NRMSUserEmbedder:
+    def __init__(self, path, device, max_clicks_per_user: int = 50):
+        config = ModelConfig()
+        self.user_encoder = UserEncoder(config.hidden_size, config.num_attention_heads)
+        checkpoint = load_file(path)
+        self.user_encoder.load_state_dict(checkpoint)
         self.device = device
-        self.max_clicks = max_clicks_per_user
+        self.max_clicks_per_user = max_clicks_per_user
 
     @torch_inference
     def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
@@ -22,38 +28,31 @@ class UserEmbedder:
 
             embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
-            interest_profile.embedding = build_user_embedding(
-                interest_profile.click_history,
-                embedding_lookup,
-                self.model,
-                self.device,
-                self.max_clicks,
-            )
+            interest_profile.embedding = self.build_user_embedding(interest_profile.click_history, embedding_lookup)
 
         return interest_profile
 
+    # Compute a vector for each user
+    def build_user_embedding(self, click_history: ClickHistory, article_embeddings):
+        article_ids = list(dict.fromkeys(click_history.article_ids))[
+            -self.max_clicks_per_user :
+        ]  # deduplicate while maintaining order
 
-# Compute a vector for each user
-def build_user_embedding(click_history: ClickHistory, article_embeddings, model, device, max_clicks_per_user):
-    article_ids = list(dict.fromkeys(click_history.article_ids))[
-        -max_clicks_per_user:
-    ]  # deduplicate while maintaining order
+        padded_positions = self.max_clicks_per_user - len(article_ids)
+        assert padded_positions >= 0
 
-    padded_positions = max_clicks_per_user - len(article_ids)
-    assert padded_positions >= 0
-
-    article_ids = ["PADDED_NEWS"] * padded_positions + article_ids
-    default = article_embeddings["PADDED_NEWS"]
-    clicked_article_embeddings = [
-        article_embeddings.get(clicked_article, default).to(device) for clicked_article in article_ids
-    ]
-    clicked_news_vector = (
-        th.stack(
-            clicked_article_embeddings,
-            dim=0,
+        article_ids = ["PADDED_NEWS"] * padded_positions + article_ids
+        default = article_embeddings["PADDED_NEWS"]
+        clicked_article_embeddings = [
+            article_embeddings.get(clicked_article, default).to(self.device) for clicked_article in article_ids
+        ]
+        clicked_news_vector = (
+            th.stack(
+                clicked_article_embeddings,
+                dim=0,
+            )
+            .unsqueeze(0)
+            .to(self.device)
         )
-        .unsqueeze(0)
-        .to(device)
-    )
 
-    return model.get_user_vector(clicked_news_vector)
+        return self.user_encoder(clicked_news_vector)
