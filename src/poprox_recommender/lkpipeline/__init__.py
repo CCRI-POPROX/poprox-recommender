@@ -276,6 +276,13 @@ class Pipeline:
             did not score.  A specific itemwise fallback component is needed for
             such an operation.
 
+        .. note::
+            If one of the fallback elements is a component ``A`` that depends on
+            another component or input ``B``, and ``B`` is missing or returns
+            ``None`` such that ``A`` would usually fail, then ``A`` will be
+            skipped and the fallback will move on to the next node. This works
+            with arbitrarily-deep transitive chains.
+
         Args:
             name:
                 The name of the node.
