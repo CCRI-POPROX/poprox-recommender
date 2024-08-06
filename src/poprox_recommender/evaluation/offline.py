@@ -9,6 +9,7 @@ from lenskit.metrics import topn
 from tqdm import tqdm
 
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.lkpipeline import PipelineState
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.pipeline import RecommendationPipeline
 
@@ -44,14 +45,10 @@ def custom_encoder(obj):
         return str(obj)
 
 
-def recsys_metric(
-    mind_data: MindData,
-    request: RecommendationRequest,
-    final: ArticleSet,
-    topk: ArticleSet | None,
-):
+def recsys_metric(mind_data: MindData, request: RecommendationRequest, state: PipelineState):
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
+    final = state["recommendations"]
 
     recs = pd.DataFrame({"item": [a.article_id for a in final.articles]})
     truth = mind_data.user_truth(request.interest_profile.profile_id)
@@ -61,7 +58,8 @@ def recsys_metric(
     single_ndcg5 = topn.ndcg(recs, truth, k=5)
     single_ndcg10 = topn.ndcg(recs, truth, k=10)
 
-    if topk and final:
+    if "ranker" in state:
+        topk = state["ranker"]
         single_rbo5 = rank_biased_overlap(topk, final, k=5)
         single_rbo10 = rank_biased_overlap(topk, final, k=10)
     else:
@@ -115,20 +113,18 @@ if __name__ == "__main__":
                 "profile": request.interest_profile,
             }
             if request.interest_profile.click_history.article_ids:
-                topk, ranked = pipeline.run("ranker", "recommender", **inputs)
+                state = pipeline.run_all(**inputs)
                 personalized = 1
             else:
                 topk = None
-                ranked = fallback.run("recommender", **inputs)
+                state = fallback.run_all(**inputs)
                 personalized = 0
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
             raise e
 
         logger.debug("measuring for user %s", request.interest_profile.profile_id)
-        single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10 = recsys_metric(
-            mind_data, request, ranked, topk
-        )
+        single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10 = recsys_metric(mind_data, request, state)
         user_csv.writerow(
             [
                 request.interest_profile.profile_id,
