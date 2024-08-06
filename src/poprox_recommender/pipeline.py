@@ -50,8 +50,6 @@ class RecommendationPipeline:
         self.components.append(spec)
 
     def __call__(self, inputs: PipelineState | StateDict) -> PipelineState:
-        # TODO: Validate that all required inputs are present
-
         # Avoid modifying the inputs
         state = deepcopy(inputs)
         if isinstance(state, dict):
