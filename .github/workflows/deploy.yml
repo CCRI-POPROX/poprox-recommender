@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+# override default shell for mamba activation
+defaults:
+  run:
+    shell: bash -el {0}
+
 jobs:
   deploy-lambdas:
     name: Deploy to AWS
