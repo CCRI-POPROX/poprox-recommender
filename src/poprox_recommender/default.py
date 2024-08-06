@@ -1,27 +1,19 @@
 # pyright: basic
 import logging
-from dataclasses import dataclass
 from typing import Any
 
-from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.components.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
 from poprox_recommender.components.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.rankers.topk import TopkRanker
-from poprox_recommender.components.samplers import UniformSampler
+from poprox_recommender.components.samplers.uniform import UniformSampler
 from poprox_recommender.components.scorers import ArticleScorer
-from poprox_recommender.lkpipeline import Pipeline
+from poprox_recommender.lkpipeline import Pipeline, PipelineState
 from poprox_recommender.model import get_model
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-
-@dataclass
-class Recommendations:
-    recs: list[Article]
-    initial: ArticleSet | None = None
-    reranked: ArticleSet | None = None
 
 
 def select_articles(
@@ -30,9 +22,10 @@ def select_articles(
     interest_profile: InterestProfile,
     num_slots: int,
     algo_params: dict[str, Any] | None = None,
-) -> Recommendations:
+) -> PipelineState:
     """
-    Select articles with default recommender configuration.
+    Select articles with default recommender configuration.  It returns a
+    pipeline state whose ``default`` is the final list of recommendations.
     """
     pipeline = None
 
@@ -47,17 +40,9 @@ def select_articles(
     if topk is None:
         wanted = (rank,)
     else:
-        wanted = (rank, topk)
+        wanted = (topk, rank)
 
-    result = pipeline.run(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
-
-    if topk is None:
-        assert isinstance(result, ArticleSet)
-        return Recommendations(result.articles, initial=result)
-    else:
-        assert isinstance(result, tuple)
-        reranked, initial = result
-        return Recommendations(reranked.articles, initial=initial, reranked=reranked)
+    return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
 
 
 def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = None) -> Pipeline | None:

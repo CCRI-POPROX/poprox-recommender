@@ -115,11 +115,11 @@ if __name__ == "__main__":
                 "profile": request.interest_profile,
             }
             if request.interest_profile.click_history.article_ids:
-                topk, ranked = pipeline.run("rank-topk", "rank", **inputs)
+                topk, ranked = pipeline.run("ranker", "recommender", **inputs)
                 personalized = 1
             else:
                 topk = None
-                ranked = fallback.run("rank", **inputs)
+                ranked = fallback.run("recommender", **inputs)
                 personalized = 0
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
