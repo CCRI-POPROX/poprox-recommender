@@ -42,8 +42,8 @@ def select_articles(
     if pipeline is None:
         pipeline = fallback_pipeline(num_slots)
 
-    rank = pipeline.node("rank")
-    topk = pipeline.node("rank-topk", missing="none")
+    rank = pipeline.node("recommender")
+    topk = pipeline.node("ranker", missing="none")
     if topk is None:
         wanted = (rank,)
     else:
@@ -103,17 +103,16 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
     candidates = pipeline.create_input("candidate", ArticleSet)
     clicked = pipeline.create_input("clicked", ArticleSet)
     profile = pipeline.create_input("profile", InterestProfile)
-    e_cand = pipeline.add_component("embed-candidates", article_embedder, article_set=candidates)
-    e_click = pipeline.add_component("embed-clicked-articles", article_embedder, article_set=clicked)
-    e_user = pipeline.add_component("embed-user", user_embedder, clicked_articles=e_click, interest_profile=profile)
-    scored = pipeline.add_component(
-        "score-articles", article_scorer, candidate_articles=e_cand, interest_profile=e_user
-    )
-    topk = pipeline.add_component("rank-topk", topk_ranker, candidate_articles=scored, interest_profile=e_user)
+    e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
+    e_click = pipeline.add_component("history-emberdder", article_embedder, article_set=clicked)
+    e_user = pipeline.add_component("user-embedder", user_embedder, clicked_articles=e_click, interest_profile=profile)
+    scored = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)
+    topk = pipeline.add_component("ranker", topk_ranker, candidate_articles=scored, interest_profile=e_user)
     if ranker is topk_ranker:
-        pipeline.alias("rank", topk)
+        pipeline.alias("recommender", topk)
     else:
-        _final = pipeline.add_component("rank", ranker, candidate_articles=scored, interest_profile=e_user)
+        rerank = pipeline.add_component("reranker", ranker, candidate_articles=scored, interest_profile=e_user)
+        pipeline.alias("recommender", rerank)
 
     return pipeline
 
@@ -132,6 +131,7 @@ def fallback_pipeline(num_slots: int) -> Pipeline:
     candidates = pipeline.create_input("candidate", ArticleSet)
     _clicked = pipeline.create_input("clicked", ArticleSet)
     profile = pipeline.create_input("profile", InterestProfile)
-    filtered = pipeline.add_component("filter-articles", topic_filter, candidate=candidates, interest_profile=profile)
-    _sampled = pipeline.add_component("rank", sampler, candidate=filtered, backup=candidates)
+    filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
+    sampled = pipeline.add_component("sampler", sampler, candidate=filtered, backup=candidates)
+    pipeline.alias("recommender", sampled)
     return pipeline
