@@ -59,20 +59,3 @@ def load_model(checkpoint, device):
     model.eval()
 
     return model
-
-
-def get_model(device=None) -> RecommenderComponents:
-    global _cached_model
-    if device is None:
-        device = default_device()
-    logger.debug("loading model components on device %s", device)
-
-    if _cached_model is None:
-        plm_path = model_file_path(LANG_MODEL_NAME)
-        logger.debug("loading tokenizer from %s", plm_path)
-        tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/")
-        checkpoint, device = load_checkpoint(device)
-        model = load_model(checkpoint, device)
-        _cached_model = RecommenderComponents(tokenizer, model, device)
-
-    return _cached_model
