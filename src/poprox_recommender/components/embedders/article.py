@@ -45,6 +45,7 @@ class NRMSArticleEmbedder:
             config.additive_attn_hidden_dim,
         )
         self.news_encoder.load_state_dict(checkpoint)
+        self.news_encoder.to(device)
         self.device = device
 
         plm_path = model_file_path(config.pretrained_model)
