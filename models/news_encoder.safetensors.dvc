@@ -1,0 +1,5 @@
+outs:
+- md5: eb2bfe9cf633f1629e1cdb8719d8b028
+  size: 275529184
+  hash: md5
+  path: news_encoder.safetensors

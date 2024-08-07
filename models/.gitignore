@@ -1,3 +1,5 @@
 /ckpt-30000.pth
 /word2int.tsv
 /model.safetensors
+/news_encoder.safetensors
+/user_encoder.safetensors
