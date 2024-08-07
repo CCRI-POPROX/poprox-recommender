@@ -1,22 +1,42 @@
 schema: '2.0'
 stages:
   measure-mind-val:
-    cmd: python -m poprox_recommender.evaluation.offline
+    cmd: python -m poprox_recommender.evaluation.evaluate
     deps:
     - path: data/MINDlarge_dev.zip
       hash: md5
       md5: c93fa1728e3537649b441c78cce5e6f1
       size: 103456245
-    - path: src/poprox_recommender/evaluation/offline.py
+    - path: outputs/mind-val-recommendations.parquet
       hash: md5
-      md5: c4b4e5bca641fd5de881fac1d860aa27
-      size: 6210
+      md5: ee13aa51c26ca9db3b218ebc117e2d51
+      size: 13813085
+    - path: src/poprox_recommender/evaluation/evaluate.py
+      hash: md5
+      md5: e390d73e0bfeaf35e99a832d3b7287e3
+      size: 4734
     outs:
-    - path: outputs/metrics.json
+    - path: outputs/mind-val-metrics.json
       hash: md5
-      md5: 3f63cdac8fd140b1e991e7defaf1e50e
-      size: 148
-    - path: outputs/user-metrics.csv.gz
+      md5: a8f56e0e1d51e572077ad45c9f858e3c
+      size: 103
+    - path: outputs/mind-val-user-metrics.csv.gz
       hash: md5
-      md5: 808ccb1d143a3c6930ae2cf8722492c0
-      size: 9816580
+      md5: f2e3a3c4d3f80c21a703f4440075b726
+      size: 8823419
+  recommend-mind-val:
+    cmd: python -m poprox_recommender.evaluation.generate -o outputs/mind-val-recommendations.parquet
+    deps:
+    - path: data/MINDlarge_dev.zip
+      hash: md5
+      md5: c93fa1728e3537649b441c78cce5e6f1
+      size: 103456245
+    - path: src/poprox_recommender/evaluation/generate.py
+      hash: md5
+      md5: 606bb643eb13d8a14ce0a9e93a87b112
+      size: 4732
+    outs:
+    - path: outputs/mind-val-recommendations.parquet
+      hash: md5
+      md5: ee13aa51c26ca9db3b218ebc117e2d51
+      size: 13813085
