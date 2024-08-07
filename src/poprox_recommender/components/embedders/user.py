@@ -13,6 +13,7 @@ class NRMSUserEmbedder:
         self.user_encoder = UserEncoder(config.hidden_size, config.num_attention_heads)
         checkpoint = load_file(path)
         self.user_encoder.load_state_dict(checkpoint)
+        self.user_encoder.to(device)
         self.device = device
         self.max_clicks_per_user = max_clicks_per_user
 
