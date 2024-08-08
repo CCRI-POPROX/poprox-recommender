@@ -85,8 +85,7 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
         logger.info("Recommendations will be ranked with plain top-k.")
         ranker = topk_ranker
 
-    # TODO put pipeline name back in
-    pipeline = Pipeline()
+    pipeline = Pipeline(diversify)
 
     # Define pipeline inputs
     candidates = pipeline.create_input("candidate", ArticleSet)
