@@ -2,10 +2,7 @@ import base64
 import logging
 
 from poprox_concepts import ArticleSet
-from poprox_concepts.api.recommendations import (
-    RecommendationRequest,
-    RecommendationResponse,
-)
+from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
 from poprox_recommender.default import select_articles
 from poprox_recommender.topics import user_topic_preference
 
@@ -62,7 +59,7 @@ def generate_recs(event, context):
     logger.info("Constructing response...")
     resp_body = RecommendationResponse.model_validate(
         {
-            "recommendations": {profile.profile_id: outputs.recs},
+            "recommendations": {profile.profile_id: outputs.default.articles},
         }
     )
 
