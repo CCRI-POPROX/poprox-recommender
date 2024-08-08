@@ -19,7 +19,7 @@ RUN micromamba install -p /opt/poprox -c conda-forge awslambdaric
 
 # Copy the soure code into the image to install it
 # TODO do we want to copy the sdist or wheel instead?
-COPY pyproject.toml README.md /src/poprox-recommender/
+COPY pyproject.toml README.md LICENSE.md /src/poprox-recommender/
 COPY src/ /src/poprox-recommender/src/
 WORKDIR /src/poprox-recommender
 # Install the poprox-recommender module
