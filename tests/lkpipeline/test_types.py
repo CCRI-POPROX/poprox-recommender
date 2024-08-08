@@ -10,13 +10,21 @@ Tests for the pipeline type-checking functions.
 
 import typing
 from collections.abc import Iterable, Sequence
+from pathlib import Path
+from types import NoneType
 
 import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike, NDArray
 from pytest import warns
 
-from poprox_recommender.lkpipeline.types import TypecheckWarning, is_compatible_data, is_compatible_type
+from poprox_recommender.lkpipeline.types import (
+    TypecheckWarning,
+    is_compatible_data,
+    is_compatible_type,
+    parse_type_string,
+    type_string,
+)
 
 
 def test_type_compat_identical():
@@ -85,3 +93,35 @@ def test_numpy_typecheck():
 
 def test_pandas_typecheck():
     assert is_compatible_data(pd.Series(["a", "b"]), ArrayLike)
+
+
+def test_type_string_none():
+    assert type_string(None) == "None"
+
+
+def test_type_string_str():
+    assert type_string(str) == "str"
+
+
+def test_type_string_generic():
+    assert type_string(list[str]) == "list"
+
+
+def test_type_string_class():
+    assert type_string(Path) == "pathlib.Path"
+
+
+def test_parse_string_None():
+    assert parse_type_string("None") == NoneType
+
+
+def test_parse_string_int():
+    assert parse_type_string("int") is int
+
+
+def test_parse_string_class():
+    assert parse_type_string("pathlib.Path") is Path
+
+
+def test_parse_string_mod_class():
+    assert parse_type_string("pathlib:Path") is Path
