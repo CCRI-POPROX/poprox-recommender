@@ -10,7 +10,7 @@ from uuid import UUID
 from pytest import fail, raises
 from typing_extensions import assert_type
 
-from poprox_recommender.lkpipeline import InputNode, Node, Pipeline
+from poprox_recommender.lkpipeline import InputNode, Node, Pipeline, PipelineError
 
 
 def test_init_empty():
@@ -126,7 +126,7 @@ def test_single_input_required():
 
     node = pipe.add_component("return", incr, msg=msg)
 
-    with raises(RuntimeError, match="not specified"):
+    with raises(PipelineError, match="not specified"):
         pipe.run(node)
 
 
@@ -238,7 +238,7 @@ def test_cycle():
     na = pipe.add_component("add", add, x=nd, y=b)
     pipe.connect(nd, x=na)
 
-    with raises(RuntimeError, match="cycle"):
+    with raises(PipelineError, match="cycle"):
         pipe.run(a=1, b=7)
 
 
@@ -268,7 +268,7 @@ def test_replace_component():
     assert pipe.run(nt, a=3, b=7) == 9
 
     # old node should be missing!
-    with raises(RuntimeError, match="not in pipeline"):
+    with raises(PipelineError, match="not in pipeline"):
         pipe.run(nd, a=3, b=7)
 
 
@@ -436,7 +436,7 @@ def test_fail_missing_input():
     nd = pipe.add_component("double", double, x=a)
     na = pipe.add_component("add", add, x=nd, y=b)
 
-    with raises(RuntimeError, match=r"input.*not specified"):
+    with raises(PipelineError, match=r"input.*not specified"):
         pipe.run(na, a=3)
 
     # missing inputs only matter if they are required
