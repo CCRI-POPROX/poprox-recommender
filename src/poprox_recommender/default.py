@@ -6,6 +6,7 @@ from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.components.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
 from poprox_recommender.components.embedders import ArticleEmbedder, UserEmbedder
 from poprox_recommender.components.filters import TopicFilter
+from poprox_recommender.components.joiners import Fill
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers.uniform import UniformSampler
 from poprox_recommender.components.scorers import ArticleScorer
@@ -29,18 +30,15 @@ def select_articles(
     """
     pipeline = None
 
-    if interest_profile.click_history.article_ids:
-        pipeline = personalized_pipeline(num_slots, algo_params)
+    pipeline = personalized_pipeline(num_slots, algo_params)
+    assert pipeline is not None
 
-    if pipeline is None:
-        pipeline = fallback_pipeline(num_slots)
-
-    rank = pipeline.node("recommender")
+    recs = pipeline.node("recommender")
     topk = pipeline.node("ranker", missing="none")
     if topk is None:
-        wanted = (rank,)
+        wanted = (recs,)
     else:
-        wanted = (topk, rank)
+        wanted = (topk, recs)
 
     return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
 
@@ -70,6 +68,9 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
     user_embedder = UserEmbedder(model.model, model.device)
     article_scorer = ArticleScorer(model.model)
     topk_ranker = TopkRanker(algo_params={}, num_slots=num_slots)
+    topic_filter = TopicFilter()
+    sampler = UniformSampler(num_slots=num_slots)
+    fill = Fill(num_slots=num_slots)
 
     if diversify == "mmr":
         logger.info("Recommendations will be re-ranked with mmr.")
@@ -84,39 +85,31 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
         logger.info("Recommendations will be ranked with plain top-k.")
         ranker = topk_ranker
 
+    # TODO put pipeline name back in
     pipeline = Pipeline()
+
+    # Define pipeline inputs
     candidates = pipeline.create_input("candidate", ArticleSet)
     clicked = pipeline.create_input("clicked", ArticleSet)
     profile = pipeline.create_input("profile", InterestProfile)
+
+    # Compute embeddings
     e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
     e_click = pipeline.add_component("history-emberdder", article_embedder, article_set=clicked)
     e_user = pipeline.add_component("user-embedder", user_embedder, clicked_articles=e_click, interest_profile=profile)
-    scored = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)
-    topk = pipeline.add_component("ranker", topk_ranker, candidate_articles=scored, interest_profile=e_user)
+
+    # Score and rank articles with diversification/calibration reranking
+    o_scored = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)
+    o_topk = pipeline.add_component("ranker", topk_ranker, candidate_articles=o_scored, interest_profile=e_user)
     if ranker is topk_ranker:
-        pipeline.alias("recommender", topk)
+        o_rank = o_topk
     else:
-        rerank = pipeline.add_component("reranker", ranker, candidate_articles=scored, interest_profile=e_user)
-        pipeline.alias("recommender", rerank)
+        o_rank = pipeline.add_component("reranker", ranker, candidate_articles=o_scored, interest_profile=e_user)
 
-    return pipeline
+    # Fallback in case not enough articles came from the ranker
+    # TODO: make this lazy so the sampler only runs if the reranker isn't enough
+    o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
+    o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
+    pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
 
-
-def fallback_pipeline(num_slots: int) -> Pipeline:
-    """
-    Create the fallback (non-personalized) pipeline.
-
-    Args:
-        num_slots: The number of items to recommend.
-    """
-    topic_filter = TopicFilter()
-    sampler = UniformSampler(num_slots=num_slots)
-
-    pipeline = Pipeline()
-    candidates = pipeline.create_input("candidate", ArticleSet)
-    _clicked = pipeline.create_input("clicked", ArticleSet)
-    profile = pipeline.create_input("profile", InterestProfile)
-    filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
-    sampled = pipeline.add_component("sampler", sampler, candidate=filtered, backup=candidates)
-    pipeline.alias("recommender", sampled)
     return pipeline
