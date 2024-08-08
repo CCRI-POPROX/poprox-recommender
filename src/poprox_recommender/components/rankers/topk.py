@@ -12,6 +12,10 @@ class TopkRanker(Ranker):
         self.num_slots = num_slots
 
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
-        article_indices = np.argsort(candidate_articles.scores)[-self.num_slots :][::-1]
+        articles = []
+        if candidate_articles.scores is not None:
+            article_indices = np.argsort(candidate_articles.scores)[-self.num_slots :][::-1]
 
-        return ArticleSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
+            articles = [candidate_articles.articles[int(idx)] for idx in article_indices]
+
+        return ArticleSet(articles=articles)

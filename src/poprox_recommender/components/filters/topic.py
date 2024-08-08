@@ -11,6 +11,9 @@ class TopicFilter:
             interest.entity_name for interest in interest_profile.onboarding_topics if interest.preference > 1
         }
 
+        if len(profile_topics) == 0:
+            return candidate
+
         topical_articles = []
         for article in candidate.articles:
             article_topics = {mention.entity.name for mention in article.mentions}

@@ -22,6 +22,9 @@ class TopicCalibrator(Ranker):
         self.num_slots = num_slots
 
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+        if candidate_articles.scores is None:
+            return candidate_articles
+
         article_scores = th.sigmoid(th.tensor(candidate_articles.scores)).cpu().detach().numpy()
 
         topic_preferences: dict[str, int] = defaultdict(int)
