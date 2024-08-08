@@ -1,8 +1,8 @@
-# Dependencies needed for working on the this code and repo.
-# This does *not* include the dependencies of poprox-recommender itself —
-# it is only the tooling and dependencies for development, image building,
-# etc.  It is included in the conda lockfile as the 'dev' category, and
-# can be directly installed in CI for repo manipulation.
+# Dependencies needed for working on the this code and repo. This does *not*
+# include the dependencies of the code itself — it is only the tooling and
+# dependencies for development, image building, etc.  It is included in the
+# conda lockfile as the 'dev' category, and can be directly installed in CI for
+# repo manipulation.
 category: dev
 dependencies:
   - hatch
