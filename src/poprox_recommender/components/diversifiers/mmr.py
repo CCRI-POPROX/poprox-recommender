@@ -17,6 +17,9 @@ class MMRDiversifier(Ranker):
 
     @torch_inference
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+        if candidate_articles.scores is None:
+            return candidate_articles
+
         similarity_matrix = compute_similarity_matrix(candidate_articles.embeddings)
 
         article_indices = mmr_diversification(

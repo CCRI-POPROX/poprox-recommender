@@ -22,7 +22,7 @@ from safetensors.torch import load_file
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
-from poprox_recommender.default import fallback_pipeline, personalized_pipeline
+from poprox_recommender.default import personalized_pipeline
 from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.paths import model_file_path, project_root
 from poprox_recommender.pipeline import PipelineState
@@ -93,7 +93,6 @@ if __name__ == "__main__":
     rbo10 = []
 
     pipeline: RecommendationPipeline = personalized_pipeline(TEST_REC_COUNT)
-    fallback: RecommendationPipeline = fallback_pipeline(TEST_REC_COUNT)
 
     logger.info("measuring recommendations")
     user_out_fn = project_root() / "outputs" / "user-metrics.csv.gz"
@@ -116,11 +115,10 @@ if __name__ == "__main__":
                 "clicked": ArticleSet(articles=request.past_articles),
                 "profile": request.interest_profile,
             }
+            outputs = pipeline(inputs)
             if request.interest_profile.click_history.article_ids:
-                outputs = pipeline(inputs)
                 personalized = 1
             else:
-                outputs = fallback(inputs)
                 personalized = 0
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)

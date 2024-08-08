@@ -11,7 +11,10 @@ class ArticleScorer:
         candidate_embeddings = candidate_articles.embeddings
         user_embedding = interest_profile.embedding
 
-        pred = self.model.get_prediction(candidate_embeddings, user_embedding.squeeze())
-        candidate_articles.scores = pred.cpu().detach().numpy()
+        if user_embedding is not None:
+            pred = self.model.get_prediction(candidate_embeddings, user_embedding.squeeze())
+            candidate_articles.scores = pred.cpu().detach().numpy()
+        else:
+            candidate_articles.scores = None
 
         return candidate_articles
