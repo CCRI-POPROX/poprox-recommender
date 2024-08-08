@@ -31,6 +31,9 @@ class PipelineState(Mapping[str, Any]):
     _aliases: dict[str, str]
     _default: str | None = None
     meta: PipelineMeta | None
+    """
+    Pipeline metadata.
+    """
 
     def __init__(
         self,
