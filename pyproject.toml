@@ -4,12 +4,16 @@ build-backend = "hatchling.build"
 
 [project]
 name = "poprox-recommender"
-dynamic = ["version"]
-description = ''
-readme = "README.md"
-requires-python = ">=3.11"
-keywords = []
+description = "POPROX recommender implementation and infrastructure."
 authors = [{ name = "Karl Higley", email = "khigley@umn.edu" }]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+]
+requires-python = ">= 3.11"
+readme = "README.md"
+license = { file = "LICENSE.md" }
+dynamic = ["version"]
 dependencies = [
   "lenskit==0.14.*",
   "nltk>=3.8,<4",
@@ -27,10 +31,11 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/CCRI-POPROX/poprox-recommender#readme"
-Issues = "https://github.com/CCRI-POPROX/poprox-recommender/issues"
-Source = "https://github.com/CCRI-POPROX/poprox-recommender"
+Homepage = "https://docs.poprox.ai"
+GitHub = "https://github.com/CCRI-POPROX/poprox-recommender"
 
+###### build and environment configurations ######
+# basic hatch config
 [tool.hatch.metadata]
 allow-direct-references = true
 
@@ -39,67 +44,68 @@ path = "src/poprox_recommender/__about__.py"
 
 [tool.hatch.envs.default]
 python = "3.11"
-# keep these dependencies in sync with dev/dev-environment.yml
+# keep these dependencies in sync with dev/environment.yml if it exists
 dependencies = [
+  # testing and coverage
+  "coverage[toml]>=6.5",
+  "pytest>=8",
+  # development tooling
+  "pre-commit >=3.7,<4",
+  "ruff >=0.4",
+  "pyright >=1.1,<2",
+  # recommender-specific deps
   "dvc[s3] ~=3.51",
   "docopt~=0.6",
   "pandas==2.*",
   "requests~=2.13",
-  "coverage[toml]>=6.5",
-  "pytest>=8",
   "pexpect~=4.9",
 ]
+
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
-cov-report = ["- coverage combine", "coverage report"]
-cov = ["test-cov", "cov-report"]
 
+# tooling just for code validation
 [tool.hatch.envs.lint]
 detached = true
 dependencies = ["ruff>=0.4", "pyright>=1.1,<2"]
+
 [tool.hatch.envs.lint.scripts]
 typing = "pyright {args:src/poprox_recommender tests}"
 style = ["ruff check {args:.}", "ruff format --check --diff {args:.}"]
 fmt = ["ruff format {args:.}", "ruff check --fix {args:.}", "style"]
 all = ["style", "typing"]
 
+# environment for project meta-tasks
+[tool.hatch.envs.meta]
+detached = true
+dependencies = ["copier==9.*"]
+
+[tool.hatch.envs.meta.scripts]
+update-template = "copier update"
+
+###### tooling configurations ######
+# ruff — formatting and lints
 [tool.ruff]
 target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
 select = ["F", "I", "E"]
-ignore = [
-  # Allow non-abstract empty methods in abstract base classes
-  "B027",
-  # Allow boolean positional values in function calls, like `dict.get(... True)`
-  "FBT003",
-  # Ignore checks for possible passwords
-  "S105",
-  "S106",
-  "S107",
-  # Ignore complexity
-  "C901",
-  "PLR0911",
-  "PLR0912",
-  "PLR0913",
-  "PLR0915",
-]
 unfixable = [
   # Don't touch unused imports
   "F401",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# tests can have unused imports (for pytest fixtures)
+"tests/**/*" = ["F401"]
+
 [tool.ruff.isort]
-known-first-party = ["poprox_recommender", "poprox_concepts"]
+known-first-party = ["poprox_*"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
-
-[tool.ruff.per-file-ignores]
-# Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.coverage.run]
 source_pkgs = ["poprox_recommender", "tests"]
@@ -108,11 +114,8 @@ parallel = true
 omit = ["src/poprox_recommender/__about__.py"]
 
 [tool.coverage.paths]
-poprox_recommender = [
-  "src/poprox_recommender",
-  "*/poprox-recommender/src/poprox_recommender",
-]
-tests = ["tests", "*/poprox-recommender/tests"]
+poprox_recommender = ["src/poprox_recommender"]
+tests = ["tests"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
