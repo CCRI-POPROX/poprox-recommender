@@ -124,8 +124,10 @@ class PipelineRunner:
                 return None
 
             if itype and not is_compatible_data(ival, itype):
+                if ival is None:
+                    raise TypeError(f"no data available for required input ❬{iname}❭ on component ❬{name}❭")
                 raise TypeError(
-                    f"input {iname} for component {name}" f" has invalid type {type(ival)} (expected {itype})"
+                    f"input ❬{iname}❭ on component ❬{name}❭ has invalid type {type(ival)} (expected {itype})"
                 )
 
             in_data[iname] = ival

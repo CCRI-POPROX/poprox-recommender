@@ -79,3 +79,44 @@ def test_pipeline_clone_with_nonconfig_class():
     p2 = pipe.clone()
 
     assert p2.run(msg="HACKEM MUCHE") == "scroll named HACKEM MUCHE?"
+
+
+def test_clone_defaults():
+    pipe = Pipeline()
+    msg = pipe.create_input("msg", str)
+    pipe.set_default("msg", msg)
+    pipe.add_component("return", exclaim)
+
+    assert pipe.run(msg="hello") == "hello!"
+
+    p2 = pipe.clone()
+
+    assert p2.run(msg="hello") == "hello!"
+
+
+def test_clone_alias():
+    pipe = Pipeline()
+    msg = pipe.create_input("msg", str)
+    excl = pipe.add_component("exclaim", exclaim, msg=msg)
+    pipe.alias("return", excl)
+
+    assert pipe.run("return", msg="hello") == "hello!"
+
+    p2 = pipe.clone()
+
+    assert p2.run("return", msg="hello") == "hello!"
+
+
+def test_clone_hash():
+    pipe = Pipeline()
+    msg = pipe.create_input("msg", str)
+    pipe.set_default("msg", msg)
+    excl = pipe.add_component("exclaim", exclaim)
+    pipe.alias("return", excl)
+
+    assert pipe.run("return", msg="hello") == "hello!"
+
+    p2 = pipe.clone()
+
+    assert p2.run("return", msg="hello") == "hello!"
+    assert p2.config_hash() == pipe.config_hash()

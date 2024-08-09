@@ -1,5 +1,7 @@
+import logging
 from types import NoneType
 
+import numpy as np
 from pytest import fail, warns
 from typing_extensions import assert_type
 
@@ -8,7 +10,10 @@ from poprox_recommender.lkpipeline.components import AutoConfig
 from poprox_recommender.lkpipeline.config import PipelineConfig
 from poprox_recommender.lkpipeline.nodes import ComponentNode
 
+_log = logging.getLogger(__name__)
 
+
+# region Test Components
 class Prefixer(AutoConfig):
     prefix: str
 
@@ -17,6 +22,29 @@ class Prefixer(AutoConfig):
 
     def __call__(self, msg: str) -> str:
         return self.prefix + msg
+
+
+def negative(x: int) -> int:
+    return -x
+
+
+def double(x: int) -> int:
+    return x * 2
+
+
+def add(x: int | np.ndarray, y: int) -> int | np.ndarray:
+    return x + y
+
+
+def msg_ident(msg: str) -> str:
+    return msg
+
+
+def msg_prefix(prefix: str, msg: str) -> str:
+    return prefix + msg
+
+
+# endregion
 
 
 def test_serialize_input():
@@ -60,10 +88,6 @@ def test_round_trip_optional_input():
     assert isinstance(i2, InputNode)
     assert i2.name == "user"
     assert i2.types == {int, str, NoneType}
-
-
-def msg_ident(msg: str) -> str:
-    return msg
 
 
 def test_config_single_node():
@@ -124,16 +148,39 @@ def test_configurable_component():
     assert p2.config_hash() == pipe.config_hash()
 
 
-def negative(x: int) -> int:
-    return -x
+def test_save_defaults():
+    pipe = Pipeline()
+    msg = pipe.create_input("msg", str)
+    pipe.set_default("msg", msg)
+    pipe.add_component("return", msg_ident)
+
+    assert pipe.run(msg="hello") == "hello"
+
+    cfg = pipe.get_config()
+    p2 = Pipeline.from_config(cfg)
+
+    assert p2.run(msg="hello") == "hello"
 
 
-def double(x: int) -> int:
-    return x * 2
+def test_hashes_different():
+    p1 = Pipeline()
+    p2 = Pipeline()
 
+    a1 = p1.create_input("a", int)
+    a2 = p2.create_input("a", int)
 
-def add(x: int, y: int) -> int:
-    return x + y
+    # at this point the hashes should be the same
+    _log.info("p1 stage 1 hash: %s", p1.config_hash())
+    _log.info("p2 stage 1 hash: %s", p2.config_hash())
+    assert p1.config_hash() == p2.config_hash()
+
+    p1.add_component("proc", negative, x=a1)
+    p2.add_component("proc", double, x=a2)
+
+    # with different components, they should be different
+    _log.info("p1 stage 2 hash: %s", p1.config_hash())
+    _log.info("p2 stage 2 hash: %s", p2.config_hash())
+    assert p1.config_hash() != p2.config_hash()
 
 
 def test_save_with_fallback():
@@ -175,7 +222,7 @@ def test_hash_validate():
 
 
 def test_alias_input():
-    "alias an input node"
+    "just an input node and an alias"
     pipe = Pipeline()
     user = pipe.create_input("user", int, str)
 
@@ -198,6 +245,45 @@ def test_alias_node():
 
     assert pipe.run("result", a=5, b=7) == 17
 
-    cfg = pipe.get_config()
-    p2 = Pipeline.from_config(cfg)
+    p2 = pipe.clone("pipeline-config")
     assert p2.run("result", a=5, b=7) == 17
+
+
+def test_literal():
+    pipe = Pipeline("literal-prefix")
+    msg = pipe.create_input("msg", str)
+
+    pipe.add_component("prefix", msg_prefix, prefix=pipe.literal("hello, "), msg=msg)
+
+    assert pipe.run(msg="HACKEM MUCHE") == "hello, HACKEM MUCHE"
+
+    print(pipe.get_config().model_dump_json(indent=2))
+    p2 = pipe.clone("pipeline-config")
+    assert p2.run(msg="FOOBIE BLETCH") == "hello, FOOBIE BLETCH"
+
+
+def test_literal_array():
+    pipe = Pipeline("literal-add-array")
+    a = pipe.create_input("a", int)
+
+    pipe.add_component("add", add, x=np.arange(10), y=a)
+
+    res = pipe.run(a=5)
+    assert np.all(res == np.arange(5, 15))
+
+    print(pipe.get_config().model_dump_json(indent=2))
+    p2 = pipe.clone("pipeline-config")
+    assert np.all(p2.run(a=5) == np.arange(5, 15))
+
+
+def test_stable_with_literals():
+    "test that two identical pipelines have the same hash, even with literals"
+    p1 = Pipeline("literal-add-array")
+    a = p1.create_input("a", int)
+    p1.add_component("add", add, x=np.arange(10), y=a)
+
+    p2 = Pipeline("literal-add-array")
+    a = p2.create_input("a", int)
+    p2.add_component("add", add, x=np.arange(10), y=a)
+
+    assert p1.config_hash() == p2.config_hash()

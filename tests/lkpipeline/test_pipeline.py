@@ -7,10 +7,12 @@
 # pyright: strict
 from uuid import UUID
 
-from pytest import fail, raises
+import numpy as np
+from pytest import fail, raises, warns
 from typing_extensions import assert_type
 
 from poprox_recommender.lkpipeline import InputNode, Node, Pipeline, PipelineError
+from poprox_recommender.lkpipeline.types import TypecheckWarning
 
 
 def test_init_empty():
@@ -576,3 +578,24 @@ def test_fallback_transitive_nodefail():
 
     assert pipe.run(nr, a=2, b=8) == -4
     assert pipe.run(nr, a=-7, b=8) == 8
+
+
+def test_pipeline_component_default():
+    """
+    Test that the last *component* is last.  It also exercises the warning logic
+    for missing component types.
+    """
+    pipe = Pipeline()
+    a = pipe.create_input("a", int)
+
+    def add(x, y):  # type: ignore
+        return x + y  # type: ignore
+
+    with warns(TypecheckWarning):
+        pipe.add_component("add", add, x=np.arange(10), y=a)  # type: ignore
+
+    # the component runs
+    assert np.all(pipe.run("add", a=5) == np.arange(5, 15))
+
+    # the component is the default
+    assert np.all(pipe.run(a=5) == np.arange(5, 15))

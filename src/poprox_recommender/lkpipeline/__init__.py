@@ -14,13 +14,12 @@ from __future__ import annotations
 import logging
 import warnings
 from types import FunctionType
-from typing import Literal, cast
-from uuid import uuid4
+from uuid import NAMESPACE_URL, uuid4, uuid5
 
-from typing_extensions import Any, LiteralString, Self, TypeVar, overload
+from typing_extensions import Any, Literal, Self, TypeAlias, TypeVar, cast, overload
 
 from .components import AutoConfig, Component, ConfigurableComponent, instantiate_component  # type: ignore # noqa: F401
-from .config import PipelineComponent, PipelineConfig, PipelineInput, PipelineMeta, hash_config
+from .config import PipelineComponent, PipelineConfig, PipelineInput, PipelineLiteral, PipelineMeta, hash_config
 from .nodes import ND, ComponentNode, FallbackNode, InputNode, LiteralNode, Node
 from .state import PipelineState
 from .types import parse_type_string
@@ -44,6 +43,9 @@ T2 = TypeVar("T2")
 T3 = TypeVar("T3")
 T4 = TypeVar("T4")
 T5 = TypeVar("T5")
+CloneMethod: TypeAlias = Literal["config", "pipeline-config"]
+
+NAMESPACE_LITERAL_DATA = uuid5(NAMESPACE_URL, "https://ns.lenskit.org/literal-data/")
 
 
 class PipelineError(Exception):
@@ -94,8 +96,12 @@ class Pipeline:
 
     _nodes: dict[str, Node[Any]]
     _aliases: dict[str, Node[Any]]
-    _defaults: dict[str, Node[Any] | Any]
+    _defaults: dict[str, Node[Any]]
     _components: dict[str, Component[Any]]
+    _hash: str | None = None
+    _last: Node[Any] | None = None
+    _anon_nodes: set[str]
+    "Track generated node names."
 
     def __init__(self, name: str | None = None, version: str | None = None):
         self.name = name
@@ -104,22 +110,19 @@ class Pipeline:
         self._aliases = {}
         self._defaults = {}
         self._components = {}
+        self._anon_nodes = set()
         self._clear_caches()
 
-    def meta(self, *, include_hash: bool | None = None) -> PipelineMeta:
+    def meta(self, *, include_hash: bool = True) -> PipelineMeta:
         """
         Get the metadata (name, version, hash, etc.) for this pipeline without
         returning the whole config.
 
         Args:
             include_hash:
-                Whether to include a configuration hash in the metadata.  If
-                ``None``, it includes a hash if there are no :meth:`literal`
-                nodes in the pipeline.
+                Whether to include a configuration hash in the metadata.
         """
         meta = PipelineMeta(name=self.name, version=self.version)
-        if include_hash is None:
-            include_hash = not any(isinstance(n, LiteralNode) for n in self.nodes)
         if include_hash:
             meta.hash = self.config_hash()
         return meta
@@ -194,7 +197,7 @@ class Pipeline:
         self._clear_caches()
         return node
 
-    def literal(self, value: T) -> LiteralNode[T]:
+    def literal(self, value: T, *, name: str | None = None) -> LiteralNode[T]:
         """
         Create a literal node (a node with a fixed value).
 
@@ -202,12 +205,15 @@ class Pipeline:
             Literal nodes cannot be serialized witih :meth:`get_config` or
             :meth:`save_config`.
         """
-        name = str(uuid4())
+        if name is None:
+            name = str(uuid4())
+            self._anon_nodes.add(name)
         node = LiteralNode(name, value, types=set([type(value)]))
         self._nodes[name] = node
+        self._clear_caches()
         return node
 
-    def set_default(self, name: LiteralString, node: Node[Any] | object) -> None:
+    def set_default(self, name: str, node: Node[Any] | object) -> None:
         """
         Set the default wiring for a component input.  Components that declare
         an input parameter with the specified ``name`` but no configured input
@@ -279,6 +285,7 @@ class Pipeline:
         self.connect(node, **inputs)
 
         self._clear_caches()
+        self._last = node
         return node
 
     def replace_component(
@@ -406,23 +413,38 @@ class Pipeline:
             if isinstance(comp, ConfigurableComponent)
         }
 
-    def clone(self, *, params: bool = False) -> Pipeline:
+    def clone(self, how: CloneMethod = "config") -> Pipeline:
         """
         Clone the pipeline, optionally including trained parameters.
 
+        The ``how`` parameter controls how the pipeline is cloned, and what is
+        available in the clone pipeline.  It can be one of the following values:
+
+        ``"config"``
+            Create fresh component instances using the configurations of the
+            components in this pipeline.  When applied to a trained pipeline,
+            the clone does **not** have the original's learned parameters. This
+            is the default clone method.
+        ``"pipeline-config"``
+            Round-trip the entire pipeline through :meth:`get_config` and
+            :meth:`from_config`.
+
         Args:
-            params:
-                Pass ``True`` to clone parameters as well as the configuration
-                and wiring.
+            how:
+                The mechanism to use for cloning the pipeline.
 
         Returns:
             A new pipeline with the same components and wiring, but fresh
             instances created by round-tripping the configuration.
         """
-        if params:  # pragma: nocover
-            raise NotImplementedError()
+        if how == "pipeline-config":
+            cfg = self.get_config()
+            return self.from_config(cfg)
+        elif how != "config":  # pragma: nocover
+            raise NotImplementedError("only 'config' cloning is currently supported")
 
         clone = Pipeline()
+
         for node in self.nodes:
             match node:
                 case InputNode(name, types=types):
@@ -445,6 +467,13 @@ class Pipeline:
                         clone.connect(cn, **{wn: clone.node(wt)})
                 case _:  # pragma: nocover
                     raise RuntimeError(f"invalid node {node}")
+
+        for n, t in self._aliases.items():
+            clone.alias(n, t.name)
+
+        for n, t in self._defaults.items():
+            clone.set_default(n, clone.node(t.name))
+
         return clone
 
     def get_config(self, *, include_hash: bool = True) -> PipelineConfig:
@@ -466,22 +495,50 @@ class Pipeline:
         """
         meta = self.meta(include_hash=False)
         config = PipelineConfig(meta=meta)
+
+        # We map anonymous nodes to hash-based names for stability.  If we ever
+        # allow anonymous components, this will need to be adjusted to maintain
+        # component ordering, but it works for now since only literals can be
+        # anonymous. First handle the anonymous nodes, so we have that mapping:
+        remapped: dict[str, str] = {}
+        for an in self._anon_nodes:
+            node = self._nodes.get(an, None)
+            match node:
+                case None:
+                    # skip nodes that no longer exist
+                    continue
+                case LiteralNode(name, value):
+                    cfg = PipelineLiteral.represent(value)
+                    sname = str(uuid5(NAMESPACE_LITERAL_DATA, cfg.model_dump_json()))
+                    _log.debug("renamed anonymous node %s to %s", name, sname)
+                    remapped[name] = sname
+                    config.literals[sname] = cfg
+                case _:
+                    # the pipeline only generates anonymous literal nodes right now
+                    raise RuntimeError(f"unexpected anonymous node {node}")
+
+        # Now we go over all named nodes and add them to the config:
         for node in self.nodes:
+            if node.name in remapped:
+                continue
+
             match node:
                 case InputNode():
                     config.inputs.append(PipelineInput.from_node(node))
-                case LiteralNode():
-                    raise RuntimeError("literal nodes cannot be serialized to config")
+                case LiteralNode(name, value):
+                    config.literals[name] = PipelineLiteral.represent(value)
                 case ComponentNode(name):
-                    config.components[name] = PipelineComponent.from_node(node)
+                    config.components[name] = PipelineComponent.from_node(node, remapped)
                 case FallbackNode(name, alternatives):
                     config.components[name] = PipelineComponent(
-                        code="@use-first-of", inputs=[n.name for n in alternatives]
+                        code="@use-first-of",
+                        inputs=[remapped.get(n.name, n.name) for n in alternatives],
                     )
                 case _:  # pragma: nocover
                     raise RuntimeError(f"invalid node {node}")
 
         config.aliases = {a: t.name for (a, t) in self._aliases.items()}
+        config.defaults = {n: t.name for (n, t) in self._defaults.items()}
 
         if include_hash:
             config.meta.hash = hash_config(config)
@@ -493,16 +550,22 @@ class Pipeline:
         Get a hash of the pipeline's configuration to uniquely identify it for
         logging, version control, or other purposes.
 
-        The precise algorithm to compute the hash is not guaranteed, except that
-        the same configuration with the same version of LensKit and its
-        dependencies will produce the same hash.  In LensKit 2024.1, the
-        configuration hash is computed by computing the JSON serialization of
-        the pipeline configuration *without* a hash returning the hex-encoded
-        SHA256 hash of that configuration.
+        The hash format and algorithm are not guaranteed, but is stable within a
+        LensKit version.  For the same version of LensKit and component code,
+        the same configuration will produce the same hash, so long as there are
+        no literal nodes.  Literal nodes will *usually* hash consistently, but
+        since literals other than basic JSON values are hashed by pickling, hash
+        stability depends on the stability of the pickle bytestream.
+
+        In LensKit 2024.1, the configuration hash is computed by computing the
+        JSON serialization of the pipeline configuration *without* a hash and
+        returning the hex-encoded SHA256 hash of that configuration.
         """
-        # get the config *without* a hash
-        cfg = self.get_config(include_hash=False)
-        return hash_config(cfg)
+        if self._hash is None:
+            # get the config *without* a hash
+            cfg = self.get_config(include_hash=False)
+            self._hash = hash_config(cfg)
+        return self._hash
 
     @classmethod
     def from_config(cls, config: object) -> Self:
@@ -518,7 +581,11 @@ class Pipeline:
         # that nodes are available before they are wired (since `connect` can
         # introduce out-of-order dependencies).
 
-        # pass 1: add components
+        # pass 1: add literals
+        for name, data in cfg.literals.items():
+            pipe.literal(data.decode(), name=name)
+
+        # pass 2: add components
         to_wire: list[PipelineComponent] = []
         for name, comp in cfg.components.items():
             if comp.code.startswith("@"):
@@ -529,7 +596,7 @@ class Pipeline:
             pipe.add_component(name, obj)
             to_wire.append(comp)
 
-        # pass 2: add meta nodes
+        # pass 3: add meta nodes
         for name, comp in cfg.components.items():
             if comp.code == "@use-first-of":
                 if not isinstance(comp.inputs, list):
@@ -538,7 +605,7 @@ class Pipeline:
             elif comp.code.startswith("@"):
                 raise PipelineError(f"unsupported meta-component {comp.code}")
 
-        # pass 3: wiring
+        # pass 4: wiring
         for name, comp in cfg.components.items():
             if isinstance(comp.inputs, dict):
                 inputs = {n: pipe.node(t) for (n, t) in comp.inputs.items()}
@@ -546,9 +613,13 @@ class Pipeline:
             elif not comp.code.startswith("@"):
                 raise PipelineError(f"component {name} inputs must be dict, not list")
 
-        # pass 4: aliases
+        # pass 5: aliases
         for n, t in cfg.aliases.items():
             pipe.alias(n, t)
+
+        # pass 6: defaults
+        for n, t in cfg.defaults.items():
+            pipe.set_default(n, pipe.node(t))
 
         if cfg.meta.hash is not None:
             h2 = pipe.config_hash()
@@ -591,9 +662,6 @@ class Pipeline:
         components.  See :ref:`pipeline-execution` for details of the pipeline
         execution model.
 
-        .. todo::
-            Add cycle detection.
-
         Args:
             nodes:
                 The component(s) to run.
@@ -606,6 +674,8 @@ class Pipeline:
             are returned in a tuple.
 
         Raises:
+            PipelineError:
+                when there is a pipeline configuration error (e.g. a cycle).
             ValueError:
                 when one or more required inputs are missing.
             TypeError:
@@ -614,7 +684,9 @@ class Pipeline:
                 exceptions thrown by components are passed through.
         """
         if not nodes:
-            nodes = (self._last_node(),)
+            if self._last is None:  # pragma: nocover
+                raise PipelineError("pipeline has no components")
+            nodes = (self._last,)
         state = self.run_all(*nodes, **kwargs)
         results = [state[self.node(n).name] for n in nodes]
 
@@ -666,11 +738,6 @@ class Pipeline:
             runner.state, {a: t.name for (a, t) in self._aliases.items()}, default=last, meta=self.meta()
         )
 
-    def _last_node(self) -> Node[object]:
-        if not self._nodes:
-            raise RuntimeError("pipeline is empty")
-        return list(self._nodes.values())[-1]
-
     def _check_available_name(self, name: str) -> None:
         if name in self._nodes or name in self._aliases:
             raise ValueError(f"pipeline already has node {name}")
@@ -681,4 +748,5 @@ class Pipeline:
             raise PipelineError(f"node {node} not in pipeline")
 
     def _clear_caches(self):
-        pass
+        if "_hash" in self.__dict__:
+            del self._hash
