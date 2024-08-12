@@ -30,7 +30,7 @@ from poprox_recommender.default import personalized_pipeline
 from poprox_recommender.lkpipeline import PipelineState
 from poprox_recommender.logging_config import setup_logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 
 # long-term TODO:
 # - support other MIND data (test?)

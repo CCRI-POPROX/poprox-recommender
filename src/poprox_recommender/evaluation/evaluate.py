@@ -35,7 +35,7 @@ from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 
 
 def convert_df_to_article_set(rec_df):
