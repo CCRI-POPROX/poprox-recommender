@@ -30,7 +30,7 @@ def test_request_with_topic_calibrator():
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
         req.num_recs,
-        algo_params={"diversity_algo": "topic-cali"},
+        pipeline_params={"diversity_algo": "topic-cali"},
     )
 
     # do we get recommendations?
