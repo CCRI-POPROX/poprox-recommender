@@ -16,7 +16,7 @@ from typing_extensions import Any, Protocol, Self, TypeVar, override, runtime_ch
 
 # COut is only return, so Component[U] can be assigned to Component[T] if U ≼ T.
 COut = TypeVar("COut", covariant=True)
-Component: TypeAlias = Callable[..., COut]
+PipelineComponent: TypeAlias = Callable[..., COut]
 
 
 @runtime_checkable
@@ -129,3 +129,7 @@ class AutoConfig(ConfigurableComponent):
         are passed to the constructor as keywrod arguments.
         """
         return cls(**cfg)
+
+
+class Component(AutoConfig):
+    pass

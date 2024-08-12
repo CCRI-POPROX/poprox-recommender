@@ -14,11 +14,15 @@ class NRMS(torch.nn.Module):
     Input 1 + K candidate news and a list of user clicked news, produce the click probability.
     """
 
-    def __init__(self, args):
+    def __init__(self, config):
         super(NRMS, self).__init__()
 
-        self.news_encoder = NewsEncoder(args)
-        self.user_encoder = UserEncoder(args)
+        self.news_encoder = NewsEncoder(
+            config.pretrained_model,
+            config.num_attention_heads,
+            config.additive_attn_hidden_dim,
+        )
+        self.user_encoder = UserEncoder(config.hidden_size, config.num_attention_heads)
         self.click_predictor = DotProductClickPredictor()
         self.loss_fn = nn.CrossEntropyLoss()
 

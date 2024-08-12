@@ -52,7 +52,6 @@ def generate_recs(event, context):
         candidate_articles,
         clicked_articles,
         profile,
-        req.num_recs,
         pipeline_params,
     )
 
