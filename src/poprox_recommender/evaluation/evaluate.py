@@ -138,7 +138,7 @@ def main():
     logger.info("running with %d workers", n_workers)
     with ProcessPoolExecutor(n_workers) as pool:
         for metrics in tqdm(
-            pool.map(compute_rec_metric, rec_users(mind_data, user_recs), chunksize=1000),
+            pool.map(compute_rec_metric, rec_users(mind_data, user_recs), chunksize=250),
             total=mind_data.n_users,
             desc="evaluate",
         ):
