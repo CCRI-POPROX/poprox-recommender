@@ -48,7 +48,7 @@ def select_articles(
     return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
 
 
-def recommendation_pipelines(device=None, num_slots=10) -> dict[str, RecommendationPipeline]:
+def recommendation_pipelines(device=None, num_slots=10) -> dict[str, Pipeline]:
     global _cached_pipelines
     if device is None:
         device = default_device()
@@ -60,7 +60,7 @@ def recommendation_pipelines(device=None, num_slots=10) -> dict[str, Recommendat
     return _cached_pipelines
 
 
-def build_pipelines(num_slots: int, device: str) -> dict[str, RecommendationPipeline]:
+def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     """
     Create the default personalized recommendation pipeline.
 
@@ -118,23 +118,30 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     fill = Fill(num_slots=num_slots)
     topk_ranker = TopkRanker(num_slots=num_slots)
 
-    pipe = RecommendationPipeline(name=name)
+    pipeline = Pipeline()
+
+    # Define pipeline inputs
+    candidates = pipeline.create_input("candidate", ArticleSet)
+    clicked = pipeline.create_input("clicked", ArticleSet)
+    profile = pipeline.create_input("profile", InterestProfile)
 
     # Compute embeddings
-    pipe.add(article_embedder, inputs=["candidate"], output="candidate")
-    pipe.add(article_embedder, inputs=["clicked"], output="clicked")
-    pipe.add(user_embedder, inputs=["clicked", "profile"], output="profile")
+    e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
+    e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
+    e_user = pipeline.add_component("user-embedder", user_embedder, clicked_articles=e_click, interest_profile=profile)
 
     # Score and rank articles with diversification/calibration reranking
-    pipe.add(article_scorer, inputs=["candidate", "profile"], output="candidate")
-    pipe.add(ranker, inputs=["candidate", "profile"], output="reranked")
-
-    # Output the plain descending-by-score ranking for comparison
-    pipe.add(topk_ranker, inputs=["candidate", "profile"], output="ranked")
+    o_scored = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)
+    o_topk = pipeline.add_component("ranker", topk_ranker, candidate_articles=o_scored, interest_profile=e_user)
+    if ranker is topk_ranker:
+        o_rank = o_topk
+    else:
+        o_rank = pipeline.add_component("reranker", ranker, candidate_articles=o_scored, interest_profile=e_user)
 
     # Fallback in case not enough articles came from the ranker
-    pipe.add(topic_filter, inputs=["candidate", "profile"], output="topical")
-    pipe.add(sampler, inputs=["topical", "candidate"], output="sampled")
-    pipe.add(fill, inputs=["reranked", "sampled"], output="recs")
+    # TODO: make this lazy so the sampler only runs if the reranker isn't enough
+    o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
+    o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
+    pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
 
-    return pipe
+    return pipeline
