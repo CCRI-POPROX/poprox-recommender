@@ -40,4 +40,7 @@ def available_cpu_parallelism(max: int | None = None) -> int:
     if n_cpus is None:
         n_cpus = 1
 
+    if max is not None and n_cpus > max:
+        n_cpus = max
+
     return n_cpus
