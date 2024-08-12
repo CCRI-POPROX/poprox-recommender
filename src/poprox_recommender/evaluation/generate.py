@@ -47,12 +47,13 @@ def extract_recs(
     assert user is not None
 
     # get the different recommendation lists to record
+    recs = pipeline_state["recommender"]
     rec_lists = [
         pd.DataFrame(
             {
                 "user": str(user),
                 "stage": "final",
-                "item": [str(a.article_id) for a in pipeline_state["recommender"]],
+                "item": [str(a.article_id) for a in recs.articles],
             }
         )
     ]
