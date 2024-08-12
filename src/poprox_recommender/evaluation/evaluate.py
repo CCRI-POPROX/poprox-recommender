@@ -28,7 +28,6 @@ from docopt import docopt
 from lenskit.metrics import topn
 from tqdm import tqdm
 
-from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import Article, ArticleSet
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.mind import MindData
@@ -40,7 +39,8 @@ logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 
 
 class UserRecs(NamedTuple):
-    request: RecommendationRequest
+    user_id: UUID
+    personalized: bool
     recs: pd.DataFrame
     truth: pd.DataFrame
 
@@ -55,10 +55,8 @@ def convert_df_to_article_set(rec_df):
 def compute_rec_metric(user: UserRecs):
     # Make sure you run generate.py first to get the recommendations data file
     # Convert truth index from UUID to string
-    request, recs, truth = user
+    user_id, personalized, recs, truth = user
     truth.index = truth.index.astype(str)
-
-    personalized = 1 if request.interest_profile.click_history.article_ids else 0
 
     final_rec_df = recs[recs["stage"] == "final"]
     single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
@@ -79,7 +77,7 @@ def compute_rec_metric(user: UserRecs):
         single_rbo10 = None
 
     return (
-        request.interest_profile.profile_id,
+        user_id,
         single_ndcg5,
         single_ndcg10,
         single_rr,
@@ -100,7 +98,7 @@ def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Itera
         recs = user_recs[user_id]
         truth = mind_data.user_truth(user_id)
         assert truth is not None
-        yield UserRecs(request, recs, truth)
+        yield UserRecs(user_id, bool(request.interest_profile.click_history.article_ids), recs, truth)
 
 
 def main():
