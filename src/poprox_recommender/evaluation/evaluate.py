@@ -1,18 +1,19 @@
 """
 Generate evaluations for offline test data.
 
+For an evaluation run NAME, it reads outputs/NAME-recommendation.parquet and
+produces OUTPUTS/name-user-eval-metrics.csv.gz and OUTPUTS/name-metrics.json.
+
 Usage:
-    poprox_recommender.evaluation.evaluate [options]
+    poprox_recommender.evaluation.evaluate [options] NAME
 
 Options:
     -v, --verbose
             enable verbose diagnostic logs
     --log-file=FILE
             write log messages to FILE
-    -i FILE, --input=FILE
-            read intput from FILE [default: outputs/mind-val-recommendations.parquet]
-    -o FILE, --output=FILE
-            write output to FILE [default: outputs/mind-val-metrics.parquet]
+    NAME
+            the name of the evaluation run [default: mind-val]
 """
 
 import csv
@@ -81,19 +82,17 @@ def main():
     global mind_data
     mind_data = MindData()
 
-    logger.info("loading recommendations")
-    input_fn = options["--input"]
-    if not input_fn:
-        recs_fn = project_root() / "outputs" / "mind-val-recommendations.parquet"
-    else:
-        recs_fn = project_root() / "outputs" / input_fn
+    eval_name = options["NAME"]
+    logger.info("measuring evaluation %s", eval_name)
+    recs_fn = project_root() / "outputs" / f"${eval_name}-recommendations.parquet"
+    logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
     user_recs = dict((UUID(u), df) for (u, df) in recs_df.groupby("user"))
     del recs_df
     logger.info("loaded recommendations for %d users", len(user_recs))
 
     logger.info("measuring recommendations")
-    user_out_fn = project_root() / "outputs" / "mind-val-user-metrics.csv.gz"
+    user_out_fn = project_root() / "outputs" / f"{eval_name}-user-metrics.csv.gz"
     user_out_fn.parent.mkdir(exist_ok=True, parents=True)
     user_out = gzip.open(user_out_fn, "wt")
     user_csv = csv.writer(user_out)
@@ -152,11 +151,7 @@ def main():
         "RBO@5": np.nanmean(rbo5),
         "RBO@10": np.nanmean(rbo10),
     }
-    out_fn = options["--output"]
-    if not out_fn:
-        out_fn = project_root() / "outputs" / "mind-val-metrics.json"
-    else:
-        out_fn = project_root() / "outputs" / out_fn
+    out_fn = project_root() / "outputs" / f"{eval_name}-metrics.json"
     logger.info("saving evaluation to %s", out_fn)
     out_fn.parent.mkdir(exist_ok=True, parents=True)
     out_fn.write_text(json.dumps(agg_metrics) + "\n")
