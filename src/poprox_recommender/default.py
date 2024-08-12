@@ -22,7 +22,7 @@ def select_articles(
     clicked_articles: ArticleSet,
     interest_profile: InterestProfile,
     num_slots: int,
-    algo_params: dict[str, Any] | None = None,
+    pipeline_params: dict[str, Any] | None = None,
 ) -> PipelineState:
     """
     Select articles with default recommender configuration.  It returns a
@@ -30,7 +30,7 @@ def select_articles(
     """
     pipeline = None
 
-    pipeline = personalized_pipeline(num_slots, algo_params)
+    pipeline = personalized_pipeline(num_slots, pipeline_params)
     assert pipeline is not None
 
     recs = pipeline.node("recommender")
@@ -43,26 +43,26 @@ def select_articles(
     return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
 
 
-def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = None) -> Pipeline | None:
+def personalized_pipeline(num_slots: int, pipeline_params: dict[str, Any] | None = None) -> Pipeline | None:
     """
     Create the default personalized recommendation pipeline.
 
     Args:
         num_slots: The number of items to recommend.
-        algo_params: Additional parameters to the reocmmender algorithm.
+        pipeline_params: Additional parameters to the reocmmender algorithm.
     """
     model = get_model()
     if model is None:
         return None
 
-    if not algo_params:
-        algo_params = {}
+    if not pipeline_params:
+        pipeline_params = {}
 
-    if "diversity_algo" in algo_params:
-        diversify = algo_params["diversity_algo"]
-        del algo_params["diversity_algo"]
+    if "pipeline" in pipeline_params:
+        diversify = pipeline_params["pipeline"]
+        del pipeline_params["pipeline"]
     else:
-        diversify = "topic-cali"
+        diversify = None
 
     article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
     user_embedder = UserEmbedder(model.model, model.device)
@@ -74,13 +74,13 @@ def personalized_pipeline(num_slots: int, algo_params: dict[str, Any] | None = N
 
     if diversify == "mmr":
         logger.info("Recommendations will be re-ranked with mmr.")
-        ranker = MMRDiversifier(algo_params, num_slots)
+        ranker = MMRDiversifier(pipeline_params, num_slots)
     elif diversify == "pfar":
         logger.info("Recommendations will be re-ranked with pfar.")
-        ranker = PFARDiversifier(algo_params, num_slots)
+        ranker = PFARDiversifier(pipeline_params, num_slots)
     elif diversify == "topic-cali":
         logger.info("Recommendations will be re-ranked with topic calibration.")
-        ranker = TopicCalibrator(algo_params, num_slots)
+        ranker = TopicCalibrator(pipeline_params, num_slots)
     else:
         logger.info("Recommendations will be ranked with plain top-k.")
         ranker = topk_ranker
