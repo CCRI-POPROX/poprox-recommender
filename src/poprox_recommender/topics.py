@@ -36,7 +36,7 @@ def user_topic_preference(past_articles: list[Article], click_history: ClickHist
     topic_count_dict = defaultdict(int)
 
     for article_id in clicked_articles:
-        clicked_topics = find_topic(past_articles, article_id)
+        clicked_topics = find_topic(past_articles, article_id) or set()
         for topic in clicked_topics:
             topic_count_dict[topic] += 1
 
