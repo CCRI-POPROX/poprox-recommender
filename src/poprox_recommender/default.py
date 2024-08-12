@@ -59,10 +59,10 @@ def personalized_pipeline(num_slots: int, pipeline_params: dict[str, Any] | None
         pipeline_params = {}
 
     if "pipeline" in pipeline_params:
-        diversify = pipeline_params["pipeline"]
+        pipeline_name = pipeline_params["pipeline"]
         del pipeline_params["pipeline"]
     else:
-        diversify = None
+        pipeline_name = None
 
     article_embedder = ArticleEmbedder(model.model, model.tokenizer, model.device)
     user_embedder = UserEmbedder(model.model, model.device)
@@ -72,13 +72,13 @@ def personalized_pipeline(num_slots: int, pipeline_params: dict[str, Any] | None
     sampler = UniformSampler(num_slots=num_slots)
     fill = Fill(num_slots=num_slots)
 
-    if diversify == "mmr":
+    if pipeline_name == "mmr":
         logger.info("Recommendations will be re-ranked with mmr.")
         ranker = MMRDiversifier(pipeline_params, num_slots)
-    elif diversify == "pfar":
+    elif pipeline_name == "pfar":
         logger.info("Recommendations will be re-ranked with pfar.")
         ranker = PFARDiversifier(pipeline_params, num_slots)
-    elif diversify == "topic-cali":
+    elif pipeline_name == "topic-cali":
         logger.info("Recommendations will be re-ranked with topic calibration.")
         ranker = TopicCalibrator(pipeline_params, num_slots)
     else:
