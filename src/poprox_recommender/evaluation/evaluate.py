@@ -97,11 +97,9 @@ def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Itera
     for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="evaluate"):
         user_id = request.interest_profile.profile_id
         assert user_id is not None
-        # we copy the data frames to detach them from parents, lighter-weight serialization
-        recs = user_recs[user_id].copy(True)
+        recs = user_recs[user_id]
         truth = mind_data.user_truth(user_id)
         assert truth is not None
-        truth = truth.copy(True)
         yield UserRecs(request, recs, truth)
 
 
@@ -136,7 +134,7 @@ def main():
     rbo5 = []
     rbo10 = []
 
-    n_workers = available_cpu_parallelism(8)
+    n_workers = available_cpu_parallelism(4)
     logger.info("running with %d workers", n_workers)
     with ProcessPoolExecutor(n_workers) as pool:
         for metrics in tqdm(
