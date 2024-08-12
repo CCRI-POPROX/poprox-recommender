@@ -33,7 +33,6 @@ from poprox_recommender.pipeline import PipelineState, RecommendationPipeline
 logger = logging.getLogger("poprox_recommender.test_offline")
 
 # next steps TODO:
-# - refactor into functions instead of one block in 'if:'
 # - add command-line options for output file, logging, etc.
 # - build measurement script
 # long-term TODO:
@@ -92,13 +91,7 @@ def extract_recs(
     return output_df
 
 
-if __name__ == "__main__":
-    """
-    For offline evaluation, set theta in mmr_diversity = 1
-    """
-    options = docopt(__doc__)
-    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
-
+def generate_user_recs():
     mind_data = MindData()
 
     pipeline: RecommendationPipeline = personalized_pipeline(TEST_REC_COUNT)
@@ -123,15 +116,23 @@ if __name__ == "__main__":
             }
             if request.interest_profile.click_history.article_ids:
                 outputs = pipeline(inputs)
-                personalized = 1
             else:
                 outputs = fallback(inputs)
-                personalized = 0
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
             raise e
-
         user_recs.append(extract_recs(request, outputs))
+    return user_recs
+
+
+if __name__ == "__main__":
+    """
+    For offline evaluation, set theta in mmr_diversity = 1
+    """
+    options = docopt(__doc__)
+    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
+
+    user_recs = generate_user_recs()
 
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]

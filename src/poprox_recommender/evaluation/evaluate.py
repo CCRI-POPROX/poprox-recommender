@@ -16,7 +16,7 @@ from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
-logger = logging.getLogger("poprox_recommender.measurement_offline")
+logger = logging.getLogger("poprox_recommender.evaluate_offline")
 
 
 def convert_df_to_article_set(rec_df):
@@ -30,15 +30,21 @@ def compute_rec_metric(user_recs: dict[UUID, pd.DataFrame], request: Recommendat
     # Make sure you run generate.py first to get the recommendations data file
     recs = user_recs[request.interest_profile.profile_id]
     truth = mind_data.user_truth(request.interest_profile.profile_id)
+    # Convert truth index from UUID to string
+    truth.index = truth.index.astype(str)
 
     personalized = 1 if request.interest_profile.click_history.article_ids else 0
 
-    single_rr = topn.recip_rank(recs[recs["stage"] == "final"], truth[truth["rating"] > 0])
-    single_ndcg5 = topn.ndcg(recs[recs["stage"] == "final"], truth, k=5)
-    single_ndcg10 = topn.ndcg(recs[recs["stage"] == "final"], truth, k=10)
+    final_rec_df = recs[recs["stage"] == "final"]
+    single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
+    single_ndcg5 = topn.ndcg(final_rec_df, truth, k=5)
+    single_ndcg10 = topn.ndcg(final_rec_df, truth, k=10)
 
-    ranked = convert_df_to_article_set(recs[recs["stage"] == "ranked"])
-    reranked = convert_df_to_article_set(recs[recs["stage"] == "reranked"])
+    ranked_rec_df = recs[recs["stage"] == "ranked"]
+    ranked = convert_df_to_article_set(ranked_rec_df)
+
+    reranked_rec_df = recs[recs["stage"] == "reranked"]
+    reranked = convert_df_to_article_set(reranked_rec_df)
 
     if ranked and reranked:
         single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
@@ -129,8 +135,8 @@ def main():
     logger.info("Mean NDCG@5: %.3f", np.mean(ndcg5))
     logger.info("Mean NDCG@10: %.3f", np.mean(ndcg10))
     logger.info("Mean RR: %.3f", np.mean(recip_rank))
-    logger.info("Mean RBO@5: %.3f", np.mean(rbo5))
-    logger.info("Mean RBO@10: %.3f", np.mean(rbo10))
+    logger.info("Mean RBO@5: %.3f", np.nanmean(rbo5))
+    logger.info("Mean RBO@10: %.3f", np.nanmean(rbo10))
 
 
 if __name__ == "__main__":
