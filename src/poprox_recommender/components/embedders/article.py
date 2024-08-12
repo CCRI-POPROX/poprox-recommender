@@ -1,12 +1,18 @@
 # pyright: basic
 import logging
+from os import PathLike
 from typing import Protocol
 from uuid import UUID
 
 import torch as th
-from transformers import PreTrainedTokenizer
+from safetensors.torch import load_file
+from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
 from poprox_concepts import ArticleSet
+from poprox_recommender.lkpipeline import Component
+from poprox_recommender.model import ModelConfig
+from poprox_recommender.model.nrms.news_encoder import NewsEncoder
+from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.datachecks import assert_tensor_size
 from poprox_recommender.pytorch.decorators import torch_inference
 
@@ -24,22 +30,37 @@ class ArticleEmbeddingModel(Protocol):
     def get_news_vector(self, news: th.Tensor) -> th.Tensor: ...
 
 
-class ArticleEmbedder:
+class NRMSArticleEmbedder(Component):
     model: ArticleEmbeddingModel
-    tokenizer: PreTrainedTokenizer
+    tokenizer: PreTrainedTokenizer | PreTrainedTokenizerFast
     device: str | None
     embedding_cache: dict[UUID, th.Tensor]
 
-    def __init__(self, model: ArticleEmbeddingModel, tokenizer: PreTrainedTokenizer, device: str | None):
-        self.model = model
-        self.tokenizer = tokenizer
+    def __init__(self, model_path: PathLike, device: str | None):
+        self.model_path = model_path
+        self.device = device
+
+        checkpoint = load_file(model_path)
+        config = ModelConfig()
+        self.news_encoder = NewsEncoder(
+            config.pretrained_model,
+            config.num_attention_heads,
+            config.additive_attn_hidden_dim,
+        )
+        self.news_encoder.load_state_dict(checkpoint)
+        self.news_encoder.to(device)
+
+        plm_path = model_file_path(config.pretrained_model)
+        logger.debug("loading tokenizer from %s", plm_path)
+
+        self.tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/")
         self.device = device
         self.embedding_cache = {}
 
     @torch_inference
     def __call__(self, article_set: ArticleSet) -> ArticleSet:
         if not article_set.articles:
-            article_set.embeddings = th.zeros((0, self.model.embedding_size))  # type: ignore
+            article_set.embeddings = th.zeros((0, self.news_encoder.embedding_size))  # type: ignore
             return article_set
 
         # Step 1: get the cached articles wherever possible.
@@ -67,9 +88,9 @@ class ArticleEmbedder:
             assert_tensor_size(uc_title_tokens, len(uncached), TITLE_LENGTH_LIMIT, label="uncached title tokens")
 
             # Step 4: embed the uncached articles
-            uc_embeddings = self.model.get_news_vector(uc_title_tokens)
+            uc_embeddings = self.news_encoder(uc_title_tokens)
             assert_tensor_size(
-                uc_embeddings, len(uncached), self.model.embedding_size, label="uncached article embeddings"
+                uc_embeddings, len(uncached), self.news_encoder.plm_hidden_size, label="uncached article embeddings"
             )
 
             # Step 5: store embeddings to cache & result
@@ -84,7 +105,7 @@ class ArticleEmbedder:
         embed_single_tensors = [cached[article.article_id] for article in article_set.articles]  # type: ignore
         embed_tensor = th.stack(embed_single_tensors)  # type: ignore
         assert_tensor_size(
-            embed_tensor, len(article_set.articles), self.model.embedding_size, label="final article embeddings"
+            embed_tensor, len(article_set.articles), self.news_encoder.plm_hidden_size, label="final article embeddings"
         )
 
         # Step 7: put the embedding tensor on the output

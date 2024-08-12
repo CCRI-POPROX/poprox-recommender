@@ -7,16 +7,15 @@ from poprox_recommender.model.general.attention.additive import (
 
 
 class UserEncoder(torch.nn.Module):
-    def __init__(self, config):
+    def __init__(self, hidden_size, num_attention_heads):
         super(UserEncoder, self).__init__()
-        self.config = config
 
         # self.multihead_self_attention = MultiHeadSelfAttention(
         # config.hidden_size, config.num_attention_heads)
         self.multihead_attention = nn.MultiheadAttention(
-            embed_dim=config.hidden_size, num_heads=config.num_attention_heads, batch_first=True
+            embed_dim=hidden_size, num_heads=num_attention_heads, batch_first=True
         )
-        self.additive_attention = AdditiveAttention(config.hidden_size, 200)
+        self.additive_attention = AdditiveAttention(hidden_size, 200)
 
     def forward(self, user_vector):
         """

@@ -1,0 +1,5 @@
+outs:
+- md5: d132722736eca39c32111e8d1a3a2218
+  size: 10066184
+  hash: md5
+  path: user_encoder.safetensors

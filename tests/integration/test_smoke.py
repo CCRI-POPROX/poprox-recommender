@@ -22,7 +22,6 @@ def test_direct_basic_request():
         ArticleSet(articles=req.todays_articles),
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
-        req.num_recs,
     )
     # do we get recommendations?
     assert len(outputs.default.articles) > 0
@@ -41,7 +40,6 @@ def test_direct_basic_request_without_clicks():
         ArticleSet(articles=req.todays_articles),
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
-        req.num_recs,
     )
     # do we get recommendations?
     assert len(outputs.default.articles) > 0

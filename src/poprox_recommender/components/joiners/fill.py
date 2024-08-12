@@ -1,7 +1,8 @@
 from poprox_concepts import ArticleSet
+from poprox_recommender.lkpipeline import Component
 
 
-class Fill:
+class Fill(Component):
     def __init__(self, num_slots):
         self.num_slots = num_slots
 

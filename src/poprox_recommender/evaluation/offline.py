@@ -23,7 +23,7 @@ from safetensors.torch import load_file
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
-from poprox_recommender.default import personalized_pipeline
+from poprox_recommender.default import recommendation_pipelines
 from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.paths import model_file_path, project_root
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     rbo5 = []
     rbo10 = []
 
-    pipeline: RecommendationPipeline = personalized_pipeline(TEST_REC_COUNT)
+    pipeline: RecommendationPipeline = recommendation_pipelines(num_slots=TEST_REC_COUNT)["nrms"]
 
     logger.info("measuring recommendations")
     user_out_fn = project_root() / "outputs" / "user-metrics.csv.gz"

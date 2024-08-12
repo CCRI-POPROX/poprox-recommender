@@ -1,18 +1,14 @@
-from typing import Any
-
 import numpy as np
 from tqdm import tqdm
 
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.components.rankers import Ranker
+from poprox_recommender.lkpipeline import Component
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
-class MMRDiversifier(Ranker):
-    def __init__(self, algo_params: dict[str, Any], num_slots=10):
-        self.validate_algo_params(algo_params, ["theta"])
-
-        self.theta = float(algo_params.get("theta", 0.8))
+class MMRDiversifier(Component):
+    def __init__(self, theta: float = 0.8, num_slots: int = 10):
+        self.theta = theta
         self.num_slots = num_slots
 
     @torch_inference

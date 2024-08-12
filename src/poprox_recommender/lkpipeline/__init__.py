@@ -18,15 +18,16 @@ from uuid import uuid4
 
 from typing_extensions import Any, LiteralString, TypeVar, overload
 
-from .components import Component, ConfigurableComponent
+from .components import Component, ConfigurableComponent, PipelineComponent
 from .nodes import ND, ComponentNode, FallbackNode, InputNode, LiteralNode, Node
 from .state import PipelineState
 
 __all__ = [
     "Pipeline",
     "Node",
-    "Component",
+    "PipelineComponent",
     "ConfigurableComponent",
+    "Component",
 ]
 
 _log = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ class Pipeline:
     _nodes: dict[str, Node[Any]]
     _aliases: dict[str, Node[Any]]
     _defaults: dict[str, Node[Any] | Any]
-    _components: dict[str, Component[Any]]
+    _components: dict[str, PipelineComponent[Any]]
 
     def __init__(self):
         self._nodes = {}
@@ -185,7 +186,7 @@ class Pipeline:
         self._aliases[alias] = node
         self._clear_caches()
 
-    def add_component(self, name: str, obj: Component[ND], **inputs: Node[Any] | object) -> Node[ND]:
+    def add_component(self, name: str, obj: PipelineComponent[ND], **inputs: Node[Any] | object) -> Node[ND]:
         """
         Add a component and connect it into the graph.
 
@@ -216,7 +217,7 @@ class Pipeline:
     def replace_component(
         self,
         name: str | Node[ND],
-        obj: Component[ND],
+        obj: PipelineComponent[ND],
         **inputs: Node[Any] | object,
     ) -> Node[ND]:
         """

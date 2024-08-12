@@ -23,13 +23,11 @@ def test_request_with_topic_calibrator():
         ArticleSet(articles=req.todays_articles),
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
-        req.num_recs,
     )
     topic_calibrated_outputs = select_articles(
         ArticleSet(articles=req.todays_articles),
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
-        req.num_recs,
         pipeline_params={"pipeline": "topic-cali"},
     )
 

@@ -1,7 +1,8 @@
 from poprox_concepts import ArticleSet, InterestProfile
+from poprox_recommender.lkpipeline import Component
 
 
-class TopicFilter:
+class TopicFilter(Component):
     def __call__(self, candidate: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
         # Preference values from onboarding are 1-indexed, where 1 means "absolutely no interest."
         # We might want to normalize them to 0-indexed somewhere upstream, but in the mean time
