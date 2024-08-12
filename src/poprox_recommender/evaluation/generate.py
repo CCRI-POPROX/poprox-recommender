@@ -26,9 +26,9 @@ from tqdm import tqdm
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
-from poprox_recommender.default import fallback_pipeline, personalized_pipeline
+from poprox_recommender.default import personalized_pipeline
+from poprox_recommender.lkpipeline import PipelineState
 from poprox_recommender.logging_config import setup_logging
-from poprox_recommender.pipeline import PipelineState, RecommendationPipeline
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +52,11 @@ def extract_recs(
             {
                 "user": str(user),
                 "stage": "final",
-                "item": [str(a.article_id) for a in pipeline_state.recs],
+                "item": [str(a.article_id) for a in pipeline_state["recommender"]],
             }
         )
     ]
-    ranked = pipeline_state.elements.get("ranked", None)
+    ranked = pipeline_state.get("ranker", None)
     if ranked is not None:
         assert isinstance(ranked, ArticleSet)
         rec_lists.append(
@@ -68,7 +68,7 @@ def extract_recs(
                 }
             )
         )
-    reranked = pipeline_state.elements.get("reranked", None)
+    reranked = pipeline_state.get("reranker", None)
     if reranked is not None:
         assert isinstance(reranked, ArticleSet)
         rec_lists.append(
@@ -91,8 +91,8 @@ def extract_recs(
 def generate_user_recs():
     mind_data = MindData()
 
-    pipeline: RecommendationPipeline = personalized_pipeline(TEST_REC_COUNT)
-    fallback: RecommendationPipeline = fallback_pipeline(TEST_REC_COUNT)
+    pipeline = personalized_pipeline(TEST_REC_COUNT)
+    assert pipeline is not None
 
     logger.info("generating recommendations")
     user_recs = []
@@ -111,10 +111,7 @@ def generate_user_recs():
                 "clicked": ArticleSet(articles=request.past_articles),
                 "profile": request.interest_profile,
             }
-            if request.interest_profile.click_history.article_ids:
-                outputs = pipeline(inputs)
-            else:
-                outputs = fallback(inputs)
+            outputs = pipeline.run_all("recommender", **inputs)
         except Exception as e:
             logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
             raise e
