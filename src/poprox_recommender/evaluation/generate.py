@@ -30,7 +30,7 @@ from poprox_recommender.default import fallback_pipeline, personalized_pipeline
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.pipeline import PipelineState, RecommendationPipeline
 
-logger = logging.getLogger("poprox_recommender.test_offline")
+logger = logging.getLogger(__name__)
 
 # long-term TODO:
 # - support other MIND data (test?)

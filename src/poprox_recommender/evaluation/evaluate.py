@@ -1,3 +1,20 @@
+"""
+Generate evaluations for offline test data.
+
+Usage:
+    poprox_recommender.evaluation.evaluate [options]
+
+Options:
+    -v, --verbose
+            enable verbose diagnostic logs
+    --log-file=FILE
+            write log messages to FILE
+    -i FILE, --input=FILE
+            read intput from FILE [default: outputs/mind-val-recommendations.parquet]
+    -o FILE, --output=FILE
+            write output to FILE [default: outputs/mind-val-metrics.parquet]
+"""
+
 import csv
 import gzip
 import json
@@ -17,7 +34,7 @@ from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
-logger = logging.getLogger("poprox_recommender.evaluate_offline")
+logger = logging.getLogger(__name__)
 
 
 def convert_df_to_article_set(rec_df):
@@ -65,7 +82,11 @@ def main():
     mind_data = MindData()
 
     logger.info("loading recommendations")
-    recs_fn = project_root() / "outputs" / "mind-val-recommendations.parquet"
+    input_fn = options["--input"]
+    if not input_fn:
+        recs_fn = project_root() / "outputs" / "mind-val-recommendations.parquet"
+    else:
+        recs_fn = project_root() / "outputs" / input_fn
     recs_df = pd.read_parquet(recs_fn)
     user_recs = dict((UUID(u), df) for (u, df) in recs_df.groupby("user"))
     del recs_df
@@ -134,6 +155,8 @@ def main():
     out_fn = options["--output"]
     if not out_fn:
         out_fn = project_root() / "outputs" / "mind-val-metrics.json"
+    else:
+        out_fn = project_root() / "outputs" / out_fn
     logger.info("saving evaluation to %s", out_fn)
     out_fn.parent.mkdir(exist_ok=True, parents=True)
     out_fn.write_text(json.dumps(agg_metrics) + "\n")
