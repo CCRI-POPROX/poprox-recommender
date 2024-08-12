@@ -32,9 +32,6 @@ from poprox_recommender.pipeline import PipelineState, RecommendationPipeline
 
 logger = logging.getLogger("poprox_recommender.test_offline")
 
-# next steps TODO:
-# - add command-line options for output file, logging, etc.
-# - build measurement script
 # long-term TODO:
 # - support other MIND data (test?)
 # - support our data
