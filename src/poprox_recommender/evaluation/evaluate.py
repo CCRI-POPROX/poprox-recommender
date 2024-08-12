@@ -94,7 +94,7 @@ def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Itera
     Iterate over rec users, yielding each request with its recommendations and
     truth.  This supports parallel computation of the final metrics.
     """
-    for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="evaluate"):
+    for request in mind_data.iter_users():
         user_id = request.interest_profile.profile_id
         assert user_id is not None
         recs = user_recs[user_id]
