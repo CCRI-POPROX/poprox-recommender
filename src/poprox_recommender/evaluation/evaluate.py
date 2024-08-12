@@ -97,9 +97,11 @@ def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Itera
     for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="evaluate"):
         user_id = request.interest_profile.profile_id
         assert user_id is not None
-        recs = user_recs[user_id]
+        # we copy the data frames to detach them from parents, lighter-weight serialization
+        recs = user_recs[user_id].copy(True)
         truth = mind_data.user_truth(user_id)
         assert truth is not None
+        truth = truth.copy(True)
         yield UserRecs(request, recs, truth)
 
 
