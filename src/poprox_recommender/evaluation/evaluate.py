@@ -6,6 +6,7 @@ from uuid import UUID
 
 import numpy as np
 import pandas as pd
+from docopt import docopt
 from lenskit.metrics import topn
 from tqdm import tqdm
 
@@ -57,9 +58,10 @@ def compute_rec_metric(user_recs: dict[UUID, pd.DataFrame], request: Recommendat
 
 
 def main():
-    global mind_data
-    setup_logging()
+    options = docopt(__doc__)
+    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
+    global mind_data
     mind_data = MindData()
 
     logger.info("loading recommendations")
@@ -129,7 +131,10 @@ def main():
         "RBO@5": np.nanmean(rbo5),
         "RBO@10": np.nanmean(rbo10),
     }
-    out_fn = project_root() / "outputs" / "mind-val-metrics.json"
+    out_fn = options["--output"]
+    if not out_fn:
+        out_fn = project_root() / "outputs" / "mind-val-metrics.json"
+    logger.info("saving evaluation to %s", out_fn)
     out_fn.parent.mkdir(exist_ok=True, parents=True)
     out_fn.write_text(json.dumps(agg_metrics) + "\n")
     logger.info("Mean NDCG@5: %.3f", np.mean(ndcg5))
