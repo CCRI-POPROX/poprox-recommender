@@ -15,15 +15,15 @@ def generate_recs(event, context):
 
     body = event.get("body", {})
     is_encoded = event.get("isBase64Encoded", False)
-    algo_params = event.get("queryStringParameters", {})
+    pipeline_params = event.get("queryStringParameters", {})
 
     body = base64.b64decode(body) if is_encoded else body
     logger.info(f"Decoded body: {body}")
 
     req = RecommendationRequest.model_validate_json(body)
 
-    if algo_params:
-        logger.info(f"Using parameters: {algo_params}")
+    if pipeline_params:
+        logger.info(f"Using parameters: {pipeline_params}")
     else:
         logger.info("Using default parameters")
 
@@ -53,7 +53,7 @@ def generate_recs(event, context):
         clicked_articles,
         profile,
         req.num_recs,
-        algo_params,
+        pipeline_params,
     )
 
     logger.info("Constructing response...")
