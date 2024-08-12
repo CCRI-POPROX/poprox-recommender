@@ -124,7 +124,7 @@ def main():
 
     logger.info("measuring recommendations")
     user_out_fn = project_root() / "outputs" / f"{eval_name}-user-metrics.csv.gz"
-    user_out_fn.parent.mkdir(exist_ok=True, parents=True)
+    logger.info("writing user results to %s", user_out_fn)
     user_out = gzip.open(user_out_fn, "wt")
     user_csv = csv.writer(user_out)
     user_csv.writerow(["user_id", "personalized", "NDCG@5", "NDCG@10", "RecipRank", "RBO@5", "RBO@10"])
