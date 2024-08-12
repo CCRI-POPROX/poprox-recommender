@@ -5,15 +5,12 @@ For an evaluation run NAME, it reads outputs/NAME-recommendation.parquet and
 produces OUTPUTS/name-user-eval-metrics.csv.gz and OUTPUTS/name-metrics.json.
 
 Usage:
-    poprox_recommender.evaluation.evaluate [options] NAME
+    poprox_recommender.evaluation.evaluate [options] <name>
 
 Options:
-    -v, --verbose
-            enable verbose diagnostic logs
-    --log-file=FILE
-            write log messages to FILE
-    NAME
-            the name of the evaluation run [default: mind-val]
+    -v, --verbose       enable verbose diagnostic logs
+    --log-file=FILE     write log messages to FILE
+    <name>              the name of the evaluation to run [default: mind-val]
 """
 
 # pyright: basic
@@ -113,7 +110,7 @@ def main():
     global mind_data
     mind_data = MindData()
 
-    eval_name = options["NAME"]
+    eval_name = options["<name>"]
     logger.info("measuring evaluation %s", eval_name)
     recs_fn = project_root() / "outputs" / f"{eval_name}-recommendations.parquet"
     logger.info("loading recommendations from %s", recs_fn)
