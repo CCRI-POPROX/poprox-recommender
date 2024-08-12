@@ -3,11 +3,12 @@ import math
 import torch as th
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_recommender.lkpipeline import Component
 from poprox_recommender.pytorch.decorators import torch_inference
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_topic_count
 
 
-class PFARDiversifier:
+class PFARDiversifier(Component):
     def __init__(self, lambda_: float = 1.0, tau: float | None = None, num_slots: int = 10):
         self.lambda_ = lambda_
         self.tau = tau

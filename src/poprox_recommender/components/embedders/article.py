@@ -9,6 +9,7 @@ from safetensors.torch import load_file
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
 from poprox_concepts import ArticleSet
+from poprox_recommender.lkpipeline import Component
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.news_encoder import NewsEncoder
 from poprox_recommender.paths import model_file_path
@@ -29,15 +30,17 @@ class ArticleEmbeddingModel(Protocol):
     def get_news_vector(self, news: th.Tensor) -> th.Tensor: ...
 
 
-class NRMSArticleEmbedder:
+class NRMSArticleEmbedder(Component):
     model: ArticleEmbeddingModel
     tokenizer: PreTrainedTokenizer | PreTrainedTokenizerFast
     device: str | None
     embedding_cache: dict[UUID, th.Tensor]
 
     def __init__(self, model_path: PathLike, device: str | None):
-        checkpoint = load_file(model_path)
+        self.model_path = model_path
+        self.device = device
 
+        checkpoint = load_file(model_path)
         config = ModelConfig()
         self.news_encoder = NewsEncoder(
             config.pretrained_model,
@@ -46,7 +49,6 @@ class NRMSArticleEmbedder:
         )
         self.news_encoder.load_state_dict(checkpoint)
         self.news_encoder.to(device)
-        self.device = device
 
         plm_path = model_file_path(config.pretrained_model)
         logger.debug("loading tokenizer from %s", plm_path)

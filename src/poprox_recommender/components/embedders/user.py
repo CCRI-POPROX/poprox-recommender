@@ -1,21 +1,26 @@
+from os import PathLike
+
 import torch as th
 from safetensors.torch import load_file
 
 from poprox_concepts import ArticleSet, ClickHistory, InterestProfile
+from poprox_recommender.lkpipeline import Component
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.user_encoder import UserEncoder
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
-class NRMSUserEmbedder:
-    def __init__(self, path, device, max_clicks_per_user: int = 50):
-        config = ModelConfig()
-        self.user_encoder = UserEncoder(config.hidden_size, config.num_attention_heads)
-        checkpoint = load_file(path)
-        self.user_encoder.load_state_dict(checkpoint)
-        self.user_encoder.to(device)
+class NRMSUserEmbedder(Component):
+    def __init__(self, model_path: PathLike, device, max_clicks_per_user: int = 50):
+        self.model_path = model_path
         self.device = device
         self.max_clicks_per_user = max_clicks_per_user
+
+        config = ModelConfig()
+        checkpoint = load_file(model_path)
+        self.user_encoder = UserEncoder(config.hidden_size, config.num_attention_heads)
+        self.user_encoder.load_state_dict(checkpoint)
+        self.user_encoder.to(device)
 
     @torch_inference
     def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:

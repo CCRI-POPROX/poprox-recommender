@@ -1,9 +1,10 @@
 import numpy as np
 
 from poprox_concepts import ArticleSet, InterestProfile
+from poprox_recommender.lkpipeline import Component
 
 
-class TopkRanker:
+class TopkRanker(Component):
     def __init__(self, num_slots=10):
         self.num_slots = num_slots
 

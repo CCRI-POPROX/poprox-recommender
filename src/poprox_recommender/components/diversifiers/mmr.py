@@ -2,10 +2,11 @@ import numpy as np
 from tqdm import tqdm
 
 from poprox_concepts import ArticleSet, InterestProfile
+from poprox_recommender.lkpipeline import Component
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
-class MMRDiversifier:
+class MMRDiversifier(Component):
     def __init__(self, theta: float = 0.8, num_slots: int = 10):
         self.theta = theta
         self.num_slots = num_slots

@@ -4,13 +4,14 @@ import numpy as np
 import torch as th
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_recommender.lkpipeline import Component
 from poprox_recommender.topics import extract_general_topics, normalized_topic_count
 
 
 # Topic Calibration uses MMR
 # to rerank recommendations according to
 # topic calibration
-class TopicCalibrator:
+class TopicCalibrator(Component):
     def __init__(self, theta: float = 0.1, num_slots=10):
         # Theta term controls the score and calibration tradeoff, the higher
         # the theta the higher the resulting recommendation will be calibrated.
