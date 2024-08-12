@@ -134,7 +134,9 @@ def main():
     rbo5 = []
     rbo10 = []
 
-    with ProcessPoolExecutor(available_cpu_parallelism(8)) as pool:
+    n_workers = available_cpu_parallelism(8)
+    logger.info("running with %d workers", n_workers)
+    with ProcessPoolExecutor(n_workers) as pool:
         for metrics in tqdm(
             pool.map(compute_rec_metric, rec_users(mind_data, user_recs), chunksize=1000),
             total=mind_data.n_users,
