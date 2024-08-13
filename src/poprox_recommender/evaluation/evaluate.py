@@ -18,7 +18,7 @@ import csv
 import gzip
 import json
 import logging
-from multiprocessing import Pool
+from concurrent.futures import ProcessPoolExecutor
 from typing import Iterator, NamedTuple
 from uuid import UUID
 
@@ -134,9 +134,9 @@ def main():
 
     n_workers = available_cpu_parallelism(4)
     logger.info("running with %d workers", n_workers)
-    with Pool(n_workers) as pool:
+    with ProcessPoolExecutor(n_workers) as pool:
         for metrics in tqdm(
-            pool.imap_unordered(compute_rec_metric, rec_users(mind_data, user_recs)),
+            pool.map(compute_rec_metric, rec_users(mind_data, user_recs)),
             total=mind_data.n_users,
             desc="evaluate",
         ):
