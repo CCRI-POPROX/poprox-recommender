@@ -15,5 +15,5 @@ stages:
     outs:
       - outputs/mind-val-user-metrics.csv.gz
     metrics:
-      - outputs/mind-val-metrics.json:
+      - outputs/mind-val-metrics.csv:
           cache: false

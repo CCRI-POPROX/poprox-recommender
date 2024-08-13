@@ -14,15 +14,11 @@ Options:
 """
 
 # pyright: basic
-import csv
-import gzip
-import json
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from typing import Iterator, NamedTuple
 from uuid import UUID
 
-import numpy as np
 import pandas as pd
 from docopt import docopt
 from lenskit.metrics import topn
@@ -55,36 +51,54 @@ def convert_df_to_article_set(rec_df):
 def compute_rec_metric(user: UserRecs):
     # Make sure you run generate.py first to get the recommendations data file
     # Convert truth index from UUID to string
-    user_id, personalized, recs, truth = user
+    user_id, personalized, all_recs, truth = user
     truth.index = truth.index.astype(str)
 
-    final_rec_df = recs[recs["stage"] == "final"]
-    single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
-    single_ndcg5 = topn.ndcg(final_rec_df, truth, k=5)
-    single_ndcg10 = topn.ndcg(final_rec_df, truth, k=10)
+    results = []
 
-    ranked_rec_df = recs[recs["stage"] == "ranked"]
-    ranked = convert_df_to_article_set(ranked_rec_df)
+    for name, recs in all_recs.groupby("recommender"):
+        final_rec_df = recs[recs["stage"] == "final"]
+        single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
+        single_ndcg5 = topn.ndcg(final_rec_df, truth, k=5)
+        single_ndcg10 = topn.ndcg(final_rec_df, truth, k=10)
 
-    reranked_rec_df = recs[recs["stage"] == "reranked"]
-    reranked = convert_df_to_article_set(reranked_rec_df)
+        ranked_rec_df = recs[recs["stage"] == "ranked"]
+        ranked = convert_df_to_article_set(ranked_rec_df)
 
-    if ranked and reranked:
-        single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
-        single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
-    else:
-        single_rbo5 = None
-        single_rbo10 = None
+        reranked_rec_df = recs[recs["stage"] == "reranked"]
+        reranked = convert_df_to_article_set(reranked_rec_df)
 
-    return (
-        user_id,
-        single_ndcg5,
-        single_ndcg10,
-        single_rr,
-        single_rbo5,
-        single_rbo10,
-        personalized,
-    )
+        if ranked and reranked:
+            single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
+            single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
+        else:
+            single_rbo5 = None
+            single_rbo10 = None
+
+        logger.debug(
+            "user %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
+            user_id,
+            name,
+            single_ndcg5,
+            single_ndcg10,
+            single_rr,
+            single_rbo5 or -1.0,
+            single_rbo10 or -1.0,
+        )
+
+        results.append(
+            {
+                "recommender": name,
+                "NDCG@5": single_ndcg5,
+                "NDCG@10": single_ndcg10,
+                "MRR": single_rr,
+                "RBO@5": single_rbo5,
+                "RBO@10": single_rbo10,
+                "personalized": personalized,
+            }
+        )
+
+    return user_id, pd.DataFrame.from_records(results).set_index("recommender")
 
 
 def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Iterator[UserRecs]:
@@ -118,79 +132,33 @@ def main():
     logger.info("loaded recommendations for %d users", len(user_recs))
 
     logger.info("measuring recommendations")
-    user_out_fn = project_root() / "outputs" / f"{eval_name}-user-metrics.csv.gz"
-    logger.info("writing user results to %s", user_out_fn)
-    user_out = gzip.open(user_out_fn, "wt")
-    user_csv = csv.writer(user_out)
-    user_csv.writerow(["user_id", "personalized", "NDCG@5", "NDCG@10", "RecipRank", "RBO@5", "RBO@10"])
-
-    ngood = 0
-    nbad = 0
-    ndcg5 = []
-    ndcg10 = []
-    recip_rank = []
-    rbo5 = []
-    rbo10 = []
+    results: dict[UUID, pd.DataFrame] = {}
 
     n_workers = available_cpu_parallelism(4)
     logger.info("running with %d workers", n_workers)
     with ProcessPoolExecutor(n_workers) as pool:
-        for metrics in tqdm(
+        for result in tqdm(
             pool.map(compute_rec_metric, rec_users(mind_data, user_recs)),
             total=mind_data.n_users,
             desc="evaluate",
         ):
-            user_id, single_ndcg5, single_ndcg10, single_rr, single_rbo5, single_rbo10, personalized = metrics
-            user_csv.writerow(
-                [
-                    user_id,
-                    personalized,
-                    single_ndcg5,
-                    single_ndcg10,
-                    single_rr,
-                    single_rbo5,
-                    single_rbo10,
-                ]
-            )
-            # recommendations {account id (uuid): LIST[Article]}
-            logger.debug(
-                "user %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
-                user_id,
-                single_ndcg5,
-                single_ndcg10,
-                single_rr,
-                single_rbo5 or -1.0,
-                single_rbo10 or -1.0,
-            )
+            user_id, metrics = result
+            results[user_id] = metrics
 
-            ndcg5.append(single_ndcg5)
-            ndcg10.append(single_ndcg10)
-            recip_rank.append(single_rr)
-            rbo5.append(single_rbo5 or np.nan)
-            rbo10.append(single_rbo10 or np.nan)
-            ngood += 1
+    logger.info("measured recs for %d users", len(results))
+    metrics = pd.concat(results, names=["user_id"]).reset_index()
 
-    user_out.close()
+    user_out_fn = project_root() / "outputs" / f"{eval_name}-user-metrics.csv.gz"
+    logger.info("writing user results to %s", user_out_fn)
+    metrics.to_csv(user_out_fn, index=False)
 
-    logger.info("recommended for %d users", ngood)
-    if nbad:
-        logger.error("recommendation FAILED for %d users", nbad)
-    agg_metrics = {
-        "NDCG@5": np.mean(ndcg5),
-        "NDCG@10": np.mean(ndcg10),
-        "MRR": np.mean(recip_rank),
-        "RBO@5": np.nanmean(rbo5),
-        "RBO@10": np.nanmean(rbo10),
-    }
-    out_fn = project_root() / "outputs" / f"{eval_name}-metrics.json"
+    agg_metrics = metrics.drop(columns=["user_id", "personalized"]).groupby("recommender").mean()
+
+    logger.info("aggregate metrics:\n%s", agg_metrics)
+
+    out_fn = project_root() / "outputs" / f"{eval_name}-metrics.csv"
     logger.info("saving evaluation to %s", out_fn)
-    out_fn.parent.mkdir(exist_ok=True, parents=True)
-    out_fn.write_text(json.dumps(agg_metrics) + "\n")
-    logger.info("Mean NDCG@5: %.3f", np.mean(ndcg5))
-    logger.info("Mean NDCG@10: %.3f", np.mean(ndcg10))
-    logger.info("Mean RR: %.3f", np.mean(recip_rank))
-    logger.info("Mean RBO@5: %.3f", np.nanmean(rbo5))
-    logger.info("Mean RBO@10: %.3f", np.nanmean(rbo10))
+    agg_metrics.to_csv(out_fn)
 
 
 if __name__ == "__main__":
