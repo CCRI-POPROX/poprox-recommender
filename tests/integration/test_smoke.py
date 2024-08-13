@@ -4,7 +4,7 @@ Test the POPROX API through direct call.
 
 import logging
 
-from poprox_concepts import ArticleSet, ClickHistory
+from poprox_concepts import ArticleSet, Click
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.default import select_articles
 from poprox_recommender.paths import project_root
@@ -35,7 +35,7 @@ def test_direct_basic_request_without_clicks():
     logger.info("generating recommendations")
 
     profile = req.interest_profile
-    profile.click_history = ClickHistory(article_ids=[])
+    profile.click_history = []
     outputs = select_articles(
         ArticleSet(articles=req.todays_articles),
         ArticleSet(articles=req.past_articles),

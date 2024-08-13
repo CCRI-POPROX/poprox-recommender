@@ -43,7 +43,9 @@ def generate_recs(event, context):
     # in the actual article selection
     profile = req.interest_profile
     click_history = profile.click_history
-    clicked_articles = list(filter(lambda a: a.article_id in set(click_history.article_ids), req.past_articles))
+    clicked_articles = list(
+        filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
+    )
     clicked_articles = ArticleSet(articles=clicked_articles)
 
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)

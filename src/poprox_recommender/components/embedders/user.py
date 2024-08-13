@@ -3,7 +3,7 @@ from os import PathLike
 import torch as th
 from safetensors.torch import load_file
 
-from poprox_concepts import ArticleSet, ClickHistory, InterestProfile
+from poprox_concepts import ArticleSet, Click, InterestProfile
 from poprox_recommender.lkpipeline import Component
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.user_encoder import UserEncoder
@@ -39,8 +39,8 @@ class NRMSUserEmbedder(Component):
         return interest_profile
 
     # Compute a vector for each user
-    def build_user_embedding(self, click_history: ClickHistory, article_embeddings):
-        article_ids = list(dict.fromkeys(click_history.article_ids))[
+    def build_user_embedding(self, click_history: list[Click], article_embeddings):
+        article_ids = list(dict.fromkeys([click.article_id for click in click_history]))[
             -self.max_clicks_per_user :
         ]  # deduplicate while maintaining order
 

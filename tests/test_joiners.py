@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from poprox_concepts.domain import Article, ArticleSet, ClickHistory, InterestProfile
+from poprox_concepts.domain import Article, ArticleSet, Click, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Concatenate, Fill, Interleave
 from poprox_recommender.components.samplers import UniformSampler
@@ -21,7 +21,7 @@ def build_pipeline(total_slots):
 total_slots = 10
 inputs = {
     "candidate": ArticleSet(articles=[Article(article_id=uuid4(), title="title") for _ in range(total_slots)]),
-    "profile": InterestProfile(click_history=ClickHistory(article_ids=[]), onboarding_topics=[]),
+    "profile": InterestProfile(click_history=[], onboarding_topics=[]),
 }
 
 
