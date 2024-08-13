@@ -2,13 +2,15 @@
 Logging configuration logic for CLI tools in the POPROX recommenders.
 """
 
-# pyright: strict
+# pyright: basic
 import logging
 import os
 import sys
 from pathlib import Path
 
 from colorlog import ColoredFormatter
+from enlighten import Manager
+from progress_api import set_backend
 
 logger = logging.getLogger(__name__)
 
@@ -81,5 +83,8 @@ def setup_logging(*, verbose: bool | None = False, log_file: str | Path | None =
         file_h.setFormatter(file_fmt)
 
         root.addHandler(file_h)
+
+    mgr = Manager(stream=sys.stderr)
+    set_backend("enlighten", mgr)
 
     logger.info("logging initialized")
