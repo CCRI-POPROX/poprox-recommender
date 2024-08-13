@@ -48,7 +48,7 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
 
         # for each target item, we want to find the *max* simialrity to an existing.
         # we do this by taking the min of each row.
-        scores = torch.min(M, axis=1)
+        scores = torch.max(M, axis=1)
         assert len(scores) == len(rewards)
 
         # now, we want to compute θ*r - (1-θ)*s. let's do that *in-place* using
