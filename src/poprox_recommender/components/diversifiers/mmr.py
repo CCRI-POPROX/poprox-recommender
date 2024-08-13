@@ -1,3 +1,5 @@
+import torch
+
 from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.lkpipeline import Component
 from poprox_recommender.pytorch.decorators import torch_inference
@@ -40,24 +42,25 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
     S.append(rewards.argmax())
 
     for k in range(topk - 1):
-        candidate = None  # next item
-        best_MR = float("-inf")
+        # find the best combo of reward and max sim to existing item
+        # first, let's pare the matrix: candidates on rows, selected items on cols
+        M = similarity_matrix[:, S]
 
-        for i, reward_i in enumerate(rewards):  # iterate R for next item
-            if i in S:
-                continue
-            max_sim = float("-inf")
+        # for each target item, we want to find the *max* simialrity to an existing.
+        # we do this by taking the min of each row.
+        scores = torch.min(M, axis=1)
 
-            for j in S:
-                sim = similarity_matrix[i][j]
-                if sim > max_sim:
-                    max_sim = sim
+        # now, we want to compute θ*r - (1-θ)*s. let's do that *in-place* using
+        # this scores vector. To start, multiply by θ-1 (-(1-θ)):
+        scores *= theta - 1
 
-            mr_i = theta * reward_i - (1 - theta) * max_sim
-            if mr_i > best_MR:
-                best_MR = mr_i
-                candidate = i
+        # with this, we can theta * rewards in-place:
+        scores.add_(rewards, theta)
 
-        if candidate is not None:
-            S.append(candidate)
+        # now, we're looking for the *max* score in this list. we can do this
+        # in two steps. step 1: clear the items we already have:
+        scores[S] = -torch.inf
+        # step 2: find the largest value
+        S.append(torch.argmax(scores))
+
     return S
