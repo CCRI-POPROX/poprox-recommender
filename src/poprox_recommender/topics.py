@@ -4,7 +4,7 @@ from uuid import UUID
 from torch.nn.functional import cosine_similarity
 from transformers import AutoModel, AutoTokenizer
 
-from poprox_concepts import Article, ClickHistory
+from poprox_concepts import Article, Click
 from poprox_concepts.domain.topics import GENERAL_TOPICS
 from poprox_recommender.paths import model_file_path
 
@@ -29,9 +29,9 @@ def normalized_topic_count(topic_counts: dict[str, int]):
     return normalized_counts
 
 
-def user_topic_preference(past_articles: list[Article], click_history: ClickHistory) -> dict[str, int]:
+def user_topic_preference(past_articles: list[Article], click_history: list[Click]) -> dict[str, int]:
     """Topic preference only based on click history"""
-    clicked_articles = click_history.article_ids  # List[UUID]
+    clicked_articles = [c.article_id for c in click_history]  # List[UUID]
 
     topic_count_dict = defaultdict(int)
 

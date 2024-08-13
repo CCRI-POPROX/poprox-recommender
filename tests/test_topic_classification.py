@@ -2,7 +2,7 @@ import json
 import logging
 import random
 
-from poprox_concepts import Article, ArticleSet, ClickHistory
+from poprox_concepts import Article, ArticleSet, Click
 from poprox_recommender.paths import project_root
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, match_news_topics_to_general
 
@@ -18,7 +18,7 @@ def load_test_articles():
 
         candidate = ArticleSet(articles=[Article.model_validate(attrs) for attrs in req_body["todays_articles"]])
         past = ArticleSet(articles=[Article.model_validate(attrs) for attrs in req_body["past_articles"]])
-        click_history = [ClickHistory.model_validate(attrs) for attrs in req_body["click_data"]]
+        click_history = [Click.model_validate(attrs) for attrs in req_body["click_data"]]
         num_recs = req_body["num_recs"]
 
     return candidate, past, click_history, num_recs

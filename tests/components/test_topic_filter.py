@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from poprox_concepts import Article, ArticleSet, ClickHistory, Entity, Mention
+from poprox_concepts import Article, ArticleSet, Click, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.samplers import UniformSampler
@@ -9,7 +9,7 @@ from poprox_recommender.pipeline import RecommendationPipeline
 
 def test_select_by_topic_filters_articles():
     profile = InterestProfile(
-        click_history=ClickHistory(article_ids=[]),
+        click_history=[],
         onboarding_topics=[
             AccountInterest(entity_id=uuid4(), entity_name="U.S. News", preference=2, frequency=1),
             AccountInterest(entity_id=uuid4(), entity_name="Politics", preference=3, frequency=2),
