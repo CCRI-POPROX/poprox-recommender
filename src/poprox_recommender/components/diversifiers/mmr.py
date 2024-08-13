@@ -1,6 +1,3 @@
-import numpy as np
-from tqdm import tqdm
-
 from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.lkpipeline import Component
 from poprox_recommender.pytorch.decorators import torch_inference
@@ -27,13 +24,10 @@ class MMRDiversifier(Component):
 
 def compute_similarity_matrix(todays_article_vectors):
     num_values = len(todays_article_vectors)
-    similarity_matrix = np.zeros((num_values, num_values))
-    for i, value1 in tqdm(enumerate(todays_article_vectors), total=num_values):
-        value1 = value1.detach().cpu()
-        for j, value2 in enumerate(todays_article_vectors):
-            if i <= j:
-                value2 = value2.detach().cpu()
-                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
+    # M is (n, k), where n = # articles & k = embed. dim.
+    # M M^T is (n, n) matrix of pairwise dot products
+    similarity_matrix = todays_article_vectors @ todays_article_vectors.T
+    assert similarity_matrix.size == (num_values, num_values)
     return similarity_matrix
 
 
