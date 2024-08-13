@@ -21,7 +21,7 @@ import logging.config
 
 import pandas as pd
 from docopt import docopt
-from tqdm import tqdm
+from progress_api import make_progress
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
@@ -101,29 +101,31 @@ def generate_user_recs():
     logger.info("generating recommendations")
     user_recs = []
 
-    for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
-        logger.debug("recommending for user %s", request.interest_profile.profile_id)
-        if request.num_recs != TEST_REC_COUNT:
-            logger.warn(
-                "request for %s had unexpected recommendation count %d",
-                request.interest_profile.profile_id,
-                request.num_recs,
-            )
-        inputs = {
-            "candidate": ArticleSet(articles=request.todays_articles),
-            "clicked": ArticleSet(articles=request.past_articles),
-            "profile": request.interest_profile,
-        }
-        for name, pipe in pipelines.items():
-            try:
-                outputs = pipe.run_all("recommender", **inputs)
-            except Exception as e:
-                logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
-                raise e
-            user_df = extract_recs(name, request, outputs)
-            user_df["recommender"] = pd.Categorical(user_df["recommender"], categories=pipe_names)
-            user_df["stage"] = pd.Categorical(user_df["stage"].astype("category"), categories=STAGES)
-            user_recs.append(user_df)
+    with make_progress(logger, "recommend", total=mind_data.n_users) as pb:
+        for request in mind_data.iter_users():  # one by one
+            logger.debug("recommending for user %s", request.interest_profile.profile_id)
+            if request.num_recs != TEST_REC_COUNT:
+                logger.warn(
+                    "request for %s had unexpected recommendation count %d",
+                    request.interest_profile.profile_id,
+                    request.num_recs,
+                )
+            inputs = {
+                "candidate": ArticleSet(articles=request.todays_articles),
+                "clicked": ArticleSet(articles=request.past_articles),
+                "profile": request.interest_profile,
+            }
+            for name, pipe in pipelines.items():
+                try:
+                    outputs = pipe.run_all("recommender", **inputs)
+                except Exception as e:
+                    logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
+                    raise e
+                user_df = extract_recs(name, request, outputs)
+                user_df["recommender"] = pd.Categorical(user_df["recommender"], categories=pipe_names)
+                user_df["stage"] = pd.Categorical(user_df["stage"].astype("category"), categories=STAGES)
+                user_recs.append(user_df)
+            pb.update()
 
     return user_recs
 

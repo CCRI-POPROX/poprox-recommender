@@ -1,5 +1,5 @@
 import numpy as np
-from tqdm import tqdm
+from progress_api import make_progress
 
 from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.lkpipeline import Component
@@ -28,12 +28,14 @@ class MMRDiversifier(Component):
 def compute_similarity_matrix(todays_article_vectors):
     num_values = len(todays_article_vectors)
     similarity_matrix = np.zeros((num_values, num_values))
-    for i, value1 in tqdm(enumerate(todays_article_vectors), total=num_values):
-        value1 = value1.detach().cpu()
-        for j, value2 in enumerate(todays_article_vectors):
-            if i <= j:
-                value2 = value2.detach().cpu()
-                similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
+    with make_progress(label="diversify", total=num_values) as pb:
+        for i, value1 in enumerate(todays_article_vectors):
+            value1 = value1.detach().cpu()
+            for j, value2 in enumerate(todays_article_vectors):
+                if i <= j:
+                    value2 = value2.detach().cpu()
+                    similarity_matrix[i, j] = similarity_matrix[j, i] = np.dot(value1, value2)
+        pb.update()
     return similarity_matrix
 
 

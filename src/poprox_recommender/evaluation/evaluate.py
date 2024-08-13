@@ -22,7 +22,7 @@ from uuid import UUID
 import pandas as pd
 from docopt import docopt
 from lenskit.metrics import topn
-from tqdm import tqdm
+from progress_api import make_progress
 
 from poprox_concepts.domain import Article, ArticleSet
 from poprox_recommender.config import available_cpu_parallelism
@@ -136,14 +136,11 @@ def main():
 
     n_workers = available_cpu_parallelism(4)
     logger.info("running with %d workers", n_workers)
-    with ProcessPoolExecutor(n_workers) as pool:
-        for result in tqdm(
-            pool.map(compute_rec_metric, rec_users(mind_data, user_recs)),
-            total=mind_data.n_users,
-            desc="evaluate",
-        ):
+    with ProcessPoolExecutor(n_workers) as pool, make_progress(logger, "evaluate", total=mind_data.n_users) as pb:
+        for result in pool.map(compute_rec_metric, rec_users(mind_data, user_recs)):
             user_id, metrics = result
             results[user_id] = metrics
+            pb.update()
 
     logger.info("measured recs for %d users", len(results))
     metrics = pd.concat(results, names=["user_id"]).reset_index()
