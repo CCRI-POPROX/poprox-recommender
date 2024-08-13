@@ -25,6 +25,7 @@ from tqdm import tqdm
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
+from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
 from poprox_recommender.default import recommendation_pipelines
 from poprox_recommender.lkpipeline import PipelineState
@@ -94,7 +95,7 @@ def extract_recs(
 def generate_user_recs():
     mind_data = MindData()
 
-    pipelines = recommendation_pipelines(TEST_REC_COUNT)
+    pipelines = recommendation_pipelines(device=default_device())
     pipe_names = list(pipelines.keys())
 
     logger.info("generating recommendations")

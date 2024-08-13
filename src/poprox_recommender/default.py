@@ -48,7 +48,7 @@ def select_articles(
     return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
 
 
-def recommendation_pipelines(device=None, num_slots=10) -> dict[str, Pipeline]:
+def recommendation_pipelines(device: str | None = None, num_slots: int = 10) -> dict[str, Pipeline]:
     global _cached_pipelines
     if device is None:
         device = default_device()
