@@ -22,18 +22,22 @@ def test_select_by_topic_filters_articles():
 
     articles = [
         Article(
+            article_id=uuid4(),
             title="Something about TV",
             mentions=[Mention(source="AP", relevance=50.0, entity=entertainment)],
         ),
         Article(
+            article_id=uuid4(),
             title="Something about the US",
             mentions=[Mention(source="AP", relevance=50.0, entity=us_news)],
         ),
         Article(
+            article_id=uuid4(),
             title="Something about politics",
             mentions=[Mention(source="AP", relevance=50.0, entity=politics)],
         ),
         Article(
+            article_id=uuid4(),
             title="Something about books",
             mentions=[Mention(source="AP", relevance=50.0, entity=entertainment)],
         ),
@@ -45,22 +49,24 @@ def test_select_by_topic_filters_articles():
     pipeline = Pipeline()
     i_profile = pipeline.create_input("profile", InterestProfile)
     i_cand = pipeline.create_input("candidates", ArticleSet)
-    c_filter = pipeline.add_component(topic_filter, candidate=i_cand, interest_profile=i_profile)
-    c_sampler = pipeline.add_component(sampler, candidate=c_filter, backup=i_cand)
+    c_filter = pipeline.add_component("topic-filter", topic_filter, candidate=i_cand, interest_profile=i_profile)
+    c_sampler = pipeline.add_component("sampler", sampler, candidate=c_filter, backup=i_cand)
 
     # If we can, only select articles matching interests
-    outputs = pipeline.run(c_sampler, candidates=ArticleSet(articles=articles), profile=profile)
+    result = pipeline.run(c_sampler, candidates=ArticleSet(articles=articles), profile=profile)
 
-    for article in outputs.recs:
+    # there are 2 valid articles that match their preferences (us news & politics)
+    assert len(result.articles) == 2
+    for article in result.articles:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
     sampler.num_slots = 3
-    outputs = pipeline.run(c_sampler, candidates=ArticleSet(articles=articles), profile=profile)
+    result = pipeline.run(c_sampler, candidates=ArticleSet(articles=articles), profile=profile)
 
-    assert len(outputs.recs) == 3
+    assert len(result.articles) == 3
 
-    for article in outputs.recs[:2]:
+    for article in result.articles[:2]:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
