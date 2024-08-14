@@ -37,6 +37,7 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
     # MR_i = \theta * reward_i - (1 - \theta)*max_{j \in S} sim(i, j) # S us
     # R is all candidates (not selected yet)
 
+    # final recommendation (topk index) - initialize to invalid indexes
     S = torch.full((topk,), -1, dtype=torch.int32)
     # first recommended item
     S[0] = rewards.argmax()
