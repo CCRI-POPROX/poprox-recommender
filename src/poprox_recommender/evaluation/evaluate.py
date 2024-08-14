@@ -112,7 +112,7 @@ def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Itera
         recs = user_recs[user_id]
         truth = mind_data.user_truth(user_id)
         assert truth is not None
-        yield UserRecs(user_id, bool(request.interest_profile.click_history.article_ids), recs, truth)
+        yield UserRecs(user_id, bool(request.interest_profile.click_history), recs, truth)
 
 
 def main():
