@@ -65,4 +65,4 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
         # step 2: find the largest value
         S[k] = torch.argmax(scores)
 
-    return S.tolist()
+    return S[S >= 0].tolist()
