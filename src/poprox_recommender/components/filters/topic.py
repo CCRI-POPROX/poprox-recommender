@@ -1,5 +1,9 @@
+import logging
+
 from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.lkpipeline import Component
+
+logger = logging.getLogger(__name__)
 
 
 class TopicFilter(Component):
@@ -21,4 +25,10 @@ class TopicFilter(Component):
             if len(profile_topics.intersection(article_topics)) > 0:
                 topical_articles.append(article)
 
+        logger.debug(
+            "filter accepted %d of %d articles for user %s",
+            len(topical_articles),
+            len(candidate.articles),
+            interest_profile.profile_id,
+        )
         return ArticleSet(articles=topical_articles)
