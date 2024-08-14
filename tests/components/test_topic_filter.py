@@ -4,7 +4,7 @@ from poprox_concepts import Article, ArticleSet, Click, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.samplers import UniformSampler
-from poprox_recommender.pipeline import RecommendationPipeline
+from poprox_recommender.lkpipeline import Pipeline
 
 
 def test_select_by_topic_filters_articles():
@@ -22,18 +22,22 @@ def test_select_by_topic_filters_articles():
 
     articles = [
         Article(
+            article_id=uuid4(),
             title="Something about TV",
             mentions=[Mention(source="AP", relevance=50.0, entity=entertainment)],
         ),
         Article(
+            article_id=uuid4(),
             title="Something about the US",
             mentions=[Mention(source="AP", relevance=50.0, entity=us_news)],
         ),
         Article(
+            article_id=uuid4(),
             title="Something about politics",
             mentions=[Mention(source="AP", relevance=50.0, entity=politics)],
         ),
         Article(
+            article_id=uuid4(),
             title="Something about books",
             mentions=[Mention(source="AP", relevance=50.0, entity=entertainment)],
         ),
@@ -42,28 +46,27 @@ def test_select_by_topic_filters_articles():
     topic_filter = TopicFilter()
     sampler = UniformSampler(num_slots=2)
 
-    pipeline = RecommendationPipeline(name="random_topical")
-    pipeline.add(topic_filter, inputs=["candidate", "profile"], output="topical")
-    pipeline.add(sampler, inputs=["topical", "candidate"], output="recs")
+    pipeline = Pipeline()
+    i_profile = pipeline.create_input("profile", InterestProfile)
+    i_cand = pipeline.create_input("candidates", ArticleSet)
+    c_filter = pipeline.add_component("topic-filter", topic_filter, candidate=i_cand, interest_profile=i_profile)
+    c_sampler = pipeline.add_component("sampler", sampler, candidate=c_filter, backup=i_cand)
 
     # If we can, only select articles matching interests
-    inputs = {
-        "candidate": ArticleSet(articles=articles),
-        "clicked": ArticleSet(articles=[]),
-        "profile": profile,
-    }
-    outputs = pipeline(inputs)
+    result = pipeline.run(c_sampler, candidates=ArticleSet(articles=articles), profile=profile)
 
-    for article in outputs.recs:
+    # there are 2 valid articles that match their preferences (us news & politics)
+    assert len(result.articles) == 2
+    for article in result.articles:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
     sampler.num_slots = 3
-    outputs = pipeline(inputs)
+    result = pipeline.run(c_sampler, candidates=ArticleSet(articles=articles), profile=profile)
 
-    assert len(outputs.recs) == 3
+    assert len(result.articles) == 3
 
-    for article in outputs.recs[:2]:
+    for article in result.articles[:2]:
         topics = [mention.entity.name for mention in article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
