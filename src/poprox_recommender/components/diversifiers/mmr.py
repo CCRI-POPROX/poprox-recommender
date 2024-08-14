@@ -55,8 +55,8 @@ def mmr_diversification(rewards, similarity_matrix, theta: float, topk: int):
         # this scores vector. To start, multiply by θ-1 (-(1-θ)):
         scores *= theta - 1
 
-        # with this, we can theta * rewards in-place:
-        scores.add_(rewards, theta)
+        # with this, we can add theta * rewards in-place:
+        scores.add_(rewards, alpha=theta)
 
         # now, we're looking for the *max* score in this list. we can do this
         # in two steps. step 1: clear the items we already have:
