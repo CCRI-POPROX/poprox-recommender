@@ -56,7 +56,7 @@ def compute_rec_metric(user: UserRecs):
 
     results = []
 
-    for name, recs in all_recs.groupby("recommender"):
+    for name, recs in all_recs.groupby("recommender", observed=True):
         final_rec_df = recs[recs["stage"] == "final"]
         single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
         single_ndcg5 = topn.ndcg(final_rec_df, truth, k=5)
