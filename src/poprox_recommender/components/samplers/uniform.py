@@ -16,10 +16,15 @@ class UniformSampler(Component):
             )
         )
 
-        sampled = random.sample(candidate.articles, min(self.num_slots, len(candidate.articles)))
+        # we want to sample article IDs for performance
+        articles = {a.article_id: a for a in candidate.articles}
+        sampled = random.sample(articles.keys(), min(self.num_slots, len(candidate.articles)))
 
         if len(sampled) < self.num_slots and backup_articles:
+            backups = {b.article_id: b for b in backup_articles}
+            # add backups to articles, but allow articles to override
+            articles = backups | articles
             num_backups = min(self.num_slots - len(sampled), len(backup_articles))
-            sampled += random.sample(backup_articles, num_backups)
+            sampled += random.sample(backups.keys(), num_backups)
 
-        return ArticleSet(articles=sampled)
+        return ArticleSet(articles=[articles[aid] for aid in sampled])
