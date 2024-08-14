@@ -117,7 +117,7 @@ def generate_user_recs():
             }
             for name, pipe in pipelines.items():
                 try:
-                    outputs = pipe.run_all("recommender", **inputs)
+                    outputs = pipe.run_all(**inputs)
                 except Exception as e:
                     logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
                     raise e
