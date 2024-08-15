@@ -118,7 +118,7 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     fill = Fill(num_slots=num_slots)
     topk_ranker = TopkRanker(num_slots=num_slots)
 
-    pipeline = Pipeline()
+    pipeline = Pipeline(name=name)
 
     # Define pipeline inputs
     candidates = pipeline.create_input("candidate", ArticleSet)
