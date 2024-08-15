@@ -6,7 +6,8 @@
 
 import json
 
-from poprox_recommender.lkpipeline import AutoConfig, Pipeline
+from poprox_recommender.lkpipeline import Pipeline
+from poprox_recommender.lkpipeline.components import AutoConfig
 
 
 class Prefixer(AutoConfig):
