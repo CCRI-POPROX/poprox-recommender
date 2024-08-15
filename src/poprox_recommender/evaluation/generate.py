@@ -21,23 +21,27 @@ import logging.config
 
 import pandas as pd
 from docopt import docopt
-from tqdm import tqdm
+from progress_api import make_progress
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
+from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
-from poprox_recommender.default import personalized_pipeline
+from poprox_recommender.default import recommendation_pipelines
 from poprox_recommender.lkpipeline import PipelineState
 from poprox_recommender.logging_config import setup_logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 
 # long-term TODO:
 # - support other MIND data (test?)
 # - support our data
 
+STAGES = ["final", "ranked", "reranked"]
+
 
 def extract_recs(
+    name: str,
     request: RecommendationRequest,
     pipeline_state: PipelineState,
 ) -> pd.DataFrame:
@@ -51,6 +55,7 @@ def extract_recs(
     rec_lists = [
         pd.DataFrame(
             {
+                "recommender": name,
                 "user": str(user),
                 "stage": "final",
                 "item": [str(a.article_id) for a in recs.articles],
@@ -63,6 +68,7 @@ def extract_recs(
         rec_lists.append(
             pd.DataFrame(
                 {
+                    "recommender": name,
                     "user": str(user),
                     "stage": "ranked",
                     "item": [str(a.article_id) for a in ranked.articles],
@@ -75,6 +81,7 @@ def extract_recs(
         rec_lists.append(
             pd.DataFrame(
                 {
+                    "recommender": name,
                     "user": str(user),
                     "stage": "reranked",
                     "item": [str(a.article_id) for a in reranked.articles],
@@ -82,41 +89,44 @@ def extract_recs(
             )
         )
     output_df = pd.concat(rec_lists, ignore_index=True)
-    # make stage a categorical to save memory + disk
-    output_df["stage"] = output_df["stage"] = pd.Categorical(
-        output_df["stage"], categories=["final", "ranked", "reranked"]
-    )
     return output_df
 
 
 def generate_user_recs():
     mind_data = MindData()
 
-    pipeline = personalized_pipeline(TEST_REC_COUNT)
-    assert pipeline is not None
+    pipelines = recommendation_pipelines(device=default_device())
+    pipe_names = list(pipelines.keys())
 
     logger.info("generating recommendations")
     user_recs = []
 
-    for request in tqdm(mind_data.iter_users(), total=mind_data.n_users, desc="recommend"):  # one by one
-        logger.debug("recommending for user %s", request.interest_profile.profile_id)
-        if request.num_recs != TEST_REC_COUNT:
-            logger.warn(
-                "request for %s had unexpected recommendation count %d",
-                request.interest_profile.profile_id,
-                request.num_recs,
-            )
-        try:
+    with make_progress(logger, "recommend", total=mind_data.n_users) as pb:
+        for request in mind_data.iter_users():  # one by one
+            logger.debug("recommending for user %s", request.interest_profile.profile_id)
+            if request.num_recs != TEST_REC_COUNT:
+                logger.warn(
+                    "request for %s had unexpected recommendation count %d",
+                    request.interest_profile.profile_id,
+                    request.num_recs,
+                )
             inputs = {
                 "candidate": ArticleSet(articles=request.todays_articles),
                 "clicked": ArticleSet(articles=request.past_articles),
                 "profile": request.interest_profile,
             }
-            outputs = pipeline.run_all("recommender", **inputs)
-        except Exception as e:
-            logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
-            raise e
-        user_recs.append(extract_recs(request, outputs))
+            for name, pipe in pipelines.items():
+                try:
+                    outputs = pipe.run_all(**inputs)
+                except Exception as e:
+                    logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
+                    raise e
+                user_df = extract_recs(name, request, outputs)
+                user_df["recommender"] = pd.Categorical(user_df["recommender"], categories=pipe_names)
+                user_df["stage"] = pd.Categorical(user_df["stage"].astype("category"), categories=STAGES)
+                user_recs.append(user_df)
+            pb.update()
+
     return user_recs
 
 
@@ -124,7 +134,7 @@ if __name__ == "__main__":
     """
     For offline evaluation, set theta in mmr_diversity = 1
     """
-    options = docopt(__doc__)
+    options = docopt(__doc__)  # type: ignore
     setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
     user_recs = generate_user_recs()
