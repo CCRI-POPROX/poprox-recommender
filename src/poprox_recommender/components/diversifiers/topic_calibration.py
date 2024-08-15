@@ -19,21 +19,16 @@ class TopicCalibrator(Component):
         self.num_slots = num_slots
 
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
-        if candidate_articles.scores is None:
-            return candidate_articles
+        normalized_topic_prefs = self.compute_topic_dist(interest_profile)
 
-        article_scores = th.sigmoid(th.tensor(candidate_articles.scores)).cpu().detach().numpy()
+        if candidate_articles.scores is not None:
+            article_scores = th.sigmoid(th.tensor(candidate_articles.scores))
+        else:
+            article_scores = self.score_articles_by_topics(candidate_articles, normalized_topic_prefs)
 
-        topic_preferences: dict[str, int] = defaultdict(int)
+        print(f"Article scores: {article_scores}")
 
-        for interest in interest_profile.onboarding_topics:
-            topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
-
-        if interest_profile.click_topic_counts:
-            for topic, click_count in interest_profile.click_topic_counts.items():
-                topic_preferences[topic] += click_count
-
-        normalized_topic_prefs = normalized_topic_count(topic_preferences)
+        article_scores = article_scores.cpu().detach().numpy()
 
         article_indices = topic_calibration(
             article_scores,
@@ -44,6 +39,34 @@ class TopicCalibrator(Component):
         )
 
         return ArticleSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
+
+    def compute_topic_dist(self, interest_profile):
+        topic_preferences: dict[str, int] = defaultdict(int)
+
+        for interest in interest_profile.onboarding_topics:
+            topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
+
+        if interest_profile.click_topic_counts:
+            for topic, click_count in interest_profile.click_topic_counts.items():
+                topic_preferences[topic] += click_count
+
+        normalized_topic_prefs = normalized_topic_count(topic_preferences)
+        return normalized_topic_prefs
+
+    def score_articles_by_topics(self, candidate_articles: ArticleSet, topic_preferences: dict[str, float]):
+        preferred_topics = set(key for key, value in topic_preferences.items() if value > 0.0)
+
+        article_scores = []
+        for article in candidate_articles.articles:
+            article_score = 0.0
+            article_topics = extract_general_topics(article)
+            for topic in article_topics.intersection(preferred_topics):
+                article_score += topic_preferences[topic]
+            article_scores.append(article_score)
+
+        raw_scores = th.tensor(article_scores)
+
+        return raw_scores / raw_scores.max()
 
 
 def topic_calibration(relevance_scores, articles, topic_preferences, theta, topk) -> list[Article]:

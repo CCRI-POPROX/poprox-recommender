@@ -11,7 +11,7 @@ from poprox_recommender.paths import model_file_path
 NEWS_MODEL_NAME = "news-category-classifier-distilbert"
 
 
-def extract_general_topics(article: Article):
+def extract_general_topics(article: Article) -> set[str]:
     article_topics = set([mention.entity.name for mention in article.mentions])
     return article_topics.intersection(GENERAL_TOPICS)
 
