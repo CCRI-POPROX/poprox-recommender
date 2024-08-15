@@ -1,7 +1,8 @@
 from poprox_concepts import ArticleSet
+from poprox_recommender.lkpipeline import Component
 
 
-class Concatenate:
+class Concatenate(Component):
     def __call__(self, candidates1: ArticleSet, candidates2: ArticleSet) -> ArticleSet:
         """
         Concatenates two sets of candidates, while deduplicating them, keeping the

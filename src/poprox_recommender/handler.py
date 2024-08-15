@@ -15,15 +15,15 @@ def generate_recs(event, context):
 
     body = event.get("body", {})
     is_encoded = event.get("isBase64Encoded", False)
-    algo_params = event.get("queryStringParameters", {})
+    pipeline_params = event.get("queryStringParameters", {})
 
     body = base64.b64decode(body) if is_encoded else body
     logger.info(f"Decoded body: {body}")
 
     req = RecommendationRequest.model_validate_json(body)
 
-    if algo_params:
-        logger.info(f"Using parameters: {algo_params}")
+    if pipeline_params:
+        logger.info(f"Using parameters: {pipeline_params}")
     else:
         logger.info("Using default parameters")
 
@@ -43,7 +43,9 @@ def generate_recs(event, context):
     # in the actual article selection
     profile = req.interest_profile
     click_history = profile.click_history
-    clicked_articles = list(filter(lambda a: a.article_id in set(click_history.article_ids), req.past_articles))
+    clicked_articles = list(
+        filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
+    )
     clicked_articles = ArticleSet(articles=clicked_articles)
 
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
@@ -52,8 +54,7 @@ def generate_recs(event, context):
         candidate_articles,
         clicked_articles,
         profile,
-        req.num_recs,
-        algo_params,
+        pipeline_params,
     )
 
     logger.info("Constructing response...")

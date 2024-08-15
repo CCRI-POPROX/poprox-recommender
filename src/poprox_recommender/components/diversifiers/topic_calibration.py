@@ -4,21 +4,18 @@ import numpy as np
 import torch as th
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
-from poprox_recommender.components.rankers import Ranker
+from poprox_recommender.lkpipeline import Component
 from poprox_recommender.topics import extract_general_topics, normalized_topic_count
 
 
 # Topic Calibration uses MMR
 # to rerank recommendations according to
 # topic calibration
-class TopicCalibrator(Ranker):
-    def __init__(self, algo_params, num_slots=10):
-        self.validate_algo_params(algo_params, ["theta"])
-
+class TopicCalibrator(Component):
+    def __init__(self, theta: float = 0.1, num_slots=10):
         # Theta term controls the score and calibration tradeoff, the higher
         # the theta the higher the resulting recommendation will be calibrated.
-        # We choose the binary search way to start in the middle
-        self.theta = float(algo_params.get("theta", 0.1))
+        self.theta = theta
         self.num_slots = num_slots
 
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
@@ -107,6 +104,7 @@ def compute_kl_divergence(interacted_distr, reco_distr):
     for genre, score in interacted_distr.items():
         reco_score = reco_distr.get(genre, 0.0)
         reco_score = (1 - alpha) * reco_score + alpha * score
-        kl_div += score * np.log2(score / reco_score)
+        if reco_score != 0.0:
+            kl_div += score * np.log2(score / reco_score)
 
     return kl_div

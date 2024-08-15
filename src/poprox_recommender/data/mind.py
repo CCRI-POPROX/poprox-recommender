@@ -14,7 +14,7 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 
 import pandas as pd
 
-from poprox_concepts import Article, ClickHistory, InterestProfile
+from poprox_concepts import Article, Click, InterestProfile
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.paths import project_root
 
@@ -95,7 +95,7 @@ class MindData:
             clicked_ids: list[str] = row.clicked_news.split()  # type: ignore
             cand_pairs: list[str] = row.impressions.split()  # type: ignore
 
-            clicks = ClickHistory(article_ids=[self.news_uuid_for_id(aid) for aid in clicked_ids])
+            clicks = [Click(article_id=self.news_uuid_for_id(aid)) for aid in clicked_ids]
             past = []
             for aid in clicked_ids:
                 past.append(self.lookup_article(id=aid))
@@ -105,7 +105,7 @@ class MindData:
                 aid, _clicked = pair.split("-")
                 today.append(self.lookup_article(id=aid))
 
-            clicks = ClickHistory(article_ids=[self.news_uuid_for_id(aid) for aid in clicked_ids])
+            clicks = [Click(article_id=self.news_uuid_for_id(aid)) for aid in clicked_ids]
             profile = InterestProfile(profile_id=cast(UUID, row.uuid), click_history=clicks, onboarding_topics=[])
             yield RecommendationRequest(
                 todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT

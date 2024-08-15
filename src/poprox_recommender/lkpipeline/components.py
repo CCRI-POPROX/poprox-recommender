@@ -18,7 +18,7 @@ from typing_extensions import Any, Protocol, Self, TypeVar, override, runtime_ch
 
 # COut is only return, so Component[U] can be assigned to Component[T] if U ≼ T.
 COut = TypeVar("COut", covariant=True)
-Component: TypeAlias = Callable[..., COut]
+PipelineComponent: TypeAlias = Callable[..., COut]
 
 
 @runtime_checkable
@@ -150,3 +150,7 @@ def instantiate_component(comp: str | type | FunctionType, config: dict[str, Any
         return comp.from_config(config)  # type: ignore
     else:
         return comp()  # type: ignore
+
+
+class Component(AutoConfig):
+    pass

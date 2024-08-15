@@ -1,9 +1,10 @@
 from itertools import zip_longest
 
 from poprox_concepts import ArticleSet
+from poprox_recommender.lkpipeline import Component
 
 
-class Interleave:
+class Interleave(Component):
     def __call__(self, candidates1: ArticleSet, candidates2: ArticleSet) -> ArticleSet:
         articles = []
         for pair in zip_longest(candidates1.articles, candidates2.articles):

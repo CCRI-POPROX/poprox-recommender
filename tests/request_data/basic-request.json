@@ -17,11 +17,11 @@
   ],
   "interest_profile": {
     "profile_id": "28838f05-23f5-4f23-bea2-30b51f67c538",
-    "click_history": {
-      "article_ids": [
-        "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
-      ]
-    },
+    "click_history": [
+      {
+        "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
+      }
+    ],
     "onboarding_topics": []
   },
   "num_recs": 1
