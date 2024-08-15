@@ -24,9 +24,7 @@ class TopicCalibrator(Component):
         if candidate_articles.scores is not None:
             article_scores = th.sigmoid(th.tensor(candidate_articles.scores))
         else:
-            article_scores = self.score_articles_by_topics(candidate_articles, normalized_topic_prefs)
-
-        print(f"Article scores: {article_scores}")
+            article_scores = th.zeros(len(candidate_articles.articles))
 
         article_scores = article_scores.cpu().detach().numpy()
 
@@ -53,21 +51,6 @@ class TopicCalibrator(Component):
         normalized_topic_prefs = normalized_topic_count(topic_preferences)
         return normalized_topic_prefs
 
-    def score_articles_by_topics(self, candidate_articles: ArticleSet, topic_preferences: dict[str, float]):
-        preferred_topics = set(key for key, value in topic_preferences.items() if value > 0.0)
-
-        article_scores = []
-        for article in candidate_articles.articles:
-            article_score = 0.0
-            article_topics = extract_general_topics(article)
-            for topic in article_topics.intersection(preferred_topics):
-                article_score += topic_preferences[topic]
-            article_scores.append(article_score)
-
-        raw_scores = th.tensor(article_scores)
-
-        return raw_scores / raw_scores.max()
-
 
 def topic_calibration(relevance_scores, articles, topic_preferences, theta, topk) -> list[Article]:
     # MR_i = \theta * reward_i - (1 - \theta)*C(S + i) # C is calibration
@@ -75,11 +58,8 @@ def topic_calibration(relevance_scores, articles, topic_preferences, theta, topk
 
     recommendations = []  # final recommendation (topk index)
     rec_topics = defaultdict(int)  # frequency distribution of topics of S
-    # first recommended item
-    recommendations.append(relevance_scores.argmax())
-    add_article_to_topics(rec_topics, articles[int(relevance_scores.argmax())])
 
-    for k in range(topk - 1):
+    for k in range(topk):
         candidate = None  # next item
         best_candidate_score = float("-inf")
 
