@@ -123,9 +123,8 @@ class MindData:
         article = Article(
             article_id=uuid,
             url=f"urn:uuid:{uuid}",
-            title=str(self.news_df.loc[id, "title"]),
+            headline=str(self.news_df.loc[id, "title"]),
         )
-        article.content = article.title
         return article
 
 

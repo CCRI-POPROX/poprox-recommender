@@ -20,7 +20,7 @@ def build_pipeline(total_slots):
 
 total_slots = 10
 inputs = {
-    "candidate": ArticleSet(articles=[Article(article_id=uuid4(), title="title") for _ in range(total_slots)]),
+    "candidate": ArticleSet(articles=[Article(article_id=uuid4(), headline="headline") for _ in range(total_slots)]),
     "profile": InterestProfile(click_history=[], onboarding_topics=[]),
 }
 

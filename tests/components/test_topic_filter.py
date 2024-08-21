@@ -23,22 +23,22 @@ def test_select_by_topic_filters_articles():
     articles = [
         Article(
             article_id=uuid4(),
-            title="Something about TV",
+            headline="Something about TV",
             mentions=[Mention(source="AP", relevance=50.0, entity=entertainment)],
         ),
         Article(
             article_id=uuid4(),
-            title="Something about the US",
+            headline="Something about the US",
             mentions=[Mention(source="AP", relevance=50.0, entity=us_news)],
         ),
         Article(
             article_id=uuid4(),
-            title="Something about politics",
+            headline="Something about politics",
             mentions=[Mention(source="AP", relevance=50.0, entity=politics)],
         ),
         Article(
             article_id=uuid4(),
-            title="Something about books",
+            headline="Something about books",
             mentions=[Mention(source="AP", relevance=50.0, entity=entertainment)],
         ),
     ]
