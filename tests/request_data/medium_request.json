@@ -2,8 +2,8 @@
   "todays_articles": [
     {
       "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
-      "title": "US job openings fall to 8.1 million, lowest since 2021, but remain at historically high levels",
-      "content": "U.S. job openings fell in April to the lowest level since 2021",
+      "headline": "US job openings fall to 8.1 million, lowest since 2021, but remain at historically high levels",
+      "subhead": "U.S. job openings fell in April to the lowest level since 2021",
       "url": "https://apnews.com/article/job-openings-unemployment-economy-inflation-interest-rates-81dae65f447ae75165b9eed8278cd424",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -172,8 +172,8 @@
     },
     {
       "article_id": "469e1b02-4d72-42d8-a520-a40a85c79610",
-      "title": "How Trump's deny-everything strategy could hurt him at sentencing",
-      "content": "Donald Trump has had plenty to say since his hush money trial conviction last week",
+      "headline": "How Trump's deny-everything strategy could hurt him at sentencing",
+      "subhead": "Donald Trump has had plenty to say since his hush money trial conviction last week",
       "url": "https://apnews.com/article/trump-hush-money-stormy-daniels-sentencing-66dbfa66613aaae29a3959e619b7593c",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -299,8 +299,8 @@
     },
     {
       "article_id": "e906956c-ede0-4a43-972c-a61f48fc1e76",
-      "title": "Idris Elba helps uncover the WWII soldiers of color who never got their due",
-      "content": "More than 8 million people of color served with the Allies but little is known of their sacrifices",
+      "headline": "Idris Elba helps uncover the WWII soldiers of color who never got their due",
+      "subhead": "More than 8 million people of color served with the Allies but little is known of their sacrifices",
       "url": "https://apnews.com/article/erased-idris-elba-ww2-soldiers-5b8163286bfdd17d4ee7dff9c9df744c",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -472,8 +472,8 @@
     },
     {
       "article_id": "28ed3e1e-be65-4e3b-b676-c2157f866e11",
-      "title": "CEO pay is rising, widening the gap between top executives and workers. What to know, by the numbers",
-      "content": "The typical compensation for CEOs of S&P 500 companies keeps climber higher \u2014 and outpacing the wages of average workers today",
+      "headline": "CEO pay is rising, widening the gap between top executives and workers. What to know, by the numbers",
+      "subhead": "The typical compensation for CEOs of S&P 500 companies keeps climber higher \u2014 and outpacing the wages of average workers today",
       "url": "https://apnews.com/article/ceo-pay-packages-2023-numbers-acf14f0a4dc4f8e64aabaa1f0e4632ef",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -645,8 +645,8 @@
     },
     {
       "article_id": "cbc30136-7fdc-4627-a4e0-66294fea6066",
-      "title": "Taraji P. Henson will host the 2024 BET Awards. Here's what to know about the show",
-      "content": "The 2024 BET Awards are fast approaching",
+      "headline": "Taraji P. Henson will host the 2024 BET Awards. Here's what to know about the show",
+      "subhead": "The 2024 BET Awards are fast approaching",
       "url": "https://apnews.com/article/bet-awards-2024-what-to-know-e7aabec1241bd72911c390baf2ad5ca4",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -796,8 +796,8 @@
     },
     {
       "article_id": "4a5d577f-b4b9-46b8-aae8-9233f7228669",
-      "title": "Mired in disappointing season, Atlanta United fires coach Gonzalo Pineda",
-      "content": "Atlanta United has fired coach Gonzalo Pineda, less than 24 hours after another loss dropped the team farther from playoff contention in Major League Soccer",
+      "headline": "Mired in disappointing season, Atlanta United fires coach Gonzalo Pineda",
+      "subhead": "Atlanta United has fired coach Gonzalo Pineda, less than 24 hours after another loss dropped the team farther from playoff contention in Major League Soccer",
       "url": "https://apnews.com/article/atlanta-united-mls-coach-pineda-fired-b75d4dc5bb437342014fecfe15b077f4",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -922,8 +922,8 @@
     },
     {
       "article_id": "327b6e77-7276-4663-99c7-f15e603b003a",
-      "title": "A Black medic wounded on D-Day saved dozens of lives. He's finally being posthumously honored",
-      "content": "Waverly Woodson Jr., a medic who was part of the only Black combat unit to take part in the D-Day invasion of France, is being posthumously awarded the Distinguished Service Cross",
+      "headline": "A Black medic wounded on D-Day saved dozens of lives. He's finally being posthumously honored",
+      "subhead": "Waverly Woodson Jr., a medic who was part of the only Black combat unit to take part in the D-Day invasion of France, is being posthumously awarded the Distinguished Service Cross",
       "url": "https://apnews.com/article/dday-black-medic-woodson-distinguished-cross-14062c686b897fe6c40a3734f28b871a",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -1143,8 +1143,8 @@
     },
     {
       "article_id": "ea52aa04-5522-433e-88bb-195ce47f1611",
-      "title": "Mother of airman killed by Florida deputy says his firing, alone, won't cut it",
-      "content": "The mother of an airman who was shot and killed by a Florida sheriff\u2019s deputy says the deputy\u2019s firing was not justice for her son\u2019s killing",
+      "headline": "Mother of airman killed by Florida deputy says his firing, alone, won't cut it",
+      "subhead": "The mother of an airman who was shot and killed by a Florida sheriff\u2019s deputy says the deputy\u2019s firing was not justice for her son\u2019s killing",
       "url": "https://apnews.com/article/roger-fortson-florida-deputy-fired-charges-89c843dba31845df1c82415238179615",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -1270,8 +1270,8 @@
     },
     {
       "article_id": "fb51572d-6a10-463c-a31d-875fd409e4ea",
-      "title": "Rapper Sean Kingston booked into Florida jail, where he and mother are charged with $1M in fraud",
-      "content": "Rapper and singer Sean Kingston is back in South Florida, where he and his mother are charged with committing more than a million dollars worth of fraud",
+      "headline": "Rapper Sean Kingston booked into Florida jail, where he and mother are charged with $1M in fraud",
+      "subhead": "Rapper and singer Sean Kingston is back in South Florida, where he and his mother are charged with committing more than a million dollars worth of fraud",
       "url": "https://apnews.com/article/sean-kingston-arrest-jail-florida-cf7eb4dd744fdeb15bf1a452f466b534",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -1466,8 +1466,8 @@
     },
     {
       "article_id": "946444f3-f21f-43c7-a6c1-684cb0ba02fb",
-      "title": "Atlanta water woes extend into fourth day as city finally cuts off leak gushing into streets",
-      "content": "For at least some residents, Atlanta\u2019s water problems aren't over",
+      "headline": "Atlanta water woes extend into fourth day as city finally cuts off leak gushing into streets",
+      "subhead": "For at least some residents, Atlanta\u2019s water problems aren't over",
       "url": "https://apnews.com/article/atlanta-water-outage-woes-andre-dickens-c02d45a4c3e2b02a413189f9d417e55e",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -1569,8 +1569,8 @@
     },
     {
       "article_id": "ab4fcd39-00b2-443a-8c48-4ebc5742a9cc",
-      "title": "Larry Allen, a Hall of Fame offensive lineman for the Dallas Cowboys, dies suddenly at 52",
-      "content": "Larry Allen, one of the most dominant offensive linemen in the NFL during a 12-year career spent mostly with the Dallas Cowboys, has died",
+      "headline": "Larry Allen, a Hall of Fame offensive lineman for the Dallas Cowboys, dies suddenly at 52",
+      "subhead": "Larry Allen, one of the most dominant offensive linemen in the NFL during a 12-year career spent mostly with the Dallas Cowboys, has died",
       "url": "https://apnews.com/article/larry-allen-dead-cowboys-3f87778f6777b4de2b82106801808e38",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": [
@@ -1651,168 +1651,168 @@
   "past_articles": [
     {
       "article_id": "50551b08-1f74-4b3f-8183-96ac57b0ed6d",
-      "title": "A foreign armed force to fight gangs makes many in Haiti celebrate, while others worry",
-      "content": "Foreigners with guns are met with hostility in most countries in the world. But the departure of armed soldiers and police from Haiti in 2017 after nearly two decades on the streets helped criminals seize control of much of the country.",
+      "headline": "A foreign armed force to fight gangs makes many in Haiti celebrate, while others worry",
+      "subhead": "Foreigners with guns are met with hostility in most countries in the world. But the departure of armed soldiers and police from Haiti in 2017 after nearly two decades on the streets helped criminals seize control of much of the country.",
       "url": "https://apnews.com/article/haiti-un-armed-force-deployment-f1a6e60688502a2e8a13ad8282869e56",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "9faaf1ec-53d0-46c1-9116-7869eebf63e6",
-      "title": "No. 10 Alabama looks to rebound from loss to Texas when Crimson Tide visits rebuilding South Florida",
-      "content": "The daunting challenge South Florida faces hosting 10th-ranked Alabama isn\u2019t lost on Alex Golesh. The first-year coach is rebuilding USF\u2019s once-thriving program and understands Saturday\u2019s nationally televised game against the Crimson Tide offers an opportunity to showcase what he\u2019s trying to accompl",
+      "headline": "No. 10 Alabama looks to rebound from loss to Texas when Crimson Tide visits rebuilding South Florida",
+      "subhead": "The daunting challenge South Florida faces hosting 10th-ranked Alabama isn\u2019t lost on Alex Golesh. The first-year coach is rebuilding USF\u2019s once-thriving program and understands Saturday\u2019s nationally televised game against the Crimson Tide offers an opportunity to showcase what he\u2019s trying to accompl",
       "url": "https://apnews.com/article/alabama-usf-crimson-tide-a0611d3a9b6b5ec169d7a50447737d0e",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "ad5c8152-5d8d-4bb8-980b-1171517f740e",
-      "title": "Pro Picks: Eagles' talent over Chiefs' experience",
-      "content": "The Philadelphia Eagles left their dog masks at home. Back in the Super Bowl five years after winning the first Lombardi Trophy in franchise history, the Eagles took a different path to reach this one.",
+      "headline": "Pro Picks: Eagles' talent over Chiefs' experience",
+      "subhead": "The Philadelphia Eagles left their dog masks at home. Back in the Super Bowl five years after winning the first Lombardi Trophy in franchise history, the Eagles took a different path to reach this one.",
       "url": "https://apnews.com/article/tom-brady-new-england-patriots-kansas-city-chiefs-minnesota-vikings-san-francisco-49ers-228cda4a6c5db4021d6b97db418b25dc",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "6ee05f9c-0f97-406a-a471-f37a2acdbb13",
-      "title": "Vanna White extends her time at the puzzle board on 'Wheel of Fortune' for two additional seasons",
-      "content": "Vanna White will remain with \"Wheel of Fortune'' for two additional seasons. Followig the announcement earlier this year that Pat Sajak would make season 41 of \u201cWheel of Fortune\u201d his last, White's future with the show was uncertain.",
+      "headline": "Vanna White extends her time at the puzzle board on 'Wheel of Fortune' for two additional seasons",
+      "subhead": "Vanna White will remain with \"Wheel of Fortune'' for two additional seasons. Followig the announcement earlier this year that Pat Sajak would make season 41 of \u201cWheel of Fortune\u201d his last, White's future with the show was uncertain.",
       "url": "https://apnews.com/article/vanna-white-wheel-of-fortune-pat-sajak-5603a165f731ae1ce426ba197b64873c",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "8818b13c-c99c-4e6a-88a7-6db36af5e40b",
-      "title": "Capitals' 5-foot 7, 140-pound Matthew Phillips tops the list of season-opening NHL roster surprises",
-      "content": "Matthew Phillips making the Washington Capitals season-opening roster is one of the biggest surprises around the NHL.",
+      "headline": "Capitals' 5-foot 7, 140-pound Matthew Phillips tops the list of season-opening NHL roster surprises",
+      "subhead": "Matthew Phillips making the Washington Capitals season-opening roster is one of the biggest surprises around the NHL.",
       "url": "https://apnews.com/article/matthew-phillips-capitals-bruins-poitras-231c0c1fdf720423617db43dba8b80d4",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "999563d9-b2d0-4ca9-8f6e-793ac5c5ae4a",
-      "title": "Coach Eddie Jones backed by union amid Australia's worst Rugby World Cup campaign",
-      "content": "Rugby Australia has doubled down on backing coach Eddie Jones while the Wallabies are on the brink of missing the Rugby World Cup quarterfinals for the first time.",
+      "headline": "Coach Eddie Jones backed by union amid Australia's worst Rugby World Cup campaign",
+      "subhead": "Rugby Australia has doubled down on backing coach Eddie Jones while the Wallabies are on the brink of missing the Rugby World Cup quarterfinals for the first time.",
       "url": "https://apnews.com/article/australia-jones-rugby-world-cup-d8e4bbc19f0cea8842356b99719fcbda",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "2b9cc70f-2d64-4b34-b26d-6d7bf908524d",
-      "title": "Inflation is slowing, but still high. What you need to know",
-      "content": "After reaching 40-year highs over the summer, price increases in the U.S. are now steadily easing. Consumer inflation slowed to 7.1% in November from a year earlier and to 0.1% from October, the government said Tuesday.",
+      "headline": "Inflation is slowing, but still high. What you need to know",
+      "subhead": "After reaching 40-year highs over the summer, price increases in the U.S. are now steadily easing. Consumer inflation slowed to 7.1% in November from a year earlier and to 0.1% from October, the government said Tuesday.",
       "url": "https://apnews.com/article/inflation-business-149cec9fb85f97f97f5d39e6b6e686d3",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "41475605-f8ae-4a9d-9565-063a55c2e5ad",
-      "title": "Injunction blocking Florida law targeting drag shows applies to all venues, judge says",
-      "content": "A federal judge says that his order blocking a Florida law targeting drag shows doesn\u2019t just apply to the restaurant that brought a lawsuit challenging it but other venues in the state.",
+      "headline": "Injunction blocking Florida law targeting drag shows applies to all venues, judge says",
+      "subhead": "A federal judge says that his order blocking a Florida law targeting drag shows doesn\u2019t just apply to the restaurant that brought a lawsuit challenging it but other venues in the state.",
       "url": "https://apnews.com/article/lgbtq-desantis-florida-drag-shows-89cc68eb3a34ceead38ec00831817eb9",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "9cd74855-f983-4d32-bb6c-3bc14e93f147",
-      "title": "Texans place Stingley on injured list, say Tunsil won't travel to Jacksonville",
-      "content": "The Houston Texans have placed cornerback Derek Stingley Jr. on the injured reserve with a hamstring injury and said Saturday left tackle Laremy Tunsil won\u2019t travel to Jacksonville because of a knee injury.",
+      "headline": "Texans place Stingley on injured list, say Tunsil won't travel to Jacksonville",
+      "subhead": "The Houston Texans have placed cornerback Derek Stingley Jr. on the injured reserve with a hamstring injury and said Saturday left tackle Laremy Tunsil won\u2019t travel to Jacksonville because of a knee injury.",
       "url": "https://apnews.com/article/texans-stingley-tunsil-houston-injured-d935c032468c05236cd5d766b2cea652",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "29328848-7cae-432a-84da-9c9b282be4c6",
-      "title": "Former Texas Rep. Will Hurd suspends long-shot GOP 2024 presidential bid, endorses Nikki Haley",
-      "content": "Former Texas congressman Will Hurd has suspended his Republican presidential bid, abandoning a brief campaign built on criticizing Donald Trump at a time when his party seems even more determined to embrace the former president.",
+      "headline": "Former Texas Rep. Will Hurd suspends long-shot GOP 2024 presidential bid, endorses Nikki Haley",
+      "subhead": "Former Texas congressman Will Hurd has suspended his Republican presidential bid, abandoning a brief campaign built on criticizing Donald Trump at a time when his party seems even more determined to embrace the former president.",
       "url": "https://apnews.com/article/will-hurd-ends-2024-presidential-campaign-c34b3c8d9ef44126e8e36623b1dc3021",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "8a6f5e08-9e4e-4598-be3e-8bde809c7092",
-      "title": "Deep-sea 'hot tubs' help octopus moms hatch their eggs faster",
-      "content": "A new study suggests that deep-sea \u201chot tubs\u201d may help octopus eggs hatch faster. Octopus usually live solitary lives.",
+      "headline": "Deep-sea 'hot tubs' help octopus moms hatch their eggs faster",
+      "subhead": "A new study suggests that deep-sea \u201chot tubs\u201d may help octopus eggs hatch faster. Octopus usually live solitary lives.",
       "url": "https://apnews.com/article/octopus-deepsea-garden-eggs-nest-6ef8d8b464d49bda4cda27b7eda270c9",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "544b7ef2-07ae-45f3-9f32-383380139956",
-      "title": "Seahawks expect to have Jamal Adams and several others back in time to face Bengals",
-      "content": "The Seattle Seahawks expect safety Jamal Adams to be cleared from the concussion protocol in the next couple of days and to play this week against Cincinnati.",
+      "headline": "Seahawks expect to have Jamal Adams and several others back in time to face Bengals",
+      "subhead": "The Seattle Seahawks expect safety Jamal Adams to be cleared from the concussion protocol in the next couple of days and to play this week against Cincinnati.",
       "url": "https://apnews.com/article/seahawks-jamal-adams-concussion-return-4b106add2315c6de1b210b597af8f05b",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "2cb543da-64a3-4640-a18b-dd84ef1e8dd9",
-      "title": "Kansas college reaches settlement in lawsuit alleging discrimination against Black athletes",
-      "content": "A Kansas community college that was accused of discriminating against Black student-athletes has agreed to a settlement. The U.S.",
+      "headline": "Kansas college reaches settlement in lawsuit alleging discrimination against Black athletes",
+      "subhead": "A Kansas community college that was accused of discriminating against Black student-athletes has agreed to a settlement. The U.S.",
       "url": "https://apnews.com/article/kansas-college-black-athletes-8d354add43b95bb90082a09f5a850fe8",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "ea8bd1fd-2fc2-4195-aeef-04f6a4197a28",
-      "title": "Dillon Gabriel throws for 5 TDs as No. 19 Oklahoma rolls past Tulsa 66-17",
-      "content": "Dillon Gabriel threw for 421 yards and five touchdowns, three of them to Nic Anderson, and No. 19 Oklahoma rolled to a 66-17 victory over in-state rival Tulsa.",
+      "headline": "Dillon Gabriel throws for 5 TDs as No. 19 Oklahoma rolls past Tulsa 66-17",
+      "subhead": "Dillon Gabriel threw for 421 yards and five touchdowns, three of them to Nic Anderson, and No. 19 Oklahoma rolled to a 66-17 victory over in-state rival Tulsa.",
       "url": "https://apnews.com/article/oklahoma-tulsa-dillon-gabriel-da24b20a2a19c93f68115613a1e5fb2d",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "98a39396-6705-4705-8307-3a618d4f63f5",
-      "title": "DeSantis' retaliation against Disney hurts Florida, former governors and lawmakers say",
-      "content": "A group of mostly Republican former high-level government officials is calling Gov. Ron DeSantis' takeover of Disney World\u2019s governing district \u201cseverely damaging to the political, social, and economic fabric of the State.\u201d",
+      "headline": "DeSantis' retaliation against Disney hurts Florida, former governors and lawmakers say",
+      "subhead": "A group of mostly Republican former high-level government officials is calling Gov. Ron DeSantis' takeover of Disney World\u2019s governing district \u201cseverely damaging to the political, social, and economic fabric of the State.\u201d",
       "url": "https://apnews.com/article/disney-desantis-feud-lgbtq-74591d962dc30065fe2dd6947bf12d2e",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "e1e93d47-68e0-451e-a3d1-5233a162ebde",
-      "title": "They shared a name \u2014 but not a future. How two kids fought to escape poverty in Baltimore",
-      "content": "Two kids named Antonio grew up together in the streets of east Baltimore surrounded by poverty and gun violence",
+      "headline": "They shared a name \u2014 but not a future. How two kids fought to escape poverty in Baltimore",
+      "subhead": "Two kids named Antonio grew up together in the streets of east Baltimore surrounded by poverty and gun violence",
       "url": "https://apnews.com/article/baltimore-youth-gun-violence-poverty-entrepreneurship-1cb941be0cd302df626f7ba38bb96df6",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "bffa0189-5f00-429f-a191-7ca8fcc29b85",
-      "title": "STAT WATCH: Davis' FBS season-best rushing game for Kentucky pushes him over 3,000 career yards",
-      "content": "Kentucky\u2019s Ray Davis became the fourth active player in the Football Bowl Subdivision to go over 3,000 career rushing yards.",
+      "headline": "STAT WATCH: Davis' FBS season-best rushing game for Kentucky pushes him over 3,000 career yards",
+      "subhead": "Kentucky\u2019s Ray Davis became the fourth active player in the Football Bowl Subdivision to go over 3,000 career rushing yards.",
       "url": "https://apnews.com/article/kentucky-wildcats-ray-davis-3d283a123843410363b577d7f22c8296",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "1410985c-f52a-4b0b-a7ac-2aa046ecdd29",
-      "title": "Hong Kong's top court rules in favor of recognizing same-sex partnerships in a landmark case",
-      "content": "Hong Kong\u2019s top court has ruled the government should provide a framework for recognizing same-sex partnerships in a landmark decision for the city\u2019s LGBTQ+ community.",
+      "headline": "Hong Kong's top court rules in favor of recognizing same-sex partnerships in a landmark case",
+      "subhead": "Hong Kong\u2019s top court has ruled the government should provide a framework for recognizing same-sex partnerships in a landmark decision for the city\u2019s LGBTQ+ community.",
       "url": "https://apnews.com/article/hong-kong-same-sex-marriage-e32da67e8d4b364cb156a2e2ec526850",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "352a67b6-153d-4835-af7c-560ad795f67a",
-      "title": "Movie Review: Horror flick 'Talk to Me' is a hand-some high-five for twin Australian filmmakers",
-      "content": "You\u2019ve got to hand it to the Philippou brothers. They\u2019ve taken the old horror cliche of a severed hand and made something worth, well, applauding, says Associated Press critic Mark Kennedy.",
+      "headline": "Movie Review: Horror flick 'Talk to Me' is a hand-some high-five for twin Australian filmmakers",
+      "subhead": "You\u2019ve got to hand it to the Philippou brothers. They\u2019ve taken the old horror cliche of a severed hand and made something worth, well, applauding, says Associated Press critic Mark Kennedy.",
       "url": "https://apnews.com/article/talk-to-me-movie-review-6e28141ea4a6d2480a504016c2a9ea8d",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "a1bdee8c-2e75-4e50-a75d-ff48d44fe6d3",
-      "title": "Starting next year, child influencers can sue if earnings aren't set aside, says new Illinois law",
-      "content": "Illinois is the first state in the U.S. to ensure child social media influencers are compensated for their work. That's according to Sen.",
+      "headline": "Starting next year, child influencers can sue if earnings aren't set aside, says new Illinois law",
+      "subhead": "Illinois is the first state in the U.S. to ensure child social media influencers are compensated for their work. That's according to Sen.",
       "url": "https://apnews.com/article/tiktok-child-influencer-illinois-social-media-f784b4bc52cb75ad1e0d28785993b1c5",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
     },
     {
       "article_id": "c4d45ecf-2d86-4419-931a-4bf76bcd0305",
-      "title": "Stock market today: Asian shares mostly higher after US inflation data ease rate hike worries",
-      "content": "Shares are mostly higher in Asia after a highly anticipated report showed inflation accelerated across the U.S. in August, but not by much more than expected.",
+      "headline": "Stock market today: Asian shares mostly higher after US inflation data ease rate hike worries",
+      "subhead": "Shares are mostly higher in Asia after a highly anticipated report showed inflation accelerated across the U.S. in August, but not by much more than expected.",
       "url": "https://apnews.com/article/stock-market-inflation-rates-oil-c6706a055c002e5d858d3591a6d3bddc",
       "published_at": "1970-01-01T00:00:00Z",
       "mentions": []
