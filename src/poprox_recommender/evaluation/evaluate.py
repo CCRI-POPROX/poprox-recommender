@@ -44,7 +44,7 @@ class UserRecs(NamedTuple):
 def convert_df_to_article_set(rec_df):
     articles = []
     for _, row in rec_df.iterrows():
-        articles.append(Article(article_id=row["item"], title=""))
+        articles.append(Article(article_id=row["item"], headline=""))
     return ArticleSet(articles=articles)
 
 
