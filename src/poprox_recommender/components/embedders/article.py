@@ -78,7 +78,7 @@ class NRMSArticleEmbedder(Component):
                 [
                     th.tensor(
                         self.tokenizer.encode(
-                            article.title, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
+                            article.headline, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
                         ),
                         dtype=th.int32,
                     ).to(self.device)
