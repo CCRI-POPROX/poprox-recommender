@@ -1,6 +1,6 @@
 [project]
 name = "poprox-recommender"
-channels = ["conda-forge", "pytorch"]
+channels = ["conda-forge", "pytorch", "nvidia"]
 platforms = ["linux-64", "osx-arm64", "win-64"]
 
 [tasks]
@@ -24,6 +24,9 @@ pydantic = "~=2.7.1"
 progress-api = { git = "https://github.com/lenskit/progress-api" }
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
 poprox-recommender = { path = ".", editable = true }
+
+[target.win.dependencies]
+pytorch-mutex = "cpu"
 
 # production runs in a trimmed-down environment - no MKL, no CUDA
 [feature.production]
@@ -72,7 +75,7 @@ libblas = { build = "*mkl*" }
 # putting everything but cuda in one solve group keeps deps consistent.
 [environments]
 default = { solve-group = "main" }
-production = { features = ["production"], solve-group = "main" }
+production = { features = ["production"] }
 test = { features = ["test"], solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
 dev = { features = ["dev", "test", "lint", "data"], solve-group = "main" }
