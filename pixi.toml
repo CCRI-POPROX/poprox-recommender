@@ -57,6 +57,9 @@ coverage = ">=6.5"
 pytest = ">=8"
 pexpect = "~=4.9"
 
+[feature.test.tasks]
+test = "pytest tests"
+
 # tooling for code validation
 [feature.lint.dependencies]
 pre-commit = "~=3.7"
