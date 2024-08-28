@@ -42,6 +42,7 @@ hatch = "*"
 ipython = ">=8"
 notebook = ">=7.2"
 jupytext = ">=1.16"
+nodejs = "~22.1"
 
 # tooling for environments, data, and evaluation
 [feature.data.dependencies]
@@ -52,6 +53,7 @@ pandas = "~=2.0"
 
 # dependencies for tests
 [feature.test.dependencies]
+nodejs = "~22.1"
 requests = ">=2.31,<3"
 coverage = ">=6.5"
 pytest = ">=8"
