@@ -3,7 +3,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-added-large-files
-        exclude: conda-lock.*\.yml
+        exclude: conda-lock.*\.yml|pixi\.lock
       - id: check-json
         exclude: outputs/.*\.json
       - id: check-merge-conflict
