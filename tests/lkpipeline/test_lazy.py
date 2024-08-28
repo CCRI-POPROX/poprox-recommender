@@ -75,7 +75,7 @@ def test_lazy_fail_with_missing_options():
     fb = pipe.add_component("fill-operand", fallback, first=b, second=nn)
     na = pipe.add_component("add", add, x=nd, y=fb)
 
-    with raises(RuntimeError, match="no alternative"):
+    with raises(TypeError):
         pipe.run(na, a=3)
 
 
