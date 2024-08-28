@@ -10,42 +10,37 @@
 from __future__ import annotations
 
 import inspect
+from abc import abstractmethod
 from importlib import import_module
 from types import FunctionType
-from typing import Callable, ClassVar, TypeAlias
+from typing import Callable, ClassVar, Generic, ParamSpec, TypeAlias
 
 from typing_extensions import Any, Protocol, Self, TypeVar, override, runtime_checkable
 
 # COut is only return, so Component[U] can be assigned to Component[T] if U ≼ T.
+P = ParamSpec("P")
 COut = TypeVar("COut", covariant=True)
-PipelineComponent: TypeAlias = Callable[..., COut]
+PipelineFunction: TypeAlias = Callable[..., COut]
 
 
 @runtime_checkable
-class ConfigurableComponent(Protocol):  # pragma: nocover
+class Configurable(Protocol):  # pragma: nocover
     """
-    Interface for configurable pipeline components (those that have
-    hyperparameters).  A configurable component supports two additional
-    operations:
+    Interface for configurable objects such as pipeline components with settings
+    or hyperparameters.  A configurable object supports two operations:
 
     * saving its configuration with :meth:`get_config`.
     * creating a new instance from a saved configuration with the class method
       :meth:`from_config`.
 
-    A component must implement both of these methods to be considered
-    configurable.  For most common cases, extending the :class:`AutoConfig`
-    class is sufficient to provide working implementations of these methods.
-
-    If a component is *not* configurable, then it should either be a function or
-    a class that can be constructed with no arguments.
+    An object must implement both of these methods to be considered
+    configurable.  Components extending the :class:`Component` class
+    automatically have working versions of these methods if they define their
+    constructor parameters and fields appropriately.
 
     .. note::
 
         Configuration data should be JSON-compatible (strings, numbers, etc.).
-
-    .. note::
-
-        Implementations must also implement ``__call__``.
     """
 
     @classmethod
@@ -62,32 +57,22 @@ class ConfigurableComponent(Protocol):  # pragma: nocover
         raise NotImplementedError()
 
 
-class AutoConfig(ConfigurableComponent):
+class Component(Configurable, Generic[COut]):
     """
-    Mixin class providing automatic configuration support based on constructor
-    arguments.
+    Base class for pipeline component objects.  Any component that is not just a
+    function should extend this class.
 
-    This method provides implementations of :meth:`get_config` and
-    :meth:`from_config` that inspect the constructor arguments and instance
-    variables to automatically provide configuration support.  By default, all
-    constructor parameters will be considered configuration parameters, and
-    their values will be read from instance variables of the same name.
-    Subclasses can also define :data:`EXTRA_CONFIG_FIELDS` and
-    :data:`IGNORED_CONFIG_FIELDS` class variables to modify this behavior.
-    Missing attributes are silently ignored.
+    Components are :class:`Configurable`.  The base class provides default
+    implementations of :meth:`get_config` and :meth:`from_config` that inspect
+    the constructor arguments and instance variables to automatically provide
+    configuration support.  By default, all constructor parameters will be
+    considered configuration parameters, and their values will be read from
+    instance variables of the same name. Components can also define
+    :data:`EXTRA_CONFIG_FIELDS` and :data:`IGNORED_CONFIG_FIELDS` class
+    variables to modify this behavior. Missing attributes are silently ignored.
 
-    In the simple case, you can write a class like this and get config for free:
-
-    .. code:: python
-
-        class MyComponent(AutoConfig):
-            some_param: int
-
-            def __init__(self, some_param: int = 20):
-                self.some_param = some_param
-
-    For compatibility with pipeline serialization, all configuration data should
-    be JSON-compatible.
+    To work as components, derived classes also need to implement a ``__call__``
+    method to perform their operations.
     """
 
     EXTRA_CONFIG_FIELDS: ClassVar[list[str]] = []
@@ -132,6 +117,23 @@ class AutoConfig(ConfigurableComponent):
         """
         return cls(**cfg)
 
+    @abstractmethod
+    def __call__(self, **kwargs: Any) -> COut:
+        """
+        Run the pipeline's operation and produce a result.  This is the key
+        method for components to implement.
+
+        .. note::
+
+            Due to limitations of Python's type model, derived classes will have
+            a type error overriding this method when using strict type checking,
+            because it is very cumbersome (if not impossible) to propagate
+            parameter names and types through to a base class.  The solution is
+            to either use basic type checking for implementations, or to disable
+            the typechecker on the ``__call__`` signature definition.
+        """
+        ...
+
 
 def instantiate_component(comp: str | type | FunctionType, config: dict[str, Any] | None) -> Callable[..., object]:
     if isinstance(comp, str):
@@ -144,13 +146,9 @@ def instantiate_component(comp: str | type | FunctionType, config: dict[str, Any
 
     if isinstance(comp, FunctionType):
         return comp
-    elif issubclass(comp, ConfigurableComponent):
+    elif issubclass(comp, Configurable):
         if config is None:
             config = {}
         return comp.from_config(config)  # type: ignore
     else:
         return comp()  # type: ignore
-
-
-class Component(AutoConfig):
-    pass
