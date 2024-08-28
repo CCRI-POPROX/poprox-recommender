@@ -1,0 +1,78 @@
+[project]
+name = "poprox-recommender"
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "win-64"]
+
+[tasks]
+
+[dependencies]
+hatchling = "*"
+python = "~=3.11.0"
+lenskit = "~=0.14.4"
+nltk = "~=3.8"
+numpy = "~=1.26"
+torch = "~=2.0"
+smart_open = "~=7.0"
+safetensors = ">=0.4,<1"
+transformers = "~=4.41"
+colorlog = "~=6.8"
+enlighten = "~=1.12"
+pydantic = "~=2.7.1"
+
+[pypi-dependencies]
+# git dep on progress-api until non-prerelease is out
+progress-api = { git = "https://github.com/lenskit/progress-api" }
+poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
+poprox-recommender = { path = ".", editable = true }
+
+# production runs in a trimmed-down environment - no MKL, no CUDA
+[feature.production]
+platforms = ['linux-64']
+
+[feature.production.dependencies]
+nomkl = "*"
+pytorch-cpu = "*"
+
+# general development dependencies
+[feature.dev.dependencies]
+hatch = "*"
+ipython = ">=8"
+notebook = ">=7.2"
+jupytext = ">=1.16"
+
+# tooling for environments, data, and evaluation
+[feature.data.dependencies]
+dvc = "~=3.51"
+dvc-s3 = "*"
+docopt = ">=0.6"
+pandas = "~=2.0"
+
+# dependencies for tests
+[feature.test.dependencies]
+requests = ">=2.31,<3"
+coverage = ">=6.5"
+pytest = ">=8"
+pexpect = "~=4.9"
+
+# tooling for code validation
+[feature.lint.dependencies]
+pre-commit = "~=3.7"
+ruff = ">=0.4"
+pyright = "~=1.1"
+
+# make CUDA available on Linux
+[feature.cuda]
+platforms = ['linux-64']
+
+[feature.cuda.dependencies]
+pytorch-gpu = "*"
+libblas = { build = "*mkl*" }
+
+# define the actual environments from these component features.
+# putting everything but cuda in one solve group keeps deps consistent.
+[environments]
+production = { features = ["production"], solve-group = "main" }
+test = { features = ["test"], solve-group = "main" }
+lint = { features = ["lint"], solve-group = "main" }
+dev = { features = ["dev", "test", "lint", "data"], solve-group = "main" }
+cuda = ["dev", "test", "lint", "data", "cuda"]
