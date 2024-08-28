@@ -183,27 +183,6 @@ def test_hashes_different():
     assert p1.config_hash() != p2.config_hash()
 
 
-def test_save_with_fallback():
-    pipe = Pipeline()
-    a = pipe.create_input("a", int)
-    b = pipe.create_input("b", int)
-
-    nd = pipe.add_component("double", double, x=a)
-    nn = pipe.add_component("negate", negative, x=a)
-    fb = pipe.use_first_of("fill-operand", b, nn)
-    pipe.add_component("add", add, x=nd, y=fb)
-
-    cfg = pipe.get_config()
-    json = cfg.model_dump_json(exclude_none=True)
-    print(json)
-    c2 = PipelineConfig.model_validate_json(json)
-
-    p2 = Pipeline.from_config(c2)
-
-    # 3 * 2 + -3 = 3
-    assert p2.run("fill-operand", "add", a=3) == (-3, 3)
-
-
 def test_hash_validate():
     pipe = Pipeline()
     msg = pipe.create_input("msg", str)

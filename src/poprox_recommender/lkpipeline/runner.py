@@ -15,7 +15,7 @@ from typing import Any, Generic, Literal, TypeAlias, TypeVar, get_args, get_orig
 
 from . import Pipeline, PipelineError
 from .components import PipelineFunction
-from .nodes import ComponentNode, FallbackNode, InputNode, LiteralNode, Node
+from .nodes import ComponentNode, InputNode, LiteralNode, Node
 from .types import Lazy, is_compatible_data
 
 _log = logging.getLogger(__name__)
@@ -80,8 +80,6 @@ class PipelineRunner:
                 self._inject_input(name, types, required)
             case ComponentNode(name, comp, inputs, wiring):
                 self._run_component(name, comp, inputs, wiring, required)
-            case FallbackNode(name, alts):
-                self._run_fallback(name, alts)
             case _:  # pragma: nocover
                 raise PipelineError(f"invalid node {node}")
 
@@ -148,16 +146,6 @@ class PipelineRunner:
 
         _log.debug("running component %s", name)
         self.state[name] = comp(**in_data)
-
-    def _run_fallback(self, name: str, alternatives: list[Node[Any]]) -> None:
-        for alt in alternatives:
-            val = self.run(alt, required=False)
-            if val is not None:
-                self.state[name] = val
-                return
-
-        # got this far, no alternatives
-        raise RuntimeError(f"no alternative for {name} returned data")
 
 
 @dataclass(eq=False)

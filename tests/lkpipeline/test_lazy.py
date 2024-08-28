@@ -135,7 +135,7 @@ def test_lazy_transitive_nodefail():
 
     nd = pipe.add_component("double", double, x=a)
     nn = pipe.add_component("negate", negative, x=nd)
-    nr = pipe.use_first_of("fill-operand", nn, b)
+    nr = pipe.add_component("fill-operand", fallback, first=nn, second=b)
 
     assert pipe.run(nr, a=2, b=8) == -4
     assert pipe.run(nr, a=-7, b=8) == 8
