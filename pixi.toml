@@ -1,6 +1,6 @@
 [project]
 name = "poprox-recommender"
-channels = ["conda-forge"]
+channels = ["conda-forge", "pytorch"]
 platforms = ["linux-64", "osx-arm64", "win-64"]
 
 [tasks]
@@ -71,6 +71,7 @@ libblas = { build = "*mkl*" }
 # define the actual environments from these component features.
 # putting everything but cuda in one solve group keeps deps consistent.
 [environments]
+default = { solve-group = "main" }
 production = { features = ["production"], solve-group = "main" }
 test = { features = ["test"], solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
