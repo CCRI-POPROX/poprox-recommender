@@ -22,6 +22,7 @@ pydantic = "~=2.7.1"
 [pypi-dependencies]
 # git dep on progress-api until non-prerelease is out
 progress-api = { git = "https://github.com/lenskit/progress-api" }
+poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
 poprox-recommender = { path = ".", editable = true }
 
 [target.win.dependencies]
