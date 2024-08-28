@@ -25,7 +25,7 @@ dependencies = [
   "colorlog >=6.8,<7",
   "progress-api >=0.1.0a9,<0.2",
   "enlighten >=1.12,<2",
-  "poprox-concepts@git+https://github.com/CCRI-POPROX/poprox-concepts.git@main",
+  "poprox-concepts@git+https://github.com/CCRI-POPROX/poprox-concepts.git",
   # direct dep on Pydantic to ensure it is in lockfile
   # this is necessary because conda-lock doesn't look into poprox-concepts to
   # find conda deps
