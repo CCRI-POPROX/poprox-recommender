@@ -114,6 +114,9 @@ known-first-party = ["poprox_*"]
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
+[tool.pyright]
+exclude = [".pixi/"]
+
 [tool.coverage.run]
 source_pkgs = ["poprox_recommender", "tests"]
 branch = true
