@@ -28,7 +28,7 @@ from .components import (  # type: ignore # noqa: F401
 from .config import PipelineConfig
 from .nodes import ND, ComponentNode, FallbackNode, InputNode, LiteralNode, Node
 from .state import PipelineState
-from .types import parse_type_string
+from .types import Lazy, parse_type_string
 
 __all__ = [
     "Pipeline",
@@ -38,6 +38,7 @@ __all__ = [
     "PipelineFunction",
     "Configurable",
     "PipelineConfig",
+    "Lazy",
     "Component",
 ]
 
