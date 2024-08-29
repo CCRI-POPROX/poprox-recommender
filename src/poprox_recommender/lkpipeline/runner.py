@@ -161,7 +161,7 @@ class DeferredRun(Generic[T]):
     required: bool
     data_type: type | None
 
-    def get(self):
+    def get(self) -> T:
         val = self.runner.run(self.node, required=self.required)
 
         if self.data_type is not None and not is_compatible_data(val, self.data_type):
