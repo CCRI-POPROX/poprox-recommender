@@ -21,8 +21,8 @@ from typing_extensions import Any, Literal, Self, TypeAlias, TypeVar, cast, over
 from . import config
 from .components import (  # type: ignore # noqa: F401
     Component,
-    ConfigurableComponent,
-    PipelineComponent,
+    Configurable,
+    PipelineFunction,
     instantiate_component,
 )
 from .config import PipelineConfig
@@ -35,8 +35,8 @@ __all__ = [
     "PipelineError",
     "PipelineWarning",
     "Node",
-    "PipelineComponent",
-    "ConfigurableComponent",
+    "PipelineFunction",
+    "Configurable",
     "PipelineConfig",
     "Component",
 ]
@@ -104,7 +104,7 @@ class Pipeline:
     _nodes: dict[str, Node[Any]]
     _aliases: dict[str, Node[Any]]
     _defaults: dict[str, Node[Any]]
-    _components: dict[str, PipelineComponent[Any]]
+    _components: dict[str, PipelineFunction[Any]]
     _hash: str | None = None
     _last: Node[Any] | None = None
     _anon_nodes: set[str]
@@ -266,7 +266,9 @@ class Pipeline:
         self._aliases[alias] = node
         self._clear_caches()
 
-    def add_component(self, name: str, obj: PipelineComponent[ND], **inputs: Node[Any] | object) -> Node[ND]:
+    def add_component(
+        self, name: str, obj: Component[ND] | PipelineFunction[ND], **inputs: Node[Any] | object
+    ) -> Node[ND]:
         """
         Add a component and connect it into the graph.
 
@@ -298,7 +300,7 @@ class Pipeline:
     def replace_component(
         self,
         name: str | Node[ND],
-        obj: PipelineComponent[ND],
+        obj: Component[ND] | PipelineFunction[ND],
         **inputs: Node[Any] | object,
     ) -> Node[ND]:
         """
@@ -414,11 +416,7 @@ class Pipeline:
         Get the configurations for the components.  This is the configurations
         only, it does not include pipeline inputs or wiring.
         """
-        return {
-            name: comp.get_config()
-            for (name, comp) in self._components.items()
-            if isinstance(comp, ConfigurableComponent)
-        }
+        return {name: comp.get_config() for (name, comp) in self._components.items() if isinstance(comp, Configurable)}
 
     def clone(self, how: CloneMethod = "config") -> Pipeline:
         """
@@ -465,7 +463,7 @@ class Pipeline:
                 case ComponentNode(name, comp, _inputs, wiring):
                     if isinstance(comp, FunctionType):
                         comp = comp
-                    elif isinstance(comp, ConfigurableComponent):
+                    elif isinstance(comp, Configurable):
                         comp = comp.__class__.from_config(comp.get_config())  # type: ignore
                     else:
                         comp = comp.__class__()  # type: ignore
