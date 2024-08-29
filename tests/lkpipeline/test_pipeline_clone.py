@@ -7,11 +7,11 @@
 import json
 
 from poprox_recommender.lkpipeline import Pipeline
-from poprox_recommender.lkpipeline.components import AutoConfig
+from poprox_recommender.lkpipeline.components import Component
 from poprox_recommender.lkpipeline.nodes import ComponentNode
 
 
-class Prefixer(AutoConfig):
+class Prefixer(Component):
     prefix: str
 
     def __init__(self, prefix: str = "hello"):

@@ -6,7 +6,7 @@ from pytest import fail, warns
 from typing_extensions import assert_type
 
 from poprox_recommender.lkpipeline import InputNode, Node, Pipeline, PipelineWarning
-from poprox_recommender.lkpipeline.components import AutoConfig
+from poprox_recommender.lkpipeline.components import Component
 from poprox_recommender.lkpipeline.config import PipelineConfig
 from poprox_recommender.lkpipeline.nodes import ComponentNode
 
@@ -14,7 +14,7 @@ _log = logging.getLogger(__name__)
 
 
 # region Test Components
-class Prefixer(AutoConfig):
+class Prefixer(Component):
     prefix: str
 
     def __init__(self, prefix: str = "hello"):
