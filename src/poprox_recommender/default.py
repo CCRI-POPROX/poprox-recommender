@@ -139,7 +139,6 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
         o_rank = pipeline.add_component("reranker", ranker, candidate_articles=o_scored, interest_profile=e_user)
 
     # Fallback in case not enough articles came from the ranker
-    # TODO: make this lazy so the sampler only runs if the reranker isn't enough
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
     o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
     pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
