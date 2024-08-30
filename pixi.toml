@@ -23,7 +23,7 @@ pydantic = "~=2.7.1"
 # git dep on progress-api until non-prerelease is out
 progress-api = { git = "https://github.com/lenskit/progress-api" }
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
-poprox-recommender = { path = ".", editable = true }
+
 
 [target.win.dependencies]
 cpuonly = "*"
@@ -35,6 +35,10 @@ platforms = ['linux-64']
 [feature.production.dependencies]
 nomkl = "*"
 pytorch-cpu = "*"
+
+
+[feature.production.pypi-dependencies]
+poprox-recommender = { path = ".", editable = false }
 
 # general development dependencies
 [feature.dev.dependencies]
@@ -51,6 +55,9 @@ dvc-s3 = "*"
 docopt = ">=0.6"
 pandas = "~=2.0"
 
+[feature.data.pypi-dependencies]
+poprox-recommender = { path = ".", editable = true }
+
 # dependencies for tests
 [feature.test.dependencies]
 nodejs = "~=22.1"
@@ -58,6 +65,9 @@ requests = ">=2.31,<3"
 coverage = ">=6.5"
 pytest = ">=8"
 pexpect = "~=4.9"
+
+[feature.test.pypi-dependencies]
+poprox-recommender = { path = ".", editable = true }
 
 [feature.test.tasks]
 test = "pytest tests"
