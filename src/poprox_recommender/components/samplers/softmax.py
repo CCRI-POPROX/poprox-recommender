@@ -19,7 +19,8 @@ class SoftmaxSampler:
         # https://timvieira.github.io/blog/post/2019/09/16/algorithms-for-sampling-without-replacement/
 
         # The weights for the sampling distribution are the softmax of the scores
-        weights = np.exp(self.temperature * candidate_articles.scores) / np.sum(candidate_articles.scores)
+        # Scores are squashed into the range [0,1] to make tuning the temperature easier
+        weights = np.exp(self.temperature * sigmoid(candidate_articles.scores)) / np.sum(candidate_articles.scores)
 
         # This is the core of the exponential sampling trick, which creates a
         # set of values that depend on both the predicted scores and random
@@ -35,3 +36,7 @@ class SoftmaxSampler:
         sampled = [candidate_articles.articles[idx] for idx in sorted_indices[: self.num_slots]]
 
         return ArticleSet(articles=sampled)
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
