@@ -27,9 +27,9 @@ from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
-from poprox_recommender.default import recommendation_pipelines
 from poprox_recommender.lkpipeline import PipelineState
 from poprox_recommender.logging_config import setup_logging
+from poprox_recommender.recommenders import recommendation_pipelines
 
 logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 

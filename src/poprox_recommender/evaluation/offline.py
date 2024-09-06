@@ -23,9 +23,9 @@ from safetensors.torch import load_file
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
-from poprox_recommender.default import recommendation_pipelines
 from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.paths import model_file_path, project_root
+from poprox_recommender.recommenders import recommendation_pipelines
 
 logger = logging.getLogger("poprox_recommender.test_offline")
 

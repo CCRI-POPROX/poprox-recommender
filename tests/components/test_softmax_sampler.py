@@ -1,7 +1,3 @@
-"""
-Test the topic calibration logic.
-"""
-
 import logging
 
 from poprox_concepts import ArticleSet
@@ -13,7 +9,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def test_request_with_topic_calibrator():
+def test_request_with_softmax_sampler():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "medium_request.json"
 
@@ -24,21 +20,21 @@ def test_request_with_topic_calibrator():
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
     )
-    topic_calibrated_outputs = select_articles(
+    sampled_outputs = select_articles(
         ArticleSet(articles=req.todays_articles),
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
-        pipeline_params={"pipeline": "topic-cali"},
+        pipeline_params={"pipeline": "softmax"},
     )
 
     # do we get recommendations?
-    tco_recs = topic_calibrated_outputs.default.articles
-    bo_recs = base_outputs.default.articles
-    assert len(tco_recs) > 0
-    assert len(bo_recs) == len(tco_recs)
+    softmax_recs = sampled_outputs.default.articles
+    base_recs = base_outputs.default.articles
+    assert len(softmax_recs) > 0
+    assert len(base_recs) == len(softmax_recs)
 
-    base_article_ids = [article.article_id for article in bo_recs]
-    calibrated_article_ids = [article.article_id for article in tco_recs]
+    base_article_ids = [article.article_id for article in base_recs]
+    sampled_article_ids = [article.article_id for article in softmax_recs]
 
     # are the recommendation lists different?
-    assert base_article_ids != calibrated_article_ids
+    assert base_article_ids != sampled_article_ids
