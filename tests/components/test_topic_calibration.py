@@ -6,8 +6,8 @@ import logging
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_recommender.default import select_articles
 from poprox_recommender.paths import project_root
+from poprox_recommender.recommenders import select_articles
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
