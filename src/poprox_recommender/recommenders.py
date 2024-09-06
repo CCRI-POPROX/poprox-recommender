@@ -8,7 +8,7 @@ from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUse
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Fill
 from poprox_recommender.components.rankers.topk import TopkRanker
-from poprox_recommender.components.samplers.uniform import UniformSampler
+from poprox_recommender.components.samplers import SoftmaxSampler, UniformSampler
 from poprox_recommender.components.scorers import ArticleScorer
 from poprox_recommender.config import default_device
 from poprox_recommender.lkpipeline import Pipeline, PipelineState
@@ -75,6 +75,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     mmr = MMRDiversifier(num_slots=num_slots)
     pfar = PFARDiversifier(num_slots=num_slots)
     calibrator = TopicCalibrator(num_slots=num_slots)
+    sampler = SoftmaxSampler(num_slots=num_slots)
 
     nrms_pipe = build_pipeline(
         "plain-NRMS",
@@ -108,7 +109,21 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    return {"nrms": nrms_pipe, "mmr": mmr_pipe, "pfar": pfar_pipe, "topic-cali": cali_pipe}
+    softmax_pipe = build_pipeline(
+        "NRMS+Softmax",
+        article_embedder=article_embedder,
+        user_embedder=user_embedder,
+        ranker=sampler,
+        num_slots=num_slots,
+    )
+
+    return {
+        "nrms": nrms_pipe,
+        "mmr": mmr_pipe,
+        "pfar": pfar_pipe,
+        "topic-cali": cali_pipe,
+        "softmax": softmax_pipe,
+    }
 
 
 def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
