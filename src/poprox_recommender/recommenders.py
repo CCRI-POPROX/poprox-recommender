@@ -75,7 +75,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     mmr = MMRDiversifier(num_slots=num_slots)
     pfar = PFARDiversifier(num_slots=num_slots)
     calibrator = TopicCalibrator(num_slots=num_slots)
-    sampler = SoftmaxSampler(num_slots=num_slots, temperature=40.0)
+    sampler = SoftmaxSampler(num_slots=num_slots, temperature=30.0)
 
     nrms_pipe = build_pipeline(
         "plain-NRMS",
