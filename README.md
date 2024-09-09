@@ -79,31 +79,32 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
 
 ```json
 {
-    "past_articles": [
-        {
-            "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d",
-            "title": "title 1",
-            "content": "content 1",
-            "url": "url 1"
-        }
+  "past_articles": [
+    {
+      "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d",
+      "headline": "headline 1",
+      "subhead": "subhead 1",
+      "url": "url 1"
+    }
+  ],
+  "todays_articles": [
+    {
+      "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
+      "headline": "headline 2",
+      "subhead": "subhead 2",
+      "url": "url 2"
+    }
+  ],
+  "interest_profile": {
+    "profile_id": "28838f05-23f5-4f23-bea2-30b51f67c538",
+    "click_history": [
+      {
+        "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
+      }
     ],
-    "todays_articles": [
-        {
-            "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
-            "title": "title 2",
-            "content": "content 2",
-            "url": "url 2"
-        }
-    ],
-    "click_histories": [
-        {
-            "account_id": "977a3c88-937a-46fb-bbfe-94dc5dcb68c8",
-            "article_ids": [
-                "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
-            ]
-        }
-    ],
-    "num_recs": 1
+    "onboarding_topics": []
+  },
+  "num_recs": 1
 }
 ```
 
@@ -129,7 +130,7 @@ should receive this response:
 You can test this by sending a request with curl:
 
 ```console
-$ curl -X POST -H "Content-Type: application/json" -d @tests/basic-request.json localhost:3000
+$ curl -X POST -H "Content-Type: application/json" -d @tests/request_data/basic-request.json localhost:3000
 
 {"recommendations": {"977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [{"article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff", "title": "title 2", "content": "content 2", "url": "url 2", "published_at": "1970-01-01T00:00:00Z", "mentions": []}]}}
 ```
