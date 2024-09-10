@@ -9,6 +9,11 @@ class SoftmaxSampler:
         self.temperature = temperature
 
     def __call__(self, candidate_articles: ArticleSet):
+        if candidate_articles.scores is None:
+            scores = np.ones(len(candidate_articles.articles))
+        else:
+            scores = sigmoid(candidate_articles.scores)
+
         # Exponential sort trick for sampling from a distribution without replacement from:
 
         # Pavlos S. Efraimidis, Paul G. Spirakis, Weighted random sampling with a reservoir,
@@ -20,7 +25,7 @@ class SoftmaxSampler:
 
         # The weights for the sampling distribution are the softmax of the scores
         # Scores are squashed into the range [0,1] to make tuning the temperature easier
-        weights = np.exp(self.temperature * sigmoid(candidate_articles.scores)) / np.sum(candidate_articles.scores)
+        weights = np.exp(self.temperature * scores) / np.sum(scores)
 
         # This is the core of the exponential sampling trick, which creates a
         # set of values that depend on both the predicted scores and random
