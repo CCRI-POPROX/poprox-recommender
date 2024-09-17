@@ -24,19 +24,20 @@ pydantic = "~=2.7.1"
 progress-api = { git = "https://github.com/lenskit/progress-api" }
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
 
+# the AWS lambda images are ancient
+[system-requirements]
+libc = { family = "glibc", version = "2.26" }
 
+# turn off CUDA on Windows
 [target.win.dependencies]
 cpuonly = "*"
+
 
 # production runs in a trimmed-down environment - no MKL, no CUDA
 # we also do *not* include the poprox-recommender as a dep, since
 # its dependency lock vesion is always out of date.
 [feature.production]
 platforms = ['linux-64']
-
-# the AWS lambda images are ancient
-[feature.production.system-requirements]
-libc = { family = "glibc", version = "2.26" }
 
 [feature.production.dependencies]
 pip = ">=24"
