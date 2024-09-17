@@ -1,6 +1,6 @@
 ARG LOG_LEVEL=INFO
 # Use Lambda "Provided" base image for the build container
-FROM public.ecr.aws/lambda/provided:al2 AS build
+FROM public.ecr.aws/lambda/provided:al2023 AS build
 
 # install necessary system packages
 RUN yum -y install git-core
@@ -18,12 +18,13 @@ RUN mkdir build
 # install the production environment (will include poprox-recommender)
 ENV PIXI_LOCKED=true
 RUN pixi install -e production
+RUN pixi install -e pkg
 # Download the punkt NLTK data
 RUN pixi run -e production python -m nltk.downloader -d build/nltk_data punkt
 # Install poprox-recommender
-RUN pixi run -e production pip install .
+RUN pixi run -e production pip install --no-deps .
 # Pack up the environment for migration to runtime
-RUN pixi run -e pkg conda-pack -p .pixi/envs/production -d /opt/poprox -o build/production-env.tar.gz
+RUN ./.pixi/envs/pkg/bin/conda-pack -p .pixi/envs/production -d /opt/poprox -o build/production-env.tar.gz
 
 # Use Lambda "Provided" base image for the deployment container
 # We installed Python ourselves
