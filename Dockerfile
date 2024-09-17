@@ -24,7 +24,7 @@ RUN pixi run -e production python -m nltk.downloader -d build/nltk_data punkt
 # Install poprox-recommender
 RUN pixi run -e production pip install --no-deps .
 # Pack up the environment for migration to runtime
-RUN ./.pixi/envs/pkg/bin/conda-pack -p .pixi/envs/production -d /opt/poprox -o build/production-env.tar.gz
+RUN ./.pixi/envs/pkg/bin/conda-pack -p .pixi/envs/production -d /opt/poprox -o build/production-env.tar
 
 # Use Lambda "Provided" base image for the deployment container
 # We installed Python ourselves
@@ -33,7 +33,7 @@ FROM public.ecr.aws/lambda/provided:al2023
 # Unpack the packaged environment from build container into runtime contianer
 RUN dnf install tar
 RUN --mount=type=bind,from=build,source=/src/poprox-recommender/build,target=/tmp/poprox-build \
-    tar -x -C /opt/poprox -f /tmp/poprox-build/production-env.tar.gz
+    tar -x -C /opt/poprox -f /tmp/poprox-build/production-env.tar
 
 # Copy the fetched NLTK data into the runtime container
 COPY --from=build /src/poprox-recommender/build/nltk_data /opt/poprox/nltk_data
