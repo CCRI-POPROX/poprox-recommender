@@ -20,7 +20,9 @@ ENV PIXI_LOCKED=true
 RUN pixi install -e production
 # Download the punkt NLTK data
 RUN pixi run -e production python -m nltk.downloader -d build/nltk_data punkt
-# package up the environment for migration
+# Install poprox-recommender
+RUN pixi run -e production pip install .
+# Pack up the environment for migration to runtime
 RUN pixi run -e pkg conda-pack -p .pixi/envs/production -d /opt/poprox -o build/production-env.tar.gz
 
 # Use Lambda "Provided" base image for the deployment container
