@@ -31,6 +31,7 @@ RUN ./.pixi/envs/pkg/bin/conda-pack -p .pixi/envs/production -d /opt/poprox -o b
 FROM public.ecr.aws/lambda/provided:al2023
 
 # Unpack the packaged environment from build container into runtime contianer
+RUN dnf install tar
 RUN --mount=type=bind,from=build,source=/src/poprox-recommender/build,target=/tmp/poprox-build \
     tar -x -C /opt/poprox -f /tmp/poprox-build/production-env.tar.gz
 
