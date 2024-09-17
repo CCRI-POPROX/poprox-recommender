@@ -101,6 +101,8 @@ default = { features = ["data"], solve-group = "main" }
 production = { features = ["production"] }
 pkg = { features = ["pkg"], no-default-feature = true }
 test = { features = ["test", "data"], solve-group = "main" }
+# environment for just getting & processing the data
+data = { features = ["data"], no-default-feature = true, solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
 dev = { features = ["dev", "test", "lint", "data"], solve-group = "main" }
 cuda = ["dev", "test", "lint", "data", "cuda"]
