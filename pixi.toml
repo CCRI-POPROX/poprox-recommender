@@ -34,6 +34,10 @@ cpuonly = "*"
 [feature.production]
 platforms = ['linux-64']
 
+# the AWS lambda images are ancient
+[feature.production.system-requirements]
+libc = { family = "glibc", version = "2.26" }
+
 [feature.production.dependencies]
 pip = ">=24"
 nomkl = "*"
