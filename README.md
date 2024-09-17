@@ -11,37 +11,52 @@ trained models.
 
 ## Installation for Development
 
-Model and data files are managed using [dvc][].  The `conda-lock.yml` provides a
-[conda-lock][] lockfile for reproducibly creating an environment with all
-necessary dependencies.
+Software environments for this repository are managed with [pixi], and model and
+data files are managed using [dvc][]. The `pixi.lock` file provides a locked
+dependency set for reproducibly running the recommender code with all
+dependencies, on Linux, macOS, and Windows (including with CUDA on Linux).
 
+[pixi]: https://pixi.sh
 [dvc]: https://dvc.org
-[conda-lock]: https://conda.github.io/conda-lock/
 
-To set up the environment with Conda:
-
-```console
-conda install -n base -c conda-forge conda-lock
-conda lock install -n poprox-recsys --dev
-conda activate poprox-recsys
-python -m pip install --no-deps -e .
-```
-
-If you use `micromamba` instead of a full Conda installation, it can directly use the lockfile:
+To install the dependencies needed for development work:
 
 ```console
-micromamba create -n poprox-recs -f conda-lock.yml --category main --category dev
-python -m pip install --no-deps -e .
+pixi install -e dev
 ```
 
-> [!NOTE]
-> You need to re-run the `pip install` every time you re-create your Conda environment.
+Alternatively, on Linux, you can use `cuda` instead of `dev`.
 
-Set up `pre-commit` to make sure that code formatting rules are applied as you make changes:
+Once you have installed the dependencies, there are 2 easy ways to run code in the environment:
+
+1.  Run individual commands with `pixi run`, e.g.:
+
+    ```console
+    pixi run -e dev pytest tests
+    ```
+
+    > [!NOTE]
+    > This specific command is also avaiable as a Pixi task: `pixi run -e dev test`.
+
+2.  Run a Pixi shell, which activates the environment and adds the appropriate
+    Python to your `PATH`:
+
+    ```console
+    pixi shell -e dev
+    ```
+
+Finally, set up `pre-commit` to make sure that code formatting rules are applied
+as you make changes:
 
 ```console
 pre-commit install
 ```
+
+> [!NOTE]
+>
+> If you will be working with `git` outside of the `pixi` shell, you may want to
+> install `pre-commit` separately.  You can do this with Brew or your preferred
+> system or user package manager, or with `pixi global install pre-commit`.
 
 To get the data and models, there are two steps:
 
@@ -51,15 +66,21 @@ To get the data and models, there are two steps:
 ### Dependency Updates
 
 If you update the dependencies in poprox-recommender, or add code that requires
-a newer version of `poprox-concepts`, you need to regenerate the lock file:
+a newer version of `poprox-concepts`, you need to regenerate the lock file with
+`pixi update`.  To update just `poprox-concepts`, run:
 
 ```console
-./dev/update-dep-lock.sh
+pixi update poprox_concepts
+```
+
+To update all dependencies, run:
+
+```console
+pixi update
 ```
 
 > [!NOTE]
-> If you are trying to re-lock the dependencies on Windows, you should run the
-> shell script from within a Git Bash or MSYS2 environment.
+> Currently, dependencies can only be updated on Linux.
 
 ## Local Endpoint Development
 
@@ -145,10 +166,13 @@ Silicon).  To make use of a GPU, do the following:
 1.  If on Linux, install the CUDA-based Conda environment:
 
     ```console
-    conda-lock install -n poprox-recs --dev conda-lock-cuda.yml
+    pixi install -e cuda
     ```
 
 2.  Set the `POPROX_REC_DEVICE` environment variable to `cuda` or `mps`.
+
+3.  Run `dvc repro` under the `cuda` environment (using either `pixi run` or
+    `pixi shell`).
 
 Timing information for batch evaluation with the MIND validation set:
 
