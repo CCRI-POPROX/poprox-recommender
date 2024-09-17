@@ -36,9 +36,14 @@ platforms = ['linux-64']
 nomkl = "*"
 pytorch-cpu = "*"
 
-
 [feature.production.pypi-dependencies]
+awslambdaric = "~=2.2"
 poprox-recommender = { path = ".", editable = false }
+
+# packaging dependencies for assembling images and packages
+[feature.pkg.dependencies]
+hatch = "*"
+conda-pack = "~=0.8"
 
 # general development dependencies
 [feature.dev.dependencies]
@@ -92,6 +97,7 @@ libblas = { build = "*mkl*" }
 [environments]
 default = { solve-group = "main" }
 production = { features = ["production"] }
+pkg = { features = ["pkg"], no-default-feature = true }
 test = { features = ["test"], solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
 dev = { features = ["dev", "test", "lint", "data"], solve-group = "main" }

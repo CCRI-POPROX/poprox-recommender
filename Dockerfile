@@ -1,45 +1,45 @@
 ARG LOG_LEVEL=INFO
 # Use Lambda "Provided" base image for the build container
-FROM public.ecr.aws/lambda/provided:al2 as build
+FROM public.ecr.aws/lambda/provided:al2 AS build
 
 # install necessary system packages
 RUN yum -y install git-core
 
-# Fetch the micromamba executable from GitHub
-ADD --chmod=0755 https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 /usr/local/bin/micromamba
-ENV MAMBA_ROOT_PREFIX=/opt/micromamba
+# Fetch the pixi executable from GitHub
+ADD --chmod=0755 https://github.com/prefix-dev/pixi/releases/latest/download/pixi-x86_64-unknown-linux-musl  /usr/local/bin/pixi
 
-# Copy dependency lockfile and install deps
-COPY conda-lock.yml /src/poprox-recommender/
-RUN micromamba create -y --always-copy -p /opt/poprox -f /src/poprox-recommender/conda-lock.yml
-# Download the punkt NLTK data
-RUN micromamba run -p /opt/poprox python -m nltk.downloader -d /opt/poprox/nltk_data punkt
-# Install the Lambda runtime bridge
-RUN micromamba install -p /opt/poprox -c conda-forge awslambdaric
-
-# Copy the soure code into the image to install it
+# Copy the soure code into the image to install it and create the environment
 # TODO do we want to copy the sdist or wheel instead?
-COPY pyproject.toml README.md LICENSE.md /src/poprox-recommender/
+COPY pyproject.toml pixi.toml pixi.lock README.md LICENSE.md /src/poprox-recommender/
 COPY src/ /src/poprox-recommender/src/
 WORKDIR /src/poprox-recommender
-# Install the poprox-recommender module
-RUN micromamba run -p /opt/poprox pip install --no-deps .
+RUN mkdir build
+
+# install the production environment (will include poprox-recommender)
+ENV PIXI_LOCKED=true
+RUN pixi install -e production
+# Download the punkt NLTK data
+RUN pixi run -e production python -m nltk.downloader -d build/nltk_data punkt
+# package up the environment for migration
+RUN pixi run -e pkg conda-pack -p .pixi/envs/production -d /opt/poprox -o build/production-env.tar.gz
 
 # Use Lambda "Provided" base image for the deployment container
 # We installed Python ourselves
 FROM public.ecr.aws/lambda/provided:al2
 
-# Copy the installed packages and data from the build container
-COPY --from=build /usr/local/bin/micromamba /usr/local/bin/micromamba
-COPY --from=build /opt/poprox /opt/poprox
-ENV MAMBA_ROOT_PREFIX=/opt/micromamba
+# Unpack the packaged environment from build container into runtime contianer
+RUN --mount=type=bind,from=build,source=/src/poprox-recommender/build,target=/tmp/poprox-build \
+    tar -x -C /opt/poprox -f /tmp/poprox-build/production-env.tar.gz
+
+# Copy the fetched NLTK data into the runtime container
+COPY --from=build /src/poprox-recommender/build/nltk_data /opt/poprox/nltk_data
 
 # Bake the model data into the image
 COPY models/ /opt/poprox/models/
 ENV POPROX_MODELS=/opt/poprox/models
 
 # Make sure we can import the recommender
-RUN micromamba run -p /opt/poprox python -m poprox_recommender.handler
+RUN /opt/poprox/bin/python -m poprox_recommender.handler
 
 # Copy the bootstrap script
 COPY --chmod=0555 lambda-bootstrap.sh /var/runtime/bootstrap
