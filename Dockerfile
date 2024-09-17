@@ -3,7 +3,7 @@ ARG LOG_LEVEL=INFO
 FROM public.ecr.aws/lambda/provided:al2023 AS build
 
 # install necessary system packages
-RUN yum -y install git-core
+RUN dnf -y install git-core
 
 # Fetch the pixi executable from GitHub
 ADD --chmod=0755 https://github.com/prefix-dev/pixi/releases/latest/download/pixi-x86_64-unknown-linux-musl  /usr/local/bin/pixi
@@ -28,7 +28,7 @@ RUN ./.pixi/envs/pkg/bin/conda-pack -p .pixi/envs/production -d /opt/poprox -o b
 
 # Use Lambda "Provided" base image for the deployment container
 # We installed Python ourselves
-FROM public.ecr.aws/lambda/provided:al2
+FROM public.ecr.aws/lambda/provided:al2023
 
 # Unpack the packaged environment from build container into runtime contianer
 RUN --mount=type=bind,from=build,source=/src/poprox-recommender/build,target=/tmp/poprox-build \
