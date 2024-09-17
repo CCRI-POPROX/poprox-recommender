@@ -28,7 +28,6 @@ poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
 [target.win.dependencies]
 cpuonly = "*"
 
-
 # production runs in a trimmed-down environment - no MKL, no CUDA
 # we also do *not* include the poprox-recommender as a dep, since
 # its dependency lock vesion is always out of date.
@@ -98,10 +97,10 @@ libblas = { build = "*mkl*" }
 # define the actual environments from these component features.
 # putting everything but cuda in one solve group keeps deps consistent.
 [environments]
-default = { solve-group = "main" }
+default = { features = ["data"], solve-group = "main" }
 production = { features = ["production"] }
 pkg = { features = ["pkg"], no-default-feature = true }
-test = { features = ["test"], solve-group = "main" }
+test = { features = ["test", "data"], solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
 dev = { features = ["dev", "test", "lint", "data"], solve-group = "main" }
 cuda = ["dev", "test", "lint", "data", "cuda"]
