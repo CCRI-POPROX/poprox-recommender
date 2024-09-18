@@ -22,12 +22,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install tooling
-        uses: mamba-org/setup-micromamba@v1
+      - name: Install environment
+        uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          # directly use the environment because we only need tooling
-          environment-file: dev/environment.yml
-          environment-name: poprox
+          pixi-version: v0.29.0
+          cache: false
+          environments: pkg
+          activate-environment: true
 
       - name: Install Node dependencies
         run: |
