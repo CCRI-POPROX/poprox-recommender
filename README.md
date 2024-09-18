@@ -11,8 +11,8 @@ trained models.
 
 ## Installation for Development
 
-Software environments for this repository are managed with [pixi], and model and
-data files are managed using [dvc][]. The `pixi.lock` file provides a locked
+Software environments for this repository are managed with [pixi][], and model
+and data files are managed using [dvc][]. The `pixi.lock` file provides a locked
 dependency set for reproducibly running the recommender code with all
 dependencies, on Linux, macOS, and Windows (including with CUDA on Linux).
 
