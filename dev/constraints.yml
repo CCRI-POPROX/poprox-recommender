@@ -1,7 +1,0 @@
-# Mixin environment file for the conda-lock process to select appropriate
-# PyTorch and compute implementations for our environments.
-dependencies:
-  - pytorch-mutex =*=cpu # [win]
-  - pytorch-cpu # [linux]
-  - pytorch-cpu # [osx]
-  - nomkl # [linux]
