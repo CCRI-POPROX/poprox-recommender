@@ -14,6 +14,8 @@ requires-python = ">= 3.11"
 readme = "README.md"
 license = { file = "LICENSE.md" }
 dynamic = ["version"]
+# Dependencies for the POPROX code — keep in sync w/ pixi.toml
+# `dependencies` table.
 dependencies = [
   "lenskit==0.14.*",
   "nltk>=3.8,<4",
@@ -25,11 +27,9 @@ dependencies = [
   "colorlog >=6.8,<7",
   "progress-api >=0.1.0a9,<0.2",
   "enlighten >=1.12,<2",
-  "poprox-concepts@git+https://github.com/CCRI-POPROX/poprox-concepts.git@main",
-  # direct dep on Pydantic to ensure it is in lockfile
-  # this is necessary because conda-lock doesn't look into poprox-concepts to
-  # find conda deps
-  "pydantic~=2.7.1",
+  # this expresses the dep, but since we only install with pixi,
+  # it's ok that it can't be resolved.
+  "poprox-concepts",
 ]
 
 [project.urls]
@@ -111,6 +111,9 @@ known-first-party = ["poprox_*"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
+
+[tool.pyright]
+exclude = [".pixi/"]
 
 [tool.coverage.run]
 source_pkgs = ["poprox_recommender", "tests"]

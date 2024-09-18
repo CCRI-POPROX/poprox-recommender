@@ -1,0 +1,114 @@
+[project]
+name = "poprox-recommender"
+channels = ["conda-forge", "pytorch", "nvidia"]
+platforms = ["linux-64", "osx-arm64", "win-64"]
+
+[tasks]
+
+# core dependencies for the poprox recommender code. Keep this in
+# sync with the `pyproject.toml` dependencies (both in recommender
+# and concepts), to prioritize using Conda packages
+[dependencies]
+# core Python and build deps (these aren't in pyproject.toml)
+python = "~=3.11.0"
+hatchling = "*"
+# poprox-recommender dependencies
+lenskit = "~=0.14.4"
+nltk = "~=3.8"
+numpy = "~=1.26"
+pytorch = "~=2.0"
+smart_open = "~=7.0"
+safetensors = ">=0.4,<1"
+transformers = "~=4.41"
+colorlog = "~=6.8"
+enlighten = "~=1.12"
+# poprox-concepts dependencies not covered above
+pydantic = "~=2.7.1"
+
+[pypi-dependencies]
+# git dep on progress-api until non-prerelease is out
+progress-api = { git = "https://github.com/lenskit/progress-api" }
+poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
+
+# turn off CUDA on Windows
+[target.win.dependencies]
+cpuonly = "*"
+
+# production runs in a trimmed-down environment - no MKL, no CUDA
+# we also do *not* include the poprox-recommender as a dep, since
+# its dependency lock vesion is always out of date.
+[feature.production]
+platforms = ['linux-64']
+
+[feature.production.dependencies]
+pip = ">=24"
+nomkl = "*"
+pytorch-cpu = "*"
+
+[feature.production.pypi-dependencies]
+awslambdaric = "~=2.2"
+
+# packaging dependencies for assembling images and packages
+[feature.pkg.dependencies]
+hatch = "*"
+conda-pack = "~=0.8"
+
+# general development dependencies
+[feature.dev.dependencies]
+hatch = "*"
+ipython = ">=8"
+notebook = ">=7.2"
+jupytext = ">=1.16"
+nodejs = "~=22.1"
+
+# tooling for environments, data, and evaluation
+[feature.data.dependencies]
+dvc = "~=3.51"
+dvc-s3 = "*"
+docopt = ">=0.6"
+pandas = "~=2.0"
+
+[feature.data.pypi-dependencies]
+poprox-recommender = { path = ".", editable = true }
+
+# dependencies for tests
+[feature.test.dependencies]
+nodejs = "~=22.1"
+requests = ">=2.31,<3"
+coverage = ">=6.5"
+pytest = ">=8"
+pexpect = "~=4.9"
+
+[feature.test.pypi-dependencies]
+poprox-recommender = { path = ".", editable = true }
+
+[feature.test.tasks]
+test = "pytest tests"
+
+# tooling for code validation
+[feature.lint.dependencies]
+pre-commit = "~=3.7"
+ruff = ">=0.4"
+pyright = "~=1.1"
+
+# make CUDA available on Linux
+[feature.cuda]
+platforms = ['linux-64']
+system-requirements = { cuda = "12" }
+
+[feature.cuda.dependencies]
+pytorch-gpu = "*"
+libblas = { build = "*mkl*" }
+
+# define the actual environments from these component features.
+# putting everything but cuda in one solve group keeps deps consistent.
+[environments]
+default = { features = ["data"], solve-group = "main" }
+production = { features = ["production"] }
+pkg = { features = ["pkg"], no-default-feature = true }
+test = { features = ["test", "data"], solve-group = "main" }
+# environment for just getting & processing the data
+data = { features = ["data"], no-default-feature = true, solve-group = "main" }
+lint = { features = ["lint"], solve-group = "main" }
+dev = { features = ["dev", "test", "lint", "data"], solve-group = "main" }
+cuda = ["dev", "test", "lint", "data", "cuda"]

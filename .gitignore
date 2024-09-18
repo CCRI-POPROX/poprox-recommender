@@ -150,3 +150,6 @@ bower_components/
 Thumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+# pixi environments
+.pixi
+*.egg-info
