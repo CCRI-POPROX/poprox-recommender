@@ -40,7 +40,7 @@ def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Itera
     for request in mind_data.iter_users():
         user_id = request.interest_profile.profile_id
         assert user_id is not None
-        recs = user_recs[user_id].copy()
+        recs = user_recs[user_id].copy(deep=True)
         truth = mind_data.user_truth(user_id)
         assert truth is not None
         yield UserRecs(user_id, bool(request.interest_profile.click_history), recs, truth)
