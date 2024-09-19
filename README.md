@@ -179,7 +179,7 @@ Timing information for generating recommendations with the MIND validation set:
 
 | CPU              | GPU        | Rec. Time | Eval Time | Notes                            |
 | :--------------: | :--------: | :-------: | :-------: | -------------------------------- |
-| EPYC 7662 (2GHz) | A40 (CUDA) | 2h30m     |           | Estimated                        |
+| EPYC 7662 (2GHz) | A40 (CUDA) | 2h10m     |           |                                  |
 | Apple M2 Pro     | -          | <20hr     | 35m       | Estimated, not run to completion |
 | Apple M2 Pro     | M2 (MPS)   | <12hr     |           | Estimated, not run to completion |
 
