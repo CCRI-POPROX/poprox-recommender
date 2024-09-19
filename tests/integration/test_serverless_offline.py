@@ -9,11 +9,19 @@ from threading import Condition, Lock, Thread
 
 import requests
 from pexpect import EOF, spawn
-from pytest import fail, fixture, mark
+from pytest import fail, fixture, mark, skip
 
 from poprox_recommender.paths import project_root
+from poprox_recommender.recommenders import recommendation_pipelines
 
 logger = logging.getLogger(__name__)
+try:
+    PIPELINES = recommendation_pipelines().keys()
+except Exception as e:
+    if "CI" not in os.environ:
+        skip("recommendation pipelines unavailable")
+    else:
+        raise e
 
 
 @fixture(scope="module")
@@ -31,7 +39,7 @@ def sl_listener():
     thread.start()
     try:
         with thread.lock:
-            if thread.ready.wait(10):
+            if thread.ready.wait(15):
                 logger.info("ready for tests")
                 yield
             else:
@@ -57,13 +65,14 @@ class ServerlessBackground(Thread):
 
 
 @mark.serverless
-def test_basic_request(sl_listener):
+@mark.parametrize("pipeline", PIPELINES)
+def test_basic_request(sl_listener, pipeline):
     test_dir = project_root() / "tests"
-    req_f = test_dir / "request_data" / "basic-request.json"
+    req_f = test_dir / "request_data" / "medium_request.json"
     req_body = req_f.read_text()
 
     logger.info("sending request")
-    res = requests.post("http://localhost:3000", req_body)
+    res = requests.post(f"http://localhost:3000?pipeline={pipeline}", req_body)
     assert res.status_code == 200
     logger.info("response: %s", res.text)
     body = res.json()
