@@ -15,88 +15,21 @@ Options:
 
 # pyright: basic
 import logging
-from typing import Iterator, NamedTuple
+from typing import Iterator
 from uuid import UUID
 
+import ipyparallel as ipp
 import pandas as pd
 from docopt import docopt
-from lenskit.metrics import topn
 from progress_api import make_progress
 
-from poprox_concepts.domain import Article, ArticleSet
+from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.mind import MindData
-from poprox_recommender.evaluation.metrics import rank_biased_overlap
+from poprox_recommender.evaluation.metrics import UserRecs, measure_user_recs
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
-
-
-class UserRecs(NamedTuple):
-    user_id: UUID
-    personalized: bool
-    recs: pd.DataFrame
-    truth: pd.DataFrame
-
-
-def convert_df_to_article_set(rec_df):
-    articles = []
-    for _, row in rec_df.iterrows():
-        articles.append(Article(article_id=row["item"], headline=""))
-    return ArticleSet(articles=articles)
-
-
-def compute_rec_metric(user: UserRecs):
-    # Make sure you run generate.py first to get the recommendations data file
-    # Convert truth index from UUID to string
-    user_id, personalized, all_recs, truth = user
-    truth.index = truth.index.astype(str)
-
-    results = []
-
-    for name, recs in all_recs.groupby("recommender", observed=True):
-        final_rec_df = recs[recs["stage"] == "final"]
-        single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
-        single_ndcg5 = topn.ndcg(final_rec_df, truth, k=5)
-        single_ndcg10 = topn.ndcg(final_rec_df, truth, k=10)
-
-        ranked_rec_df = recs[recs["stage"] == "ranked"]
-        ranked = convert_df_to_article_set(ranked_rec_df)
-
-        reranked_rec_df = recs[recs["stage"] == "reranked"]
-        reranked = convert_df_to_article_set(reranked_rec_df)
-
-        if ranked and reranked:
-            single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
-            single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
-        else:
-            single_rbo5 = None
-            single_rbo10 = None
-
-        logger.debug(
-            "user %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
-            user_id,
-            name,
-            single_ndcg5,
-            single_ndcg10,
-            single_rr,
-            single_rbo5 or -1.0,
-            single_rbo10 or -1.0,
-        )
-
-        results.append(
-            {
-                "recommender": name,
-                "NDCG@5": single_ndcg5,
-                "NDCG@10": single_ndcg10,
-                "MRR": single_rr,
-                "RBO@5": single_rbo5,
-                "RBO@10": single_rbo10,
-                "personalized": personalized,
-            }
-        )
-
-    return user_id, pd.DataFrame.from_records(results).set_index("recommender")
 
 
 def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Iterator[UserRecs]:
@@ -111,6 +44,19 @@ def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Itera
         truth = mind_data.user_truth(user_id)
         assert truth is not None
         yield UserRecs(user_id, bool(request.interest_profile.click_history), recs, truth)
+
+
+def user_eval_results(
+    mind_data: MindData, user_recs: dict[UUID, pd.DataFrame], n_procs: int
+) -> Iterator[tuple[UUID, pd.DataFrame]]:
+    if n_procs > 1:
+        logger.info("starting parallel measurement with %d workers", n_procs)
+        with ipp.Cluster(n=n_procs) as client:
+            lb = client.load_balanced_view()
+            yield from lb.imap(measure_user_recs, rec_users(mind_data, user_recs), ordered=False)
+    else:
+        for user in rec_users(mind_data, user_recs):
+            yield measure_user_recs(user)
 
 
 def main():
@@ -132,11 +78,10 @@ def main():
     logger.info("measuring recommendations")
     results: dict[UUID, pd.DataFrame] = {}
 
+    n_procs = available_cpu_parallelism(4)
     with make_progress(logger, "evaluate", total=mind_data.n_users, unit="users") as pb:
-        for user in rec_users(mind_data, user_recs):
-            user_id, metrics = compute_rec_metric(user)
+        for user_id, metrics in user_eval_results(mind_data, user_recs, n_procs):
             results[user_id] = metrics
-
             pb.update()
 
     logger.info("measured recs for %d users", len(results))
