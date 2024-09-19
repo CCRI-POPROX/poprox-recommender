@@ -35,15 +35,16 @@ Once you have installed the dependencies, there are 2 easy ways to run code in t
     pixi run -e dev pytest tests
     ```
 
-    > [!NOTE]
-    > This specific command is also avaiable as a Pixi task: `pixi run -e dev test`.
-
 2.  Run a Pixi shell, which activates the environment and adds the appropriate
     Python to your `PATH`:
 
     ```console
     pixi shell -e dev
     ```
+
+> [!NOTE]
+> Tests are also available as a Pixi task: `pixi run -e dev test`.
+
 
 Finally, set up `pre-commit` to make sure that code formatting rules are applied
 as you make changes:
