@@ -15,7 +15,6 @@ Options:
 
 # pyright: basic
 import logging
-from concurrent.futures import ProcessPoolExecutor
 from typing import Iterator, NamedTuple
 from uuid import UUID
 
@@ -25,7 +24,6 @@ from lenskit.metrics import topn
 from progress_api import make_progress
 
 from poprox_concepts.domain import Article, ArticleSet
-from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.evaluation.metrics import rank_biased_overlap
 from poprox_recommender.logging_config import setup_logging
@@ -109,7 +107,7 @@ def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Itera
     for request in mind_data.iter_users():
         user_id = request.interest_profile.profile_id
         assert user_id is not None
-        recs = user_recs[user_id]
+        recs = user_recs[user_id].copy()
         truth = mind_data.user_truth(user_id)
         assert truth is not None
         yield UserRecs(user_id, bool(request.interest_profile.click_history), recs, truth)
@@ -134,12 +132,11 @@ def main():
     logger.info("measuring recommendations")
     results: dict[UUID, pd.DataFrame] = {}
 
-    n_workers = available_cpu_parallelism(4)
-    logger.info("running with %d workers", n_workers)
-    with ProcessPoolExecutor(n_workers) as pool, make_progress(logger, "evaluate", total=mind_data.n_users) as pb:
-        for result in pool.map(compute_rec_metric, rec_users(mind_data, user_recs)):
-            user_id, metrics = result
+    with make_progress(logger, "evaluate", total=mind_data.n_users, unit="users") as pb:
+        for user in rec_users(mind_data, user_recs):
+            user_id, metrics = compute_rec_metric(user)
             results[user_id] = metrics
+
             pb.update()
 
     logger.info("measured recs for %d users", len(results))
