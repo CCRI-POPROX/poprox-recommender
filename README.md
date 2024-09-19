@@ -177,11 +177,11 @@ Silicon).  To make use of a GPU, do the following:
 
 Timing information for generating recommendations with the MIND validation set:
 
-| CPU              | GPU        | Time  | Notes                            |
-| :--------------: | :--------: | :---: | -------------------------------- |
-| EPYC 7662 (2GHz) | A40 (CUDA) | 2h30m | Estimated                        |
-| Apple M2 Pro     | -          | <20hr | Estimated, not run to completion |
-| Apple M2 Pro     | M2 (MPS)   | <12hr | Estimated, not run to completion |
+| CPU              | GPU        | Rec. Time | Eval Time | Notes                            |
+| :--------------: | :--------: | :-------: | :-------: | -------------------------------- |
+| EPYC 7662 (2GHz) | A40 (CUDA) | 2h30m     |           | Estimated                        |
+| Apple M2 Pro     | -          | <20hr     | 35m       | Estimated, not run to completion |
+| Apple M2 Pro     | M2 (MPS)   | <12hr     |           | Estimated, not run to completion |
 
 ## Editor Setup
 
