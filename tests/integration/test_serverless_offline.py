@@ -39,7 +39,7 @@ def sl_listener():
     thread.start()
     try:
         with thread.lock:
-            if thread.ready.wait(10):
+            if thread.ready.wait(15):
                 logger.info("ready for tests")
                 yield
             else:
@@ -68,7 +68,7 @@ class ServerlessBackground(Thread):
 @mark.parametrize("pipeline", PIPELINES)
 def test_basic_request(sl_listener, pipeline):
     test_dir = project_root() / "tests"
-    req_f = test_dir / "request_data" / "basic-request.json"
+    req_f = test_dir / "request_data" / "medium_request.json"
     req_body = req_f.read_text()
 
     logger.info("sending request")
