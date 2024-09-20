@@ -35,15 +35,16 @@ Once you have installed the dependencies, there are 2 easy ways to run code in t
     pixi run -e dev pytest tests
     ```
 
-    > [!NOTE]
-    > This specific command is also avaiable as a Pixi task: `pixi run -e dev test`.
-
 2.  Run a Pixi shell, which activates the environment and adds the appropriate
     Python to your `PATH`:
 
     ```console
     pixi shell -e dev
     ```
+
+> [!NOTE]
+> Tests are also available as a Pixi task: `pixi run -e dev test`.
+
 
 Finally, set up `pre-commit` to make sure that code formatting rules are applied
 as you make changes:
@@ -174,13 +175,17 @@ Silicon).  To make use of a GPU, do the following:
 3.  Run `dvc repro` under the `cuda` environment (using either `pixi run` or
     `pixi shell`).
 
-Timing information for batch evaluation with the MIND validation set:
+Timing information for generating recommendations with the MIND validation set:
 
-| CPU              | GPU        | Time   | Notes                            |
-| :--------------: | :--------: | :----: | -------------------------------- |
-| EPYC 7662 (2GHz) | A40 (CUDA) | <1hr   |                                  |
-| Apple M2 Pro     | M2 (MPS)   | ~1 day | Estimated, not run to completion |
-| Apple M2 Pro     | -          | days   | Estimated, not run to completion |
+| CPU              | GPU        | Rec. Time | Eval Time |
+| :--------------: | :--------: | :-------: | :-------: |
+| EPYC 7662 (2GHz) | A40 (CUDA) | 2h10m     | 45m       |
+| Apple M2 Pro     | -          | <20hr¹    | 30m¹      |
+| Apple M2 Pro     | M2 (MPS)   | <12hr¹    |           |
+
+Footnotes:
+
+1. Estimated based on early progress, not run to completion.
 
 ## Editor Setup
 

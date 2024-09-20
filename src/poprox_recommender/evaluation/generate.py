@@ -19,6 +19,7 @@ from __future__ import annotations
 import logging
 import logging.config
 
+import numpy as np
 import pandas as pd
 from docopt import docopt
 from progress_api import make_progress
@@ -59,6 +60,7 @@ def extract_recs(
                 "user": str(user),
                 "stage": "final",
                 "item": [str(a.article_id) for a in recs.articles],
+                "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
             }
         )
     ]
@@ -72,6 +74,7 @@ def extract_recs(
                     "user": str(user),
                     "stage": "ranked",
                     "item": [str(a.article_id) for a in ranked.articles],
+                    "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
                 }
             )
         )
@@ -85,6 +88,7 @@ def extract_recs(
                     "user": str(user),
                     "stage": "reranked",
                     "item": [str(a.article_id) for a in reranked.articles],
+                    "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
                 }
             )
         )

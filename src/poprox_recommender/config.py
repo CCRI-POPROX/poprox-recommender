@@ -29,8 +29,9 @@ def available_cpu_parallelism(max: int | None = None) -> int:
         # The number of CPUs to use for parallelism.
     """
 
-    if "POPROX_CPU_COUNT" in os.environ:
-        return int(os.environ("POPROX_CPU_COUNT"))
+    env_cpus = os.environ.get("POPROX_CPU_COUNT", None)
+    if env_cpus is not None:
+        return int(env_cpus)
 
     try:
         # linux allows cpu limits

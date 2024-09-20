@@ -27,6 +27,7 @@ dependencies = [
   "colorlog >=6.8,<7",
   "progress-api >=0.1.0a9,<0.2",
   "enlighten >=1.12,<2",
+  "ipyparallel ~=8.0",
   # this expresses the dep, but since we only install with pixi,
   # it's ok that it can't be resolved.
   "poprox-concepts",
