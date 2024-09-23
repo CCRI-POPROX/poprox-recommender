@@ -4,7 +4,7 @@ import logging
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
 from poprox_recommender.recommenders import select_articles
-from poprox_recommender.topics import user_topic_preference
+from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -49,6 +49,7 @@ def generate_recs(event, context):
     clicked_articles = ArticleSet(articles=clicked_articles)
 
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
+    profile.click_locality_counts = user_locality_preference(req.past_articles, profile.click_history)
 
     outputs = select_articles(
         candidate_articles,
