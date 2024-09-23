@@ -1,0 +1,5 @@
+outs:
+- md5: b20a6bc96c834efe55eda7a37d1ac9e4
+  size: 52952752
+  hash: md5
+  path: MINDsmall_train.zip
