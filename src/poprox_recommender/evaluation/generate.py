@@ -157,7 +157,6 @@ if __name__ == "__main__":
     For offline evaluation, set theta in mmr_diversity = 1
     """
     options = docopt(__doc__)  # type: ignore
-    print(options)
     setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
     n_users = options["--subset"]
