@@ -13,17 +13,21 @@ Options:
             write output to FILE [default: outputs/recommendations.parquet]
     -M DATA, --mind-data=DATA
             read MIND test data DATA [default: MINDsmall_dev]
+    --subset=N
+            test only on the first N test users
 """
 
 # pyright: basic
 from __future__ import annotations
 
+import itertools as it
 import logging
 import logging.config
 
 import numpy as np
 import pandas as pd
 from docopt import docopt
+from lenskit.util import Stopwatch
 from progress_api import make_progress
 
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -98,7 +102,7 @@ def extract_recs(
     return output_df
 
 
-def generate_user_recs(dataset: str):
+def generate_user_recs(dataset: str, n_users: int | None = None):
     mind_data = MindData(dataset)
 
     pipelines = recommendation_pipelines(device=default_device())
@@ -107,8 +111,17 @@ def generate_user_recs(dataset: str):
     logger.info("generating recommendations")
     user_recs = []
 
-    with make_progress(logger, "recommend", total=mind_data.n_users) as pb:
-        for request in mind_data.iter_users():  # one by one
+    user_iter = mind_data.iter_users()
+    if n_users is None:
+        n_users = mind_data.n_users
+        logger.info("recommending for all %d users", n_users)
+    else:
+        logger.info("running on subset of %d users", n_users)
+        user_iter = it.islice(user_iter, n_users)
+
+    timer = Stopwatch()
+    with make_progress(logger, "recommend", total=n_users) as pb:
+        for request in user_iter:  # one by one
             logger.debug("recommending for user %s", request.interest_profile.profile_id)
             if request.num_recs != TEST_REC_COUNT:
                 logger.warn(
@@ -133,6 +146,9 @@ def generate_user_recs(dataset: str):
                 user_recs.append(user_df)
             pb.update()
 
+    timer.stop()
+    logger.info("finished recommending in %s", timer)
+
     return user_recs
 
 
@@ -141,9 +157,14 @@ if __name__ == "__main__":
     For offline evaluation, set theta in mmr_diversity = 1
     """
     options = docopt(__doc__)  # type: ignore
+    print(options)
     setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
-    user_recs = generate_user_recs(options["--mind-data"])
+    n_users = options["--subset"]
+    if n_users is not None:
+        n_users = int(n_users)
+
+    user_recs = generate_user_recs(options["--mind-data"], n_users)
 
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]
