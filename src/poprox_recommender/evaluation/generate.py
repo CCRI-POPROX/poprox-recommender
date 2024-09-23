@@ -11,6 +11,8 @@ Options:
             write log messages to FILE
     -o FILE, --output=FILE
             write output to FILE [default: outputs/recommendations.parquet]
+    -M DATA, --mind-data=DATA
+            read MIND test data DATA [default: MINDsmall_dev]
 """
 
 # pyright: basic
@@ -96,8 +98,8 @@ def extract_recs(
     return output_df
 
 
-def generate_user_recs():
-    mind_data = MindData()
+def generate_user_recs(dataset: str):
+    mind_data = MindData(dataset)
 
     pipelines = recommendation_pipelines(device=default_device())
     pipe_names = list(pipelines.keys())
@@ -141,7 +143,7 @@ if __name__ == "__main__":
     options = docopt(__doc__)  # type: ignore
     setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
-    user_recs = generate_user_recs()
+    user_recs = generate_user_recs(options["--mind-data"])
 
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]

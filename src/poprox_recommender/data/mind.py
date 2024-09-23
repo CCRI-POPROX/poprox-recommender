@@ -37,11 +37,11 @@ class MindData:
         # index data frames for quick lookup of users & articles
         self.news_df = news_df.set_index("id")
         if not self.news_df.index.unique:
-            logger.warn("news data has non-unique index")
+            logger.warning("news data has non-unique index")
 
         self.behavior_df = behavior_df.set_index("impression_id")
         if not self.behavior_df.index.unique:
-            logger.warn("behavior data has non-unique index")
+            logger.warning("behavior data has non-unique index")
 
         # add and reverse-index the UUIDs
         ns_article = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
