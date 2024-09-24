@@ -10,7 +10,9 @@ Usage:
 Options:
     -v, --verbose       enable verbose diagnostic logs
     --log-file=FILE     write log messages to FILE
-    <name>              the name of the evaluation to run [default: mind-val]
+    -M DATA, --mind-data=DATA
+            read MIND test data DATA [default: MINDsmall_dev]
+    <name>              the name of the evaluation to measure
 """
 
 # pyright: basic
@@ -64,7 +66,7 @@ def main():
     setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
     global mind_data
-    mind_data = MindData()
+    mind_data = MindData(options["--mind-data"])
 
     eval_name = options["<name>"]
     logger.info("measuring evaluation %s", eval_name)

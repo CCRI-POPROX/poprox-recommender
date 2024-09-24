@@ -1,0 +1,5 @@
+outs:
+- md5: e3bac5485be8fc7a9934e85e3b78615f
+  size: 30948560
+  hash: md5
+  path: MINDsmall_dev.zip

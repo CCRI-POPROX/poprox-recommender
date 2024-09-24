@@ -2,3 +2,5 @@
 /user-metrics.csv.gz
 /mind-val-recommendations.parquet
 /mind-val-user-metrics.csv.gz
+/mind-small-recommendations.parquet
+/mind-small-user-metrics.csv.gz
