@@ -28,6 +28,24 @@ def extract_locality_codes(article: Article) -> set[str]:
     return article_codes.intersection(locality_codes)
 
 
+def extract_locality(article: Article) -> list[str]:
+    topics = extract_general_topics(article)
+    codes = extract_locality_codes(article)
+
+    us_criteria = ("U.S. news" in topics) or ("a" in codes)
+    world_criteria = ("World news" in topics) or ("i" in codes)
+    washington_criteria = ("Washington news" in topics) or ("w" in codes)
+
+    if (us_criteria or washington_criteria) and world_criteria:
+        return ["US", "World"]
+    elif us_criteria or washington_criteria:
+        return ["US"]
+    elif world_criteria:
+        return ["World"]
+    else:
+        return ["Neither"]
+
+
 def find_topic(past_articles: list[Article], article_id: UUID):
     # each article might correspond to multiple topic
     for article in past_articles:
@@ -36,29 +54,15 @@ def find_topic(past_articles: list[Article], article_id: UUID):
 
 
 def find_locality(past_articles: list[Article], article_id: UUID):
-    # each article might correspond to U.S., World, both, or neither locality
+    # each article might correspond to multiple locality: U.S., World, or neither
     for article in past_articles:
         if article.article_id == article_id:
-            topics = extract_general_topics(article)
-            codes = extract_locality_codes(article)
-
-            us_criteria = ("U.S. news" in topics) or ("a" in codes)
-            world_criteria = ("World news" in topics) or ("i" in codes)
-            washington_criteria = ("Washington news" in topics) or ("w" in codes)
-
-            if (us_criteria or washington_criteria) and world_criteria:
-                return "Both"
-            elif us_criteria or washington_criteria:
-                return "US"
-            elif world_criteria:
-                return "World"
-            else:
-                return "Neither"
+            return extract_locality(article)
 
 
-def normalized_topic_count(topic_counts: dict[str, int]):
-    total_count = sum(topic_counts.values())
-    normalized_counts = {key: value / total_count for key, value in topic_counts.items()}
+def normalized_category_count(counts: dict[str, int]):
+    total_count = sum(counts.values())
+    normalized_counts = {key: value / total_count for key, value in counts.items()}
     return normalized_counts
 
 
