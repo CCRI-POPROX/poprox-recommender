@@ -48,10 +48,6 @@ Once you have installed the dependencies, there are 3 easy ways to run code in t
     pixi shell -e dev
     ```
 
-> [!NOTE]
-> Tests are also available as a Pixi task: `pixi run -e dev test`.
-
-
 Finally, set up `pre-commit` to make sure that code formatting rules are applied
 as you make changes:
 
