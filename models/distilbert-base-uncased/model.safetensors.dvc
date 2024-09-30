@@ -3,3 +3,10 @@ outs:
   size: 267954768
   hash: md5
   path: model.safetensors
+md5: dd731a6d839cbfdd52ba4e065b61f265
+frozen: true
+deps:
+- path: model.safetensors
+  repo:
+    url: https://huggingface.co/distilbert/distilbert-base-uncased
+    rev_lock: 12040accade4e8a0f71eabdb258fecc2e7e948be
