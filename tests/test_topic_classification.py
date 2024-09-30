@@ -2,7 +2,10 @@ import json
 import logging
 import random
 
+from pytest import skip
+
 from poprox_concepts import Article, ArticleSet, Click
+from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, match_news_topics_to_general
 
@@ -12,6 +15,8 @@ logger = logging.getLogger(__name__)
 def load_test_articles():
     test_dir = project_root() / "tests"
     event_path = test_dir / "request_data" / "request_body.json"
+    if allow_data_test_failures() and not event_path.exists():
+        skip("request file does not exist")
 
     with open(event_path, "r") as j:
         req_body = json.loads(j.read())
