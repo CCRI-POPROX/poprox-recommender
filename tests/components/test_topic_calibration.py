@@ -4,6 +4,8 @@ Test the topic calibration logic.
 
 import logging
 
+from pytest import skip
+
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.paths import project_root
@@ -19,17 +21,21 @@ def test_request_with_topic_calibrator():
 
     req = RecommendationRequest.model_validate_json(req_f.read_text())
 
-    base_outputs = select_articles(
-        ArticleSet(articles=req.todays_articles),
-        ArticleSet(articles=req.past_articles),
-        req.interest_profile,
-    )
-    topic_calibrated_outputs = select_articles(
-        ArticleSet(articles=req.todays_articles),
-        ArticleSet(articles=req.past_articles),
-        req.interest_profile,
-        pipeline_params={"pipeline": "topic-cali"},
-    )
+    try:
+        base_outputs = select_articles(
+            ArticleSet(articles=req.todays_articles),
+            ArticleSet(articles=req.past_articles),
+            req.interest_profile,
+        )
+        topic_calibrated_outputs = select_articles(
+            ArticleSet(articles=req.todays_articles),
+            ArticleSet(articles=req.past_articles),
+            req.interest_profile,
+            pipeline_params={"pipeline": "topic-cali"},
+        )
+    except FileNotFoundError:
+        # FIXME: when we have configuration files, separate "cannot load" from "cannot run"
+        skip("model data not available")
 
     # do we get recommendations?
     tco_recs = topic_calibrated_outputs.default.articles
