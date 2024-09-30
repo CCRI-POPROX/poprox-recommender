@@ -2,10 +2,11 @@ import logging
 import os
 import platform
 import shutil
+import warnings
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from pytest import mark
+from pytest import mark, xfail
 
 from poprox_recommender.paths import model_file_path, project_root
 
@@ -28,6 +29,10 @@ def test_module_file_path_project_root():
         if old:
             del os.environ["POPROX_MODELS"]
         root = project_root()
+        if not (root / "models" / "model.safetensors").exists():
+            warnings.warn("model source file not available")
+            xfail("model data not available")
+
         mfile = model_file_path("model.safetensors")
 
         assert mfile == root / "models" / "model.safetensors"
@@ -46,7 +51,12 @@ def test_module_file_path_env_dir():
             root = project_root()
 
             logger.info("copying model file")
-            shutil.copy(root / "models" / "model.safetensors", td_path / "model.safetensors")
+            model_src = root / "models" / "model.safetensors"
+            if not model_src.exists():
+                warnings.warn("model source file not available")
+                xfail("model data not available")
+
+            shutil.copy(model_src, td_path / "model.safetensors")
 
             mfile = model_file_path("model.safetensors")
 

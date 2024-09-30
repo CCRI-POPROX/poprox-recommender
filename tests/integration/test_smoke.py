@@ -4,14 +4,18 @@ Test the POPROX API through direct call.
 
 import logging
 
+from pytest import mark, skip
+
 from poprox_concepts import ArticleSet, Click
 from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
-from poprox_recommender.recommenders import select_articles
+from poprox_recommender.recommenders import PipelineLoadError, select_articles
 
 logger = logging.getLogger(__name__)
 
 
+@mark.xfail(condition=allow_data_test_failures(), raises=PipelineLoadError, reason="data not pulled")
 def test_direct_basic_request():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
@@ -23,10 +27,12 @@ def test_direct_basic_request():
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
     )
+
     # do we get recommendations?
     assert len(outputs.default.articles) > 0
 
 
+@mark.xfail(condition=allow_data_test_failures(), raises=PipelineLoadError, reason="data not pulled")
 def test_direct_basic_request_without_clicks():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
@@ -41,5 +47,6 @@ def test_direct_basic_request_without_clicks():
         ArticleSet(articles=req.past_articles),
         req.interest_profile,
     )
+
     # do we get recommendations?
     assert len(outputs.default.articles) > 0
