@@ -62,7 +62,8 @@ jobs:
         with:
           pixi-version: v0.29.0
           cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+          # just reuse cache from previous run of other test action
+          cache-write: false
           environments: test
           activate-environment: true
 
