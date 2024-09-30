@@ -21,6 +21,13 @@ logger.setLevel(logging.DEBUG)
 _cached_pipelines = None
 
 
+class PipelineLoadError(Exception):
+    """
+    Exception raised when a pipeline cannot be loaded or instantiated, to
+    separate those errors from errors running the pipeline.
+    """
+
+
 def select_articles(
     candidate_articles: ArticleSet,
     clicked_articles: ArticleSet,
@@ -55,7 +62,11 @@ def recommendation_pipelines(device: str | None = None, num_slots: int = 10) -> 
     logger.debug("loading pipeline components on device %s", device)
 
     if _cached_pipelines is None:
-        _cached_pipelines = build_pipelines(num_slots=num_slots, device=device)
+        try:
+            _cached_pipelines = build_pipelines(num_slots=num_slots, device=device)
+        except Exception as e:
+            e.add_note("did you remember to `dvc pull`?")
+            raise PipelineLoadError("could not instantiate pipelines", e)
 
     return _cached_pipelines
 
