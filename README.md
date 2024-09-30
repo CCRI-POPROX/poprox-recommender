@@ -48,6 +48,12 @@ Once you have installed the dependencies, there are 3 easy ways to run code in t
     pixi shell -e dev
     ```
 
+> [!NOTE]
+>
+> `pixi shell` starts a new, *nested* shell with the Pixi environment active. If
+> you type `exit` in this shell, it will exit the nested shell and return you to
+> you original shell session without the environment active.
+
 Finally, set up `pre-commit` to make sure that code formatting rules are applied
 as you make changes:
 
