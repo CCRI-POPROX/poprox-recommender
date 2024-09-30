@@ -70,3 +70,5 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest -v
+        env:
+          POPROX_CI_WITHOUT_DATA: 1
