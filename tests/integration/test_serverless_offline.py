@@ -5,6 +5,7 @@ Test the POPROX endpoint running under Serverless Offline.
 import logging
 import os
 import sys
+import warnings
 from threading import Condition, Lock, Thread
 
 import requests
@@ -18,8 +19,9 @@ logger = logging.getLogger(__name__)
 try:
     PIPELINES = recommendation_pipelines().keys()
 except Exception as e:
+    warnings.warn("failed to load models, did you run `dvc pull`?")
     if "CI" not in os.environ:
-        skip("recommendation pipelines unavailable")
+        skip("recommendation pipelines unavailable", allow_module_level=True)
     else:
         raise e
 
