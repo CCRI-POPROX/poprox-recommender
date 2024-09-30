@@ -12,6 +12,7 @@ import requests
 from pexpect import EOF, spawn
 from pytest import fail, fixture, mark, skip
 
+from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.recommenders import recommendation_pipelines
 
@@ -20,7 +21,7 @@ try:
     PIPELINES = recommendation_pipelines().keys()
 except Exception as e:
     warnings.warn("failed to load models, did you run `dvc pull`?")
-    if "CI" not in os.environ or "POPROX_CI_WITHOUT_DATA" in os.environ:
+    if allow_data_test_failures():
         skip("recommendation pipelines unavailable", allow_module_level=True)
     else:
         raise e
