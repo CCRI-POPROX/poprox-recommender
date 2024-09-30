@@ -45,3 +45,11 @@ def available_cpu_parallelism(max: int | None = None) -> int:
         n_cpus = max
 
     return n_cpus
+
+
+def allow_data_test_failures() -> bool:
+    "Whether to allow tests to fail because the DVC-managed data is missing."
+    if "CI" in os.environ:
+        return "POPROX_CI_WITHOUT_DATA" in os.environ
+
+    return True

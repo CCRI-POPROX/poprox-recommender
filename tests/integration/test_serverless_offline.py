@@ -5,12 +5,14 @@ Test the POPROX endpoint running under Serverless Offline.
 import logging
 import os
 import sys
+import warnings
 from threading import Condition, Lock, Thread
 
 import requests
 from pexpect import EOF, spawn
 from pytest import fail, fixture, mark, skip
 
+from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.recommenders import recommendation_pipelines
 
@@ -18,8 +20,9 @@ logger = logging.getLogger(__name__)
 try:
     PIPELINES = recommendation_pipelines().keys()
 except Exception as e:
-    if "CI" not in os.environ:
-        skip("recommendation pipelines unavailable")
+    warnings.warn("failed to load models, did you run `dvc pull`?")
+    if allow_data_test_failures():
+        skip("recommendation pipelines unavailable", allow_module_level=True)
     else:
         raise e
 
