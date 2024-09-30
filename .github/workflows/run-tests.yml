@@ -67,13 +67,6 @@ jobs:
           environments: test
           activate-environment: true
 
-      - name: Fetch model data
-        run: |
-          dvc pull -R models tests
-        env:
-          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-
       - name: Run tests
         run: |
           python -m pytest -v
