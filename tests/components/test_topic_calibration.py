@@ -4,7 +4,7 @@ Test the topic calibration logic.
 
 import logging
 
-from pytest import mark, skip
+from pytest import skip, xfail
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-@mark.xfail(condition=allow_data_test_failures(), raises=PipelineLoadError, reason="data not pulled")
 def test_request_with_topic_calibrator():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "medium_request.json"
@@ -25,17 +24,23 @@ def test_request_with_topic_calibrator():
 
     req = RecommendationRequest.model_validate_json(req_f.read_text())
 
-    base_outputs = select_articles(
-        ArticleSet(articles=req.todays_articles),
-        ArticleSet(articles=req.past_articles),
-        req.interest_profile,
-    )
-    topic_calibrated_outputs = select_articles(
-        ArticleSet(articles=req.todays_articles),
-        ArticleSet(articles=req.past_articles),
-        req.interest_profile,
-        pipeline_params={"pipeline": "topic-cali"},
-    )
+    try:
+        base_outputs = select_articles(
+            ArticleSet(articles=req.todays_articles),
+            ArticleSet(articles=req.past_articles),
+            req.interest_profile,
+        )
+        topic_calibrated_outputs = select_articles(
+            ArticleSet(articles=req.todays_articles),
+            ArticleSet(articles=req.past_articles),
+            req.interest_profile,
+            pipeline_params={"pipeline": "topic-cali"},
+        )
+    except PipelineLoadError as e:
+        if allow_data_test_failures():
+            xfail("data not pulled")
+        else:
+            raise e
 
     # do we get recommendations?
     tco_recs = topic_calibrated_outputs.default.articles
