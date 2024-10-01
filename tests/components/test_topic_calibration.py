@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 
 def test_request_with_topic_calibrator():
     test_dir = project_root() / "tests"
-    req_f = test_dir / "request_data" / "medium_request.json"
+    req_f = test_dir / "request_data" / "request_body.json"
     if allow_data_test_failures() and not req_f.exists():
         skip("request file does not exist")
 

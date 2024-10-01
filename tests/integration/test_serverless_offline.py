@@ -71,7 +71,7 @@ class ServerlessBackground(Thread):
 @mark.parametrize("pipeline", PIPELINES)
 def test_basic_request(sl_listener, pipeline):
     test_dir = project_root() / "tests"
-    req_f = test_dir / "request_data" / "medium_request.json"
+    req_f = test_dir / "request_data" / "request_body.json"
     req_body = req_f.read_text()
 
     logger.info("sending request")

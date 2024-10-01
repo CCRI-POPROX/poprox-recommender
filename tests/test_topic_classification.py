@@ -23,7 +23,7 @@ def load_test_articles():
 
         candidate = ArticleSet(articles=[Article.model_validate(attrs) for attrs in req_body["todays_articles"]])
         past = ArticleSet(articles=[Article.model_validate(attrs) for attrs in req_body["past_articles"]])
-        click_history = [Click.model_validate(attrs) for attrs in req_body["click_data"]]
+        click_history = [Click.model_validate(attrs) for attrs in req_body["interest_profile"]["click_history"]]
         num_recs = req_body["num_recs"]
 
     return candidate, past, click_history, num_recs
