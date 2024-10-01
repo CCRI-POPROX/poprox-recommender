@@ -63,10 +63,10 @@ def find_locality(past_articles: list[Article], article_id: UUID):
 
 
 def normalized_category_count(counts: dict[str, int]):
-    if isinstance(counts, dict):
+    try:
         total_count = sum(counts.values())
         normalized_counts = {key: value / total_count for key, value in counts.items()}
-    else:
+    except Exception as _:
         normalized_counts = {}
     return normalized_counts
 
