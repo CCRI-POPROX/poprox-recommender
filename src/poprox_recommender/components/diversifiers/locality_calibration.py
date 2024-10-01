@@ -10,7 +10,7 @@ from poprox_recommender.topics import extract_locality, normalized_category_coun
 # locality calibration
 class LocalityCalibrator(Calibrator):
     def __init__(self, theta: float = 0.1, num_slots=10):
-        super.__init__(theta, num_slots)
+        super().__init__(theta, num_slots)
 
     def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
         normalized_locality_prefs = normalized_category_count(interest_profile.click_locality_counts)

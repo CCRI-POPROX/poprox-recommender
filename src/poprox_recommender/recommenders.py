@@ -7,6 +7,7 @@ from poprox_recommender.components.diversifiers import (
     LocalityCalibrator,
     MMRDiversifier,
     PFARDiversifier,
+    TopicCalibrator,
 )
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.filters import TopicFilter
@@ -43,7 +44,7 @@ def select_articles(
     pipeline state whose ``default`` is the final list of recommendations.
     """
     available_pipelines = recommendation_pipelines(device=default_device())
-    pipeline = available_pipelines["cali"]
+    pipeline = available_pipelines["nrms"]
 
     if pipeline_params and "pipeline" in pipeline_params:
         pipeline_name = pipeline_params["pipeline"]
@@ -89,7 +90,8 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
     pfar = PFARDiversifier(num_slots=num_slots)
-    calibrator = LocalityCalibrator(num_slots=num_slots)
+    locality_calibrator = LocalityCalibrator(num_slots=num_slots)
+    topic_calibrator = TopicCalibrator(num_slots=num_slots)
     sampler = SoftmaxSampler(num_slots=num_slots, temperature=30.0)
 
     nrms_pipe = build_pipeline(
@@ -116,11 +118,19 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    cali_pipe = build_pipeline(
-        "NRMS+Calibration",
+    topic_cali_pipe = build_pipeline(
+        "NRMS+Topic+Calibration",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
-        ranker=calibrator,
+        ranker=topic_calibrator,
+        num_slots=num_slots,
+    )
+
+    locality_cali_pipe = build_pipeline(
+        "NRMS+Locality+Calibration",
+        article_embedder=article_embedder,
+        user_embedder=user_embedder,
+        ranker=locality_calibrator,
         num_slots=num_slots,
     )
 
@@ -136,7 +146,8 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         "nrms": nrms_pipe,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
-        "cali": cali_pipe,
+        "topic-cali": topic_cali_pipe,
+        "locality-cali": locality_cali_pipe,
         "softmax": softmax_pipe,
     }
 

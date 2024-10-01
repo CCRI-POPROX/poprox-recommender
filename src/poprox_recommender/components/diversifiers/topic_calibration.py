@@ -44,7 +44,7 @@ class TopicCalibrator(Calibrator):
         normalized_topic_prefs = normalized_category_count(topic_preferences)
         return normalized_topic_prefs
 
-    def add_article_to_categories(rec_topics, article):
+    def add_article_to_categories(self, rec_topics, article):
         topics = extract_general_topics(article)
         for topic in topics:
             rec_topics[topic] = rec_topics.get(topic, 0) + 1

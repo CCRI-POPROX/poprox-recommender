@@ -20,7 +20,7 @@ class Calibrator(Component):
     def __call__():
         pass
 
-    def add_article_to_categories(rec_categories_with_candidate, article):
+    def add_article_to_categories(self, rec_categories_with_candidate, article):
         pass
 
     def normalized_categories_with_candidate(self, rec_categories, article):
