@@ -23,9 +23,11 @@ def extract_locality_topics(article: Article) -> set[str]:
 
 
 def extract_locality_codes(article: Article) -> set[str]:
-    article_codes = set([sub.code for sub in article.raw_data.subject if len(sub.code) == 1])
-    locality_codes = ["a", "i", "w"]
-    return article_codes.intersection(locality_codes)
+    if "raw_data" in article and "subject" in article.raw_data:
+        article_codes = set([sub.code for sub in article.raw_data.subject if sub.code and len(sub.code) == 1])
+        locality_codes = ["a", "i", "w"]
+        return article_codes.intersection(locality_codes)
+    return []
 
 
 def extract_locality(article: Article) -> list[str]:
@@ -61,8 +63,11 @@ def find_locality(past_articles: list[Article], article_id: UUID):
 
 
 def normalized_category_count(counts: dict[str, int]):
-    total_count = sum(counts.values())
-    normalized_counts = {key: value / total_count for key, value in counts.items()}
+    if isinstance(counts, dict):
+        total_count = sum(counts.values())
+        normalized_counts = {key: value / total_count for key, value in counts.items()}
+    else:
+        normalized_counts = {}
     return normalized_counts
 
 

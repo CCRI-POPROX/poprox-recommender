@@ -2,6 +2,7 @@ import json
 import logging
 import random
 
+import pytest
 from pytest import skip
 
 from poprox_concepts import Article, ArticleSet, Click
@@ -39,6 +40,7 @@ def test_topic_classification():
         assert len(topic_matched_dict[article_topic]) > 0
 
 
+@pytest.mark.skip(reason="too time intensive and not used by current prod logic")
 def test_extract_generalized_topic():
     candidate, _, _, _ = load_test_articles()
     for article in candidate.articles:
