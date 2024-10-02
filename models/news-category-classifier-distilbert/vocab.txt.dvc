@@ -3,3 +3,10 @@ outs:
   size: 231508
   hash: md5
   path: vocab.txt
+md5: 721f828a6f53b9b76a86fbdcbdea2617
+frozen: true
+deps:
+- path: vocab.txt
+  repo:
+    url: https://huggingface.co/dima806/news-category-classifier-distilbert
+    rev_lock: e6d8809b863f80b7cd2bbaf241112b0b926e0da8

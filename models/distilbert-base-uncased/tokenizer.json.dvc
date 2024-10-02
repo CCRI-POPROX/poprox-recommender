@@ -3,3 +3,10 @@ outs:
   size: 466062
   hash: md5
   path: tokenizer.json
+md5: d2bcada8b5513c9210ba8928bafd2124
+frozen: true
+deps:
+- path: tokenizer.json
+  repo:
+    url: https://huggingface.co/distilbert/distilbert-base-uncased
+    rev_lock: 12040accade4e8a0f71eabdb258fecc2e7e948be

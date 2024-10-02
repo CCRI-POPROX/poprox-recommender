@@ -3,3 +3,10 @@ outs:
   size: 10066184
   hash: md5
   path: user_encoder.safetensors
+md5: cab8a0941111aa717a2a69011851d401
+frozen: true
+deps:
+- etag: c8dcb260de4589573a8aa693466fff79-2
+  size: 10066184
+  hash: md5
+  path: s3://poprox-public-models/nrms-baseline/user_encoder.safetensors

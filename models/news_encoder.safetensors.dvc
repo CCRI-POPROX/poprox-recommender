@@ -3,3 +3,10 @@ outs:
   size: 275529184
   hash: md5
   path: news_encoder.safetensors
+md5: 0c2738f5293159e8e95013eb32c8024a
+frozen: true
+deps:
+- etag: 3de466cec52fde652d1642f55d3bb2f5-33
+  size: 275529184
+  hash: md5
+  path: s3://poprox-public-models/nrms-baseline/news_encoder.safetensors
