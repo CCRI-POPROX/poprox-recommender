@@ -3,3 +3,10 @@ outs:
   size: 438081688
   hash: md5
   path: model.safetensors
+md5: b7c02937f341f2e16506b29425e280be
+frozen: true
+deps:
+- path: model.safetensors
+  repo:
+    url: https://huggingface.co/dima806/news-category-classifier-distilbert
+    rev_lock: e6d8809b863f80b7cd2bbaf241112b0b926e0da8
