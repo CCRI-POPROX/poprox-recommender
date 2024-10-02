@@ -27,15 +27,21 @@ pixi install -e dev
 
 Alternatively, on Linux, you can use `cuda` instead of `dev`.
 
-Once you have installed the dependencies, there are 2 easy ways to run code in the environment:
+Once you have installed the dependencies, there are 3 easy ways to run code in the environment:
 
-1.  Run individual commands with `pixi run`, e.g.:
+1.  Run a defined task, like `test`, with `pixi run`:
+
+    ```console
+    pixi run -e dev test
+    ```
+
+2.  Run individual commands with `pixi run`, e.g.:
 
     ```console
     pixi run -e dev pytest tests
     ```
 
-2.  Run a Pixi shell, which activates the environment and adds the appropriate
+3.  Run a Pixi shell, which activates the environment and adds the appropriate
     Python to your `PATH`:
 
     ```console
@@ -43,8 +49,10 @@ Once you have installed the dependencies, there are 2 easy ways to run code in t
     ```
 
 > [!NOTE]
-> Tests are also available as a Pixi task: `pixi run -e dev test`.
-
+>
+> `pixi shell` starts a new, *nested* shell with the Pixi environment active. If
+> you type `exit` in this shell, it will exit the nested shell and return you to
+> you original shell session without the environment active.
 
 Finally, set up `pre-commit` to make sure that code formatting rules are applied
 as you make changes:
@@ -85,17 +93,29 @@ pixi update
 
 ## Local Endpoint Development
 
-Local endpoint development also requires some Node-based tools in addition to the tools above:
+Local endpoint development also requires some Node-based tools in addition to the tools above — this install is
+automated with `npm` and `pixi`:
 
 ```console
-npm install
+pixi run -e dev install-serverless
 ```
 
 To run the API endpoint locally:
 
 ```console
+pixi run -e dev start-serverless
+```
+
+<details>
+<summary>Implementation</sumamry>
+
+Under the hood, those tasks run the following Node commands within the `dev` environment:
+
+```console
+npm ci
 npx serverless offline start --reloadHandler
 ```
+</details>
 
 Once the local server is running, you can send requests to `localhost:3000`. A request with this JSON body:
 

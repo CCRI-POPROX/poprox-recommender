@@ -58,6 +58,12 @@ conda-pack = "~=0.8"
 [feature.serverless.dependencies]
 nodejs = "~=22.1"
 
+[feature.serverless.tasks]
+install-serverless = "npm ci"
+start-serverless = { cmd = "npx serverless offline start --reloadHandler", depends-on = [
+  "install-serverless",
+] }
+
 # general development dependencies
 [feature.dev.dependencies]
 hatch = "*"
@@ -86,7 +92,7 @@ pexpect = "~=4.9"
 poprox-recommender = { path = ".", editable = true }
 
 [feature.test.tasks]
-test = "pytest tests"
+test = { cmd = "pytest tests", depends-on = ["install-serverless"] }
 
 # tooling for code validation
 [feature.lint.dependencies]
