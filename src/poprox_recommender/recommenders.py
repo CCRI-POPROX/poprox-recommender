@@ -3,7 +3,12 @@ import logging
 from typing import Any
 
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.components.diversifiers import MMRDiversifier, PFARDiversifier, TopicCalibrator
+from poprox_recommender.components.diversifiers import (
+    LocalityCalibrator,
+    MMRDiversifier,
+    PFARDiversifier,
+    TopicCalibrator,
+)
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Fill
@@ -85,7 +90,8 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
     pfar = PFARDiversifier(num_slots=num_slots)
-    calibrator = TopicCalibrator(num_slots=num_slots)
+    locality_calibrator = LocalityCalibrator(num_slots=num_slots)
+    topic_calibrator = TopicCalibrator(num_slots=num_slots)
     sampler = SoftmaxSampler(num_slots=num_slots, temperature=30.0)
 
     nrms_pipe = build_pipeline(
@@ -112,11 +118,19 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    cali_pipe = build_pipeline(
-        "NRMS+Calibration",
+    topic_cali_pipe = build_pipeline(
+        "NRMS+Topic+Calibration",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
-        ranker=calibrator,
+        ranker=topic_calibrator,
+        num_slots=num_slots,
+    )
+
+    locality_cali_pipe = build_pipeline(
+        "NRMS+Locality+Calibration",
+        article_embedder=article_embedder,
+        user_embedder=user_embedder,
+        ranker=locality_calibrator,
         num_slots=num_slots,
     )
 
@@ -132,7 +146,8 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         "nrms": nrms_pipe,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
-        "topic-cali": cali_pipe,
+        "topic-cali": topic_cali_pipe,
+        "locality-cali": locality_cali_pipe,
         "softmax": softmax_pipe,
     }
 
