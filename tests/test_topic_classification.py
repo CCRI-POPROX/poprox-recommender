@@ -2,6 +2,7 @@ import json
 import logging
 import random
 
+import pytest
 from pytest import skip
 
 from poprox_concepts import Article, ArticleSet, Click
@@ -29,6 +30,7 @@ def load_test_articles():
     return candidate, past, click_history, num_recs
 
 
+@pytest.mark.skip(reason="too time intensive and not used by current prod logic")
 def test_topic_classification():
     candidate, _, _, _ = load_test_articles()
     topic_matched_dict, todays_article_matched_topics = match_news_topics_to_general(candidate.articles)
@@ -39,6 +41,7 @@ def test_topic_classification():
         assert len(topic_matched_dict[article_topic]) > 0
 
 
+@pytest.mark.skip(reason="too time intensive and not used by current prod logic")
 def test_extract_generalized_topic():
     candidate, _, _, _ = load_test_articles()
     for article in candidate.articles:

@@ -5,7 +5,7 @@ import torch as th
 from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.lkpipeline import Component
 from poprox_recommender.pytorch.decorators import torch_inference
-from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_topic_count
+from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_category_count
 
 
 class PFARDiversifier(Component):
@@ -30,7 +30,7 @@ class PFARDiversifier(Component):
             for topic, click_count in interest_profile.click_topic_counts.items():
                 topic_preferences[topic] = click_count
 
-        normalized_topic_prefs = normalized_topic_count(topic_preferences)
+        normalized_topic_prefs = normalized_category_count(topic_preferences)
 
         article_indices = pfar_diversification(
             article_scores,

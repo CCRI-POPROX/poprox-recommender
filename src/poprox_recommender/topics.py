@@ -16,6 +16,38 @@ def extract_general_topics(article: Article) -> set[str]:
     return article_topics.intersection(GENERAL_TOPICS)
 
 
+def extract_locality_topics(article: Article) -> set[str]:
+    article_topics = set([mention.entity.name for mention in article.mentions])
+    locality_topics = ["U.S. news", "World news", "Washington news"]
+    return article_topics.intersection(locality_topics)
+
+
+def extract_locality_codes(article: Article) -> set[str]:
+    if "raw_data" in article and "subject" in article.raw_data:
+        article_codes = set([sub.code for sub in article.raw_data.subject if sub.code and len(sub.code) == 1])
+        locality_codes = ["a", "i", "w"]
+        return article_codes.intersection(locality_codes)
+    return []
+
+
+def extract_locality(article: Article) -> list[str]:
+    topics = extract_general_topics(article)
+    codes = extract_locality_codes(article)
+
+    us_criteria = ("U.S. news" in topics) or ("a" in codes)
+    world_criteria = ("World news" in topics) or ("i" in codes)
+    washington_criteria = ("Washington news" in topics) or ("w" in codes)
+
+    if (us_criteria or washington_criteria) and world_criteria:
+        return ["US", "World"]
+    elif us_criteria or washington_criteria:
+        return ["US"]
+    elif world_criteria:
+        return ["World"]
+    else:
+        return ["Neither"]
+
+
 def find_topic(past_articles: list[Article], article_id: UUID):
     # each article might correspond to multiple topic
     for article in past_articles:
@@ -23,9 +55,19 @@ def find_topic(past_articles: list[Article], article_id: UUID):
             return extract_general_topics(article)
 
 
-def normalized_topic_count(topic_counts: dict[str, int]):
-    total_count = sum(topic_counts.values())
-    normalized_counts = {key: value / total_count for key, value in topic_counts.items()}
+def find_locality(past_articles: list[Article], article_id: UUID):
+    # each article might correspond to multiple locality: U.S., World, or neither
+    for article in past_articles:
+        if article.article_id == article_id:
+            return extract_locality(article)
+
+
+def normalized_category_count(counts: dict[str, int]):
+    try:
+        total_count = sum(counts.values())
+        normalized_counts = {key: value / total_count for key, value in counts.items()}
+    except Exception as _:
+        normalized_counts = {}
     return normalized_counts
 
 
@@ -41,6 +83,19 @@ def user_topic_preference(past_articles: list[Article], click_history: list[Clic
             topic_count_dict[topic] += 1
 
     return topic_count_dict
+
+
+def user_locality_preference(past_articles: list[Article], click_history: list[Click]) -> dict[str, int]:
+    clicked_articles = [c.article_id for c in click_history]  # List[UUID]
+
+    locality_count_dict = defaultdict(int)
+
+    for article_id in clicked_articles:
+        clicked_locality = find_locality(past_articles, article_id) or set()
+        for locality in clicked_locality:
+            locality_count_dict[locality] += 1
+
+    return locality_count_dict
 
 
 def classify_news_topic(model, tokenizer, general_topics, topic):
