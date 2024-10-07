@@ -22,7 +22,7 @@ install on Mac, either do the same or use Homebrew (`brew install pixi`).
 [pixi]: https://pixi.sh
 [dvc]: https://dvc.org
 
-To install the dependencies needed for development work:
+Once Pixi is installed, to install the dependencies needed for development work:
 
 ```console
 pixi install -e dev
