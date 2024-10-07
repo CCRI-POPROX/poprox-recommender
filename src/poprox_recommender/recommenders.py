@@ -93,6 +93,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     locality_calibrator = LocalityCalibrator(num_slots=num_slots)
     topic_calibrator = TopicCalibrator(num_slots=num_slots)
     sampler = SoftmaxSampler(num_slots=num_slots, temperature=30.0)
+    softmax_locality_calibrator = LocalityCalibrator(theta=0.5, num_slots=num_slots)  # , scorer=sampler)
 
     nrms_pipe = build_pipeline(
         "plain-NRMS",
@@ -134,6 +135,14 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
+    softmax_locality_cali_pipe = build_pipeline(
+        "NRMS+Softmax+Locality+Calibration",
+        article_embedder=article_embedder,
+        user_embedder=user_embedder,
+        ranker=softmax_locality_calibrator,
+        num_slots=num_slots,
+    )
+
     softmax_pipe = build_pipeline(
         "NRMS+Softmax",
         article_embedder=article_embedder,
@@ -149,6 +158,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         "topic-cali": topic_cali_pipe,
         "locality-cali": locality_cali_pipe,
         "softmax": softmax_pipe,
+        "softmax-locality-cali": softmax_locality_cali_pipe,
     }
 
 

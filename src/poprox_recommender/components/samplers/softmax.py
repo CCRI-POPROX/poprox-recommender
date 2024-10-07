@@ -8,7 +8,7 @@ class SoftmaxSampler:
         self.num_slots = num_slots
         self.temperature = temperature
 
-    def __call__(self, candidate_articles: ArticleSet):
+    def sort_score(self, candidate_articles: ArticleSet):
         if candidate_articles.scores is None:
             scores = np.ones(len(candidate_articles.articles))
         else:
@@ -38,9 +38,15 @@ class SoftmaxSampler:
 
         # This is just bookkeeping to produce the final ordered list of recs
         sorted_indices = np.argsort(exponentials)
-        sampled = [candidate_articles.articles[idx] for idx in sorted_indices[: self.num_slots]]
 
-        return ArticleSet(articles=sampled)
+        candidate_articles.articles = [candidate_articles.articles[idx] for idx in sorted_indices]
+        candidate_articles.scores = [exponentials[idx] for idx in sorted_indices]
+        return candidate_articles
+
+    def __call__(self, candidate_articles: ArticleSet):
+        sorted_articles = self.sort_score(candidate_articles)
+
+        return ArticleSet(articles=sorted_articles.articles[: self.num_slots])
 
 
 def sigmoid(x):
