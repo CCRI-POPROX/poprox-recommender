@@ -16,6 +16,9 @@ and data files are managed using [dvc][]. The `pixi.lock` file provides a locked
 dependency set for reproducibly running the recommender code with all
 dependencies, on Linux, macOS, and Windows (including with CUDA on Linux).
 
+To install Pixi on Linux or Windows, see the [install instructions][pixi]. To
+install on Mac, either do the same or use Homebrew (`brew install pixi`).
+
 [pixi]: https://pixi.sh
 [dvc]: https://dvc.org
 
