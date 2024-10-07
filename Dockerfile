@@ -1,12 +1,17 @@
 ARG LOG_LEVEL=INFO
+
 # Use Lambda "Provided" base image for the build container
 FROM public.ecr.aws/lambda/provided:al2023 AS build
+ARG PIXI_VERSION=0.31.0
 
 # install necessary system packages
 RUN dnf -y install git-core
 
 # Fetch the pixi executable from GitHub
-ADD --chmod=0755 https://github.com/prefix-dev/pixi/releases/latest/download/pixi-x86_64-unknown-linux-musl  /usr/local/bin/pixi
+# see: https://github.com/prefix-dev/pixi-docker/blob/main/Dockerfile
+RUN curl -fsL \
+    "https://github.com/prefix-dev/pixi/releases/download/v${PIXI_VERSION}/pixi-x86_64-unknown-linux-musl" \
+    -o /usr/local/bin/pixi && chmod +x /usr/local/bin/pixi
 
 # Copy the soure code into the image to install it and create the environment
 # TODO do we want to copy the sdist or wheel instead?
