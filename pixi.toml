@@ -78,10 +78,13 @@ copier = "~=9.0"
 [feature.meta.tasks]
 update-template = "copier update"
 
-# dependencies for working with the data files, but *not* running any recommender code
+# dependencies for working with the data files and querying servers,
+# but *not* running any recommender code
 [feature.data.dependencies]
 dvc = "~=3.51"
 dvc-s3 = "*"
+# keep below dependencies synchronized with 'eval' extra deps in pyproject.toml
+docopt = ">=0.6"
 pandas = "~=2.0"
 
 # dependencies for running the evaluation code
