@@ -33,6 +33,11 @@ dependencies = [
   "poprox-concepts",
 ]
 
+[project.optional-dependencies]
+# keep synchronized with feature.data.dependencies in pixi.toml
+# we want these here so the doc build can work with the eval code
+eval = ["docopt >=0.6", "pandas ~=2.0"]
+
 [project.urls]
 Homepage = "https://docs.poprox.ai"
 GitHub = "https://github.com/CCRI-POPROX/poprox-recommender"

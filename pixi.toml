@@ -75,6 +75,7 @@ jupytext = ">=1.16"
 [feature.data.dependencies]
 dvc = "~=3.51"
 dvc-s3 = "*"
+# keep below dependencies synchronized with 'eval' extra deps in pyproject.toml
 docopt = ">=0.6"
 pandas = "~=2.0"
 
