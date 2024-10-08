@@ -37,7 +37,7 @@ cpuonly = "*"
 
 # production runs in a trimmed-down environment - no MKL, no CUDA
 # we also do *not* include the poprox-recommender as a dep, since
-# its dependency lock vesion is always out of date.
+# its dependency lock version is always out of date.
 [feature.production]
 platforms = ['linux-64']
 
