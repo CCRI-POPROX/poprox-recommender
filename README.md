@@ -28,8 +28,6 @@ Once Pixi is installed, to install the dependencies needed for development work:
 pixi install -e dev
 ```
 
-Alternatively, on Linux, you can use `cuda` instead of `dev`.
-
 Once you have installed the dependencies, there are 3 easy ways to run code in the environment:
 
 1.  Run a defined task, like `test`, with `pixi run`:
@@ -187,16 +185,10 @@ and for deployment, but is very inefficient for evaluation.  The current set of
 models work on both CUDA (on Linux with NVidia cards) and MPS (macOS on Apple
 Silicon).  To make use of a GPU, do the following:
 
-1.  If on Linux, install the CUDA-based Conda environment:
+1.  Set the `POPROX_REC_DEVICE` environment variable to `cuda` or `mps`.
 
-    ```console
-    pixi install -e cuda
-    ```
-
-2.  Set the `POPROX_REC_DEVICE` environment variable to `cuda` or `mps`.
-
-3.  Run `dvc repro` under the `cuda` environment (using either `pixi run` or
-    `pixi shell`).
+2.  Run `dvc repro` under the `eval` or `dev` environment (using either `pixi
+    run` or `pixi shell`).
 
 Timing information for generating recommendations with the MIND validation set:
 
