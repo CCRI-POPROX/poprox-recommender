@@ -94,6 +94,9 @@ poprox-recommender = { path = ".", editable = true }
 
 [feature.test.tasks]
 test = { cmd = "pytest tests", depends-on = ["install-serverless"] }
+test-cov = { cmd = "coverage run -m pytest tests", depends-on = [
+  "install-serverless",
+] }
 
 # tooling for code validation
 [feature.lint.dependencies]
