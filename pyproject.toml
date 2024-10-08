@@ -91,14 +91,3 @@ tests = ["tests"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
-
-[tool.conda-lock]
-channels = ["pytorch", "conda-forge", "nodefaults"]
-# extra deps in the conda environment
-[tool.conda-lock.dependencies]
-# specify our Python version & make sure we have pip
-python = "=3.11"
-pip = ">=24"
-# poprox concepts comes from PyPI
-poprox-concepts = { source = "pypi" }
-progress-api = { source = "pypi" }
