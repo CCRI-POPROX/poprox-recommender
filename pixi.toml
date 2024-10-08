@@ -71,6 +71,13 @@ ipython = ">=8"
 notebook = ">=7.2"
 jupytext = ">=1.16"
 
+# dependencies for project meta-work (e.g. updating project files from templates)
+[feature.meta.dependencies]
+copier = "~=9.0"
+
+[feature.meta.tasks]
+update-template = "copier update"
+
 # tooling for environments, data, and evaluation
 [feature.data.dependencies]
 dvc = "~=3.51"
@@ -129,6 +136,7 @@ data = { features = ["data"], no-default-feature = true, solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
 dev = { features = [
   "dev",
+  "meta",
   "test",
   "lint",
   "data",
