@@ -90,6 +90,12 @@ pixi update
 ```
 
 > [!NOTE]
+> We use [Pixi][] for all dependency management.  If you need to add a new dependency
+> for this code, add it to the appropriate feature(s) in `pixi.toml`.  If it is a
+> dependency of the recommendation components themselves, add it both to the
+> top-level `dependencies` table in `pixi.toml` *and* in `pyproject.toml`.
+
+> [!NOTE]
 > Currently, dependencies can only be updated on Linux.
 
 ## Local Endpoint Development
