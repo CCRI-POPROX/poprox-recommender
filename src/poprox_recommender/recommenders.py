@@ -15,6 +15,7 @@ from poprox_recommender.components.joiners import Fill
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers import SoftmaxSampler, UniformSampler
 from poprox_recommender.components.scorers import ArticleScorer
+from poprox_recommender.components.summarizers.llm import Summarizer
 from poprox_recommender.config import default_device
 from poprox_recommender.lkpipeline import Pipeline, PipelineState
 from poprox_recommender.paths import model_file_path
@@ -159,6 +160,8 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     fill = Fill(num_slots=num_slots)
     topk_ranker = TopkRanker(num_slots=num_slots)
 
+    summarizer = Summarizer()
+
     pipeline = Pipeline(name=name)
 
     # Define pipeline inputs
@@ -182,6 +185,8 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
     o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
-    pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
+    o_filled = pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
+
+    r_articles = pipeline.add_component("summarizer", summarizer, candidates=o_filled)
 
     return pipeline
