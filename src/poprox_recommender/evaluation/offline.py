@@ -34,7 +34,7 @@ def load_model(device_name=None):
     if device_name is None:
         device_name = "cuda" if th.cuda.is_available() else "cpu"
 
-    load_path = model_file_path("model.safetensors")
+    load_path = model_file_path("nrms-mind/model.safetensors")
     checkpoint = load_file(load_path)
 
     return checkpoint, device_name
