@@ -1,4 +1,6 @@
 # PORPOX data sharing
+# NOTE TO REVIEWERS: carefully check that any new lines are setting
+# appropriate sharing permissions.
 models/*-mind/* poprox-sharing=public
 outputs/mind-* poprox-sharing=public
 # GitHub syntax highlighting
