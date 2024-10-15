@@ -1,2 +1,5 @@
+# PORPOX data sharing
+models/*-mind/* poprox-sharing=public
+outputs/mind-* poprox-sharing=public
 # GitHub syntax highlighting
 pixi.lock linguist-language=YAML linguist-generated=true
