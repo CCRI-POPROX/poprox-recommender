@@ -9,7 +9,6 @@ jobs:
   share-data:
     name: Share data to S3
     runs-on: ubuntu-latest
-    environment: publish
 
     steps:
       - name: Checkout
