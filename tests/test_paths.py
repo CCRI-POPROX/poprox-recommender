@@ -56,11 +56,11 @@ def test_module_file_path_env_dir():
                 warnings.warn("model source file not available")
                 xfail("model data not available")
 
-            shutil.copy(model_src, td_path / "nrms-mind" / "model.safetensors")
+            shutil.copy(model_src, td_path / "model.safetensors")
 
-            mfile = model_file_path("nrms-mind/model.safetensors")
+            mfile = model_file_path("model.safetensors")
 
-            assert mfile == td_path / "nrms-mind" / "model.safetensors"
+            assert mfile == td_path / "model.safetensors"
     finally:
         if old:
             os.environ["POPROX_MODELS"] = old
