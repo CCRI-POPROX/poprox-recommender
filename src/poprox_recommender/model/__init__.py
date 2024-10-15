@@ -45,7 +45,7 @@ def load_checkpoint(device=None):
     if device is None:
         device = default_device()
 
-    load_path = model_file_path("model.safetensors")
+    load_path = model_file_path("nrms-mind/model.safetensors")
     logger.debug("loading model checkpoint from %s", load_path)
 
     checkpoint = load_file(load_path)
