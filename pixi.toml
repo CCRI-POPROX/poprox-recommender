@@ -39,7 +39,7 @@ cpuonly = "*"
 # we also do *not* include the poprox-recommender as a dep, since
 # its dependency lock version is always out of date.
 [feature.production]
-platforms = ['linux-64']
+platforms = ["linux-64"]
 
 [feature.production.dependencies]
 pip = ">=24"
@@ -88,9 +88,6 @@ docopt = ">=0.6"
 pandas = "~=2.0"
 
 # dependencies for running the evaluation code
-# we also pull in CUDA on Linux for this
-[feature.eval]
-system-requirements = { cuda = "12" }
 
 [feature.eval.dependencies]
 # keep below dependencies synchronized with 'eval' extra deps in pyproject.toml
@@ -99,10 +96,6 @@ pandas = "~=2.0"
 
 [feature.eval.pypi-dependencies]
 poprox-recommender = { path = ".", editable = true }
-
-[feature.eval.target.linux.dependencies]
-pytorch-gpu = "*"
-libblas = { build = "*mkl*" }
 
 # dependencies for tests
 [feature.test.dependencies]
@@ -126,6 +119,17 @@ pre-commit = "~=3.7"
 ruff = ">=0.4"
 pyright = "~=1.1"
 
+# CUDA support
+[feature.cuda]
+platforms = ["linux-64"]
+
+[feature.cuda.system-requirements]
+cuda = "12"
+
+[feature.cuda.dependencies]
+pytorch-gpu = "*"
+libblas = { build = "*mkl*" }
+
 # define the actual environments from these component features.
 # putting everything but cuda in one solve group keeps deps consistent.
 [environments]
@@ -141,6 +145,7 @@ test = { features = ["test", "data", "serverless"], solve-group = "main" }
 data = { features = ["data"], no-default-feature = true, solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
 eval = { features = ["data", "eval"], solve-group = "main" }
+eval-cuda = { features = ["data", "eval", "cuda"], solve-group = "cuda" }
 dev = { features = [
   "dev",
   "meta",
@@ -150,3 +155,13 @@ dev = { features = [
   "eval",
   "serverless",
 ], solve-group = "main" }
+dev-cuda = { features = [
+  "dev",
+  "meta",
+  "test",
+  "lint",
+  "data",
+  "eval",
+  "serverless",
+  "cuda",
+], solve-group = "cuda" }
