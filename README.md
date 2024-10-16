@@ -134,14 +134,38 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
       "headline": "headline 1",
       "subhead": "subhead 1",
       "url": "url 1"
+    },
+    {
+      "article_id": "a0266b75-2873-4a40-9373-4e216e88c2f7",
+      "headline": "headline 2",
+      "subhead": "subhead 2",
+      "url": "url 2"
+    },
+    {
+      "article_id": "d88ee3b6-2b5e-4821-98a8-ffd702f571de",
+      "headline": "headline 3",
+      "subhead": "subhead 3",
+      "url": "url 3"
     }
   ],
   "todays_articles": [
     {
       "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
-      "headline": "headline 2",
-      "subhead": "subhead 2",
-      "url": "url 2"
+      "headline": "headline 4",
+      "subhead": "subhead 4",
+      "url": "url 4"
+    },
+    {
+      "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
+      "headline": "headline 5",
+      "subhead": "subhead 5",
+      "url": "url 5"
+    },
+    {
+      "article_id": "2d5a25ba-0963-474a-8da6-5b312c87bb82",
+      "headline": "headline 6",
+      "subhead": "subhead 6",
+      "url": "url 6"
     }
   ],
   "interest_profile": {
@@ -149,6 +173,12 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
     "click_history": [
       {
         "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
+      },
+      {
+        "article_id": "a0266b75-2873-4a40-9373-4e216e88c2f7"
+      },
+      {
+        "article_id": "d88ee3b6-2b5e-4821-98a8-ffd702f571de"
       }
     ],
     "onboarding_topics": []
@@ -162,16 +192,26 @@ should receive this response:
 ```json
 {
     "recommendations": {
-        "977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [
+        "28838f05-23f5-4f23-bea2-30b51f67c538": [
             {
                 "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
-                "title": "title 2",
-                "content": "content 2",
-                "url": "url 2",
+                "headline": "headline 5",
+                "subhead": "subhead 5",
+                "url": "url 5",
+                "preview_image_id": null,
                 "published_at": "1970-01-01T00:00:00Z",
-                "mentions": []
-            }
+                "mentions": [],
+                "source": null,
+                "external_id": null,
+                "raw_data": null
+            },
+            ...
         ]
+    },
+    "recommender": {
+        "name": "plain-NRMS",
+        "version": null,
+        "hash": "bd076520fa51dc70d8f74dfc9c0e0169236478d342b08f35b95399437f012563"
     }
 }
 ```
@@ -180,8 +220,6 @@ You can test this by sending a request with curl:
 
 ```console
 $ curl -X POST -H "Content-Type: application/json" -d @tests/request_data/basic-request.json localhost:3000
-
-{"recommendations": {"977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [{"article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff", "title": "title 2", "content": "content 2", "url": "url 2", "published_at": "1970-01-01T00:00:00Z", "mentions": []}]}}
 ```
 
 ## Running the Evaluation
