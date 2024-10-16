@@ -51,6 +51,11 @@ Once you have installed the dependencies, there are 3 easy ways to run code in t
 
 > [!NOTE]
 >
+> If you have a CUDA-enabled Linux system, you can use the `dev-cuda` and
+> `eval-cuda` environments to use your GPU for POPROX batch inference.
+
+> [!NOTE]
+>
 > `pixi shell` starts a new, *nested* shell with the Pixi environment active. If
 > you type `exit` in this shell, it will exit the nested shell and return you to
 > you original shell session without the environment active.
