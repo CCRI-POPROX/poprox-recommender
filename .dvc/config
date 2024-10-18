@@ -3,7 +3,6 @@
     autostage = true
 ['remote "poprox-s3"']
     url = s3://poprox-recommender-e24b613efbd9
-
 ['remote "shared"']
     url = s3://poprox-recommender-shared
 ['remote "public"']
