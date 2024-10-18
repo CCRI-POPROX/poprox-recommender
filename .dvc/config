@@ -3,8 +3,7 @@
     autostage = true
 ['remote "poprox-s3"']
     url = s3://poprox-recommender-e24b613efbd9
-    access_key_id = AKIAWET4FAY3S6KNLEHE
-    secret_access_key = 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
+
 ['remote "shared"']
     url = s3://poprox-recommender-shared
 ['remote "public"']
