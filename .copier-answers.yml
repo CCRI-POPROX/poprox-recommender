@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: 733113b
+_commit: 48a6656
 _src_path: https://github.com/CCRI-POPROX/poprox-repo-template
 package_name: poprox_recommender
 project_descr: POPROX recommender implementation and infrastructure.
