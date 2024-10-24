@@ -39,14 +39,7 @@ repos:
       # Run the formatter.
       - id: ruff-format
         name: format Python source
-  - repo: local
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.10.0-1
     hooks:
-      # shfmt support, adapted from https://github.com/mvdan/sh/issues/818
-      - id: format-shell-scripts
-        name: format shell scripts
-        language: golang
-        require_serial: true
-        additional_dependencies: [mvdan.cc/sh/v3/cmd/shfmt@v3.8.0]
-        entry: shfmt
-        args: ["-l", "-w", "-i", "4"]
-        types: [shell]
+      - id: shfmt
