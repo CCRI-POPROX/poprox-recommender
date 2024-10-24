@@ -6,7 +6,7 @@ repo="UNKNOWN"
 file_attr_pattern=""
 upload=yes
 
-while [[ -n "$1" ]]; do
+while [[ -n $1 ]]; do
     case "$1" in
     --shared)
         file_attr_pattern='poprox-sharing: (shared|public)$'
@@ -33,7 +33,7 @@ while [[ -n "$1" ]]; do
     esac
 done
 
-if [[ -z "$file_attr_pattern" ]]; then
+if [[ -z $file_attr_pattern ]]; then
     echo "no target specified" >&2
     exit 2
 fi
@@ -47,7 +47,7 @@ files=($(dvc list --dvc-only -R . |
     sed -e 's/:.*$//'))
 
 echo "found ${#files[@]} files to share"
-if [[ $upload = yes ]]; then
+if [[ $upload == yes ]]; then
     set -x
     dvc push -r $repo "${files[@]}"
 fi
