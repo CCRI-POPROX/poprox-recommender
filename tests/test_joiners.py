@@ -3,6 +3,7 @@ from uuid import uuid4
 from poprox_concepts.domain import Article, ArticleSet, Click, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Concatenate, Fill, Interleave
+from poprox_recommender.components.joiners.rrf import ReciprocalRankFusion
 from poprox_recommender.components.samplers import UniformSampler
 from poprox_recommender.lkpipeline import Pipeline
 
@@ -111,3 +112,28 @@ def test_fill_removes_duplicates():
 
     assert len(outputs["recommender"].articles) == 5
     assert len(article_ids) == len(set(article_ids))
+
+
+def test_reciprocal_rank_fusion():
+    inputs = {
+        "candidate1": ArticleSet(
+            articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots / 2))]
+        ),
+        "candidate2": ArticleSet(
+            articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots / 2))]
+        ),
+        "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+    }
+
+    rrf = ReciprocalRankFusion(num_slots=total_slots)
+
+    pipeline = Pipeline(name="rrf")
+    in_cand1 = pipeline.create_input("candidate1", ArticleSet)
+    in_cand2 = pipeline.create_input("candidate2", ArticleSet)
+
+    pipeline.add_component("rrf", rrf, candidates1=in_cand1, candidates2=in_cand2)
+    pipeline.alias("recommender", "rrf")
+
+    outputs = pipeline.run_all(**inputs)
+
+    assert len(outputs["recommender"].articles) == total_slots
