@@ -14,7 +14,7 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 
 import pandas as pd
 
-from poprox_concepts import Article, Click, InterestProfile
+from poprox_concepts import Article, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.paths import project_root
 
@@ -120,10 +120,14 @@ class MindData:
         elif id is None:
             id = self.news_id_for_uuid(uuid)
 
+        category = Entity(name=str(self.news_df.loc[id, "category"]), entity_type="category", source="MIND")
+        subcategory = Entity(name=str(self.news_df.loc[id, "subcategory"]), entity_type="subcategory", source="MIND")
+
         article = Article(
             article_id=uuid,
             url=f"urn:uuid:{uuid}",
             headline=str(self.news_df.loc[id, "title"]),
+            mentions=[Mention(source="MIND", relevance=1, entity=entity) for entity in [category, subcategory]],
         )
         return article
 
@@ -141,7 +145,7 @@ def load_mind_frames(archive: str = "MINDlarge_dev") -> tuple[pd.DataFrame, pd.D
         # FIXME: don't blanket fillna
         behavior_df.fillna("", inplace=True)
 
-        news_df = _read_zipped_tsv(zf, "news.tsv", ["id", "topic", "subtopic", "title"])
+        news_df = _read_zipped_tsv(zf, "news.tsv", ["id", "category", "subcategory", "title"])
         size = news_df.memory_usage(deep=True).sum()
         logger.info("loaded %d articles from %s (%.1f MiB)", len(news_df), archive, size / (1024 * 1024))
 
