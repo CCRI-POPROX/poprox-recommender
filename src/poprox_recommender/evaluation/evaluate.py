@@ -27,7 +27,7 @@ from progress_api import make_progress
 from poprox_concepts.domain import Article, ArticleSet
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.mind import MindData
-from poprox_recommender.evaluation.metrics import rank_biased_overlap
+from poprox_recommender.evaluation.metrics import ILD_EMBEDDING, ILD_TOPIC, intra_list_distance, rank_biased_overlap
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
@@ -75,8 +75,16 @@ def compute_rec_metric(user: UserRecs):
             single_rbo5 = None
             single_rbo10 = None
 
+        if ranked:
+            if reranked:
+                ild_topic = intra_list_distance(reranked, sim_type=ILD_EMBEDDING, k=10)
+            else:
+                ild_topic = intra_list_distance(ranked, sim_type=ILD_EMBEDDING, k=10)
+        else:
+            ild_topic = None
+
         logger.debug(
-            "user %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
+            "user %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f, ILD@10=%0.3f",
             user_id,
             name,
             single_ndcg5,
@@ -84,6 +92,7 @@ def compute_rec_metric(user: UserRecs):
             single_rr,
             single_rbo5 or -1.0,
             single_rbo10 or -1.0,
+            ild_topic or -1.0,
         )
 
         results.append(
@@ -94,6 +103,7 @@ def compute_rec_metric(user: UserRecs):
                 "MRR": single_rr,
                 "RBO@5": single_rbo5,
                 "RBO@10": single_rbo10,
+                "ILD@10": ild_topic,
                 "personalized": personalized,
             }
         )
