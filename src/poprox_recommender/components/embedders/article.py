@@ -112,3 +112,44 @@ class NRMSArticleEmbedder(Component):
         article_set.embeddings = embed_tensor  # type: ignore
 
         return article_set
+
+
+class EmbeddingCopier(Component):
+    @torch_inference
+    def __call__(self, candidate_set: ArticleSet, selected_set: ArticleSet) -> ArticleSet:
+        """
+        Copies article embeddings from a candidate set to a set of selected/recommended articles
+
+        Parameters
+        ----------
+        candidate_set : ArticleSet
+            A set of candidate articles with the `.embeddings` property filled in
+            (e.g. with ArticleEmbedder)
+        selected_set : ArticleSet
+            A set of selected or recommended articles chosen from `candidate_set`
+
+        Returns
+        -------
+        ArticleSet
+            selected_set with `.embeddings` set using the embeddings from `candidate_set`
+        """
+        candidate_article_ids = [article.article_id for article in candidate_set.articles]
+
+        assert_tensor_size(
+            candidate_set.embeddings,
+            len(candidate_article_ids),
+            candidate_set.embeddings.shape[1],
+            label="candidate article embeddings",
+        )
+
+        indices = [candidate_article_ids.index(article.article_id) for article in selected_set.articles]
+        selected_set.embeddings = candidate_set.embeddings[indices]
+
+        assert_tensor_size(
+            selected_set.embeddings,
+            len(selected_set.articles),
+            candidate_set.embeddings.shape[1],
+            label="copied article embeddings",
+        )
+
+        return selected_set
