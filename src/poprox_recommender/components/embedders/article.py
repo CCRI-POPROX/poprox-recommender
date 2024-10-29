@@ -135,6 +135,13 @@ class EmbeddingCopier(Component):
         """
         candidate_article_ids = [article.article_id for article in candidate_set.articles]
 
+        assert_tensor_size(
+            candidate_set.embeddings,
+            len(candidate_article_ids),
+            candidate_set.embeddings.shape[1],
+            label="candidate article embeddings",
+        )
+
         indices = [candidate_article_ids.index(article.article_id) for article in selected_set.articles]
         selected_set.embeddings = candidate_set.embeddings[indices]
 
