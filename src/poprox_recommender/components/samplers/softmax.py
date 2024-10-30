@@ -38,9 +38,12 @@ class SoftmaxSampler:
 
         # This is just bookkeeping to produce the final ordered list of recs
         sorted_indices = np.argsort(exponentials)
-        sampled = [candidate_articles.articles[idx] for idx in sorted_indices[: self.num_slots]]
+        wanted = sorted_indices[: self.num_slots]
+        sampled = [candidate_articles.articles[idx] for idx in wanted]
 
-        return ArticleSet(articles=sampled)
+        result = ArticleSet(articles=sampled)
+        result.scores = scores[wanted]
+        return result
 
 
 def sigmoid(x):
