@@ -1,3 +1,5 @@
+*.parquet
+*.duckdb
 /user-metrics.csv
 /user-metrics.csv.gz
 /mind-val-recommendations.parquet

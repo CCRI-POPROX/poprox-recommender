@@ -87,24 +87,37 @@ class RecListWriter:
         (rl_id,) = row
 
         scores = getattr(recs, "scores", None)
-        self.db.executemany(
-            """
-            INSERT INTO rec_list_articles (rl_id, rank, article_id, score)
-            VALUES (?, ?, ?, ?)
-            """,
-            [
-                [rl_id, i + 1, a.article_id, scores[i] if scores is not None else None]
-                for (i, a) in enumerate(recs.articles)
-            ],
-        )
+        rows = [
+            [rl_id, i + 1, a.article_id, scores[i] if scores is not None else None]
+            for (i, a) in enumerate(recs.articles)
+        ]
+        if rows:
+            self.db.executemany(
+                """
+                INSERT INTO rec_list_articles (rl_id, rank, article_id, score)
+                VALUES (?, ?, ?, ?)
+                """,
+                rows,
+            )
+        else:
+            logger.debug("user %s has empty list for stage %s", user, stage)
 
     def finish(self):
         "Finish writing.  The database remains open."
-        pass
+        if self._current_batch_size > 0:
+            logger.debug("commiting final result batch")
+            self.db.commit()
+            self._current_batch_size = 0
+
+        sql_file = SCHEMA_DIR / "rec-index.sql"
+
+        logger.info("applying index script %s", sql_file)
+        sql = sql_file.read_text()
+        self.db.execute(sql)
 
     def close(self):
         "Close the database."
-        pass
+        self.db.close()
 
     def __enter__(self):
         return self

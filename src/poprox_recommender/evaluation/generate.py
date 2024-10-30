@@ -10,7 +10,7 @@ Options:
     --log-file=FILE
             write log messages to FILE
     -o FILE, --output=FILE
-            write output to FILE [default: outputs/recommendations.parquet]
+            write output to FILE [default: outputs/recommendations.duckdb]
     -M DATA, --mind-data=DATA
             read MIND test data DATA [default: MINDsmall_dev]
     --subset=N
@@ -24,17 +24,14 @@ import itertools as it
 import logging
 import logging.config
 
-import numpy as np
-import pandas as pd
 from docopt import docopt
 from lenskit.util import Stopwatch
 from progress_api import make_progress
 
-from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
-from poprox_recommender.lkpipeline import PipelineState
+from poprox_recommender.evaluation.recdb import RecListWriter
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.recommenders import recommendation_pipelines
 
@@ -47,69 +44,12 @@ logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 STAGES = ["final", "ranked", "reranked"]
 
 
-def extract_recs(
-    name: str,
-    request: RecommendationRequest,
-    pipeline_state: PipelineState,
-) -> pd.DataFrame:
-    # recommendations {account id (uuid): LIST[Article]}
-    # use the url of Article
-    user = request.interest_profile.profile_id
-    assert user is not None
-
-    # get the different recommendation lists to record
-    recs = pipeline_state["recommender"]
-    rec_lists = [
-        pd.DataFrame(
-            {
-                "recommender": name,
-                "user": str(user),
-                "stage": "final",
-                "item": [str(a.article_id) for a in recs.articles],
-                "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
-            }
-        )
-    ]
-    ranked = pipeline_state.get("ranker", None)
-    if ranked is not None:
-        assert isinstance(ranked, ArticleSet)
-        rec_lists.append(
-            pd.DataFrame(
-                {
-                    "recommender": name,
-                    "user": str(user),
-                    "stage": "ranked",
-                    "item": [str(a.article_id) for a in ranked.articles],
-                    "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
-                }
-            )
-        )
-    reranked = pipeline_state.get("reranker", None)
-    if reranked is not None:
-        assert isinstance(reranked, ArticleSet)
-        rec_lists.append(
-            pd.DataFrame(
-                {
-                    "recommender": name,
-                    "user": str(user),
-                    "stage": "reranked",
-                    "item": [str(a.article_id) for a in reranked.articles],
-                    "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
-                }
-            )
-        )
-    output_df = pd.concat(rec_lists, ignore_index=True)
-    return output_df
-
-
-def generate_user_recs(dataset: str, n_users: int | None = None):
+def generate_user_recs(dataset: str, out: RecListWriter, n_users: int | None = None):
     mind_data = MindData(dataset)
 
     pipelines = recommendation_pipelines(device=default_device())
-    pipe_names = list(pipelines.keys())
 
     logger.info("generating recommendations")
-    user_recs = []
 
     user_iter = mind_data.iter_users()
     if n_users is None:
@@ -140,16 +80,12 @@ def generate_user_recs(dataset: str, n_users: int | None = None):
                 except Exception as e:
                     logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
                     raise e
-                user_df = extract_recs(name, request, outputs)
-                user_df["recommender"] = pd.Categorical(user_df["recommender"], categories=pipe_names)
-                user_df["stage"] = pd.Categorical(user_df["stage"].astype("category"), categories=STAGES)
-                user_recs.append(user_df)
+                out.store_results(name, request, outputs)
+
             pb.update()
 
     timer.stop()
     logger.info("finished recommending in %s", timer)
-
-    return user_recs
 
 
 if __name__ == "__main__":
@@ -163,11 +99,7 @@ if __name__ == "__main__":
     if n_users is not None:
         n_users = int(n_users)
 
-    user_recs = generate_user_recs(options["--mind-data"], n_users)
-
-    all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]
-    logger.info("saving recommendations to %s", out_fn)
-    all_recs.to_parquet(out_fn, compression="zstd", index=False)
-
-    # response = {"statusCode": 200, "body": json.dump(body, default=custom_encoder)}
+    logger.info("storing recommendations in %s", out_fn)
+    with RecListWriter(out_fn) as out:
+        generate_user_recs(options["--mind-data"], out, n_users)

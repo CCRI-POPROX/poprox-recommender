@@ -2,8 +2,9 @@
 
 -- list metadata — user, recommender etc.
 -- we're using varchar for the categoricals, duckdb should use dictionary encoding
+CREATE SEQUENCE rl_id START 1;
 CREATE TABLE rec_list_meta (
-    rl_id SERIAL PRIMARY KEY,
+    rl_id INTEGER PRIMARY KEY DEFAULT nextval('rl_id'),
     recommender VARCHAR NOT NULL,
     user_id UUID,
     stage VARCHAR NOT NULL,
