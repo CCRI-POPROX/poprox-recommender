@@ -54,8 +54,8 @@ stages:
     outs:
     - path: outputs/mind-small-recommendations.duckdb
       hash: md5
-      md5: 9f3a69e6ed2dbf5b8c4a11dc71f4158b
-      size: 438054912
+      md5: d6ec279bca3b6bc5b020904f1eb9b151
+      size: 465842176
   measure-mind-small:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small
     deps:
