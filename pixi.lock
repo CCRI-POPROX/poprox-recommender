@@ -48,6 +48,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -103,6 +104,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libblas-3.9.0-20_linux64_mkl.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcblas-3.9.0-20_linux64_mkl.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.21-h4bc722e_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20191231-he28a2e2_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libexpat-2.6.3-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libffi-3.4.2-h7f98852_5.tar.bz2
@@ -164,6 +166,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha2e5f31_6.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.11.10-hc5c86c4_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-gssapi-1.8.3-py311h0820609_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python_abi-3.11-5_cp311.conda
@@ -261,6 +264,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/duckdb-cli-1.1.2-h5833ebf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -315,6 +319,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcblas-3.9.0-24_osxarm64_openblas.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libdeflate-1.21-h99b78c6_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libduckdb-1.1.2-h475894c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libedit-3.1.20191231-hc8eb9b7_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.6.3-hf9b8971_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libffi-3.4.2-h3422bc3_5.tar.bz2
@@ -369,6 +374,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha2e5f31_6.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-3.11.10-h739c21a_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-duckdb-1.1.2-py311h6885ffc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-gssapi-1.8.3-py311hadfd579_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python_abi-3.11-5_cp311.conda
@@ -559,6 +565,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyh0701188_6.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-3.11.10-hce54a09_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/python-duckdb-1.1.2-py311hda3d55a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-gssapi-1.8.3-py311h8a3cce8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python_abi-3.11-5_cp311.conda
@@ -700,6 +707,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -784,6 +792,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcrc32c-1.1.2-h9c3ff4c_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.10.1-hbbe4b11_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.21-h4bc722e_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20191231-he28a2e2_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libev-4.33-hd590300_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libevent-2.1.12-hf998b51_1.conda
@@ -887,6 +896,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.11.10-hc5c86c4_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-blosc-1.11.2-py311h6dcdc2f_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-gssapi-1.8.3-py311h0820609_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-xxhash-3.5.0-py311h9ecbd09_1.conda
@@ -966,8 +976,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
@@ -1039,6 +1049,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/duckdb-cli-1.1.2-h5833ebf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -1122,6 +1133,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcurl-8.10.1-h13a7ad3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libdeflate-1.21-h99b78c6_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libduckdb-1.1.2-h475894c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libedit-3.1.20191231-hc8eb9b7_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libev-4.33-h93a5062_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libevent-2.1.12-h2757513_1.conda
@@ -1216,6 +1228,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-3.11.10-h739c21a_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-blosc-1.11.2-py311h57524c7_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-duckdb-1.1.2-py311h6885ffc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-gssapi-1.8.3-py311hadfd579_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-xxhash-3.5.0-py311h460d6c5_1.conda
@@ -1282,8 +1295,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
@@ -1519,6 +1532,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-3.11.10-hce54a09_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-blosc-1.11.2-py311hbc92ba2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/python-duckdb-1.1.2-py311hda3d55a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-gssapi-1.8.3-py311h8a3cce8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-xxhash-3.5.0-py311he736701_1.conda
@@ -1602,8 +1616,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
   dev:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -1703,6 +1717,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
@@ -1820,6 +1835,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcrc32c-1.1.2-h9c3ff4c_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.10.1-hbbe4b11_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.21-h4bc722e_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20191231-he28a2e2_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libev-4.33-hd590300_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libevent-2.1.12-hf998b51_1.conda
@@ -1944,6 +1960,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.11.10-hc5c86c4_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-blosc-1.11.2-py311h6dcdc2f_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-fastjsonschema-2.20.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-gssapi-1.8.3-py311h0820609_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-json-logger-2.0.7-pyhd8ed1ab_0.conda
@@ -2048,8 +2065,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -2140,6 +2157,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/duckdb-cli-1.1.2-h5833ebf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
@@ -2255,6 +2273,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcurl-8.10.1-h13a7ad3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libdeflate-1.21-h99b78c6_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libduckdb-1.1.2-h475894c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libedit-3.1.20191231-hc8eb9b7_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libev-4.33-h93a5062_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libevent-2.1.12-h2757513_1.conda
@@ -2372,6 +2391,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-3.11.10-h739c21a_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-blosc-1.11.2-py311h57524c7_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-duckdb-1.1.2-py311h6885ffc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-fastjsonschema-2.20.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-gssapi-1.8.3-py311hadfd579_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-json-logger-2.0.7-pyhd8ed1ab_0.conda
@@ -2462,8 +2482,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -2772,6 +2792,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-3.11.10-hce54a09_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-blosc-1.11.2-py311hbc92ba2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/python-duckdb-1.1.2-py311hda3d55a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-fastjsonschema-2.20.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-gssapi-1.8.3-py311h8a3cce8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-json-logger-2.0.7-pyhd8ed1ab_0.conda
@@ -2882,8 +2903,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
   dev-cuda:
     channels:
@@ -2988,6 +3009,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
@@ -3106,6 +3128,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcrc32c-1.1.2-h9c3ff4c_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.10.1-hbbe4b11_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.22-hb9d3cd8_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20191231-he28a2e2_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libev-4.33-hd590300_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libevent-2.1.12-hf998b51_1.conda
@@ -3234,6 +3257,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.11.10-hc5c86c4_3_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-blosc-1.11.2-py311h6dcdc2f_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-fastjsonschema-2.20.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-gssapi-1.9.0-py311h9db375c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-json-logger-2.0.7-pyhd8ed1ab_0.conda
@@ -3337,8 +3361,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
   eval:
     channels:
@@ -3420,6 +3444,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -3504,6 +3529,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcrc32c-1.1.2-h9c3ff4c_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.10.1-hbbe4b11_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.21-h4bc722e_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20191231-he28a2e2_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libev-4.33-hd590300_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libevent-2.1.12-hf998b51_1.conda
@@ -3607,6 +3633,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.11.10-hc5c86c4_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-blosc-1.11.2-py311h6dcdc2f_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-gssapi-1.8.3-py311h0820609_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-xxhash-3.5.0-py311h9ecbd09_1.conda
@@ -3686,8 +3713,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -3760,6 +3787,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/duckdb-cli-1.1.2-h5833ebf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -3843,6 +3871,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcurl-8.10.1-h13a7ad3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libdeflate-1.21-h99b78c6_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libduckdb-1.1.2-h475894c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libedit-3.1.20191231-hc8eb9b7_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libev-4.33-h93a5062_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libevent-2.1.12-h2757513_1.conda
@@ -3937,6 +3966,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-3.11.10-h739c21a_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-blosc-1.11.2-py311h57524c7_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-duckdb-1.1.2-py311h6885ffc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-gssapi-1.8.3-py311hadfd579_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-xxhash-3.5.0-py311h460d6c5_1.conda
@@ -4003,8 +4033,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -4241,6 +4271,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-3.11.10-hce54a09_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-blosc-1.11.2-py311hbc92ba2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/python-duckdb-1.1.2-py311hda3d55a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-gssapi-1.8.3-py311h8a3cce8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-xxhash-3.5.0-py311he736701_1.conda
@@ -4324,8 +4355,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
   eval-cuda:
     channels:
@@ -4411,6 +4442,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.6-pyhd8ed1ab_0.conda
@@ -4496,6 +4528,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcrc32c-1.1.2-h9c3ff4c_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.10.1-hbbe4b11_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.22-hb9d3cd8_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20191231-he28a2e2_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libev-4.33-hd590300_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libevent-2.1.12-hf998b51_1.conda
@@ -4603,6 +4636,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.11.10-hc5c86c4_3_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-blosc-1.11.2-py311h6dcdc2f_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-gssapi-1.9.0-py311h9db375c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-xxhash-3.5.0-py311h9ecbd09_1.conda
@@ -4681,8 +4715,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
   lint:
     channels:
@@ -4918,8 +4952,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/aiohttp-3.10.5-py311h460d6c5_1.conda
@@ -5134,8 +5168,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/aiohttp-3.10.5-py311he736701_1.conda
@@ -5342,8 +5376,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-3.20.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
   pkg:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -5398,6 +5432,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -5467,6 +5502,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libblas-3.9.0-20_linux64_mkl.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcblas-3.9.0-20_linux64_mkl.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.21-h4bc722e_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20191231-he28a2e2_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libexpat-2.6.3-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libffi-3.4.2-h7f98852_5.tar.bz2
@@ -5534,6 +5570,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha2e5f31_6.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.11.10-hc5c86c4_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-gssapi-1.8.3-py311h0820609_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python_abi-3.11-5_cp311.conda
@@ -5644,6 +5681,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/duckdb-cli-1.1.2-h5833ebf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -5711,6 +5749,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcblas-3.9.0-24_osxarm64_openblas.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libdeflate-1.21-h99b78c6_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libduckdb-1.1.2-h475894c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libedit-3.1.20191231-hc8eb9b7_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.6.3-hf9b8971_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libffi-3.4.2-h3422bc3_5.tar.bz2
@@ -5771,6 +5810,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyha2e5f31_6.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-3.11.10-h739c21a_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-duckdb-1.1.2-py311h6885ffc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-gssapi-1.8.3-py311hadfd579_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python_abi-3.11-5_cp311.conda
@@ -5991,6 +6031,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pysocks-1.7.1-pyh0701188_6.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-3.11.10-hce54a09_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/python-duckdb-1.1.2-py311hda3d55a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-gssapi-1.8.3-py311h8a3cce8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python_abi-3.11-5_cp311.conda
@@ -6370,6 +6411,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -6455,6 +6497,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcrc32c-1.1.2-h9c3ff4c_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.10.1-hbbe4b11_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.21-h4bc722e_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20191231-he28a2e2_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libev-4.33-hd590300_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libevent-2.1.12-hf998b51_1.conda
@@ -6560,6 +6603,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.11.10-hc5c86c4_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-blosc-1.11.2-py311h6dcdc2f_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-gssapi-1.8.3-py311h0820609_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/python-xxhash-3.5.0-py311h9ecbd09_1.conda
@@ -6639,8 +6683,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -6714,6 +6758,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/duckdb-cli-1.1.2-h5833ebf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
@@ -6798,6 +6843,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcurl-8.10.1-h13a7ad3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h3ed4263_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libdeflate-1.21-h99b78c6_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libduckdb-1.1.2-h475894c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libedit-3.1.20191231-hc8eb9b7_2.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libev-4.33-h93a5062_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libevent-2.1.12-h2757513_1.conda
@@ -6894,6 +6940,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-3.11.10-h739c21a_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-blosc-1.11.2-py311h57524c7_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-duckdb-1.1.2-py311h6885ffc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-gssapi-1.8.3-py311hadfd579_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-xxhash-3.5.0-py311h460d6c5_1.conda
@@ -6960,8 +7007,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -7204,6 +7251,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-3.11.10-hce54a09_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-blosc-1.11.2-py311hbc92ba2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.9.0-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/python-duckdb-1.1.2-py311hda3d55a_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-gssapi-1.8.3-py311h8a3cce8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/python-tzdata-2024.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/python-xxhash-3.5.0-py311he736701_1.conda
@@ -7287,8 +7335,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
+      - pypi: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
       - pypi: .
 packages:
 - kind: conda
@@ -10014,38 +10062,6 @@ packages:
   - libglib >=2.80.3,<3.0a0
   - libpng >=1.6.43,<1.7.0a0
   - libstdcxx-ng >=12
-  - libxcb >=1.16,<1.17.0a0
-  - libzlib >=1.3.1,<2.0a0
-  - pixman >=0.43.2,<1.0a0
-  - xorg-libice >=1.1.1,<2.0a0
-  - xorg-libsm >=1.2.4,<2.0a0
-  - xorg-libx11 >=1.8.9,<2.0a0
-  - xorg-libxext >=1.3.4,<2.0a0
-  - xorg-libxrender >=0.9.11,<0.10.0a0
-  - zlib
-  license: LGPL-2.1-only or MPL-1.1
-  purls: []
-  size: 983604
-  timestamp: 1721138900054
-- kind: conda
-  name: cairo
-  version: 1.18.0
-  build: hebfffa5_3
-  build_number: 3
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/cairo-1.18.0-hebfffa5_3.conda
-  sha256: aee5b9e6ef71cdfb2aee9beae3ea91910ca761c01c0ef32052e3f94a252fa173
-  md5: fceaedf1cdbcb02df9699a0d9b005292
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - fontconfig >=2.14.2,<3.0a0
-  - fonts-conda-ecosystem
-  - freetype >=2.12.1,<3.0a0
-  - icu >=75.1,<76.0a0
-  - libgcc-ng >=12
-  - libglib >=2.80.3,<3.0a0
-  - libpng >=1.6.43,<1.7.0a0
-  - libstdcxx-ng >=12
   - libxcb >=1.16,<2.0.0a0
   - libzlib >=1.3.1,<2.0a0
   - pixman >=0.43.2,<1.0a0
@@ -11102,6 +11118,41 @@ packages:
   size: 21344
   timestamp: 1718243548474
 - kind: conda
+  name: duckdb-cli
+  version: 1.1.2
+  build: h5833ebf_0
+  subdir: osx-arm64
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/duckdb-cli-1.1.2-h5833ebf_0.conda
+  sha256: 7242102bbc4d79ad83be5d45d305a9c1ab9fc8e052a8128c07ff1c3f4119fa9f
+  md5: 53f8ad4921bc97faf782341a0613d40d
+  depends:
+  - __osx >=11.0
+  - libcxx >=17
+  - libduckdb 1.1.2 h475894c_0
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 166431
+  timestamp: 1728926105930
+- kind: conda
+  name: duckdb-cli
+  version: 1.1.2
+  build: h5888daf_0
+  subdir: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/duckdb-cli-1.1.2-h5888daf_0.conda
+  sha256: dad18dedecd64cdadf8e3b467b75b60aca6ff75c12363b2e73d826e482364d2c
+  md5: b14b225f6a10faa9c3a613e02305c010
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - libduckdb 1.1.2 h1b44611_0
+  - libgcc >=13
+  - libstdcxx >=13
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 257447
+  timestamp: 1728926247151
+- kind: conda
   name: dulwich
   version: 0.22.1
   build: py311h481aa64_1
@@ -12027,23 +12078,6 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/fsspec?source=compressed-mapping
-  size: 134378
-  timestamp: 1725543368393
-- kind: conda
-  name: fsspec
-  version: 2024.9.0
-  build: pyhff2d567_0
-  subdir: noarch
-  noarch: python
-  url: https://conda.anaconda.org/conda-forge/noarch/fsspec-2024.9.0-pyhff2d567_0.conda
-  sha256: 8f4e9805b4ec223dea0d99f9e7e57c391d9026455eb9f0d6e0784c5d1a1200dc
-  md5: ace4329fbff4c69ab0309db6da182987
-  depends:
-  - python >=3.8
-  license: BSD-3-Clause
-  license_family: BSD
-  purls:
   - pkg:pypi/fsspec?source=hash-mapping
   size: 134378
   timestamp: 1725543368393
@@ -12101,25 +12135,6 @@ packages:
   purls: []
   size: 509570
   timestamp: 1715783199780
-- kind: conda
-  name: gdk-pixbuf
-  version: 2.42.12
-  build: hb9ae30d_0
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/gdk-pixbuf-2.42.12-hb9ae30d_0.conda
-  sha256: d5283b95a8d49dcd88d29b360d8b38694aaa905d968d156d72ab71d32b38facb
-  md5: 201db6c2d9a3c5e46573ac4cb2e92f4f
-  depends:
-  - libgcc-ng >=12
-  - libglib >=2.80.2,<3.0a0
-  - libjpeg-turbo >=3.0.0,<4.0a0
-  - libpng >=1.6.43,<1.7.0a0
-  - libtiff >=4.6.0,<4.7.0a0
-  license: LGPL-2.1-or-later
-  license_family: LGPL
-  purls: []
-  size: 528149
-  timestamp: 1715782983957
 - kind: conda
   name: gdk-pixbuf
   version: 2.42.12
@@ -14688,50 +14703,6 @@ packages:
   - libgcc >=13
   - libgoogle-cloud >=2.29.0,<2.30.0a0
   - libgoogle-cloud-storage >=2.29.0,<2.30.0a0
-  - libre2-11 >=2023.9.1,<2024.0a0
-  - libstdcxx >=13
-  - libutf8proc >=2.8.0,<3.0a0
-  - libzlib >=1.3.1,<2.0a0
-  - lz4-c >=1.9.3,<1.10.0a0
-  - orc >=2.0.2,<2.0.3.0a0
-  - re2
-  - snappy >=1.2.1,<1.3.0a0
-  - zstd >=1.5.6,<1.6.0a0
-  constrains:
-  - parquet-cpp <0.0a0
-  - arrow-cpp <0.0a0
-  - apache-arrow-proc =*=cpu
-  license: Apache-2.0
-  purls: []
-  size: 8495428
-  timestamp: 1726669963852
-- kind: conda
-  name: libarrow
-  version: 17.0.0
-  build: had3b6fe_16_cpu
-  build_number: 16
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-17.0.0-had3b6fe_16_cpu.conda
-  sha256: 9aa5598878cccc29de744ebc4b501c4a5a43332973edfdf0a19ddc521bd7248f
-  md5: c899e532e16be21570d32bc74ea3d34f
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - aws-crt-cpp >=0.28.3,<0.28.4.0a0
-  - aws-sdk-cpp >=1.11.407,<1.11.408.0a0
-  - azure-core-cpp >=1.13.0,<1.13.1.0a0
-  - azure-identity-cpp >=1.8.0,<1.8.1.0a0
-  - azure-storage-blobs-cpp >=12.12.0,<12.12.1.0a0
-  - azure-storage-files-datalake-cpp >=12.11.0,<12.11.1.0a0
-  - bzip2 >=1.0.8,<2.0a0
-  - gflags >=2.2.2,<2.3.0a0
-  - glog >=0.7.1,<0.8.0a0
-  - libabseil * cxx17*
-  - libabseil >=20240116.2,<20240117.0a0
-  - libbrotlidec >=1.1.0,<1.2.0a0
-  - libbrotlienc >=1.1.0,<1.2.0a0
-  - libgcc >=13
-  - libgoogle-cloud >=2.29.0,<2.30.0a0
-  - libgoogle-cloud-storage >=2.29.0,<2.30.0a0
   - libre2-11 >=2023.9.1
   - libstdcxx >=13
   - libutf8proc >=2.8.0,<3.0a0
@@ -14807,24 +14778,6 @@ packages:
   - libgcc >=13
   - libstdcxx >=13
   license: Apache-2.0
-  purls: []
-  size: 608267
-  timestamp: 1726669999941
-- kind: conda
-  name: libarrow-acero
-  version: 17.0.0
-  build: h5888daf_16_cpu
-  build_number: 16
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-acero-17.0.0-h5888daf_16_cpu.conda
-  sha256: 0ff4c712c7c61e60708c6ef4f8158200059e0f63c25d0a54c8e4cca7bd153d86
-  md5: 18f796aae018a26a20ac51d19de69115
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - libarrow 17.0.0 had3b6fe_16_cpu
-  - libgcc >=13
-  - libstdcxx >=13
-  license: Apache-2.0
   license_family: APACHE
   purls: []
   size: 608267
@@ -14883,26 +14836,6 @@ packages:
   purls: []
   size: 483187
   timestamp: 1726670022814
-- kind: conda
-  name: libarrow-dataset
-  version: 17.0.0
-  build: h5888daf_16_cpu
-  build_number: 16
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-dataset-17.0.0-h5888daf_16_cpu.conda
-  sha256: e500e0154cf3ebb41bed3bdf41bd0ff5e0a6b7527a46ba755c05e59c8036e442
-  md5: 5400efd6bf101674e0ce170906a0f7cb
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - libarrow 17.0.0 had3b6fe_16_cpu
-  - libarrow-acero 17.0.0 h5888daf_16_cpu
-  - libgcc >=13
-  - libparquet 17.0.0 h39682fd_16_cpu
-  - libstdcxx >=13
-  license: Apache-2.0
-  purls: []
-  size: 585061
-  timestamp: 1726670063965
 - kind: conda
   name: libarrow-dataset
   version: 17.0.0
@@ -15053,29 +14986,6 @@ packages:
   purls: []
   size: 515581
   timestamp: 1728881756281
-- kind: conda
-  name: libarrow-substrait
-  version: 17.0.0
-  build: hf54134d_16_cpu
-  build_number: 16
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-substrait-17.0.0-hf54134d_16_cpu.conda
-  sha256: 53f3d5f12c9ea557f33a4e1cf9067ce2dbb4211eff0a095574eeb7f0528bc044
-  md5: 1cbc3fb1ee28c99e5f8c52920a7717a3
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - libabseil * cxx17*
-  - libabseil >=20240116.2,<20240117.0a0
-  - libarrow 17.0.0 had3b6fe_16_cpu
-  - libarrow-acero 17.0.0 h5888daf_16_cpu
-  - libarrow-dataset 17.0.0 h5888daf_16_cpu
-  - libgcc >=13
-  - libprotobuf >=4.25.3,<4.25.4.0a0
-  - libstdcxx >=13
-  license: Apache-2.0
-  purls: []
-  size: 550960
-  timestamp: 1726670093831
 - kind: conda
   name: libarrow-substrait
   version: 17.0.0
@@ -15612,6 +15522,41 @@ packages:
   size: 72242
   timestamp: 1728177071251
 - kind: conda
+  name: libduckdb
+  version: 1.1.2
+  build: h1b44611_0
+  subdir: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/libduckdb-1.1.2-h1b44611_0.conda
+  sha256: cf79dc2866aa8832c3c247cb7369a944ba03df9ffbe4cb0360e9947232bed204
+  md5: c3f1253e8034d3857c8c7c3b0ff3bc90
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - libgcc >=13
+  - libstdcxx >=13
+  - openssl >=3.3.2,<4.0a0
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 9251072
+  timestamp: 1728926214796
+- kind: conda
+  name: libduckdb
+  version: 1.1.2
+  build: h475894c_0
+  subdir: osx-arm64
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/libduckdb-1.1.2-h475894c_0.conda
+  sha256: 2d087dc250de80aa41de45416bb56ceee783a917ea00250c268a8e425202fdba
+  md5: 06612e00105d35f690350c24de361f2e
+  depends:
+  - __osx >=11.0
+  - libcxx >=17
+  - openssl >=3.3.2,<4.0a0
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 6531851
+  timestamp: 1728925942693
+- kind: conda
   name: libedit
   version: 3.1.20191231
   build: hc8eb9b7_2
@@ -15953,33 +15898,6 @@ packages:
   purls: []
   size: 200309
   timestamp: 1722928354606
-- kind: conda
-  name: libgd
-  version: 2.3.3
-  build: hd3e95f3_10
-  build_number: 10
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libgd-2.3.3-hd3e95f3_10.conda
-  sha256: b0fa27d4d09fb24750c04e89dbd0aee898dc028bde99e62621065a9bde43efe8
-  md5: 30ee3a29c84cf7b842a8c5828c4b7c13
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - fontconfig >=2.14.2,<3.0a0
-  - fonts-conda-ecosystem
-  - freetype >=2.12.1,<3.0a0
-  - icu >=75.1,<76.0a0
-  - libexpat >=2.6.2,<3.0a0
-  - libgcc-ng >=12
-  - libjpeg-turbo >=3.0.0,<4.0a0
-  - libpng >=1.6.43,<1.7.0a0
-  - libtiff >=4.6.0,<4.7.0a0
-  - libwebp-base >=1.4.0,<2.0a0
-  - libzlib >=1.3.1,<2.0a0
-  license: GD
-  license_family: BSD
-  purls: []
-  size: 225113
-  timestamp: 1722928278395
 - kind: conda
   name: libgd
   version: 2.3.3
@@ -16514,32 +16432,6 @@ packages:
   - libabseil >=20240116.1,<20240117.0a0
   - libgcc-ng >=12
   - libprotobuf >=4.25.3,<4.25.4.0a0
-  - libre2-11 >=2023.9.1,<2024.0a0
-  - libstdcxx-ng >=12
-  - libzlib >=1.2.13,<2.0.0a0
-  - openssl >=3.2.1,<4.0a0
-  - re2
-  constrains:
-  - grpc-cpp =1.62.2
-  license: Apache-2.0
-  license_family: APACHE
-  purls: []
-  size: 7316832
-  timestamp: 1713390645548
-- kind: conda
-  name: libgrpc
-  version: 1.62.2
-  build: h15f2491_0
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libgrpc-1.62.2-h15f2491_0.conda
-  sha256: 28241ed89335871db33cb6010e9ccb2d9e9b6bb444ddf6884f02f0857363c06a
-  md5: 8dabe607748cb3d7002ad73cd06f1325
-  depends:
-  - c-ares >=1.28.1,<2.0a0
-  - libabseil * cxx17*
-  - libabseil >=20240116.1,<20240117.0a0
-  - libgcc-ng >=12
-  - libprotobuf >=4.25.3,<4.25.4.0a0
   - libre2-11 >=2023.9.1
   - libstdcxx-ng >=12
   - libzlib >=1.2.13,<2.0.0a0
@@ -17057,26 +16949,6 @@ packages:
   purls: []
   size: 5563053
   timestamp: 1720426334043
-- kind: conda
-  name: libparquet
-  version: 17.0.0
-  build: h39682fd_16_cpu
-  build_number: 16
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libparquet-17.0.0-h39682fd_16_cpu.conda
-  sha256: 09bc64111e5e1e9f5fee78efdd62592e01c681943fe6e91b369f6580dc8726c4
-  md5: dd1fee2da0659103080fdd74004656df
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - libarrow 17.0.0 had3b6fe_16_cpu
-  - libgcc >=13
-  - libstdcxx >=13
-  - libthrift >=0.20.0,<0.20.1.0a0
-  - openssl >=3.3.2,<4.0a0
-  license: Apache-2.0
-  purls: []
-  size: 1186069
-  timestamp: 1726670048098
 - kind: conda
   name: libparquet
   version: 17.0.0
@@ -19381,27 +19253,6 @@ packages:
   - openssl >=3.3.2,<4.0a0
   - zlib
   license: MIT
-  purls: []
-  size: 21198038
-  timestamp: 1726661026112
-- kind: conda
-  name: nodejs
-  version: 22.9.0
-  build: hf235a45_0
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/nodejs-22.9.0-hf235a45_0.conda
-  sha256: 1bc6445b7ecb3bff478d5a11eb3504e45eb5a3cdde24c6ec7339f80c193d24c8
-  md5: 40255c9ffb722d614b02ca7aaee6abcb
-  depends:
-  - __glibc >=2.28,<3.0.a0
-  - icu >=75.1,<76.0a0
-  - libgcc >=13
-  - libstdcxx >=13
-  - libuv >=1.48.0,<2.0a0
-  - libzlib >=1.3.1,<2.0a0
-  - openssl >=3.3.2,<4.0a0
-  - zlib
-  license: MIT
   license_family: MIT
   purls: []
   size: 21198038
@@ -20556,7 +20407,7 @@ packages:
 - kind: pypi
   name: poprox-concepts
   version: 0.0.1
-  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
+  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3521652ed600eca3f1b6f5812751ee78d3f67b45
   requires_dist:
   - pydantic~=2.7.1
   requires_python: '>=3.10'
@@ -20677,8 +20528,32 @@ packages:
   requires_python: '>=3.10'
 - kind: pypi
   name: progress-api
-  version: 0.1.0a10.dev2+g870ee4c
-  url: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+  version: 0.1.0a10.dev3+ga5a3e73
+  url: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
+  requires_dist:
+  - setuptools>=64 ; extra == 'dev'
+  - setuptools-scm>=8 ; extra == 'dev'
+  - build==1.* ; extra == 'dev'
+  - ruff>=0.2 ; extra == 'dev'
+  - pyright ; extra == 'dev'
+  - copier==9.* ; extra == 'dev'
+  - unbeheader~=1.3 ; extra == 'dev'
+  - ipython ; extra == 'dev'
+  - pyproject2conda ; extra == 'dev'
+  - sphinx-autobuild ; extra == 'dev'
+  - enlighten==1.* ; extra == 'dev'
+  - tqdm==4.* ; extra == 'dev'
+  - sphinx>=4.2 ; extra == 'doc'
+  - sphinxext-opengraph>=0.5 ; extra == 'doc'
+  - furo ; extra == 'doc'
+  - enlighten ; extra == 'doc'
+  - tqdm ; extra == 'doc'
+  - pytest>=7 ; extra == 'test'
+  requires_python: '>=3.10'
+- kind: pypi
+  name: progress-api
+  version: 0.1.0a10.dev3+ga5a3e73
+  url: git+https://github.com/lenskit/progress-api@a5a3e730b080570b787e78a1e7d3918eff660e51
   requires_dist:
   - setuptools>=64 ; extra == 'dev'
   - setuptools-scm>=8 ; extra == 'dev'
@@ -21949,6 +21824,69 @@ packages:
   - pkg:pypi/python-dateutil?source=hash-mapping
   size: 222742
   timestamp: 1709299922152
+- kind: conda
+  name: python-duckdb
+  version: 1.1.2
+  build: py311h6885ffc_1
+  build_number: 1
+  subdir: osx-arm64
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/python-duckdb-1.1.2-py311h6885ffc_1.conda
+  sha256: 2e4f2a129e7e64a696d996de40ba219b36a0b5b29167997ad6bccc5f7438eaab
+  md5: 237c0e32e8948cc520565eb3a6c2a07e
+  depends:
+  - __osx >=11.0
+  - libcxx >=17
+  - python >=3.11,<3.12.0a0
+  - python >=3.11,<3.12.0a0 *_cpython
+  - python_abi 3.11.* *_cp311
+  license: MIT
+  license_family: MIT
+  purls:
+  - pkg:pypi/duckdb?source=hash-mapping
+  size: 20431992
+  timestamp: 1729758992188
+- kind: conda
+  name: python-duckdb
+  version: 1.1.2
+  build: py311hda3d55a_1
+  build_number: 1
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/python-duckdb-1.1.2-py311hda3d55a_1.conda
+  sha256: ec242777800709eaca2dec3618db284f666f8cacc15d8a6de2f3de9ce154d6a1
+  md5: fe9c55ca8cb87e47797de1e811609ce9
+  depends:
+  - python >=3.11,<3.12.0a0
+  - python_abi 3.11.* *_cp311
+  - ucrt >=10.0.20348.0
+  - vc >=14.2,<15
+  - vc14_runtime >=14.29.30139
+  license: MIT
+  license_family: MIT
+  purls:
+  - pkg:pypi/duckdb?source=hash-mapping
+  size: 16987475
+  timestamp: 1729759056429
+- kind: conda
+  name: python-duckdb
+  version: 1.1.2
+  build: py311hfdbb021_1
+  build_number: 1
+  subdir: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/python-duckdb-1.1.2-py311hfdbb021_1.conda
+  sha256: 68e8494cea1e9c921941d62c15b6bf7d1e476af0cd05498e877e5a5257c9d71a
+  md5: a489c660bed1df2a040066161c7bf26e
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - libgcc >=13
+  - libstdcxx >=13
+  - python >=3.11,<3.12.0a0
+  - python_abi 3.11.* *_cp311
+  license: MIT
+  license_family: MIT
+  purls:
+  - pkg:pypi/duckdb?source=hash-mapping
+  size: 24286854
+  timestamp: 1729759054001
 - kind: conda
   name: python-fastjsonschema
   version: 2.20.0

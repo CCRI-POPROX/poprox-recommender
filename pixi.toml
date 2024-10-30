@@ -86,6 +86,11 @@ dvc-s3 = "*"
 # keep below dependencies synchronized with 'eval' extra deps in pyproject.toml
 docopt = ">=0.6"
 pandas = "~=2.0"
+python-duckdb = "~=1.1"
+
+# not yet available for windows
+[feature.data.target.unix.dependencies]
+duckdb-cli = "~=1.1"
 
 # dependencies for running the evaluation code
 
