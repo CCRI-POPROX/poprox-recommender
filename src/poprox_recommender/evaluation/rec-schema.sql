@@ -15,7 +15,6 @@ CREATE TABLE rec_list_articles (
     rank INT16 NOT NULL,
     article_id UUID NOT NULL,
     score FLOAT NULL,
-    embedding FLOAT[] NULL,
 );
 
 -- LensKit-compatible view of final recommendation data
