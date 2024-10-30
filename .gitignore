@@ -150,6 +150,12 @@ bower_components/
 Thumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+
 # pixi environments
 .pixi
 *.egg-info
+
+# database working files
+*.wal
+*.sqlite-journal
+*.sqlite-wal
