@@ -11,7 +11,7 @@ class ReciprocalRankFusion(Component):
 
     def __call__(self, candidates1: ArticleSet, candidates2: Lazy[ArticleSet]) -> ArticleSet:
         articles = candidates1.articles
-        article_scores = defaultdict(int)
+        article_scores = defaultdict(float)
         articles_by_id = {}
 
         i = 1
