@@ -12,7 +12,7 @@ CREATE TABLE rec_list_meta (
 -- individual articles in a recommendation list
 CREATE TABLE rec_list_articles (
     rl_id INTEGER NOT NULL,
-    rank INTEGER NOT NULL,
+    rank INT16 NOT NULL,
     article_id UUID NOT NULL,
     score FLOAT NULL,
     embedding FLOAT[] NULL,
