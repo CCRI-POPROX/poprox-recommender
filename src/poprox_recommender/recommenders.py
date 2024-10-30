@@ -15,6 +15,7 @@ from poprox_recommender.components.joiners import Fill
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers import SoftmaxSampler, UniformSampler
 from poprox_recommender.components.scorers import ArticleScorer
+from poprox_recommender.components.summarizer import Summarizer
 from poprox_recommender.config import default_device
 from poprox_recommender.lkpipeline import Pipeline, PipelineState
 from poprox_recommender.paths import model_file_path
@@ -94,7 +95,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     topic_calibrator = TopicCalibrator(num_slots=num_slots)
     sampler = SoftmaxSampler(num_slots=num_slots, temperature=30.0)
 
-    nrms_pipe = build_pipeline(
+    nrms_pipe, _ = build_pipeline(
         "plain-NRMS",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
@@ -102,7 +103,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    mmr_pipe = build_pipeline(
+    mmr_pipe, _ = build_pipeline(
         "NRMS+MMR",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
@@ -110,7 +111,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    pfar_pipe = build_pipeline(
+    pfar_pipe, _ = build_pipeline(
         "NRMS+PFAR",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
@@ -118,7 +119,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    topic_cali_pipe = build_pipeline(
+    topic_cali_pipe, _ = build_pipeline(
         "NRMS+Topic+Calibration",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
@@ -126,7 +127,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    locality_cali_pipe = build_pipeline(
+    locality_cali_pipe, _ = build_pipeline(
         "NRMS+Locality+Calibration",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
@@ -134,13 +135,25 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    softmax_pipe = build_pipeline(
+    softmax_pipe, _ = build_pipeline(
         "NRMS+Softmax",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
         ranker=sampler,
         num_slots=num_slots,
     )
+
+    summarizer_pipeline, recs_output = build_pipeline(
+        "NRMS+Softmax+Summarizer",
+        article_embedder=article_embedder,
+        user_embedder=user_embedder,
+        ranker=sampler,
+        num_slots=num_slots,
+    )
+
+    summarizer = Summarizer()
+
+    summarizer_pipeline.add_component("recommender", summarizer, article_set=recs_output)
 
     return {
         "nrms": nrms_pipe,
@@ -149,6 +162,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         "topic-cali": topic_cali_pipe,
         "locality-cali": locality_cali_pipe,
         "softmax": softmax_pipe,
+        "summarizer": summarizer_pipeline,
     }
 
 
@@ -182,6 +196,6 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
     o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
-    pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
+    o_recs = pipeline.add_component("fill", fill, candidates1=o_rank, candidates2=o_sampled)
 
-    return pipeline
+    return pipeline, o_recs
