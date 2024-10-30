@@ -41,7 +41,7 @@ stages:
       md5: 89894b06cf63b54cc216d10a301d8d8f
       size: 40956994
   recommend-mind-small:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small-recommendations.parquet
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small-recommendations.duckdb
     deps:
     - path: data/MINDsmall_dev.zip
       hash: md5
@@ -49,13 +49,13 @@ stages:
       size: 30948560
     - path: src/poprox_recommender/evaluation/generate.py
       hash: md5
-      md5: c284d38f83ec700c25e5ab675491302e
-      size: 5906
+      md5: bccd38757719e88855ef74745145adf1
+      size: 3494
     outs:
-    - path: outputs/mind-small-recommendations.parquet
+    - path: outputs/mind-small-recommendations.duckdb
       hash: md5
-      md5: 9089f88fdf32c5b596d1580d0af19a93
-      size: 8223302
+      md5: 9f3a69e6ed2dbf5b8c4a11dc71f4158b
+      size: 438054912
   measure-mind-small:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small
     deps:
