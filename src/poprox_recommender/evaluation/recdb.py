@@ -2,21 +2,32 @@
 Interface to database storing recommendation results.
 """
 
+import os
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
+from typing import NamedTuple
 from uuid import UUID
 
 import duckdb
+import numpy as np
+import pandas as pd
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.lkpipeline import PipelineState
 
-RLW_TRANSACTION_SIZE = 1000
+RLW_TRANSACTION_SIZE = 2500
 SCHEMA_DIR = Path(__file__).parent
 
 logger = getLogger(__name__)
+
+
+class RecListMeta(NamedTuple):
+    rl_id: int
+    recommender: str
+    user_id: UUID
+    stage: str
 
 
 class RecListWriter:
@@ -30,18 +41,23 @@ class RecListWriter:
 
     path: Path
     db: duckdb.DuckDBPyConnection
-    _current_batch_size: int = 0
+    batch_size: int = RLW_TRANSACTION_SIZE
+    _current_batch_meta: list[RecListMeta]
+    _current_batch_articles: list[pd.DataFrame]
+    _last_rl_id: int = 0
 
     def __init__(self, path: PathLike[str]):
         self.path = Path(path)
         self.db = duckdb.connect(self.path)
         self._init_db()
 
-    def store_results(self, name: str, request: RecommendationRequest, pipeline_state: PipelineState) -> None:
-        if self._current_batch_size == 0:
-            logger.debug("beginning database transaction")
-            self.db.begin()
+        if "POPROX_BATCH_SIZE" in os.environ:
+            self.batch_size = int(os.environ["POPROX_BATCH_SIZE"])
 
+        self._current_batch_meta = []
+        self._current_batch_articles = []
+
+    def store_results(self, name: str, request: RecommendationRequest, pipeline_state: PipelineState) -> None:
         user = request.interest_profile.profile_id
         assert user is not None, "no user ID specified"
 
@@ -59,11 +75,8 @@ class RecListWriter:
             assert isinstance(reranked, ArticleSet)
             self._store_list(name, user, "ranked", reranked)
 
-        self._current_batch_size += 1
-        if self._current_batch_size >= RLW_TRANSACTION_SIZE:
-            logger.debug("commiting result batch")
-            self.db.commit()
-            self._current_batch_size = 0
+        if len(self._current_batch_meta) >= self.batch_size:
+            self._save_batch()
 
     def _init_db(self):
         "Initialize the database schema."
@@ -74,40 +87,51 @@ class RecListWriter:
         self.db.execute(sql)
 
     def _store_list(self, name: str, user: UUID, stage: str, recs: ArticleSet):
-        self.db.execute(
-            """
-            INSERT INTO rec_list_meta (recommender, user_id, stage)
-            VALUES (?, ?, ?)
-            RETURNING rl_id
-            """,
-            [name, user, stage],
-        )
-        row = self.db.fetchone()
-        assert row is not None, "failed to fetch insert result"
-        (rl_id,) = row
+        self._last_rl_id += 1
+        rl_id = self._last_rl_id
 
-        scores = getattr(recs, "scores", None)
-        rows = [
-            [rl_id, i + 1, a.article_id, scores[i] if scores is not None else None]
-            for (i, a) in enumerate(recs.articles)
-        ]
-        if rows:
-            self.db.executemany(
-                """
-                INSERT INTO rec_list_articles (rl_id, rank, article_id, score)
-                VALUES (?, ?, ?, ?)
-                """,
-                rows,
+        self._current_batch_meta.append(RecListMeta(rl_id, name, user, stage))
+
+        if recs.articles:
+            rows = pd.DataFrame(
+                {
+                    "rl_id": rl_id,
+                    "rank": np.arange(1, len(recs.articles) + 1),
+                    "article_id": [a.article_id for a in recs.articles],
+                }
             )
+            scores = getattr(recs, "scores", None)
+            if scores is not None:
+                rows["score"] = scores
+            self._current_batch_articles.append(rows)
         else:
             logger.debug("user %s has empty list for stage %s", user, stage)
 
+    def _save_batch(self):
+        if not self._current_batch_meta:
+            return
+
+        meta_df = pd.DataFrame.from_records(self._current_batch_meta)
+        article_df = pd.concat(self._current_batch_articles, ignore_index=True)
+        aq_cols = ", ".join(article_df.columns)
+        a_query = f"INSERT INTO rec_list_articles ({aq_cols}) SELECT * FROM article_df"
+        logger.debug("saving batch of %d lists", len(meta_df))
+
+        self.db.begin()
+        try:
+            self.db.from_df(meta_df).insert_into("rec_list_meta")
+            self.db.execute(a_query)
+            self.db.commit()
+        except Exception as e:
+            self.db.rollback()
+            raise e
+
+        self._current_batch_meta = []
+        self._current_batch_articles = []
+
     def finish(self):
         "Finish writing.  The database remains open."
-        if self._current_batch_size > 0:
-            logger.debug("commiting final result batch")
-            self.db.commit()
-            self._current_batch_size = 0
+        self._save_batch()
 
         sql_file = SCHEMA_DIR / "rec-index.sql"
 
