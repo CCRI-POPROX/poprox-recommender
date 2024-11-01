@@ -22,17 +22,8 @@ def extract_locality_topics(article: Article) -> set[str]:
     return article_topics.intersection(locality_topics)
 
 
-def extract_locality_codes(article: Article) -> set[str]:
-    if "raw_data" in article and "subject" in article.raw_data:
-        article_codes = set([sub.code for sub in article.raw_data.subject if sub.code and len(sub.code) == 1])
-        locality_codes = ["a", "i", "w"]
-        return article_codes.intersection(locality_codes)
-    return []
-
-
 def extract_locality(article: Article) -> list[str]:
     topics = extract_general_topics(article)
-    codes = extract_locality_codes(article)
 
     us_criteria = ("U.S. news" in topics) or ("a" in codes)
     world_criteria = ("World news" in topics) or ("i" in codes)
