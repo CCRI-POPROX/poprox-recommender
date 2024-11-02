@@ -69,7 +69,6 @@ start-serverless = { cmd = "npx serverless offline start --reloadHandler", depen
 hatch = "*"
 ipython = ">=8"
 notebook = ">=7.2"
-jupytext = ">=1.16"
 
 # tooling for environments, data, and evaluation
 [feature.data.dependencies]
@@ -77,6 +76,9 @@ dvc = "~=3.51"
 dvc-s3 = "*"
 docopt = ">=0.6"
 pandas = "~=2.0"
+matplotlib = "~=3.6"
+seaborn = "~=0.13.2"
+jupytext = ">=1.16"
 
 [feature.data.pypi-dependencies]
 poprox-recommender = { path = ".", editable = true }
