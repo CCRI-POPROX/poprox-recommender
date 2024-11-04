@@ -15,7 +15,7 @@ stages:
       - data/MINDlarge_dev.zip
       - outputs/mind-val/recommendations.parquet
     outs:
-      - outputs/mind-val-user-metrics.csv.gz
+      - outputs/mind-val/mind-val-user-metrics.csv.gz
     metrics:
       - outputs/mind-val-metrics.csv:
           cache: false
@@ -35,7 +35,7 @@ stages:
       - data/MINDlarge_dev.zip
       - outputs/mind-small/recommendations.parquet
     outs:
-      - outputs/mind-small-user-metrics.csv.gz
+      - outputs/mind-small/mind-small-user-metrics.csv.gz
     metrics:
       - outputs/mind-small-metrics.csv:
           cache: false
