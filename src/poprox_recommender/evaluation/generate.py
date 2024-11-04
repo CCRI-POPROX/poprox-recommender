@@ -9,8 +9,8 @@ Options:
             enable verbose diagnostic logs
     --log-file=FILE
             write log messages to FILE
-    -o FILE, --output=FILE
-            write output to FILE [default: outputs/recommendations.parquet]
+    -o PATH, --output-path=PATH
+            write output to PATH [default: outputs/]
     -M DATA, --mind-data=DATA
             read MIND test data DATA [default: MINDsmall_dev]
     --subset=N
@@ -23,6 +23,7 @@ from __future__ import annotations
 import itertools as it
 import logging
 import logging.config
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -51,7 +52,7 @@ def extract_recs(
     name: str,
     request: RecommendationRequest,
     pipeline_state: PipelineState,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, dict[str, np.ndarray]]:
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
     user = request.interest_profile.profile_id
@@ -99,7 +100,17 @@ def extract_recs(
             )
         )
     output_df = pd.concat(rec_lists, ignore_index=True)
-    return output_df
+
+    # get the embeddings
+    embedded = pipeline_state.get("candidate-embedder", None)
+    embeddings = {}
+    if embedded is not None:
+        assert isinstance(embedded, ArticleSet)
+        assert hasattr(embedded, "embeddings")
+
+        for idx, article in enumerate(embedded.articles):
+            embeddings[article.article_id] = embedded.embeddings[idx].cpu().numpy()
+    return output_df, embeddings
 
 
 def generate_user_recs(dataset: str, n_users: int | None = None):
@@ -120,6 +131,7 @@ def generate_user_recs(dataset: str, n_users: int | None = None):
         user_iter = it.islice(user_iter, n_users)
 
     timer = Stopwatch()
+    embeddings = {}
     with make_progress(logger, "recommend", total=n_users) as pb:
         for request in user_iter:  # one by one
             logger.debug("recommending for user %s", request.interest_profile.profile_id)
@@ -140,16 +152,17 @@ def generate_user_recs(dataset: str, n_users: int | None = None):
                 except Exception as e:
                     logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
                     raise e
-                user_df = extract_recs(name, request, outputs)
+                user_df, user_embeddings = extract_recs(name, request, outputs)
                 user_df["recommender"] = pd.Categorical(user_df["recommender"], categories=pipe_names)
                 user_df["stage"] = pd.Categorical(user_df["stage"].astype("category"), categories=STAGES)
                 user_recs.append(user_df)
+                embeddings.update(user_embeddings)
             pb.update()
 
     timer.stop()
     logger.info("finished recommending in %s", timer)
 
-    return user_recs
+    return user_recs, embeddings
 
 
 if __name__ == "__main__":
@@ -163,11 +176,18 @@ if __name__ == "__main__":
     if n_users is not None:
         n_users = int(n_users)
 
-    user_recs = generate_user_recs(options["--mind-data"], n_users)
+    user_recs, article_embeddings = generate_user_recs(options["--mind-data"], n_users)
 
     all_recs = pd.concat(user_recs, ignore_index=True)
-    out_fn = options["--output"]
-    logger.info("saving recommendations to %s", out_fn)
-    all_recs.to_parquet(out_fn, compression="zstd", index=False)
 
-    # response = {"statusCode": 200, "body": json.dump(body, default=custom_encoder)}
+    out_fn = options["--output-path"]
+    logger.info("saving recommendations to %s", out_fn)
+    output_path = Path(out_fn)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    all_recs.to_parquet(output_path / "recommendations.parquet", compression="zstd", index=False)
+
+    embedding_df = pd.DataFrame.from_records(
+        [{"article_id": str(id_), "embedding": embedding} for id_, embedding in article_embeddings.items()]
+    )
+    embedding_df.to_parquet(output_path / "embeddings.parquet")
