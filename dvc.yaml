@@ -6,6 +6,7 @@ stages:
       - data/MINDlarge_dev.zip
     outs:
       - outputs/mind-val/recommendations.parquet
+      - outputs/mind-val/embeddings.parquet
 
   measure-mind-val:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev mind-val
@@ -26,6 +27,7 @@ stages:
       - data/MINDsmall_dev.zip
     outs:
       - outputs/mind-small/recommendations.parquet
+      - outputs/mind-small/embeddings.parquet
   measure-mind-small:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small
     deps:
