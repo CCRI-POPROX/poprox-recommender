@@ -70,7 +70,7 @@ def main():
 
     eval_name = options["<name>"]
     logger.info("measuring evaluation %s", eval_name)
-    recs_fn = project_root() / "outputs" / f"{eval_name}-recommendations.parquet"
+    recs_fn = project_root() / "outputs" / eval_name / "recommendations.parquet"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
     user_recs = dict((UUID(str(u)), df) for (u, df) in recs_df.groupby("user"))
