@@ -1,2 +1,3 @@
 /recommendations
 /embeddings.parquet
+/user-metrics.csv.gz

@@ -37,7 +37,7 @@ stages:
     outs:
       - outputs/mind-small/user-metrics.csv.gz
     metrics:
-      - outputs/metrics.csv:
+      - outputs/mind-small/metrics.csv:
           cache: false
 
   # small subset for quick testing
