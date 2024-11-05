@@ -241,11 +241,14 @@ Silicon).  To make use of a GPU, do the following:
 
 Timing information for generating recommendations with the MIND validation set:
 
-| CPU              | GPU        | Rec. Time | Eval Time |
-| :--------------: | :--------: | :-------: | :-------: |
-| EPYC 7662 (2GHz) | A40 (CUDA) | 2h10m     | 45m       |
-| Apple M2 Pro     | -          | <20hr¹    | 30m¹      |
-| Apple M2 Pro     | M2 (MPS)   | <12hr¹    |           |
+| Machine | CPU              | GPU        | Rec. Time | Eval Time |
+| ------- | :--------------: | :--------: | :-------: | :-------: |
+| [DXC][] | EPYC 7662 (2GHz) | A40 (CUDA) | 2h10m     | 45m       |
+| [MBP][] | Apple M2 Pro     | -          | <20hr¹    | 30m¹      |
+| [MBP][] | Apple M2 Pro     | M2 (MPS)   | <12hr¹    |           |
+
+[DXC]: https://codex.lenskit.org/hardware/cruncher.html
+[MBP]: https://codex.lenskit.org/hardware/mbp2.html
 
 Footnotes:
 
