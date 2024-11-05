@@ -115,3 +115,28 @@ stages:
       md5: bdd8062aa2c7ffec87cc4e61f0363882.dir
       size: 151647
       nfiles: 1
+  measure-mind-subset:
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset
+    deps:
+    - path: data/MINDlarge_dev.zip
+      hash: md5
+      md5: c93fa1728e3537649b441c78cce5e6f1
+      size: 103456245
+    - path: outputs/mind-subset/recommendations
+      hash: md5
+      md5: bdd8062aa2c7ffec87cc4e61f0363882.dir
+      size: 151647
+      nfiles: 1
+    - path: src/poprox_recommender/evaluation/evaluate.py
+      hash: md5
+      md5: d0578aa90049ca11ad696519e5d51ac6
+      size: 4166
+    outs:
+    - path: outputs/mind-subset/metrics.csv
+      hash: md5
+      md5: 2c7203b628c905c0155e9ce3c6712c83
+      size: 674
+    - path: outputs/mind-subset/user-metrics.csv.gz
+      hash: md5
+      md5: 379c5b70403bbd129db1e8785811fe83
+      size: 76778

@@ -1,5 +1,5 @@
 import logging
-from typing import NamedTuple
+from typing import NamedTuple, TypedDict
 from uuid import UUID
 
 import pandas as pd
@@ -24,6 +24,11 @@ class UserRecs(NamedTuple):
     truth: pd.DataFrame
 
 
+class ListMeasurements(TypedDict, total=False):
+    recommender: str
+    personalized: bool
+
+
 def convert_df_to_article_set(rec_df):
     articles = []
     for _, row in rec_df.iterrows():
@@ -31,7 +36,7 @@ def convert_df_to_article_set(rec_df):
     return ArticleSet(articles=articles)
 
 
-def measure_user_recs(user: UserRecs) -> tuple[UUID, pd.DataFrame]:
+def measure_user_recs(user: UserRecs) -> tuple[UUID, list[ListMeasurements]]:
     """
     Measure a single user's recommendations.  Returns the user ID and
     a data frame of evaluation metrics.
@@ -83,4 +88,4 @@ def measure_user_recs(user: UserRecs) -> tuple[UUID, pd.DataFrame]:
             }
         )
 
-    return user_id, pd.DataFrame.from_records(results).set_index("recommender")
+    return user_id, results

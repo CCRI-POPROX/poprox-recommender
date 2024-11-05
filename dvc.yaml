@@ -15,9 +15,9 @@ stages:
       - data/MINDlarge_dev.zip
       - outputs/mind-val/recommendations
     outs:
-      - outputs/mind-val/mind-val-user-metrics.csv.gz
+      - outputs/mind-val/user-metrics.csv.gz
     metrics:
-      - outputs/mind-val-metrics.csv:
+      - outputs/mind-val/metrics.csv:
           cache: false
 
   recommend-mind-small:
@@ -35,9 +35,9 @@ stages:
       - data/MINDlarge_dev.zip
       - outputs/mind-small/recommendations
     outs:
-      - outputs/mind-small/mind-small-user-metrics.csv.gz
+      - outputs/mind-small/user-metrics.csv.gz
     metrics:
-      - outputs/mind-small-metrics.csv:
+      - outputs/metrics.csv:
           cache: false
 
   # small subset for quick testing
@@ -54,9 +54,9 @@ stages:
     deps:
       - src/poprox_recommender/evaluation/evaluate.py
       - data/MINDlarge_dev.zip
-      - outputs/mind-subset/recommendations.parquet
+      - outputs/mind-subset/recommendations
     outs:
-      - outputs/mind-subset/mind-subset-user-metrics.csv.gz
+      - outputs/mind-subset/user-metrics.csv.gz
     metrics:
-      - outputs/mind-subset-metrics.csv:
+      - outputs/mind-subset/metrics.csv:
           cache: false
