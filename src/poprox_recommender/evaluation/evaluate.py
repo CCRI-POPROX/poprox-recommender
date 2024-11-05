@@ -16,8 +16,10 @@ Options:
 """
 
 # pyright: basic
+import csv
+import gzip
 import logging
-from typing import Iterator
+from typing import Any, Iterator
 from uuid import UUID
 
 import ipyparallel as ipp
@@ -27,39 +29,35 @@ from progress_api import make_progress
 
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.mind import MindData
-from poprox_recommender.evaluation.metrics import ListMeasurements, UserRecs, measure_user_recs
+from poprox_recommender.evaluation.metrics import METRIC_COLUMNS, UserRecs, measure_user_recs
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 
 
-def rec_users(mind_data: MindData, user_recs: dict[UUID, pd.DataFrame]) -> Iterator[UserRecs]:
+def rec_users(mind_data: MindData, user_recs: pd.DataFrame) -> Iterator[UserRecs]:
     """
-    Iterate over rec users, yielding each request with its recommendations and
-    truth.  This supports parallel computation of the final metrics.
+    Iterate over rec users, yielding each recommendation list with its truth and
+    whether the user is personalized.  This supports parallel computation of the
+    final metrics.
     """
-    for request in mind_data.iter_users():
-        user_id = request.interest_profile.profile_id
-        assert user_id is not None
-        if user_id not in user_recs:
-            logger.warning("found user without recommendations, assuming subset and quitting")
-            break
-
-        recs = user_recs[user_id].copy(deep=True)
+    for user_id, recs in user_recs.groupby("user"):
+        user_id = UUID(str(user_id))
         truth = mind_data.user_truth(user_id)
+        pers = mind_data.user_has_history(user_id)
         assert truth is not None
-        yield UserRecs(user_id, bool(request.interest_profile.click_history), recs, truth)
+        yield UserRecs(user_id, pers, recs, truth)
 
 
-def user_eval_results(
-    mind_data: MindData, user_recs: dict[UUID, pd.DataFrame], n_procs: int
-) -> Iterator[tuple[UUID, list[ListMeasurements]]]:
+def user_eval_results(mind_data: MindData, user_recs: pd.DataFrame, n_procs: int) -> Iterator[list[list[Any]]]:
     if n_procs > 1:
         logger.info("starting parallel measurement with %d workers", n_procs)
         with ipp.Cluster(n=n_procs) as client:
             lb = client.load_balanced_view()
-            yield from lb.imap(measure_user_recs, rec_users(mind_data, user_recs), ordered=False)
+            yield from lb.imap(
+                measure_user_recs, rec_users(mind_data, user_recs), ordered=False, max_outstanding=n_procs * 10
+            )
     else:
         for user in rec_users(mind_data, user_recs):
             yield measure_user_recs(user)
@@ -77,25 +75,26 @@ def main():
     recs_fn = project_root() / "outputs" / eval_name / "recommendations"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
-    user_recs = dict((UUID(str(u)), df) for (u, df) in recs_df.groupby("user"))
-    del recs_df
-    logger.info("loaded recommendations for %d users", len(user_recs))
+    n_users = recs_df["user"].nunique()
+    logger.info("loaded recommendations for %d users", n_users)
 
     logger.info("measuring recommendations")
-    results: dict[UUID, list[ListMeasurements]] = {}
+    user_out_fn = project_root() / "outputs" / eval_name / "user-metrics.csv.gz"
 
     n_procs = available_cpu_parallelism(4)
-    with make_progress(logger, "evaluate", total=mind_data.n_users, unit="users") as pb:
-        for user_id, metrics in user_eval_results(mind_data, user_recs, n_procs):
-            results[user_id] = metrics
+    with (
+        gzip.open(user_out_fn, "wt") as zf,
+        make_progress(logger, "evaluate", total=n_users, unit="users") as pb,
+    ):
+        w = csv.writer(zf)  # type: ignore
+        w.writerow(METRIC_COLUMNS)
+        for user_rows in user_eval_results(mind_data, recs_df, n_procs):
+            for row in user_rows:
+                w.writerow(row)
             pb.update()
 
-    logger.info("measured recs for %d users", len(results))
-    metrics = pd.DataFrame.from_records({"user_id": u} | row for (u, rows) in results.items() for row in rows)
-
-    user_out_fn = project_root() / "outputs" / eval_name / "user-metrics.csv.gz"
-    logger.info("writing user results to %s", user_out_fn)
-    metrics.to_csv(user_out_fn, index=False)
+    metrics = pd.read_csv(user_out_fn)
+    logger.info("measured recs for %d users", metrics["user_id"].nunique())
 
     agg_metrics = metrics.drop(columns=["user_id", "personalized"]).groupby("recommender").mean()
 

@@ -1,5 +1,5 @@
 import logging
-from typing import NamedTuple, TypedDict
+from typing import Any, NamedTuple
 from uuid import UUID
 
 import pandas as pd
@@ -11,6 +11,17 @@ from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 __all__ = ["rank_biased_overlap", "UserRecs", "measure_user_recs"]
 
 logger = logging.getLogger(__name__)
+
+METRIC_COLUMNS = [
+    "user_id",
+    "recommender",
+    "personalized",
+    "NDCG@5",
+    "NDCG@10",
+    "MRR",
+    "RBO@5",
+    "RBO@10",
+]
 
 
 class UserRecs(NamedTuple):
@@ -24,11 +35,6 @@ class UserRecs(NamedTuple):
     truth: pd.DataFrame
 
 
-class ListMeasurements(TypedDict, total=False):
-    recommender: str
-    personalized: bool
-
-
 def convert_df_to_article_set(rec_df):
     articles = []
     for _, row in rec_df.iterrows():
@@ -36,7 +42,7 @@ def convert_df_to_article_set(rec_df):
     return ArticleSet(articles=articles)
 
 
-def measure_user_recs(user: UserRecs) -> tuple[UUID, list[ListMeasurements]]:
+def measure_user_recs(user: UserRecs) -> list[list[Any]]:
     """
     Measure a single user's recommendations.  Returns the user ID and
     a data frame of evaluation metrics.
@@ -76,16 +82,18 @@ def measure_user_recs(user: UserRecs) -> tuple[UUID, list[ListMeasurements]]:
             single_rbo10 or -1.0,
         )
 
+        # KEEP IN SYNC with the metric columns above
         results.append(
-            {
-                "recommender": name,
-                "NDCG@5": single_ndcg5,
-                "NDCG@10": single_ndcg10,
-                "MRR": single_rr,
-                "RBO@5": single_rbo5,
-                "RBO@10": single_rbo10,
-                "personalized": personalized,
-            }
+            [
+                user_id,
+                name,
+                personalized,
+                single_ndcg5,
+                single_ndcg10,
+                single_rr,
+                single_rbo5,
+                single_rbo10,
+            ]
         )
 
-    return user_id, results
+    return results
