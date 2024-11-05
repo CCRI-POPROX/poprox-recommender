@@ -16,8 +16,6 @@ Options:
 """
 
 # pyright: basic
-import csv
-import gzip
 import logging
 from typing import Any, Iterator
 from uuid import UUID
@@ -47,7 +45,7 @@ def rec_users(mind_data: MindData, user_recs: pd.DataFrame) -> Iterator[UserRecs
         truth = mind_data.user_truth(user_id)
         pers = mind_data.user_has_history(user_id)
         assert truth is not None
-        yield UserRecs(user_id, pers, recs, truth)
+        yield UserRecs(user_id, pers, recs.copy(), truth)
 
 
 def user_eval_results(mind_data: MindData, user_recs: pd.DataFrame, n_procs: int) -> Iterator[list[dict[str, Any]]]:
@@ -79,24 +77,22 @@ def main():
     logger.info("loaded recommendations for %d users", n_users)
 
     logger.info("measuring recommendations")
-    user_out_fn = project_root() / "outputs" / eval_name / "user-metrics.csv.gz"
 
     n_procs = available_cpu_parallelism(4)
+    records = []
     with (
-        gzip.open(user_out_fn, "wt") as zf,
         make_progress(logger, "evaluate", total=n_users, unit="users") as pb,
     ):
-        w: csv.DictWriter | None = None
         for user_rows in user_eval_results(mind_data, recs_df, n_procs):
-            for row in user_rows:
-                if w is None:
-                    w = csv.DictWriter(zf, list(row.keys()))  # type: ignore
-                    w.writeheader()
-                w.writerow(row)
+            records += user_rows
             pb.update()
 
-    metrics = pd.read_csv(user_out_fn)
+    metrics = pd.DataFrame.from_records(records)
     logger.info("measured recs for %d users", metrics["user_id"].nunique())
+
+    user_out_fn = project_root() / "outputs" / eval_name / "user-metrics.csv.gz"
+    logger.info("saving per-user metrics to %s", user_out_fn)
+    metrics.to_csv(user_out_fn)
 
     agg_metrics = metrics.drop(columns=["user_id", "personalized"]).groupby("recommender").mean()
     # reciprocal rank means to MRR
