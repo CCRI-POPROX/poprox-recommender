@@ -106,6 +106,6 @@ stages:
       size: 5124321
     - path: outputs/mind-subset/recommendations
       hash: md5
-      md5: ac2a194d7769b77c260bf5de0a51daf5.dir
-      size: 151471
+      md5: bdd8062aa2c7ffec87cc4e61f0363882.dir
+      size: 151647
       nfiles: 1
