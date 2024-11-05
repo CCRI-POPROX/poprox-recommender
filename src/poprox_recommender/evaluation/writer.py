@@ -71,6 +71,8 @@ class ParquetBatchedWriter:
         logger.debug("%s: writing batch of %d rows", self.path, self._batch_rows)
         all_tbl = pa.concat_tables(self._batch)
         self.writer.write(all_tbl)
+        self._batch = []
+        self._batch_rows = 0
 
     def close(self):
         if self.writer is not None:
