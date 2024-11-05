@@ -29,7 +29,7 @@ from progress_api import make_progress
 
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.mind import MindData
-from poprox_recommender.evaluation.metrics import METRIC_COLUMNS, UserRecs, measure_user_recs
+from poprox_recommender.evaluation.metrics import UserRecs, measure_user_recs
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
@@ -50,7 +50,7 @@ def rec_users(mind_data: MindData, user_recs: pd.DataFrame) -> Iterator[UserRecs
         yield UserRecs(user_id, pers, recs, truth)
 
 
-def user_eval_results(mind_data: MindData, user_recs: pd.DataFrame, n_procs: int) -> Iterator[list[list[Any]]]:
+def user_eval_results(mind_data: MindData, user_recs: pd.DataFrame, n_procs: int) -> Iterator[list[dict[str, Any]]]:
     if n_procs > 1:
         logger.info("starting parallel measurement with %d workers", n_procs)
         with ipp.Cluster(n=n_procs) as client:
@@ -86,10 +86,12 @@ def main():
         gzip.open(user_out_fn, "wt") as zf,
         make_progress(logger, "evaluate", total=n_users, unit="users") as pb,
     ):
-        w = csv.writer(zf)  # type: ignore
-        w.writerow(METRIC_COLUMNS)
+        w: csv.DictWriter | None = None
         for user_rows in user_eval_results(mind_data, recs_df, n_procs):
             for row in user_rows:
+                if w is None:
+                    w = csv.DictWriter(zf, list(row.keys()))  # type: ignore
+                    w.writeheader()
                 w.writerow(row)
             pb.update()
 
@@ -97,6 +99,8 @@ def main():
     logger.info("measured recs for %d users", metrics["user_id"].nunique())
 
     agg_metrics = metrics.drop(columns=["user_id", "personalized"]).groupby("recommender").mean()
+    # reciprocal rank means to MRR
+    agg_metrics = agg_metrics.rename(columns={"RR": "MRR"})
 
     logger.info("aggregate metrics:\n%s", agg_metrics)
 

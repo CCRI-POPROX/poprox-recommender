@@ -12,17 +12,6 @@ __all__ = ["rank_biased_overlap", "UserRecs", "measure_user_recs"]
 
 logger = logging.getLogger(__name__)
 
-METRIC_COLUMNS = [
-    "user_id",
-    "recommender",
-    "personalized",
-    "NDCG@5",
-    "NDCG@10",
-    "MRR",
-    "RBO@5",
-    "RBO@10",
-]
-
 
 class UserRecs(NamedTuple):
     """
@@ -42,7 +31,7 @@ def convert_df_to_article_set(rec_df):
     return ArticleSet(articles=articles)
 
 
-def measure_user_recs(user: UserRecs) -> list[list[Any]]:
+def measure_user_recs(user: UserRecs) -> list[dict[str, Any]]:
     """
     Measure a single user's recommendations.  Returns the user ID and
     a data frame of evaluation metrics.
@@ -82,18 +71,17 @@ def measure_user_recs(user: UserRecs) -> list[list[Any]]:
             single_rbo10 or -1.0,
         )
 
-        # KEEP IN SYNC with the metric columns above
         results.append(
-            [
-                user_id,
-                name,
-                personalized,
-                single_ndcg5,
-                single_ndcg10,
-                single_rr,
-                single_rbo5,
-                single_rbo10,
-            ]
+            {
+                "user_id": user_id,
+                "recommender": name,
+                "personalized": personalized,
+                "NDCG@5": single_ndcg5,
+                "NDCG@10": single_ndcg10,
+                "RR": single_rr,
+                "RBO@5": single_rbo5,
+                "RBO@10": single_rbo10,
+            }
         )
 
     return results
