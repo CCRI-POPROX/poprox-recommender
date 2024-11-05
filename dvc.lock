@@ -25,21 +25,27 @@ stages:
       md5: 8112f2a9715a67bdd03d3abdd6f65f41
       size: 26901064
   recommend-mind-val:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val-recommendations.parquet
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val
     deps:
     - path: data/MINDlarge_dev.zip
       hash: md5
       md5: c93fa1728e3537649b441c78cce5e6f1
       size: 103456245
-    - path: src/poprox_recommender/evaluation/generate.py
+    - path: src/poprox_recommender/evaluation/generate/
       hash: md5
-      md5: c284d38f83ec700c25e5ab675491302e
-      size: 5906
+      md5: c8c4b39db004d1d0e9ef843ab28406ea.dir
+      size: 31102
+      nfiles: 8
     outs:
-    - path: outputs/mind-val-recommendations.parquet
+    - path: outputs/mind-val/embeddings.parquet
       hash: md5
-      md5: 89894b06cf63b54cc216d10a301d8d8f
-      size: 40956994
+      md5: add4cb4d4215e49e01960d1505bf428a
+      size: 20626201
+    - path: outputs/mind-val/recommendations
+      hash: md5
+      md5: 9689913bad2941d108971445f635dcab.dir
+      size: 44862771
+      nfiles: 12
   recommend-mind-small:
     cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small
     deps:
