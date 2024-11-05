@@ -16,13 +16,14 @@ import pandas as pd
 
 from poprox_concepts import Article, Click, InterestProfile
 from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_recommender.data.data import Data
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
 
 
-class MindData:
+class MindData(Data):
     """
     News and behavior data loaded from MIND data.
     """
