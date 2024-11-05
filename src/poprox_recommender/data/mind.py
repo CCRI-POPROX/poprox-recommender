@@ -83,8 +83,14 @@ class MindData:
         except KeyError:
             raise ValueError(f"unknown user {user}")
 
+        # helper generator to only split articles once
+        def split_records():
+            for article in imp_log.split():
+                iid, rv = article.split("-")
+                yield iid, int(rv)
+
         truth = pd.DataFrame.from_records(
-            ((article.split("-")[0], int(article.split("-")[1])) for article in imp_log.split()),
+            split_records(),
             columns=["mind_item_id", "rating"],
         )
         truth["item"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]

@@ -1,5 +1,5 @@
 import logging
-from typing import NamedTuple
+from typing import Any, NamedTuple
 from uuid import UUID
 
 import pandas as pd
@@ -19,7 +19,6 @@ class UserRecs(NamedTuple):
     """
 
     user_id: UUID
-    personalized: bool
     recs: pd.DataFrame
     truth: pd.DataFrame
 
@@ -31,12 +30,12 @@ def convert_df_to_article_set(rec_df):
     return ArticleSet(articles=articles)
 
 
-def measure_user_recs(user: UserRecs) -> tuple[UUID, pd.DataFrame]:
+def measure_user_recs(user: UserRecs) -> list[dict[str, Any]]:
     """
     Measure a single user's recommendations.  Returns the user ID and
     a data frame of evaluation metrics.
     """
-    user_id, personalized, all_recs, truth = user
+    user_id, all_recs, truth = user
     truth.index = truth.index.astype(str)
 
     results = []
@@ -73,14 +72,18 @@ def measure_user_recs(user: UserRecs) -> tuple[UUID, pd.DataFrame]:
 
         results.append(
             {
+                "user_id": user_id,
                 "recommender": name,
+                # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
+                # whole function should be revised for generality when we want to support
+                # other pipelines.
+                "personalized": len(ranked.articles) > 0,
                 "NDCG@5": single_ndcg5,
                 "NDCG@10": single_ndcg10,
-                "MRR": single_rr,
+                "RR": single_rr,
                 "RBO@5": single_rbo5,
                 "RBO@10": single_rbo10,
-                "personalized": personalized,
             }
         )
 
-    return user_id, pd.DataFrame.from_records(results).set_index("recommender")
+    return results
