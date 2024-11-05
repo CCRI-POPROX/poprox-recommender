@@ -96,16 +96,16 @@ stages:
       size: 30948560
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
-      md5: bb531d7b15e9a839fbc1d75f804c2307.dir
+      md5: c8c4b39db004d1d0e9ef843ab28406ea.dir
       size: 31102
       nfiles: 8
     outs:
     - path: outputs/mind-subset/embeddings.parquet
       hash: md5
-      md5: f22499680b57eeb497f0306a41c485f9
-      size: 5129112
+      md5: 5eaac23fcaa108c8c73c68239e6fb022
+      size: 5124321
     - path: outputs/mind-subset/recommendations
       hash: md5
-      md5: 857dc145b7010826a5ddfb40942753b9.dir
-      size: 153642
-      nfiles: 4
+      md5: ac2a194d7769b77c260bf5de0a51daf5.dir
+      size: 151471
+      nfiles: 1
