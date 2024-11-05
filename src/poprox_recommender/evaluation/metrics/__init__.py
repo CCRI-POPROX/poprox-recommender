@@ -19,7 +19,6 @@ class UserRecs(NamedTuple):
     """
 
     user_id: UUID
-    personalized: bool
     recs: pd.DataFrame
     truth: pd.DataFrame
 
@@ -36,7 +35,7 @@ def measure_user_recs(user: UserRecs) -> list[dict[str, Any]]:
     Measure a single user's recommendations.  Returns the user ID and
     a data frame of evaluation metrics.
     """
-    user_id, personalized, all_recs, truth = user
+    user_id, all_recs, truth = user
     truth.index = truth.index.astype(str)
 
     results = []
@@ -75,7 +74,10 @@ def measure_user_recs(user: UserRecs) -> list[dict[str, Any]]:
             {
                 "user_id": user_id,
                 "recommender": name,
-                "personalized": personalized,
+                # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
+                # whole function should be revised for generality when we want to support
+                # other pipelines.
+                "personalized": len(ranked.articles) > 0,
                 "NDCG@5": single_ndcg5,
                 "NDCG@10": single_ndcg10,
                 "RR": single_rr,

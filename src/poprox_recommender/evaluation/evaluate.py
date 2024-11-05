@@ -43,9 +43,8 @@ def rec_users(mind_data: MindData, user_recs: pd.DataFrame) -> Iterator[UserRecs
     for user_id, recs in user_recs.groupby("user"):
         user_id = UUID(str(user_id))
         truth = mind_data.user_truth(user_id)
-        pers = mind_data.user_has_history(user_id)
         assert truth is not None
-        yield UserRecs(user_id, pers, recs.copy(), truth)
+        yield UserRecs(user_id, recs.copy(), truth)
 
 
 def user_eval_results(mind_data: MindData, user_recs: pd.DataFrame, n_procs: int) -> Iterator[list[dict[str, Any]]]:

@@ -96,18 +96,6 @@ class MindData:
         truth["item"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
         return truth.set_index("item")
 
-    def user_has_history(self, user: UUID) -> bool:
-        """
-        Fast-path to check if the user has a history without constructing entire requests.
-        """
-        try:
-            uid = self.behavior_id_for_uuid(user)
-            clicks = self.behavior_df.loc[uid, "clicked_news"]
-        except KeyError:
-            raise ValueError(f"unknown user {user}")
-
-        return clicks != ""
-
     def iter_users(self) -> Generator[RecommendationRequest]:
         for row in self.behavior_df.itertuples():
             clicked_ids: list[str] = row.clicked_news.split()  # type: ignore
