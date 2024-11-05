@@ -2,7 +2,7 @@
 Generate recommendations for offline test data.
 
 Usage:
-    poprox_recommender.evaluation.generate [options]
+    poprox_recommender.evaluation.generate [options] --pipelines=<pipelines>...
 
 Options:
     -v, --verbose
@@ -12,9 +12,13 @@ Options:
     -o FILE, --output=FILE
             write output to FILE [default: outputs/recommendations.parquet]
     -M DATA, --mind-data=DATA
-            read MIND test data DATA [default: MINDsmall_dev]
+            read MIND test data DATA
+    --data_path=<data_path>
+            path to PopRox data
     --subset=N
             test only on the first N test users
+    --pipelines=<pipelines>...
+            list of pipeline names (separated by spaces)
 """
 
 # pyright: basic
@@ -33,7 +37,9 @@ from progress_api import make_progress
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
 from poprox_recommender.config import default_device
+from poprox_recommender.data.data import Data
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.lkpipeline import PipelineState
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.recommenders import recommendation_pipelines
@@ -102,18 +108,19 @@ def extract_recs(
     return output_df
 
 
-def generate_user_recs(dataset: str, n_users: int | None = None):
-    mind_data = MindData(dataset)
-
+def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users: int | None = None):
     pipelines = recommendation_pipelines(device=default_device())
-    pipe_names = list(pipelines.keys())
+    if pipe_names is not None:
+        pipelines = {name: pipelines[name] for name in pipe_names}  # type: ignore
+    else:
+        pipe_names = list(pipelines.keys())
 
     logger.info("generating recommendations")
     user_recs = []
 
-    user_iter = mind_data.iter_users()
+    user_iter = data.iter_users()
     if n_users is None:
-        n_users = mind_data.n_users
+        n_users = data.n_users
         logger.info("recommending for all %d users", n_users)
     else:
         logger.info("running on subset of %d users", n_users)
@@ -163,7 +170,15 @@ if __name__ == "__main__":
     if n_users is not None:
         n_users = int(n_users)
 
-    user_recs = generate_user_recs(options["--mind-data"], n_users)
+    pipelines = options["--pipelines"]
+    print("Pipelines:", pipelines)
+
+    mind_data = options["--mind-data"]
+    data_path = options["--data_path"]
+    if mind_data is not None:
+        user_recs = generate_user_recs(MindData(mind_data), pipelines, n_users)
+    elif data_path is not None:
+        user_recs = generate_user_recs(PoproxData(data_path), pipelines, n_users)
 
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]
