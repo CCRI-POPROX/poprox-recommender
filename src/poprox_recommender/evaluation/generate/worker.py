@@ -13,7 +13,7 @@ from progress_api import make_progress
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
 from poprox_recommender.config import default_device
-from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.lkpipeline import Pipeline
 from poprox_recommender.lkpipeline.state import PipelineState
@@ -162,13 +162,11 @@ def extract_recs(
 
 
 def generate_user_recs(dataset: str, outs: RecOutputs, n_users: int | None = None, n_jobs: int = 1):
-    mind_data = MindData(dataset)
-
     logger.info("generating recommendations")
 
-    user_iter = mind_data.iter_users()
+    user_iter = dataset.iter_users()
     if n_users is None:
-        n_users = mind_data.n_users
+        n_users = dataset.n_users
         logger.info("recommending for all %d users", n_users)
     else:
         logger.info("running on subset of %d users", n_users)
