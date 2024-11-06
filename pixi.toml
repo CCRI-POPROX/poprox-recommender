@@ -23,6 +23,9 @@ transformers = "~=4.41"
 colorlog = "~=6.8"
 enlighten = "~=1.12"
 ipyparallel = "~=8.0"
+openai = "~=1.52.2"
+sentence-transformers = "~=3.2.1"
+scikit-learn = "~=1.5.2"
 # poprox-concepts dependencies not covered above
 pydantic = "~=2.7.1"
 
