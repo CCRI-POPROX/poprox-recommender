@@ -132,7 +132,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         user_embedder=user_embedder,
         ranker=locality_calibrator,
         num_slots=num_slots,
-    )
+    )  #
 
     softmax_pipe = build_pipeline(
         "NRMS+Softmax",
@@ -143,7 +143,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     )
 
     return {
-        "nrms": nrms_pipe,
+        "nrms": locality_cali_pipe,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
