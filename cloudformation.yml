@@ -1,0 +1,22 @@
+Resources:
+  PoproxRecommenderDeploymentIAMGroup:
+    UpdateReplacePolicy: Retain
+    Type: AWS::IAM::Group
+    DeletionPolicy: Retain
+    Properties:
+      GroupName: poprox-recommender-deployment
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
+        - arn:aws:iam::aws:policy/AWSLambda_FullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
+  PoproxRecommenderDeploymentIAMUser:
+    UpdateReplacePolicy: Retain
+    Type: AWS::IAM::User
+    DeletionPolicy: Retain
+    Properties:
+      Path: /
+      UserName: PoproxRecommenderDeploymentIamUser
+      Groups:
+        - !Ref PoproxRecommenderDeploymentIAMGroup
