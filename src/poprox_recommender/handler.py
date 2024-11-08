@@ -4,7 +4,9 @@ import logging
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
 from poprox_recommender.recommenders import select_articles
-from poprox_recommender.topics import user_locality_preference, user_topic_preference
+from poprox_recommender.topics import user_topic_preference
+from poprox_recommender.components.diversifiers.locality_calibration import generated_context
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -41,15 +43,15 @@ def generate_recs(event, context):
     # Similarly, the platform should provided pre-filtered clicked articles
     # and compute the topic counts but this shim lets us ignore that issue
     # in the actual article selection
+
     profile = req.interest_profile
     click_history = profile.click_history
     clicked_articles = list(
         filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
     )
-    clicked_articles = ArticleSet(articles=clicked_articles)
 
+    clicked_articles = ArticleSet(articles=clicked_articles)
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
-    profile.click_locality_counts = user_locality_preference(req.past_articles, profile.click_history)
 
     outputs = select_articles(
         candidate_articles,
@@ -57,6 +59,16 @@ def generate_recs(event, context):
         profile,
         pipeline_params,
     )
+
+    text_generation = False  # TODO: move to parameter
+    time_decay = True  # TODO: move to parameter
+    topk_similar = 5  # TODO: move to parameter
+    other_filter = "topic"  # TODO: move to parameter
+
+    if text_generation:
+        for article in outputs.default.articles:
+            generated_subhead = generated_context(article, clicked_articles, time_decay, topk_similar, other_filter)
+            article.subhead = generated_subhead
 
     logger.info("Constructing response...")
     resp_body = RecommendationResponse.model_validate(

@@ -84,8 +84,8 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots: The number of items to recommend.
     """
 
-    article_embedder = NRMSArticleEmbedder(model_file_path("news_encoder.safetensors"), device)
-    user_embedder = NRMSUserEmbedder(model_file_path("user_encoder.safetensors"), device)
+    article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
+    user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
 
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
@@ -132,7 +132,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         user_embedder=user_embedder,
         ranker=locality_calibrator,
         num_slots=num_slots,
-    )
+    )  #
 
     softmax_pipe = build_pipeline(
         "NRMS+Softmax",
@@ -143,7 +143,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     )
 
     return {
-        "nrms": nrms_pipe,
+        "nrms": locality_cali_pipe,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
