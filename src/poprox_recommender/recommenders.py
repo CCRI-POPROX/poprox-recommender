@@ -143,7 +143,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     )
 
     return {
-        "nrms": locality_cali_pipe,
+        "nrms": nrms_pipe,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
