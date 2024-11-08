@@ -163,6 +163,7 @@ if __name__ == "__main__":
     """
     For offline evaluation, set theta in mmr_diversity = 1
     """
+    print("in poprox-recommender-locality")
     options = docopt(__doc__)  # type: ignore
     setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
