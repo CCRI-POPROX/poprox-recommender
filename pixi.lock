@@ -22797,6 +22797,29 @@ packages:
   - pandas~=2.0 ; extra == 'eval'
   requires_python: '>=3.11'
   editable: true
+- kind: pypi
+  name: poprox-recommender
+  version: 0.0.1
+  path: .
+  sha256: 182167ca6c296ae7c0e8acd28a01f54120d127c6c1cfd95a802c59097392524d
+  requires_dist:
+  - colorlog<7,>=6.8
+  - enlighten<2,>=1.12
+  - ipyparallel~=8.0
+  - lenskit==0.14.*
+  - nltk<4,>=3.8
+  - numpy<2,>=1.26
+  - openai==1.52.2
+  - poprox-concepts
+  - progress-api<0.2,>=0.1.0a9
+  - safetensors<1,>=0.4
+  - scikit-learn==1.5.2
+  - sentence-transformers==3.2.1
+  - smart-open==7.*
+  - torch==2.*
+  - transformers<5,>=4.41
+  requires_python: '>=3.11'
+  editable: true
 - kind: conda
   name: pre-commit
   version: 3.8.0
