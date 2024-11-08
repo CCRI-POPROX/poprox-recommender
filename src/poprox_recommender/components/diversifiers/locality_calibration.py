@@ -16,7 +16,8 @@ from poprox_recommender.topics import extract_general_topics, extract_locality, 
 class LocalityCalibrator(Component):
     def __init__(self, theta_local: float = 0.1, theta_topic: float = 0.1, num_slots=10):
         """
-        TODOs: If set different theta_topic and theta_local values for different users, then can save them in interest_profile
+        TODOs: If set different theta_topic and theta_local values for different users,
+        then can save them in interest_profile
         """
         self.theta_local = theta_local
         self.theta_topic = theta_topic

@@ -3,10 +3,9 @@ import logging
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
+from poprox_recommender.components.diversifiers.locality_calibration import generated_context
 from poprox_recommender.recommenders import select_articles
 from poprox_recommender.topics import user_topic_preference
-from poprox_recommender.components.diversifiers.locality_calibration import generated_context
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
