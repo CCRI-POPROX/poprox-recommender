@@ -49,7 +49,7 @@ def generate_recs(event, context):
     clicked_articles = list(
         filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
     )
-    
+
     clicked_articles = ArticleSet(articles=clicked_articles)
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
 
@@ -60,13 +60,13 @@ def generate_recs(event, context):
         pipeline_params,
     )
 
-    text_generation = True # TODO: move to parameter
-    time_decay = True # TODO: move to parameter 
-    topk_similar = 5 # TODO: move to parameter 
-    other_filter = 'topic' # TODO: move to parameter 
+    text_generation = False  # TODO: move to parameter
+    time_decay = True  # TODO: move to parameter
+    topk_similar = 5  # TODO: move to parameter
+    other_filter = "topic"  # TODO: move to parameter
 
-    if text_generation: 
-        for article in outputs.default.articles: 
+    if text_generation:
+        for article in outputs.default.articles:
             generated_subhead = generated_context(article, clicked_articles, time_decay, topk_similar, other_filter)
             article.subhead = generated_subhead
 
