@@ -1,24 +1,23 @@
+import datetime
 from collections import defaultdict
 
 import numpy as np
 import torch as th
-import datetime
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_recommender.components.diversifiers.calibration import compute_kl_divergence
 from poprox_recommender.lkpipeline import Component
 from poprox_recommender.topics import extract_general_topics, extract_locality, normalized_category_count
-from poprox_recommender.components.diversifiers.calibration import compute_kl_divergence
-
 
 
 class LocalityCalibrator(Component):
     def __init__(self, theta_local: float = 0.1, theta_topic: float = 0.1, num_slots=10):
-        '''
+        """
         TODOs: If set different theta_topic and theta_local values for different users, then can save them in interest_profile
-        '''
+        """
         self.theta_local = theta_local
         self.theta_topic = theta_topic
         self.num_slots = num_slots
@@ -39,12 +38,14 @@ class LocalityCalibrator(Component):
             candidate_articles.articles,
             normalized_topic_prefs,
             normalized_locality_prefs,
-            self.theta_topic,
+            theta_topic,
             self.theta_local,
             topk=self.num_slots,
         )
 
-        return ArticleSet(articles=[candidate_articles.articles[idx] for idx in article_indices]) # all selected articles
+        return ArticleSet(
+            articles=[candidate_articles.articles[idx] for idx in article_indices]
+        )  # all selected articles
 
     def add_article_to_categories(self, rec_topics, article):
         rec_topics = rec_topics.copy()
@@ -144,7 +145,9 @@ class LocalityCalibrator(Component):
 ###################### text generation part
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-client = OpenAI(api_key='Put your key here',)
+client = OpenAI(
+    api_key="Put your key here",
+)
 
 
 def gpt_generate(system_prompt, content_prompt):
@@ -163,7 +166,7 @@ def gpt_generate(system_prompt, content_prompt):
     return chat_completion.choices[0].message.content
 
 
-'''
+"""
 # TODO: check backward or forward for past k articles
 def user_interest_generate(past_articles: Article, past_k: int):
     system_prompt = (
@@ -173,7 +176,8 @@ def user_interest_generate(past_articles: Article, past_k: int):
     )
 
     return gpt_generate(system_prompt, f"{past_article_infor}")
-'''
+"""
+
 
 def generate_narrative(news_list):
     system_prompt = (
@@ -193,40 +197,44 @@ def get_time_weight(published_target, published_clicked):
     weight = 1 / np.log(1 + time_distance) if time_distance > 0 else 1  # Avoid log(1) when x = 0
     return weight
 
-def related_indices(selected_subhead: str, selected_date: datetime, clicked_articles: list, time_decay: bool, topk_similar: int): 
 
+def related_indices(
+    selected_subhead: str, selected_date: datetime, clicked_articles: list, time_decay: bool, topk_similar: int
+):
     all_subheads = [selected_subhead] + [article.subhead for article in clicked_articles]
     embeddings = model.encode(all_subheads)
 
-    target_embedding = embeddings[0].reshape(1, -1)  
-    clicked_embeddings = embeddings[1:]  
+    target_embedding = embeddings[0].reshape(1, -1)
+    clicked_embeddings = embeddings[1:]
     similarities = cosine_similarity(target_embedding, clicked_embeddings)[0]
 
-    if time_decay: 
-        weights = [get_time_weight(selected_date, published_date) 
-                   for published_date in [article.published_at for article in clicked_articles]]
-        weighted_similarities = similarities * weights  
+    if time_decay:
+        weights = [
+            get_time_weight(selected_date, published_date)
+            for published_date in [article.published_at for article in clicked_articles]
+        ]
+        weighted_similarities = similarities * weights
         return np.argsort(weighted_similarities)[-topk_similar:][::-1]
 
-    return np.argsort(similarities)[-topk_similar:][::-1] 
+    return np.argsort(similarities)[-topk_similar:][::-1]
 
 
-
-
-def related_context(article: Article, clicked_articles: ArticleSet, time_decay: bool, topk_similar: int, other_filter: None): 
-    selected_subhead = article.subhead 
-    selected_date = article.published_at 
+def related_context(
+    article: Article, clicked_articles: ArticleSet, time_decay: bool, topk_similar: int, other_filter: None
+):
+    selected_subhead = article.subhead
+    selected_date = article.published_at
     selected_topic = extract_general_topics(article)
-    
-    if other_filter == 'topic': 
-        filtered_candidates = [
-                                candidate for candidate in clicked_articles.articles
-                                if set(extract_general_topics(candidate)) & set(selected_topic)
-                            ]
-        clicked_articles = filtered_candidates if filtered_candidates else clicked_articles.articles
-       
 
-    else: 
+    if other_filter == "topic":
+        filtered_candidates = [
+            candidate
+            for candidate in clicked_articles.articles
+            if set(extract_general_topics(candidate)) & set(selected_topic)
+        ]
+        clicked_articles = filtered_candidates if filtered_candidates else clicked_articles.articles
+
+    else:
         clicked_articles = clicked_articles.articles
 
     candidate_indices = related_indices(selected_subhead, selected_date, clicked_articles, time_decay, topk_similar)
@@ -234,22 +242,19 @@ def related_context(article: Article, clicked_articles: ArticleSet, time_decay: 
     return [clicked_articles[index] for index in candidate_indices]
 
 
-
-def generated_context(article: Article, clicked_articles: ArticleSet, time_decay: bool, topk_similar: int,  other_filter: None): 
+def generated_context(
+    article: Article, clicked_articles: ArticleSet, time_decay: bool, topk_similar: int, other_filter: None
+):
     # TODO: add fallback that based on user interests
 
-    topk_similar =  min(topk_similar, len(clicked_articles.articles))
+    topk_similar = min(topk_similar, len(clicked_articles.articles))
     related_articles = related_context(article, clicked_articles, time_decay, topk_similar, other_filter)
 
     input_prompt = []
-    input_prompt.append({'ID': 'Main News', 
-                         'subhead': article.subhead})
-    
+    input_prompt.append({"ID": "Main News", "subhead": article.subhead})
+
     for i in range(topk_similar):
-        input_prompt.append({'ID': 'Related News', 
-                            'subhead': related_articles[i].subhead})
-    
+        input_prompt.append({"ID": "Related News", "subhead": related_articles[i].subhead})
+
     generated_subhead = generate_narrative(input_prompt)
     return generated_subhead
-    
-
