@@ -166,6 +166,10 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     clicked = pipeline.create_input("clicked", ArticleSet)
     profile = pipeline.create_input("profile", InterestProfile)
 
+    # locality-calibration specific inputs
+    theta_topic = pipeline.create_input("theta_topic", float)
+    theta_locality = pipeline.create_input("theta_locality", float)
+    
     # Compute embeddings
     e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
     e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
@@ -177,7 +181,7 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     if ranker is topk_ranker:
         o_rank = o_topk
     else:
-        o_rank = pipeline.add_component("reranker", ranker, candidate_articles=o_scored, interest_profile=e_user)
+        o_rank = pipeline.add_component("reranker", ranker, candidate_articles=o_scored, interest_profile=e_user, theta_topic=theta_topic, theta_locality=theta_locality)
 
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
