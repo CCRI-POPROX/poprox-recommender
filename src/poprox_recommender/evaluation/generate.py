@@ -140,6 +140,8 @@ def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users:
                 "candidate": ArticleSet(articles=request.todays_articles),
                 "clicked": ArticleSet(articles=request.past_articles),
                 "profile": request.interest_profile,
+                "theta_topic": 0.3,
+                "theta_locality": 0.3
             }
             for name, pipe in pipelines.items():
                 try:

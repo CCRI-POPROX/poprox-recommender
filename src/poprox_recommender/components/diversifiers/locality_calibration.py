@@ -23,7 +23,7 @@ class LocalityCalibrator(Component):
         self.theta_topic = theta_topic
         self.num_slots = num_slots
 
-    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile, theta_topic: float, theta_locality: float) -> ArticleSet:
         normalized_topic_prefs = self.compute_topic_prefs(interest_profile)
         normalized_locality_prefs = self.compute_local_prefs(candidate_articles)
 
@@ -39,8 +39,8 @@ class LocalityCalibrator(Component):
             candidate_articles.articles,
             normalized_topic_prefs,
             normalized_locality_prefs,
-            self.theta_topic,
-            self.theta_local,
+            theta_topic,
+            theta_locality,
             topk=self.num_slots,
         )
 
