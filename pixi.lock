@@ -18661,6 +18661,29 @@ packages:
   - transformers<5,>=4.41
   requires_python: '>=3.11'
   editable: true
+- kind: pypi
+  name: poprox-recommender
+  version: 0.0.1
+  path: .
+  sha256: 182167ca6c296ae7c0e8acd28a01f54120d127c6c1cfd95a802c59097392524d
+  requires_dist:
+  - colorlog<7,>=6.8
+  - enlighten<2,>=1.12
+  - ipyparallel~=8.0
+  - lenskit==0.14.*
+  - nltk<4,>=3.8
+  - numpy<2,>=1.26
+  - openai==1.52.2
+  - poprox-concepts
+  - progress-api<0.2,>=0.1.0a9
+  - safetensors<1,>=0.4
+  - scikit-learn==1.5.2
+  - sentence-transformers==3.2.1
+  - smart-open==7.*
+  - torch==2.*
+  - transformers<5,>=4.41
+  requires_python: '>=3.11'
+  editable: true
 - kind: conda
   name: pre-commit
   version: 3.8.0
@@ -18701,6 +18724,30 @@ packages:
   - pkg:pypi/prefixed?source=hash-mapping
   size: 18192
   timestamp: 1725320870356
+- kind: pypi
+  name: progress-api
+  version: 0.1.0
+  url: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+  requires_dist:
+  - setuptools>=64 ; extra == 'dev'
+  - setuptools-scm>=8 ; extra == 'dev'
+  - build==1.* ; extra == 'dev'
+  - ruff>=0.2 ; extra == 'dev'
+  - pyright ; extra == 'dev'
+  - copier==9.* ; extra == 'dev'
+  - unbeheader~=1.3 ; extra == 'dev'
+  - ipython ; extra == 'dev'
+  - pyproject2conda ; extra == 'dev'
+  - sphinx-autobuild ; extra == 'dev'
+  - enlighten==1.* ; extra == 'dev'
+  - tqdm==4.* ; extra == 'dev'
+  - sphinx>=4.2 ; extra == 'doc'
+  - sphinxext-opengraph>=0.5 ; extra == 'doc'
+  - furo ; extra == 'doc'
+  - enlighten ; extra == 'doc'
+  - tqdm ; extra == 'doc'
+  - pytest>=7 ; extra == 'test'
+  requires_python: '>=3.10'
 - kind: pypi
   name: progress-api
   version: 0.1.0
