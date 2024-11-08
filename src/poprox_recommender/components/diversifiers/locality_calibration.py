@@ -38,7 +38,7 @@ class LocalityCalibrator(Component):
             candidate_articles.articles,
             normalized_topic_prefs,
             normalized_locality_prefs,
-            theta_topic,
+            self.theta_topic,
             self.theta_local,
             topk=self.num_slots,
         )
