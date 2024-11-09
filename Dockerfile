@@ -37,7 +37,7 @@ FROM public.ecr.aws/lambda/provided:al2023
 
 # Unpack the packaged environment from build container into runtime contianer
 # GNU tar chokes on conda-pack's output, so we use bsdtar
-RUN dnf install -y bsdtar
+RUN dnf install -y bsdtar && dnf clean -y all
 RUN mkdir /opt/poprox
 RUN --mount=type=bind,from=build,source=/src/poprox-recommender/build,target=/tmp/poprox-build \
     bsdtar -C /opt/poprox -xf /tmp/poprox-build/production-env.tar
