@@ -1,5 +1,6 @@
 data/
 dist/
+outputs/
 models/news-category-classifier-distilbert/
 .dvc/
 .git/
