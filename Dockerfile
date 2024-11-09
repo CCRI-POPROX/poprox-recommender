@@ -1,5 +1,3 @@
-ARG LOG_LEVEL=INFO
-
 # Use Lambda "Provided" base image for the build container
 FROM public.ecr.aws/lambda/provided:al2023 AS build
 ARG PIXI_VERSION=0.35.0
@@ -34,6 +32,7 @@ RUN ./.pixi/envs/pkg/bin/conda-pack -p .pixi/envs/production -d /opt/poprox -o b
 # Use Lambda "Provided" base image for the deployment container
 # We installed Python ourselves
 FROM public.ecr.aws/lambda/provided:al2023
+ARG LOG_LEVEL=INFO
 
 # Unpack the packaged environment from build container into runtime contianer
 # GNU tar chokes on conda-pack's output, so we use bsdtar
