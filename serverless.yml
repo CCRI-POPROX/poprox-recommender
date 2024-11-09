@@ -28,6 +28,7 @@ provider:
     images:
       poprox-recommender:
         path: "./"
+        platform: linux/amd64
 
 plugins:
   - serverless-offline
