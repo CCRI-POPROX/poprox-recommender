@@ -27,7 +27,7 @@ RUN pixi install -e pkg
 # Download the punkt NLTK data
 RUN pixi run -e production python -m nltk.downloader -d build/nltk_data punkt
 # Install poprox-recommender
-RUN pixi run -e production pip install --no-deps .
+RUN pixi run -e production pip install --no-deps --root-user-action .
 # Pack up the environment for migration to runtime
 RUN ./.pixi/envs/pkg/bin/conda-pack -p .pixi/envs/production -d /opt/poprox -o build/production-env.tar
 
