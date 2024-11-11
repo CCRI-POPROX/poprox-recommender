@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from poprox_concepts.domain import Article, ArticleSet, Click, InterestProfile
+from poprox_concepts.domain import Article, ArticleSet, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Concatenate, Fill, Interleave
 from poprox_recommender.components.samplers import UniformSampler
