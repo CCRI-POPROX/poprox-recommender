@@ -1,6 +1,8 @@
 data/
 dist/
+outputs/
 models/news-category-classifier-distilbert/
+.pixi/
 .dvc/
 .git/
 node_modules/
