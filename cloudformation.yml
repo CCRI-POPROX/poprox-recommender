@@ -1,10 +1,23 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Deployment and execution resources for the POPROX recommender
+
+Parameters:
+  env:
+    Type: String
+    Default: "prod"
+    AllowedValues:
+      - "prod"
+      - "dev"
+      - "test"
+
 Resources:
   PoproxRecommenderDeploymentIAMGroup:
-    UpdateReplacePolicy: Retain
     Type: AWS::IAM::Group
-    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
     Properties:
-      GroupName: poprox-recommender-deployment
+      GroupName: !Sub "poprox-recommender-deployment-${env}"
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
@@ -12,11 +25,50 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
   PoproxRecommenderDeploymentIAMUser:
-    UpdateReplacePolicy: Retain
     Type: AWS::IAM::User
-    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
     Properties:
       Path: /
-      UserName: PoproxRecommenderDeploymentIamUser
+      UserName: !Sub "PoproxRecommenderDeploymentIamUser-${env}"
       Groups:
         - !Ref PoproxRecommenderDeploymentIAMGroup
+
+  IamRoleLambdaExecution:
+    Type: AWS::IAM::Role
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "poprox-recommender-${env}-lambda"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:CreateLogGroup
+                  - logs:TagResource
+                Resource:
+                  - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/poprox-recommender-${env}*:*
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/poprox-recommender-${env}*:*:*
+      Path: /
+      RoleName: !Join
+        - '-'
+        - - poprox-recommender
+          - !Ref AWS::Region
+          - lambdaRole
+          - !Sub "${env}"
