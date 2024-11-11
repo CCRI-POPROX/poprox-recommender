@@ -1,8 +1,6 @@
-ARG LOG_LEVEL=INFO
-
 # Use Lambda "Provided" base image for the build container
 FROM public.ecr.aws/lambda/provided:al2023 AS build
-ARG PIXI_VERSION=0.31.0
+ARG PIXI_VERSION=0.35.0
 
 # install necessary system packages
 RUN dnf -y install git-core
@@ -27,17 +25,18 @@ RUN pixi install -e pkg
 # Download the punkt NLTK data
 RUN pixi run -e production python -m nltk.downloader -d build/nltk_data punkt
 # Install poprox-recommender
-RUN pixi run -e production pip install --no-deps .
+RUN pixi run -e production pip install --no-deps --root-user-action=ignore .
 # Pack up the environment for migration to runtime
 RUN ./.pixi/envs/pkg/bin/conda-pack -p .pixi/envs/production -d /opt/poprox -o build/production-env.tar
 
 # Use Lambda "Provided" base image for the deployment container
 # We installed Python ourselves
 FROM public.ecr.aws/lambda/provided:al2023
+ARG LOG_LEVEL=INFO
 
 # Unpack the packaged environment from build container into runtime contianer
 # GNU tar chokes on conda-pack's output, so we use bsdtar
-RUN dnf install -y bsdtar
+RUN dnf install -y bsdtar && dnf clean -y all
 RUN mkdir /opt/poprox
 RUN --mount=type=bind,from=build,source=/src/poprox-recommender/build,target=/tmp/poprox-build \
     bsdtar -C /opt/poprox -xf /tmp/poprox-build/production-env.tar
