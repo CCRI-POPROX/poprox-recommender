@@ -55,7 +55,7 @@ def _finish_worker():
 def _generate_for_request(request: RecommendationRequest) -> UUID | None:
     global _emb_seen
 
-    logger.debug("recommending for user %s", request.interest_profile.profile_id)
+    logger.debug("recommending for profile %s", request.interest_profile.profile_id)
     if request.num_recs != TEST_REC_COUNT:
         logger.warning(
             "request for %s had unexpected recommendation count %d",
@@ -74,7 +74,7 @@ def _generate_for_request(request: RecommendationRequest) -> UUID | None:
         try:
             outputs = pipe.run_all(**inputs)
         except Exception as e:
-            logger.error("error recommending for user %s: %s", request.interest_profile.profile_id, e)
+            logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
             raise e
 
         rec_df, embeddings = extract_recs(name, request, outputs)
@@ -103,8 +103,8 @@ def extract_recs(
 ) -> tuple[pd.DataFrame, dict[UUID, np.ndarray]]:
     # recommendations {account id (uuid): LIST[Article]}
     # use the url of Article
-    user = request.interest_profile.profile_id
-    assert user is not None
+    profile = request.interest_profile.profile_id
+    assert profile is not None
 
     # get the different recommendation lists to record
     recs = pipeline_state["recommender"]
@@ -112,7 +112,7 @@ def extract_recs(
         pd.DataFrame(
             {
                 "recommender": name,
-                "user": str(user),
+                "profile": str(profile),
                 "stage": "final",
                 "item": [str(a.article_id) for a in recs.articles],
                 "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
@@ -126,7 +126,7 @@ def extract_recs(
             pd.DataFrame(
                 {
                     "recommender": name,
-                    "user": str(user),
+                    "profile": str(profile),
                     "stage": "ranked",
                     "item": [str(a.article_id) for a in ranked.articles],
                     "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
@@ -140,7 +140,7 @@ def extract_recs(
             pd.DataFrame(
                 {
                     "recommender": name,
-                    "user": str(user),
+                    "profile": str(profile),
                     "stage": "reranked",
                     "item": [str(a.article_id) for a in reranked.articles],
                     "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
@@ -161,16 +161,16 @@ def extract_recs(
     return output_df, embeddings
 
 
-def generate_user_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
+def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
     logger.info("generating recommendations")
 
-    user_iter = dataset.iter_profiles()
+    profile_iter = dataset.iter_profiles()
     if n_profiles is None:
         n_profiles = dataset.n_profiles
-        logger.info("recommending for all %d users", n_profiles)
+        logger.info("recommending for all %d profiles", n_profiles)
     else:
-        logger.info("running on subset of %d users", n_profiles)
-        user_iter = it.islice(user_iter, n_profiles)
+        logger.info("running on subset of %d profiles", n_profiles)
+        profile_iter = it.islice(profile_iter, n_profiles)
 
     timer = Stopwatch()
     with make_progress(logger, "recommend", total=n_profiles) as pb:
@@ -183,7 +183,7 @@ def generate_user_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = 
 
                 logger.debug("dispatching jobs")
                 lbv = client.load_balanced_view()
-                for uid in lbv.imap(_generate_for_request, user_iter, max_outstanding=n_jobs * 5, ordered=False):
+                for uid in lbv.imap(_generate_for_request, profile_iter, max_outstanding=n_jobs * 5, ordered=False):
                     logger.debug("finished measuring %s", uid)
                     pb.update()
 
@@ -194,7 +194,7 @@ def generate_user_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = 
             # directly call things in-process
             _init_worker(outs)
 
-            for request in user_iter:
+            for request in profile_iter:
                 _generate_for_request(request)
                 pb.update()
 
