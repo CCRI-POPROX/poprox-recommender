@@ -161,19 +161,19 @@ def extract_recs(
     return output_df, embeddings
 
 
-def generate_user_recs(dataset: str, outs: RecOutputs, n_users: int | None = None, n_jobs: int = 1):
+def generate_user_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
     logger.info("generating recommendations")
 
-    user_iter = dataset.iter_users()
-    if n_users is None:
-        n_users = dataset.n_users
-        logger.info("recommending for all %d users", n_users)
+    user_iter = dataset.iter_profiles()
+    if n_profiles is None:
+        n_profiles = dataset.n_profiles
+        logger.info("recommending for all %d users", n_profiles)
     else:
-        logger.info("running on subset of %d users", n_users)
-        user_iter = it.islice(user_iter, n_users)
+        logger.info("running on subset of %d users", n_profiles)
+        user_iter = it.islice(user_iter, n_profiles)
 
     timer = Stopwatch()
-    with make_progress(logger, "recommend", total=n_users) as pb:
+    with make_progress(logger, "recommend", total=n_profiles) as pb:
         if n_jobs > 1:
             logger.info("starting evaluation with %d workers", n_jobs)
             with ipp.Cluster(n=n_jobs) as client:
