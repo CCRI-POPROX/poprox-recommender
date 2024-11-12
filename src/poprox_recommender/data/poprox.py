@@ -55,8 +55,10 @@ class PoproxData(EvalData):
         # Create one row per clicked article with this newsletter_id
         # Returned dataframe must have an "item" column containing the clicked article ids
         # and the "item" column must be the index of the dataframe
-        newsletter_clicks = self.clicks_df[self.clicks_df["newsletter_id"] == newsletter_id]
-        return pd.DataFrame({"item": newsletter_clicks["article_id"]}).set_index("item")
+        # There must also be a "rating" columns
+        newsletter_clicks = self.clicks_df[self.clicks_df["newsletter_id"] == str(newsletter_id)]
+        clicked_items = newsletter_clicks["article_id"].unique()
+        return pd.DataFrame({"item": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item")
 
     def iter_profiles(self) -> Generator[RecommendationRequest]:
         newsletter_ids = self.newsletters_df["newsletter_id"].unique()
