@@ -51,7 +51,8 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[Pr
         profile_id = UUID(str(profile_id))
         truth = eval_data.profile_truth(profile_id)
         assert truth is not None
-        yield ProfileRecs(profile_id, recs.copy(), truth)
+        if len(truth) > 0:
+            yield ProfileRecs(profile_id, recs.copy(), truth)
 
 
 def profile_eval_results(
