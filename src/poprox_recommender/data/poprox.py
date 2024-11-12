@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 from typing import Generator
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pandas as pd
 
@@ -90,7 +90,7 @@ class PoproxData(EvalData):
                 )
 
             # TODO: Fill in the onboarding topics
-            profile = InterestProfile(profile_id=uuid4(), click_history=clicks, onboarding_topics=[])
+            profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, onboarding_topics=[])
 
             # Filter candidate articles to those ingested on the same day as the newsletter (today's articles)
             candidate_articles = []
