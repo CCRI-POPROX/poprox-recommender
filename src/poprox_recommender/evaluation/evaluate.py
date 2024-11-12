@@ -14,6 +14,8 @@ Options:
             read MIND test data DATA [default: MINDsmall_dev]
     -P DATA, --poprox-data=DATA
             read POPROX test data DATA
+    -j N, --jobs=N
+            use N parallel jobs
     <name>              the name of the evaluation to measure
 """
 
@@ -77,6 +79,15 @@ def main():
         eval_data = PoproxData(options["--poprox-data"])
     else:
         eval_data = MindData(options["--mind-data"])
+
+    n_jobs = options["--jobs"]
+    if n_jobs is not None:
+        n_jobs = int(n_jobs)
+        if n_jobs <= 0:
+            logger.warning("--jobs must be positive, using single job")
+            n_jobs = 1
+    else:
+        n_jobs = available_cpu_parallelism(4)
 
     eval_name = options["<name>"]
     logger.info("measuring evaluation %s", eval_name)
