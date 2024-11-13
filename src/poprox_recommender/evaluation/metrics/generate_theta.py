@@ -28,6 +28,9 @@ import itertools as it
 import logging
 import logging.config
 
+import hydra
+from omegaconf import DictConfig
+
 import numpy as np
 import pandas as pd
 from docopt import docopt
@@ -43,6 +46,7 @@ from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.lkpipeline import PipelineState
 from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.recommenders import recommendation_pipelines
+from poprox_recommender.topics import user_topic_preference
 
 logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 
@@ -51,7 +55,6 @@ logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 # - support our data
 
 STAGES = ["final", "ranked", "reranked"]
-
 
 def extract_recs(
     name: str,
@@ -108,7 +111,8 @@ def extract_recs(
     return output_df
 
 
-def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users: int | None = None):
+def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users: int | None = None, 
+                       theta_topic=0.1, theta_locality=0.1):
     pipelines = recommendation_pipelines(device=default_device())
     if pipe_names is not None:
         pipelines = {name: pipelines[name] for name in pipe_names}  # type: ignore
@@ -136,10 +140,15 @@ def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users:
                     request.interest_profile.profile_id,
                     request.num_recs,
                 )
+            # Calculate the clicked topic count
+            request.interest_profile.click_topic_counts = user_topic_preference(
+                request.past_articles, request.interest_profile.click_history)
             inputs = {
                 "candidate": ArticleSet(articles=request.todays_articles),
                 "clicked": ArticleSet(articles=request.past_articles),
                 "profile": request.interest_profile,
+                "theta_topic": theta_topic,
+                "theta_locality": theta_locality
             }
             for name, pipe in pipelines.items():
                 try:
@@ -158,32 +167,16 @@ def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users:
 
     return user_recs
 
-
-if __name__ == "__main__":
-    """
-    For offline evaluation, set theta in mmr_diversity = 1
-    """
-    print("in poprox-recommender-locality")
-    options = docopt(__doc__)  # type: ignore
-    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
-
-    n_users = options["--subset"]
-    if n_users is not None:
-        n_users = int(n_users)
-
-    pipelines = options["--pipelines"]
-    print("Pipelines:", pipelines)
-
-    mind_data = options["--mind-data"]
-    data_path = options["--data_path"]
-    if mind_data is not None:
-        user_recs = generate_user_recs(MindData(mind_data), pipelines, n_users)
-    elif data_path is not None:
-        user_recs = generate_user_recs(PoproxData(data_path), pipelines, n_users)
-
+@hydra.main(config_path="/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/src/", config_name="config", version_base="1.1")
+def main(cfg: DictConfig) -> None:
+    user_recs = generate_user_recs(PoproxData(cfg.data_path), cfg.pipelines, 
+                                   theta_topic=cfg.theta_topic, theta_locality=cfg.theta_locality)
+    
+    print(f"Starting run with theta_topic={round(cfg.theta_topic, 2)}, theta_locality={round(cfg.theta_locality, 2)}")
     all_recs = pd.concat(user_recs, ignore_index=True)
-    out_fn = options["--output"]
+    out_fn = "{}top_{}_loc_{}.parquet".format(cfg.output_dir, round(cfg.theta_topic, 2), round(cfg.theta_locality, 2))
     logger.info("saving recommendations to %s", out_fn)
     all_recs.to_parquet(out_fn, compression="zstd", index=False)
 
-    # response = {"statusCode": 200, "body": json.dump(body, default=custom_encoder)}
+if __name__ == "__main__":
+    main()
