@@ -29,7 +29,6 @@ import pandas as pd
 from docopt import docopt
 from progress_api import make_progress
 
-# from poprox_recommender.data.mind import MindData
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
