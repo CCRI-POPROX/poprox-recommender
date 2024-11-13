@@ -8,17 +8,17 @@ from lenskit.metrics import topn
 from poprox_concepts import Article, ArticleSet
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 
-__all__ = ["rank_biased_overlap", "UserRecs", "measure_user_recs"]
+__all__ = ["rank_biased_overlap", "ProfileRecs", "measure_profile_recs"]
 
 logger = logging.getLogger(__name__)
 
 
-class UserRecs(NamedTuple):
+class ProfileRecs(NamedTuple):
     """
-    A user's recommendations (possibly from multiple algorithms and stages)
+    A user profile's recommendations (possibly from multiple algorithms and stages)
     """
 
-    user_id: UUID
+    profile_id: UUID
     recs: pd.DataFrame
     truth: pd.DataFrame
 
@@ -30,12 +30,12 @@ def convert_df_to_article_set(rec_df):
     return ArticleSet(articles=articles)
 
 
-def measure_user_recs(user: UserRecs) -> list[dict[str, Any]]:
+def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
     """
-    Measure a single user's recommendations.  Returns the user ID and
+    Measure a single user profile's recommendations.  Returns the profile ID and
     a data frame of evaluation metrics.
     """
-    user_id, all_recs, truth = user
+    profile_id, all_recs, truth = profile
     truth.index = truth.index.astype(str)
 
     results = []
@@ -60,8 +60,8 @@ def measure_user_recs(user: UserRecs) -> list[dict[str, Any]]:
             single_rbo10 = None
 
         logger.debug(
-            "user %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
-            user_id,
+            "profile %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
+            profile_id,
             name,
             single_ndcg5,
             single_ndcg10,
@@ -72,7 +72,7 @@ def measure_user_recs(user: UserRecs) -> list[dict[str, Any]]:
 
         results.append(
             {
-                "user_id": user_id,
+                "profile_id": profile_id,
                 "recommender": name,
                 # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
                 # whole function should be revised for generality when we want to support
