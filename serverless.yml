@@ -14,7 +14,7 @@ provider:
   architecture: x86_64
 
   iam:
-    role: !Sub arn:aws:iam::${AWS::AccountId}:role/poprox-recommender-${AWS::Region}-lambdaRole-${opt:stage}
+    role: arn:aws:iam::${AWS::AccountId}:role/poprox-recommender-${AWS::Region}-lambdaRole-${opt:stage}
 
   ecr:
     # In this section you can define images that will be built locally and uploaded to ECR
