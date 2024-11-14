@@ -16,8 +16,19 @@ and data files are managed using [dvc][]. The `pixi.lock` file provides a locked
 dependency set for reproducibly running the recommender code with all
 dependencies, on Linux, macOS, and Windows (including with CUDA on Linux).
 
-To install Pixi on Linux or Windows, see the [install instructions][pixi]. To
-install on Mac, either do the same or use Homebrew (`brew install pixi`).
+See the Pixi [install instructions][pixi] for how to install Pixi in general. On
+macOS, you can also use Homebrew (`brew install pixi`), and on Windows you can
+use WinGet (`winget install prefix-dev.pixi`).
+
+> [!NOTE]
+>
+> If you are trying to work on poprox-recommender with WSL on Windows, you need
+> to follow the Linux install instructions, and also add the following to the
+> Pixi configuration file (`~/.pixi/config.toml`):
+>
+> ```toml
+> detached-environments = true
+> ```
 
 [pixi]: https://pixi.sh
 [dvc]: https://dvc.org
