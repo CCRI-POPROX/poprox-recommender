@@ -11,7 +11,7 @@ from uuid import UUID
 
 import pandas as pd
 
-from poprox_concepts import Article, Click, Entity, InterestProfile, Mention
+from poprox_concepts import AccountInterest, Article, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
@@ -21,13 +21,16 @@ TEST_REC_COUNT = 10
 
 
 class PoproxData(EvalData):
-    clicks_df: pd.DataFrame
-    articles_df: pd.DataFrame
-
     def __init__(self, archive: str = "POPROX"):
-        articles_df, mentions_df, newsletters_df, clicks_df, clicked_articles_df, clicked_mentions_df = (
-            load_poprox_frames(archive)
-        )
+        (
+            articles_df,
+            mentions_df,
+            newsletters_df,
+            clicks_df,
+            clicked_articles_df,
+            clicked_mentions_df,
+            interests_df,
+        ) = load_poprox_frames(archive)
 
         self.newsletters_df = newsletters_df
 
@@ -42,6 +45,8 @@ class PoproxData(EvalData):
         self.clicked_articles_df = clicked_articles_df.set_index("article_id", drop=False)
         if not self.clicked_articles_df.index.unique:
             logger.warning("clicked article data has non-unique index")
+
+        self.interests_df = interests_df
 
     @property
     def n_profiles(self) -> int:
@@ -89,8 +94,20 @@ class PoproxData(EvalData):
                     )
                 )
 
-            # TODO: Fill in the onboarding topics
-            profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, onboarding_topics=[])
+            interests = self.interests_df.loc[self.interests_df["account_id"] == profile_id]
+            topics = []
+            for interest in interests.itertuples():
+                topics.append(
+                    AccountInterest(
+                        account_id=profile_id,
+                        entity_id=interest.entity_id,
+                        entity_name=interest.entity_name,
+                        preference=interest.preference,
+                        frequency=interest.frequency,
+                    )
+                )
+
+            profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, onboarding_topics=topics)
 
             # Filter candidate articles to those ingested on the same day as the newsletter (today's articles)
             candidate_articles = []
@@ -155,4 +172,14 @@ def load_poprox_frames(archive: str = "POPROX"):
     clicked_articles_df = pd.read_parquet(data / "POPROX" / "clicked" / "articles.parquet")
     clicked_mentions_df = pd.read_parquet(data / "POPROX" / "clicked" / "mentions.parquet")
 
-    return articles_df, mentions_df, newsletters_df, clicks_df, clicked_articles_df, clicked_mentions_df
+    interests_df = pd.read_parquet(data / "POPROX" / "interests.parquet")
+
+    return (
+        articles_df,
+        mentions_df,
+        newsletters_df,
+        clicks_df,
+        clicked_articles_df,
+        clicked_mentions_df,
+        interests_df,
+    )
