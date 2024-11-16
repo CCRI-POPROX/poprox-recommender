@@ -12,7 +12,7 @@ from poprox_recommender.components.diversifiers.calibration import compute_kl_di
 from poprox_recommender.lkpipeline import Component
 from poprox_recommender.topics import extract_general_topics, extract_locality, normalized_category_count
 
-KL_VALUE_PATH = '/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/outputs/theta_kl_values.txt'
+KL_VALUE_PATH = '/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/outputs/theta_kl_values_2.txt'
 
 class LocalityCalibrator(Component):
     def __init__(self, theta_local: float = 0.1, theta_topic: float = 0.1, num_slots=10):
@@ -134,8 +134,9 @@ class LocalityCalibrator(Component):
             candidate_locality = extract_locality(article) or set()
             for locality in candidate_locality:
                 locality_preferences[locality] += 1
-
-        return locality_preferences
+        
+        normalized_locality_pres = normalized_category_count(locality_preferences)
+        return normalized_locality_pres
 
     def compute_topic_prefs(self, interest_profile):
         topic_preferences: dict[str, int] = defaultdict(int)
