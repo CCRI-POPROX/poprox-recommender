@@ -52,6 +52,13 @@ def test_multifill():
     assert recs.items == ["a", "b", "c"]
 
 
+def test_multifill_with_duplicate():
+    recs = LazyRecs(num_slots=3)
+    recs.fill_position(1, "a")
+    recs.multifill(["a", "b", "c"])
+    assert recs.items == ["a", "b", "c"]
+
+
 def test_multifill_by_score():
     items = ["a", "b", "c", "d", "e"]
     scores = [0.1, 0.2, 0.3, 0.4, 0.5]
@@ -67,3 +74,47 @@ def test_multifill_by_score_already_partially_filled():
     recs.fill_position(2, "a")
     recs.multifill_by_score(items, scores)
     assert recs.items == ["e", "a", "d"]
+
+
+def test_multifill_with_constraint():
+    items = ["c", "d", "e"]
+    scores = [0.3, 0.4, 0.5]
+    recs = LazyRecs(num_slots=5)
+    recs.constrain_above_position(3, ["a", "b"], [0.1, 0.2])
+    recs.multifill_by_score(items, scores)
+    assert recs.items == ["e", "b", "a", "d", "c"]
+
+
+def test_multifill_with_constraint_and_fixed():
+    items = ["d", "e"]
+    scores = [0.4, 0.5]
+    recs = LazyRecs(num_slots=5)
+    recs.fill_position(3, "c")
+    recs.constrain_above_position(4, ["a", "b"], [0.1, 0.2])
+    recs.multifill_by_score(items, scores)
+    assert recs.items == ["e", "b", "c", "a", "d"]
+
+
+def test_multifill_with_multiple_constraints():
+    items = ["d", "e"]
+    scores = [0.4, 0.5]
+    recs = LazyRecs(num_slots=5)
+    recs.constrain_above_position(2, ["a"], [0.1])
+    recs.constrain_above_position(4, ["b", "c"], [0.2, 0.3])
+    recs.multifill_by_score(items, scores)
+    assert recs.items == ["e", "a", "c", "b", "d"]
+
+
+def test_constraint_with_too_many_items():
+    items = ["a", "b", "c", "d", "e"]
+    scores = [0.1, 0.2, 0.3, 0.4, 0.5]
+    recs = LazyRecs(num_slots=3)
+    with pytest.raises(ValueError):
+        recs.constrain_above_position(2, items, scores)
+
+
+def test_multiple_constraints_with_too_many_items():
+    recs = LazyRecs(num_slots=5)
+    recs.constrain_above_position(5, ["a", "b", "c"], [0.1, 0.2, 0.3])
+    with pytest.raises(ValueError):
+        recs.constrain_above_position(5, ["d", "e", "f"], [0.4, 0.5, 0.6])
