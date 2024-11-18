@@ -16,8 +16,19 @@ and data files are managed using [dvc][]. The `pixi.lock` file provides a locked
 dependency set for reproducibly running the recommender code with all
 dependencies, on Linux, macOS, and Windows (including with CUDA on Linux).
 
-To install Pixi on Linux or Windows, see the [install instructions][pixi]. To
-install on Mac, either do the same or use Homebrew (`brew install pixi`).
+See the Pixi [install instructions][pixi] for how to install Pixi in general. On
+macOS, you can also use Homebrew (`brew install pixi`), and on Windows you can
+use WinGet (`winget install prefix-dev.pixi`).
+
+> [!NOTE]
+>
+> If you are trying to work on poprox-recommender with WSL on Windows, you need
+> to follow the Linux install instructions, and also add the following to the
+> Pixi configuration file (`~/.pixi/config.toml`):
+>
+> ```toml
+> detached-environments = true
+> ```
 
 [pixi]: https://pixi.sh
 [dvc]: https://dvc.org
@@ -241,15 +252,19 @@ Silicon).  To make use of a GPU, do the following:
 
 Timing information for generating recommendations with the MIND validation set:
 
-| CPU              | GPU        | Rec. Time | Eval Time |
-| :--------------: | :--------: | :-------: | :-------: |
-| EPYC 7662 (2GHz) | A40 (CUDA) | 2h10m     | 45m       |
-| Apple M2 Pro     | -          | <20hr¹    | 30m¹      |
-| Apple M2 Pro     | M2 (MPS)   | <12hr¹    |           |
+| Machine | CPU              | GPU        | Rec. Time | Rec. Power | Eval Time |
+| ------- | :--------------: | :--------: | :-------: | :--------: | :-------: |
+| [DXC][] | EPYC 7662 (2GHz) | A40 (CUDA) | 45m¹      | 418.5 Wh   | 24m       |
+| [MBP][] | Apple M2 Pro     | -          | <20hr²    |            | 30m²      |
+| [MBP][] | Apple M2 Pro     | M2 (MPS)   | <12hr²    |            |           |
+
+[DXC]: https://codex.lenskit.org/hardware/cruncher.html
+[MBP]: https://codex.lenskit.org/hardware/mbp2.html
 
 Footnotes:
 
-1. Estimated based on early progress, not run to completion.
+1. Using 12 worker processes
+2. Estimated based on early progress, not run to completion.
 
 ## Editor Setup
 

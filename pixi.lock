@@ -1024,8 +1024,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.3-pyhd8ed1ab_0.conda
@@ -1375,8 +1375,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.3-pyhd8ed1ab_0.conda
@@ -1729,8 +1729,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
   dev:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -2070,8 +2070,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pthread-stubs-0.4-h36c2ea0_1001.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/ptyprocess-0.7.0-pyhd3deb0d_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/pure_eval-0.2.3-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/pyarrow-18.0.0-py311h38be061_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/pyarrow-core-18.0.0-py311h4854187_1_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/pyarrow-17.0.0-py311hbd00459_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/pyarrow-core-17.0.0-py311h4510849_1_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pyarrow-stubs-17.11-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pycparser-2.22-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.7.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pydantic-core-2.18.4-py311h5ecf98a_0.conda
@@ -2206,8 +2207,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.2-pyhd8ed1ab_0.conda
@@ -2519,8 +2520,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/psutil-6.0.0-py311h460d6c5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/ptyprocess-0.7.0-pyhd3deb0d_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/pure_eval-0.2.3-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyarrow-18.0.0-py311ha1ab1f8_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyarrow-core-18.0.0-py311he04fa90_1_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyarrow-17.0.0-py311h35c05fe_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pyarrow-core-17.0.0-py311he42f270_1_cpu.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pycparser-2.22-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.7.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pydantic-core-2.18.4-py311h98c6a39_0.conda
@@ -2634,8 +2635,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.2-pyhd8ed1ab_0.conda
@@ -2938,8 +2939,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/pthreads-win32-2.9.1-hfa6e2cd_3.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/ptyprocess-0.7.0-pyhd3deb0d_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/pure_eval-0.2.3-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/pyarrow-18.0.0-py311h1ea47a8_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/pyarrow-core-18.0.0-py311hdea38fa_1_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/pyarrow-17.0.0-py311h06a5be4_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/pyarrow-core-17.0.0-py311hdea38fa_1_cpu.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pycparser-2.22-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.7.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pydantic-core-2.18.4-py311h533ab2d_0.conda
@@ -3069,8 +3070,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
   dev-cuda:
     channels:
@@ -3419,6 +3420,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pure_eval-0.2.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pyarrow-17.0.0-py311hbd00459_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pyarrow-core-17.0.0-py311h4510849_1_cpu.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pyarrow-stubs-17.11-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pycparser-2.22-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.7.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pydantic-core-2.18.4-py311h5ecf98a_0.conda
@@ -3538,8 +3540,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
   eval:
     channels:
@@ -3902,8 +3904,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.2-pyhd8ed1ab_0.conda
@@ -4234,8 +4236,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.2-pyhd8ed1ab_0.conda
@@ -4571,8 +4573,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
   eval-cuda:
     channels:
@@ -4928,8 +4930,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
   lint:
     channels:
@@ -5167,8 +5169,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/aiohttp-3.11.2-py311h4921393_0.conda
@@ -5385,8 +5387,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/aiohttp-3.11.2-py311h5082efb_0.conda
@@ -5595,8 +5597,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-3.21.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
   pkg:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -6968,8 +6970,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.2-pyhd8ed1ab_0.conda
@@ -7325,8 +7327,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.2-pyhd8ed1ab_0.conda
@@ -7689,8 +7691,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
-      - pypi: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
       - pypi: .
 packages:
 - kind: conda
@@ -10418,38 +10420,6 @@ packages:
   - libglib >=2.80.3,<3.0a0
   - libpng >=1.6.43,<1.7.0a0
   - libstdcxx-ng >=12
-  - libxcb >=1.16,<1.17.0a0
-  - libzlib >=1.3.1,<2.0a0
-  - pixman >=0.43.2,<1.0a0
-  - xorg-libice >=1.1.1,<2.0a0
-  - xorg-libsm >=1.2.4,<2.0a0
-  - xorg-libx11 >=1.8.9,<2.0a0
-  - xorg-libxext >=1.3.4,<2.0a0
-  - xorg-libxrender >=0.9.11,<0.10.0a0
-  - zlib
-  license: LGPL-2.1-only or MPL-1.1
-  purls: []
-  size: 983604
-  timestamp: 1721138900054
-- kind: conda
-  name: cairo
-  version: 1.18.0
-  build: hebfffa5_3
-  build_number: 3
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/cairo-1.18.0-hebfffa5_3.conda
-  sha256: aee5b9e6ef71cdfb2aee9beae3ea91910ca761c01c0ef32052e3f94a252fa173
-  md5: fceaedf1cdbcb02df9699a0d9b005292
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - fontconfig >=2.14.2,<3.0a0
-  - fonts-conda-ecosystem
-  - freetype >=2.12.1,<3.0a0
-  - icu >=75.1,<76.0a0
-  - libgcc-ng >=12
-  - libglib >=2.80.3,<3.0a0
-  - libpng >=1.6.43,<1.7.0a0
-  - libstdcxx-ng >=12
   - libxcb >=1.16,<2.0.0a0
   - libzlib >=1.3.1,<2.0a0
   - pixman >=0.43.2,<1.0a0
@@ -12603,17 +12573,17 @@ packages:
   license_family: APACHE
   purls:
   - pkg:pypi/frozenlist?source=hash-mapping
-  size: 54934
-  timestamp: 1729699828246
+  size: 54199
+  timestamp: 1725396279788
 - kind: conda
   name: fsspec
-  version: 2024.10.0
+  version: 2024.9.0
   build: pyhff2d567_0
   subdir: noarch
   noarch: python
-  url: https://conda.anaconda.org/conda-forge/noarch/fsspec-2024.10.0-pyhff2d567_0.conda
-  sha256: 40bb76981dd49d5869b48925a8975bb7bbe4e33e1e40af4ec06f6bf4a62effd7
-  md5: 816dbc4679a64e4417cd1385d661bb31
+  url: https://conda.anaconda.org/conda-forge/noarch/fsspec-2024.9.0-pyhff2d567_0.conda
+  sha256: 8f4e9805b4ec223dea0d99f9e7e57c391d9026455eb9f0d6e0784c5d1a1200dc
+  md5: ace4329fbff4c69ab0309db6da182987
   depends:
   - python >=3.8
   license: BSD-3-Clause
@@ -12693,25 +12663,6 @@ packages:
   purls: []
   size: 509570
   timestamp: 1715783199780
-- kind: conda
-  name: gdk-pixbuf
-  version: 2.42.12
-  build: hb9ae30d_0
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/gdk-pixbuf-2.42.12-hb9ae30d_0.conda
-  sha256: d5283b95a8d49dcd88d29b360d8b38694aaa905d968d156d72ab71d32b38facb
-  md5: 201db6c2d9a3c5e46573ac4cb2e92f4f
-  depends:
-  - libgcc-ng >=12
-  - libglib >=2.80.2,<3.0a0
-  - libjpeg-turbo >=3.0.0,<4.0a0
-  - libpng >=1.6.43,<1.7.0a0
-  - libtiff >=4.6.0,<4.7.0a0
-  license: LGPL-2.1-or-later
-  license_family: LGPL
-  purls: []
-  size: 528149
-  timestamp: 1715782983957
 - kind: conda
   name: gdk-pixbuf
   version: 2.42.12
@@ -15362,46 +15313,45 @@ packages:
   timestamp: 1728881566531
 - kind: conda
   name: libarrow
-  version: 18.0.0
-  build: h3b997a5_7_cpu
-  build_number: 7
+  version: 17.0.0
+  build: had3b6fe_16_cpu
+  build_number: 16
   subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-18.0.0-h3b997a5_7_cpu.conda
-  sha256: d8e179b123ca9f62b83115091d3936c64d55506fef9c516b90cd3f2bdea304ca
-  md5: 32897a50e7f68187c4a524c439c0943c
+  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-17.0.0-had3b6fe_16_cpu.conda
+  sha256: 9aa5598878cccc29de744ebc4b501c4a5a43332973edfdf0a19ddc521bd7248f
+  md5: c899e532e16be21570d32bc74ea3d34f
   depends:
   - __glibc >=2.17,<3.0.a0
-  - aws-crt-cpp >=0.29.4,<0.29.5.0a0
-  - aws-sdk-cpp >=1.11.449,<1.11.450.0a0
-  - azure-core-cpp >=1.14.0,<1.14.1.0a0
-  - azure-identity-cpp >=1.10.0,<1.10.1.0a0
-  - azure-storage-blobs-cpp >=12.13.0,<12.13.1.0a0
-  - azure-storage-files-datalake-cpp >=12.12.0,<12.12.1.0a0
+  - aws-crt-cpp >=0.28.3,<0.28.4.0a0
+  - aws-sdk-cpp >=1.11.407,<1.11.408.0a0
+  - azure-core-cpp >=1.13.0,<1.13.1.0a0
+  - azure-identity-cpp >=1.8.0,<1.8.1.0a0
+  - azure-storage-blobs-cpp >=12.12.0,<12.12.1.0a0
+  - azure-storage-files-datalake-cpp >=12.11.0,<12.11.1.0a0
   - bzip2 >=1.0.8,<2.0a0
   - gflags >=2.2.2,<2.3.0a0
   - glog >=0.7.1,<0.8.0a0
   - libabseil * cxx17*
-  - libabseil >=20240722.0,<20240723.0a0
+  - libabseil >=20240116.2,<20240117.0a0
   - libbrotlidec >=1.1.0,<1.2.0a0
   - libbrotlienc >=1.1.0,<1.2.0a0
   - libgcc >=13
-  - libgoogle-cloud >=2.31.0,<2.32.0a0
-  - libgoogle-cloud-storage >=2.31.0,<2.32.0a0
-  - libre2-11 >=2024.7.2
+  - libgoogle-cloud >=2.29.0,<2.30.0a0
+  - libgoogle-cloud-storage >=2.29.0,<2.30.0a0
+  - libre2-11 >=2023.9.1,<2024.0a0
   - libstdcxx >=13
   - libutf8proc >=2.8.0,<3.0a0
   - libzlib >=1.3.1,<2.0a0
   - lz4-c >=1.9.3,<1.10.0a0
-  - orc >=2.0.3,<2.0.4.0a0
+  - orc >=2.0.2,<2.0.3.0a0
   - re2
   - snappy >=1.2.1,<1.3.0a0
   - zstd >=1.5.6,<1.6.0a0
   constrains:
+  - parquet-cpp <0.0a0
   - arrow-cpp <0.0a0
   - apache-arrow-proc =*=cpu
-  - parquet-cpp <0.0a0
   license: Apache-2.0
-  license_family: APACHE
   purls: []
   size: 8495428
   timestamp: 1726669963852
@@ -15489,110 +15439,23 @@ packages:
   license: Apache-2.0
   license_family: APACHE
   purls: []
-  size: 5213890
-  timestamp: 1731791745173
-- kind: conda
-  name: libarrow
-  version: 18.0.0
-  build: h90946fb_7_cuda
-  build_number: 7
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-18.0.0-h90946fb_7_cuda.conda
-  sha256: a4e42a2a1fa2f80e604eb5ad4047a0917487a83b880180c761d0c1da37c2242b
-  md5: 15511651285e50a3d8066706a9f02a7e
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - aws-crt-cpp >=0.29.4,<0.29.5.0a0
-  - aws-sdk-cpp >=1.11.449,<1.11.450.0a0
-  - azure-core-cpp >=1.14.0,<1.14.1.0a0
-  - azure-identity-cpp >=1.10.0,<1.10.1.0a0
-  - azure-storage-blobs-cpp >=12.13.0,<12.13.1.0a0
-  - azure-storage-files-datalake-cpp >=12.12.0,<12.12.1.0a0
-  - bzip2 >=1.0.8,<2.0a0
-  - gflags >=2.2.2,<2.3.0a0
-  - glog >=0.7.1,<0.8.0a0
-  - libabseil * cxx17*
-  - libabseil >=20240722.0,<20240723.0a0
-  - libbrotlidec >=1.1.0,<1.2.0a0
-  - libbrotlienc >=1.1.0,<1.2.0a0
-  - libgcc
-  - libgcc-ng >=12
-  - libgoogle-cloud >=2.31.0,<2.32.0a0
-  - libgoogle-cloud-storage >=2.31.0,<2.32.0a0
-  - libre2-11 >=2024.7.2
-  - libstdcxx
-  - libstdcxx-ng >=12
-  - libutf8proc >=2.8.0,<3.0a0
-  - libzlib >=1.3.1,<2.0a0
-  - lz4-c >=1.9.3,<1.10.0a0
-  - orc >=2.0.3,<2.0.4.0a0
-  - re2
-  - snappy >=1.2.1,<1.3.0a0
-  - zstd >=1.5.6,<1.6.0a0
-  constrains:
-  - arrow-cpp <0.0a0
-  - apache-arrow-proc =*=cuda
-  - parquet-cpp <0.0a0
-  license: Apache-2.0
-  license_family: APACHE
-  purls: []
-  size: 8577864
-  timestamp: 1731790004594
+  size: 5318871
+  timestamp: 1726669928492
 - kind: conda
   name: libarrow-acero
-  version: 18.0.0
-  build: h286801f_7_cpu
-  build_number: 7
-  subdir: osx-arm64
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/libarrow-acero-18.0.0-h286801f_7_cpu.conda
-  sha256: 8df47c06ad5b839393aa4703721385d3529a64971227a3a342a1100eeb2fbe78
-  md5: 67a94caeec254580852dd71b0cb5bfc7
-  depends:
-  - __osx >=11.0
-  - libarrow 18.0.0 h2409f62_7_cpu
-  - libcxx >=18
-  license: Apache-2.0
-  license_family: APACHE
-  purls: []
-  size: 491285
-  timestamp: 1731789825049
-- kind: conda
-  name: libarrow-acero
-  version: 18.0.0
-  build: h530483c_7_cuda
-  build_number: 7
+  version: 17.0.0
+  build: h5888daf_16_cpu
+  build_number: 16
   subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-acero-18.0.0-h530483c_7_cuda.conda
-  sha256: 6429da1f4b466abd2a0fc6e832c9b1fc6dfab14cabb0fd2674390d8f7b5b71bd
-  md5: d5f9190ecfaa61dae3336400787d7436
+  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-acero-17.0.0-h5888daf_16_cpu.conda
+  sha256: 0ff4c712c7c61e60708c6ef4f8158200059e0f63c25d0a54c8e4cca7bd153d86
+  md5: 18f796aae018a26a20ac51d19de69115
   depends:
   - __glibc >=2.17,<3.0.a0
-  - libarrow 18.0.0 h90946fb_7_cuda
-  - libgcc
-  - libgcc-ng >=12
-  - libstdcxx
-  - libstdcxx-ng >=12
-  license: Apache-2.0
-  license_family: APACHE
-  purls: []
-  size: 605500
-  timestamp: 1731790040198
-- kind: conda
-  name: libarrow-acero
-  version: 18.0.0
-  build: h5888daf_7_cpu
-  build_number: 7
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-acero-18.0.0-h5888daf_7_cpu.conda
-  sha256: bc0aa7f6c05c097f224cb2a8f72d22a5cde7ef239fde7a57f18061bf74776cd5
-  md5: 786a275d019708cd1c963b12a8fb0c72
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - libarrow 18.0.0 h3b997a5_7_cpu
+  - libarrow 17.0.0 had3b6fe_16_cpu
   - libgcc >=13
   - libstdcxx >=13
   license: Apache-2.0
-  license_family: APACHE
   purls: []
   size: 608267
   timestamp: 1726669999941
@@ -15671,28 +15534,25 @@ packages:
   license: Apache-2.0
   license_family: APACHE
   purls: []
-  size: 497438
-  timestamp: 1731791003104
+  size: 483187
+  timestamp: 1726670022814
 - kind: conda
   name: libarrow-dataset
-  version: 18.0.0
-  build: h530483c_7_cuda
-  build_number: 7
+  version: 17.0.0
+  build: h5888daf_16_cpu
+  build_number: 16
   subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-dataset-18.0.0-h530483c_7_cuda.conda
-  sha256: 2f8e31d037ecd138ffa907740f187ded7eb135398a282eb35513168b42c13dfb
-  md5: 810218ea4068d760544fe18c054c54f7
+  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-dataset-17.0.0-h5888daf_16_cpu.conda
+  sha256: e500e0154cf3ebb41bed3bdf41bd0ff5e0a6b7527a46ba755c05e59c8036e442
+  md5: 5400efd6bf101674e0ce170906a0f7cb
   depends:
   - __glibc >=2.17,<3.0.a0
-  - libarrow 18.0.0 h90946fb_7_cuda
-  - libarrow-acero 18.0.0 h530483c_7_cuda
-  - libgcc
-  - libgcc-ng >=12
-  - libparquet 18.0.0 hdbc8f64_7_cuda
-  - libstdcxx
-  - libstdcxx-ng >=12
+  - libarrow 17.0.0 had3b6fe_16_cpu
+  - libarrow-acero 17.0.0 h5888daf_16_cpu
+  - libgcc >=13
+  - libparquet 17.0.0 h39682fd_16_cpu
+  - libstdcxx >=13
   license: Apache-2.0
-  license_family: APACHE
   purls: []
   size: 585061
   timestamp: 1726670063965
@@ -15853,27 +15713,24 @@ packages:
   timestamp: 1728881756281
 - kind: conda
   name: libarrow-substrait
-  version: 18.0.0
-  build: hb57c354_7_cuda
-  build_number: 7
+  version: 17.0.0
+  build: hf54134d_16_cpu
+  build_number: 16
   subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-substrait-18.0.0-hb57c354_7_cuda.conda
-  sha256: b099311f4c3121b51c47bf72cae4481c232b075dd6c3f53645aa53b860d03f30
-  md5: 09bff864295009375c70ad4b8e587c88
+  url: https://conda.anaconda.org/conda-forge/linux-64/libarrow-substrait-17.0.0-hf54134d_16_cpu.conda
+  sha256: 53f3d5f12c9ea557f33a4e1cf9067ce2dbb4211eff0a095574eeb7f0528bc044
+  md5: 1cbc3fb1ee28c99e5f8c52920a7717a3
   depends:
   - __glibc >=2.17,<3.0.a0
   - libabseil * cxx17*
-  - libabseil >=20240722.0,<20240723.0a0
-  - libarrow 18.0.0 h90946fb_7_cuda
-  - libarrow-acero 18.0.0 h530483c_7_cuda
-  - libarrow-dataset 18.0.0 h530483c_7_cuda
-  - libgcc
-  - libgcc-ng >=12
-  - libprotobuf >=5.28.2,<5.28.3.0a0
-  - libstdcxx
-  - libstdcxx-ng >=12
+  - libabseil >=20240116.2,<20240117.0a0
+  - libarrow 17.0.0 had3b6fe_16_cpu
+  - libarrow-acero 17.0.0 h5888daf_16_cpu
+  - libarrow-dataset 17.0.0 h5888daf_16_cpu
+  - libgcc >=13
+  - libprotobuf >=4.25.3,<4.25.4.0a0
+  - libstdcxx >=13
   license: Apache-2.0
-  license_family: APACHE
   purls: []
   size: 550960
   timestamp: 1726670093831
@@ -16959,33 +16816,6 @@ packages:
   - libgcc-ng >=12
   - libjpeg-turbo >=3.0.0,<4.0a0
   - libpng >=1.6.43,<1.7.0a0
-  - libtiff >=4.6.0,<4.7.0a0
-  - libwebp-base >=1.4.0,<2.0a0
-  - libzlib >=1.3.1,<2.0a0
-  license: GD
-  license_family: BSD
-  purls: []
-  size: 225113
-  timestamp: 1722928278395
-- kind: conda
-  name: libgd
-  version: 2.3.3
-  build: hd3e95f3_10
-  build_number: 10
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libgd-2.3.3-hd3e95f3_10.conda
-  sha256: b0fa27d4d09fb24750c04e89dbd0aee898dc028bde99e62621065a9bde43efe8
-  md5: 30ee3a29c84cf7b842a8c5828c4b7c13
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - fontconfig >=2.14.2,<3.0a0
-  - fonts-conda-ecosystem
-  - freetype >=2.12.1,<3.0a0
-  - icu >=75.1,<76.0a0
-  - libexpat >=2.6.2,<3.0a0
-  - libgcc-ng >=12
-  - libjpeg-turbo >=3.0.0,<4.0a0
-  - libpng >=1.6.43,<1.7.0a0
   - libtiff >=4.6.0,<4.8.0a0
   - libwebp-base >=1.4.0,<2.0a0
   - libzlib >=1.3.1,<2.0a0
@@ -17500,26 +17330,25 @@ packages:
   timestamp: 1728022391174
 - kind: conda
   name: libgrpc
-  version: 1.67.1
-  build: h7aa3b8a_0
-  subdir: win-64
-  url: https://conda.anaconda.org/conda-forge/win-64/libgrpc-1.67.1-h7aa3b8a_0.conda
-  sha256: 986dafe9c3219e88a82389e679a2804d4256aa9ddaead193f91b7d6b4ef89ea1
-  md5: daad5d4a1c24c1afe748afbb83377e43
+  version: 1.62.2
+  build: h15f2491_0
+  subdir: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/libgrpc-1.62.2-h15f2491_0.conda
+  sha256: 28241ed89335871db33cb6010e9ccb2d9e9b6bb444ddf6884f02f0857363c06a
+  md5: 8dabe607748cb3d7002ad73cd06f1325
   depends:
-  - c-ares >=1.34.2,<2.0a0
+  - c-ares >=1.28.1,<2.0a0
   - libabseil * cxx17*
-  - libabseil >=20240722.0,<20240723.0a0
-  - libprotobuf >=5.28.2,<5.28.3.0a0
-  - libre2-11 >=2024.7.2
-  - libzlib >=1.3.1,<2.0a0
-  - openssl >=3.3.2,<4.0a0
+  - libabseil >=20240116.1,<20240117.0a0
+  - libgcc-ng >=12
+  - libprotobuf >=4.25.3,<4.25.4.0a0
+  - libre2-11 >=2023.9.1,<2024.0a0
+  - libstdcxx-ng >=12
+  - libzlib >=1.2.13,<2.0.0a0
+  - openssl >=3.2.1,<4.0a0
   - re2
-  - ucrt >=10.0.20348.0
-  - vc >=14.2,<15
-  - vc14_runtime >=14.29.30139
   constrains:
-  - grpc-cpp =1.67.1
+  - grpc-cpp =1.62.2
   license: Apache-2.0
   license_family: APACHE
   purls: []
@@ -18116,21 +17945,25 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls: []
-  size: 5578513
-  timestamp: 1730772671118
+  size: 5563053
+  timestamp: 1720426334043
 - kind: conda
-  name: libopengl
-  version: 1.7.0
-  build: ha4b6fd6_2
-  build_number: 2
+  name: libparquet
+  version: 17.0.0
+  build: h39682fd_16_cpu
+  build_number: 16
   subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/libopengl-1.7.0-ha4b6fd6_2.conda
-  sha256: 215086c108d80349e96051ad14131b751d17af3ed2cb5a34edd62fa89bfe8ead
-  md5: 7df50d44d4a14d6c31a2c54f2cd92157
+  url: https://conda.anaconda.org/conda-forge/linux-64/libparquet-17.0.0-h39682fd_16_cpu.conda
+  sha256: 09bc64111e5e1e9f5fee78efdd62592e01c681943fe6e91b369f6580dc8726c4
+  md5: dd1fee2da0659103080fdd74004656df
   depends:
   - __glibc >=2.17,<3.0.a0
-  - libglvnd 1.7.0 ha4b6fd6_2
-  license: LicenseRef-libglvnd
+  - libarrow 17.0.0 had3b6fe_16_cpu
+  - libgcc >=13
+  - libstdcxx >=13
+  - libthrift >=0.20.0,<0.20.1.0a0
+  - openssl >=3.3.2,<4.0a0
+  license: Apache-2.0
   purls: []
   size: 1186069
   timestamp: 1726670048098
@@ -20669,27 +20502,6 @@ packages:
   - openssl >=3.3.2,<4.0a0
   - zlib
   license: MIT
-  purls: []
-  size: 21198038
-  timestamp: 1726661026112
-- kind: conda
-  name: nodejs
-  version: 22.9.0
-  build: hf235a45_0
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/nodejs-22.9.0-hf235a45_0.conda
-  sha256: 1bc6445b7ecb3bff478d5a11eb3504e45eb5a3cdde24c6ec7339f80c193d24c8
-  md5: 40255c9ffb722d614b02ca7aaee6abcb
-  depends:
-  - __glibc >=2.28,<3.0.a0
-  - icu >=75.1,<76.0a0
-  - libgcc >=13
-  - libstdcxx >=13
-  - libuv >=1.48.0,<2.0a0
-  - libzlib >=1.3.1,<2.0a0
-  - openssl >=3.3.2,<4.0a0
-  - zlib
-  license: MIT
   license_family: MIT
   purls: []
   size: 21198038
@@ -22071,7 +21883,7 @@ packages:
 - kind: pypi
   name: poprox-concepts
   version: 0.0.1
-  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@5801187583396dc7b101ed8c6c8596982a1590b3
+  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
   requires_dist:
   - pydantic~=2.7.1
   requires_python: '>=3.10'
@@ -22082,28 +21894,6 @@ packages:
   requires_dist:
   - pydantic~=2.7.1
   requires_python: '>=3.10'
-- kind: pypi
-  name: poprox-recommender
-  version: 0.0.1
-  path: .
-  sha256: 0044f458fc372da6f2de12738fa31193b0514067b5f27b037eea7e76654fe7f5
-  requires_dist:
-  - colorlog<7,>=6.8
-  - enlighten<2,>=1.12
-  - ipyparallel~=8.0
-  - lenskit==0.14.*
-  - nltk<4,>=3.8
-  - numpy<2,>=1.26
-  - poprox-concepts
-  - progress-api<0.2,>=0.1.0a9
-  - safetensors<1,>=0.4
-  - smart-open==7.*
-  - torch==2.*
-  - transformers<5,>=4.41
-  - docopt>=0.6 ; extra == 'eval'
-  - pandas~=2.0 ; extra == 'eval'
-  requires_python: '>=3.11'
-  editable: true
 - kind: pypi
   name: poprox-recommender
   version: 0.0.1
@@ -22192,8 +21982,8 @@ packages:
   requires_python: '>=3.10'
 - kind: pypi
   name: progress-api
-  version: 0.1.0a10.dev2+g870ee4c
-  url: git+https://github.com/lenskit/progress-api@870ee4cc90a18afa19b59f20102a3ed83035fc9e
+  version: 0.1.0
+  url: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
   requires_dist:
   - setuptools>=64 ; extra == 'dev'
   - setuptools-scm>=8 ; extra == 'dev'
@@ -22790,8 +22580,8 @@ packages:
   license_family: APACHE
   purls:
   - pkg:pypi/pyarrow?source=hash-mapping
-  size: 3934172
-  timestamp: 1731058505049
+  size: 4032162
+  timestamp: 1722487567114
 - kind: conda
   name: pycparser
   version: '2.22'

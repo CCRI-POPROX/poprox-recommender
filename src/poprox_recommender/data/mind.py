@@ -16,13 +16,14 @@ import pandas as pd
 
 from poprox_concepts import Article, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
 
 
-class MindData:
+class MindData(EvalData):
     """
     News and behavior data loaded from MIND data.
     """
@@ -65,17 +66,17 @@ class MindData:
         return cast(UUID, self.behavior_df.loc[id, "uuid"])
 
     @property
-    def n_users(self) -> int:
+    def n_profiles(self) -> int:
         return self.behavior_df.shape[0]
 
     @property
     def n_articles(self) -> int:
         return self.news_df.shape[0]
 
-    def user_truth(self, user: UUID) -> pd.DataFrame | None:
+    def profile_truth(self, user: UUID) -> pd.DataFrame | None:
         """
-        Look up the ground-truth data for a particular user, in LensKit format,
-        with item UUIDs for item IDs.
+        Look up the ground-truth data for a particular user profile,
+        in LensKit format with item UUIDs for item IDs.
         """
         try:
             uid = self.behavior_id_for_uuid(user)
@@ -83,14 +84,20 @@ class MindData:
         except KeyError:
             raise ValueError(f"unknown user {user}")
 
+        # helper generator to only split articles once
+        def split_records():
+            for article in imp_log.split():
+                iid, rv = article.split("-")
+                yield iid, int(rv)
+
         truth = pd.DataFrame.from_records(
-            ((article.split("-")[0], int(article.split("-")[1])) for article in imp_log.split()),
+            split_records(),
             columns=["mind_item_id", "rating"],
         )
         truth["item"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
         return truth.set_index("item")
 
-    def iter_users(self) -> Generator[RecommendationRequest]:
+    def iter_profiles(self) -> Generator[RecommendationRequest]:
         for row in self.behavior_df.itertuples():
             clicked_ids: list[str] = row.clicked_news.split()  # type: ignore
             cand_pairs: list[str] = row.impressions.split()  # type: ignore
