@@ -78,7 +78,10 @@ docopt = ">=0.6"
 pandas = "~=2.0"
 matplotlib = "~=3.6"
 seaborn = "~=0.13.2"
+plotnine = "~=0.14.1"
 jupytext = ">=1.16"
+scipy = "~=1.14.1"
+pylatex = "~=1.4.2"
 
 [feature.data.pypi-dependencies]
 poprox-recommender = { path = ".", editable = true }
