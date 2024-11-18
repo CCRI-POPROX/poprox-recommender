@@ -29,13 +29,13 @@ def test_module_file_path_project_root():
         if old:
             del os.environ["POPROX_MODELS"]
         root = project_root()
-        if not (root / "models" / "model.safetensors").exists():
+        if not (root / "models" / "nrms-mind" / "model.safetensors").exists():
             warnings.warn("model source file not available")
             xfail("model data not available")
 
-        mfile = model_file_path("model.safetensors")
+        mfile = model_file_path("nrms-mind/model.safetensors")
 
-        assert mfile == root / "models" / "model.safetensors"
+        assert mfile == root / "models" / "nrms-mind" / "model.safetensors"
     finally:
         if old:
             os.environ["POPROX_MODELS"] = old
@@ -51,7 +51,7 @@ def test_module_file_path_env_dir():
             root = project_root()
 
             logger.info("copying model file")
-            model_src = root / "models" / "model.safetensors"
+            model_src = root / "models" / "nrms-mind" / "model.safetensors"
             if not model_src.exists():
                 warnings.warn("model source file not available")
                 xfail("model data not available")
