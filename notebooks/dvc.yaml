@@ -2,13 +2,17 @@ stages:
   results-mind-val:
     cmd: jupytext --to notebook --execute mind-val.md
     deps:
-      - notebooks
+      - mind-val.md
+      - ../outputs/mind-val/user-metrics.csv.gz
     outs:
-      - notebooks/mind-val.ipynb
+      - mind-val.ipynb:
+          cache: false
 
   results-mind-small:
     cmd: jupytext --to notebook --execute mind-small.md
     deps:
-      - notebooks
+      - mind-small.md
+      - ../outputs/mind-small/user-metrics.csv.gz
     outs:
-      - notebooks/mind-small.ipynb
+      - mind-small.ipynb:
+          cache: false
