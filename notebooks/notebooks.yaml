@@ -1,0 +1,14 @@
+stages:
+  results-mind-val:
+    cmd: jupytext --to notebook --execute mind-val.md
+    deps:
+      - notebooks
+    outs:
+      - notebooks/mind-val.ipynb
+
+  results-mind-small:
+    cmd: jupytext --to notebook --execute mind-small.md
+    deps:
+      - notebooks
+    outs:
+      - notebooks/mind-small.ipynb
