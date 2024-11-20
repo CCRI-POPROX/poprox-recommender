@@ -12,7 +12,8 @@ from poprox_recommender.components.diversifiers.calibration import compute_kl_di
 from poprox_recommender.lkpipeline import Component
 from poprox_recommender.topics import extract_general_topics, extract_locality, normalized_category_count
 
-KL_VALUE_PATH = '/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/outputs/theta_kl_values_2.txt'
+# Only uncomment this in offline theta value exploration
+# KL_VALUE_PATH = '/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/outputs/theta_kl_values_11-17.txt'
 
 class LocalityCalibrator(Component):
     def __init__(self, theta_local: float = 0.1, theta_topic: float = 0.1, num_slots=10):
@@ -46,8 +47,9 @@ class LocalityCalibrator(Component):
         )
 
         # Save computed kl divergence for topic and locality
-        with open(KL_VALUE_PATH, 'a') as file:
-            file.write('{}_top_{}_loc_{}: {}, {}\n'.format(str(interest_profile.profile_id), theta_topic, theta_locality, final_calibrations[0], final_calibrations[1]))
+        # Only uncomment this in offline theta value exploration
+        # with open(KL_VALUE_PATH, 'a') as file:
+        #     file.write('{}_top_{}_loc_{},{},{}\n'.format(str(interest_profile.profile_id), theta_topic, theta_locality, final_calibrations[0], final_calibrations[1]))
 
         return ArticleSet(
             articles=[candidate_articles.articles[idx] for idx in article_indices]
