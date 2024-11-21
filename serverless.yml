@@ -10,7 +10,6 @@ provider:
   region: ${opt:region, "us-east-1"}
   stage: ${opt:stage, "local"}
   memorySize: 2048 # 2gb
-  ephemeralStorageSize: 2048
   timeout: 25
   architecture: x86_64
 
