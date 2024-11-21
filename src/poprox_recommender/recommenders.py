@@ -11,6 +11,7 @@ from poprox_recommender.components.diversifiers import (
 )
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.filters import TopicFilter
+from poprox_recommender.components.generators.context import ContextGenerator
 from poprox_recommender.components.joiners import Fill
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers import SoftmaxSampler, UniformSampler
@@ -158,6 +159,7 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     sampler = UniformSampler(num_slots=num_slots)
     fill = Fill(num_slots=num_slots)
     topk_ranker = TopkRanker(num_slots=num_slots)
+    generator = ContextGenerator()
 
     pipeline = Pipeline(name=name)
 
@@ -166,10 +168,6 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     clicked = pipeline.create_input("clicked", ArticleSet)
     profile = pipeline.create_input("profile", InterestProfile)
 
-    # locality-calibration specific inputs
-    theta_topic = pipeline.create_input("theta_topic", float)
-    theta_locality = pipeline.create_input("theta_locality", float)
-    
     # Compute embeddings
     e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
     e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
@@ -181,11 +179,18 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     if ranker is topk_ranker:
         o_rank = o_topk
     else:
-        o_rank = pipeline.add_component("reranker", ranker, candidate_articles=o_scored, interest_profile=e_user, theta_topic=theta_topic, theta_locality=theta_locality)
+        o_rank = pipeline.add_component(
+            "reranker",
+            ranker,
+            candidate_articles=o_scored,
+            interest_profile=e_user,
+        )
+
+    o_context = pipeline.add_component("generator", generator, clicked=e_click, recommended=o_rank)
 
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
     o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
-    pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
+    pipeline.add_component("recommender", fill, candidates1=o_context, candidates2=o_sampled)
 
     return pipeline

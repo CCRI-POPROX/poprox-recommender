@@ -3,7 +3,6 @@ import logging
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
-from poprox_recommender.components.diversifiers.locality_calibration import generated_context
 from poprox_recommender.recommenders import select_articles
 from poprox_recommender.topics import user_topic_preference
 
@@ -58,16 +57,6 @@ def generate_recs(event, context):
         profile,
         pipeline_params,
     )
-
-    text_generation = False  # TODO: move to parameter
-    time_decay = True  # TODO: move to parameter
-    topk_similar = 5  # TODO: move to parameter
-    other_filter = "topic"  # TODO: move to parameter
-
-    if text_generation:
-        for article in outputs.default.articles:
-            generated_subhead = generated_context(article, clicked_articles, time_decay, topk_similar, other_filter)
-            article.subhead = generated_subhead
 
     logger.info("Constructing response...")
     resp_body = RecommendationResponse.model_validate(
