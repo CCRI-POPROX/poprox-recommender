@@ -15,7 +15,7 @@ stages:
       - data/MINDlarge_dev.zip
       - outputs/mind-val/recommendations
     outs:
-      - outputs/mind-val/user-metrics.csv.gz
+      - outputs/mind-val/profile-metrics.csv.gz
     metrics:
       - outputs/mind-val/metrics.csv:
           cache: false
@@ -35,7 +35,7 @@ stages:
       - data/MINDlarge_dev.zip
       - outputs/mind-small/recommendations
     outs:
-      - outputs/mind-small/user-metrics.csv.gz
+      - outputs/mind-small/profile-metrics.csv.gz
     metrics:
       - outputs/mind-small/metrics.csv:
           cache: false
@@ -56,7 +56,7 @@ stages:
       - data/MINDlarge_dev.zip
       - outputs/mind-subset/recommendations
     outs:
-      - outputs/mind-subset/user-metrics.csv.gz
+      - outputs/mind-subset/profile-metrics.csv.gz
     metrics:
       - outputs/mind-subset/metrics.csv:
           cache: false
