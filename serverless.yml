@@ -1,6 +1,6 @@
 useDotenv: true
 
-service: poprox-default-recommender
+service: poprox-recommender-locality
 frameworkVersion: "3"
 
 provider:
@@ -25,7 +25,7 @@ provider:
   ecr:
     # In this section you can define images that will be built locally and uploaded to ECR
     images:
-      poprox-recommender:
+      poprox-recommender-locality:
         path: "./"
         platform: linux/amd64
 
