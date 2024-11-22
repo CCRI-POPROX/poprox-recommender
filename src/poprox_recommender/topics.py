@@ -25,9 +25,9 @@ def extract_locality_topics(article: Article) -> set[str]:
 def extract_locality(article: Article) -> list[str]:
     topics = extract_general_topics(article)
 
-    us_criteria = ("U.S. news" in topics) or ("a" in codes)
-    world_criteria = ("World news" in topics) or ("i" in codes)
-    washington_criteria = ("Washington news" in topics) or ("w" in codes)
+    us_criteria = "U.S. news" in topics
+    world_criteria = "World news" in topics
+    washington_criteria = "Washington news" in topics
 
     if (us_criteria or washington_criteria) and world_criteria:
         return ["US", "World"]
