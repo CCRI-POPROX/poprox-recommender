@@ -12,6 +12,8 @@ from poprox_recommender.components.diversifiers.calibration import compute_kl_di
 from poprox_recommender.lkpipeline import Component
 from poprox_recommender.topics import extract_general_topics, extract_locality, normalized_category_count
 
+# Only uncomment this in offline theta value exploration
+# KL_VALUE_PATH = '/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/outputs/theta_kl_values_11-17.txt'
 
 class LocalityCalibrator(Component):
     def __init__(self, theta_local: float = 0.1, theta_topic: float = 0.1, num_slots=10):
@@ -23,7 +25,7 @@ class LocalityCalibrator(Component):
         self.theta_topic = theta_topic
         self.num_slots = num_slots
 
-    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile, theta_topic: float, theta_locality: float) -> ArticleSet:
         normalized_topic_prefs = self.compute_topic_prefs(interest_profile)
         normalized_locality_prefs = self.compute_local_prefs(candidate_articles)
 
@@ -34,15 +36,20 @@ class LocalityCalibrator(Component):
 
         article_scores = article_scores.cpu().detach().numpy()
 
-        article_indices = self.calibration(
+        article_indices, final_calibrations = self.calibration(
             article_scores,
             candidate_articles.articles,
             normalized_topic_prefs,
             normalized_locality_prefs,
-            self.theta_topic,
-            self.theta_local,
+            theta_topic,
+            theta_locality,
             topk=self.num_slots,
         )
+
+        # Save computed kl divergence for topic and locality
+        # Only uncomment this in offline theta value exploration
+        # with open(KL_VALUE_PATH, 'a') as file:
+        #     file.write('{}_top_{}_loc_{},{},{}\n'.format(str(interest_profile.profile_id), theta_topic, theta_locality, final_calibrations[0], final_calibrations[1]))
 
         return ArticleSet(
             articles=[candidate_articles.articles[idx] for idx in article_indices]
@@ -83,6 +90,8 @@ class LocalityCalibrator(Component):
         topic_categories = defaultdict(int)
         local_categories = defaultdict(int)
 
+        final_calibrations = [None, None]
+
         for _ in range(topk):
             candidate = None  # next item
             best_candidate_score = float("-inf")
@@ -110,13 +119,14 @@ class LocalityCalibrator(Component):
                 if adjusted_candidate_score > best_candidate_score:
                     best_candidate_score = adjusted_candidate_score
                     candidate = article_idx
+                    final_calibrations = [calibration_topic, calibration_local]
 
             if candidate is not None:
                 recommendations.append(candidate)
                 topic_categories = self.add_article_to_categories(topic_categories, articles[candidate])
                 local_categories = self.add_article_to_localities(local_categories, articles[candidate])
 
-        return recommendations
+        return recommendations, final_calibrations
 
     def compute_local_prefs(self, candidate_articles: ArticleSet):
         locality_preferences: dict[str, int] = defaultdict(int)
@@ -126,8 +136,9 @@ class LocalityCalibrator(Component):
             candidate_locality = extract_locality(article) or set()
             for locality in candidate_locality:
                 locality_preferences[locality] += 1
-
-        return locality_preferences
+        
+        normalized_locality_pres = normalized_category_count(locality_preferences)
+        return normalized_locality_pres
 
     def compute_topic_prefs(self, interest_profile):
         topic_preferences: dict[str, int] = defaultdict(int)
