@@ -5,6 +5,7 @@ import torch as th
 from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.components.diversifiers.calibration import compute_kl_divergence
 from poprox_recommender.lkpipeline import Component
+from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics, extract_locality, normalized_category_count
 
 # Only uncomment this in offline theta value exploration

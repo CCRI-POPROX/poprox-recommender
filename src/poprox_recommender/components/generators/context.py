@@ -7,6 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from poprox_concepts import Article, ArticleSet
 from poprox_recommender.lkpipeline import Component
+from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
