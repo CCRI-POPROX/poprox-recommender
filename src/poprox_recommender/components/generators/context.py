@@ -10,7 +10,7 @@ from poprox_recommender.lkpipeline import Component
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
 client = OpenAI(
     api_key="Put your key here",
