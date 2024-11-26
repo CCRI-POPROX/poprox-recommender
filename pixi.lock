@@ -40,7 +40,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-plugins-1.1.1-py_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-repl-0.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cryptography-43.0.1-py311hafd3f86_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/decorator-5.1.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dictdiffer-0.9.0-pyhd8ed1ab_0.tar.bz2
@@ -49,7 +49,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -177,7 +177,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml.clib-0.2.8-py311h459d7ec_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3fs-2024.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/shellingham-1.5.4-pyhd8ed1ab_0.conda
@@ -253,7 +253,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-plugins-1.1.1-py_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-repl-0.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cryptography-43.0.1-py311h47c44cf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/decorator-5.1.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dictdiffer-0.9.0-pyhd8ed1ab_0.tar.bz2
@@ -262,7 +262,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -382,7 +382,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ruamel.yaml.clib-0.2.8-py311h05b510d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3fs-2024.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/shellingham-1.5.4-pyhd8ed1ab_0.conda
@@ -445,7 +445,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-plugins-1.1.1-py_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-repl-0.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-43.0.1-py311hfd75b31_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/decorator-5.1.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dictdiffer-0.9.0-pyhd8ed1ab_0.tar.bz2
@@ -454,7 +454,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/dulwich-0.22.1-py311h533ab2d_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -572,7 +572,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruamel.yaml.clib-0.2.8-py311ha68e1ae_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3fs-2024.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/shellingham-1.5.4-pyhd8ed1ab_0.conda
@@ -688,7 +688,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/colorlog-6.8.2-py311h38be061_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cryptography-43.0.1-py311hafd3f86_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/csr-0.5.2-py311h0ceab66_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/datasets-2.14.4-pyhd8ed1ab_0.conda
@@ -701,7 +701,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -908,7 +908,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/safetensors-0.4.5-py311h9e33e62_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.14.1-py311he1f765f_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -966,8 +966,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
@@ -1027,7 +1027,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/colorlog-6.8.2-py311h267d04e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cryptography-43.0.1-py311h47c44cf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/csr-0.5.2-py311h4402670_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/datasets-2.14.4-pyhd8ed1ab_0.conda
@@ -1040,7 +1040,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -1236,7 +1236,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/safetensors-0.4.5-py311h481aa64_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.14.1-py311h2929bc6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -1282,8 +1282,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
@@ -1338,7 +1338,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/colorlog-6.8.2-py311h1ea47a8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/pytorch/noarch/cpuonly-2.0-0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-43.0.1-py311hfd75b31_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/csr-0.5.2-py311h4a5616c_0.conda
@@ -1352,7 +1352,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/dulwich-0.22.1-py311h533ab2d_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -1540,7 +1540,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/safetensors-0.4.5-py311h533ab2d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.14.1-py311hd4686c6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -1602,8 +1602,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
   dev:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -1686,7 +1686,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/colorlog-6.8.2-py311h38be061_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/copier-9.3.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/coverage-7.6.1-py311h9ecbd09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cryptography-43.0.1-py311hafd3f86_0.conda
@@ -1705,7 +1705,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -1974,7 +1974,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/safetensors-0.4.5-py311h9e33e62_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.14.1-py311he1f765f_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/secretstorage-3.3.3-py311h38be061_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
@@ -2049,8 +2049,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -2125,7 +2125,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/colorlog-6.8.2-py311h267d04e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/copier-9.3.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/coverage-7.6.1-py311h460d6c5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cryptography-43.0.1-py311h47c44cf_0.conda
@@ -2143,7 +2143,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -2402,7 +2402,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/safetensors-0.4.5-py311h481aa64_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.14.1-py311h2929bc6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/send2trash-1.8.3-pyh31c8845_0.conda
@@ -2464,8 +2464,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -2535,7 +2535,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/colorlog-6.8.2-py311h1ea47a8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/copier-9.3.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/coverage-7.6.1-py311he736701_1.conda
       - conda: https://conda.anaconda.org/pytorch/noarch/cpuonly-2.0-0.tar.bz2
@@ -2554,7 +2554,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/dulwich-0.22.1-py311h533ab2d_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -2806,7 +2806,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/safetensors-0.4.5-py311h533ab2d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.14.1-py311hd4686c6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/send2trash-1.8.3-pyh5737063_0.conda
@@ -2885,8 +2885,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
   dev-cuda:
     channels:
@@ -2993,7 +2993,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -3341,8 +3341,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
   eval:
     channels:
@@ -3412,7 +3412,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/colorlog-6.8.2-py311h38be061_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cryptography-43.0.1-py311hafd3f86_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/csr-0.5.2-py311h0ceab66_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/datasets-2.14.4-pyhd8ed1ab_0.conda
@@ -3425,7 +3425,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -3632,7 +3632,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/safetensors-0.4.5-py311h9e33e62_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.14.1-py311he1f765f_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -3690,8 +3690,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -3752,7 +3752,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/colorlog-6.8.2-py311h267d04e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cryptography-43.0.1-py311h47c44cf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/csr-0.5.2-py311h4402670_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/datasets-2.14.4-pyhd8ed1ab_0.conda
@@ -3765,7 +3765,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -3961,7 +3961,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/safetensors-0.4.5-py311h481aa64_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.14.1-py311h2929bc6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -4007,8 +4007,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -4064,7 +4064,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/colorlog-6.8.2-py311h1ea47a8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/pytorch/noarch/cpuonly-2.0-0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-43.0.1-py311hfd75b31_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/csr-0.5.2-py311h4a5616c_0.conda
@@ -4078,7 +4078,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/dulwich-0.22.1-py311h533ab2d_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -4266,7 +4266,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/safetensors-0.4.5-py311h533ab2d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.14.1-py311hd4686c6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -4328,8 +4328,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
   eval-cuda:
     channels:
@@ -4416,7 +4416,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -4685,8 +4685,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
   lint:
     channels:
@@ -4922,8 +4922,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/aiohttp-3.10.5-py311h460d6c5_1.conda
@@ -5138,8 +5138,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/aiohttp-3.10.5-py311he736701_1.conda
@@ -5346,8 +5346,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-3.20.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
   pkg:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -5392,7 +5392,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-repl-0.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/conda-pack-0.8.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cryptography-43.0.1-py311hafd3f86_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dbus-1.13.6-h5008d03_3.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/decorator-5.1.1-pyhd8ed1ab_0.tar.bz2
@@ -5403,7 +5403,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -5551,7 +5551,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml.clib-0.2.8-py311h459d7ec_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3fs-2024.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/secretstorage-3.3.3-py311h38be061_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -5639,7 +5639,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-repl-0.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/conda-pack-0.8.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cryptography-43.0.1-py311h47c44cf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/decorator-5.1.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dictdiffer-0.9.0-pyhd8ed1ab_0.tar.bz2
@@ -5649,7 +5649,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -5788,7 +5788,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ruamel.yaml.clib-0.2.8-py311h05b510d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3fs-2024.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/shellingham-1.5.4-pyhd8ed1ab_0.conda
@@ -5862,7 +5862,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/click-repl-0.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/conda-pack-0.8.0-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-43.0.1-py311hfd75b31_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/decorator-5.1.1-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dictdiffer-0.9.0-pyhd8ed1ab_0.tar.bz2
@@ -5872,7 +5872,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/dulwich-0.22.1-py311h533ab2d_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -6009,7 +6009,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/ruamel.yaml.clib-0.2.8-py311ha68e1ae_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3fs-2024.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/shellingham-1.5.4-pyhd8ed1ab_0.conda
@@ -6361,7 +6361,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/colorlog-6.8.2-py311h38be061_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/coverage-7.6.1-py311h9ecbd09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/cryptography-43.0.1-py311hafd3f86_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/csr-0.5.2-py311h0ceab66_0.conda
@@ -6375,7 +6375,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.1-py311h9e33e62_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -6585,7 +6585,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/safetensors-0.4.5-py311h9e33e62_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.14.1-py311he1f765f_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -6643,8 +6643,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-h4ab18f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -6705,7 +6705,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/colorlog-6.8.2-py311h267d04e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/coverage-7.6.1-py311h460d6c5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/cryptography-43.0.1-py311h47c44cf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/csr-0.5.2-py311h4402670_0.conda
@@ -6719,7 +6719,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.1-py311h481aa64_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -6918,7 +6918,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/safetensors-0.4.5-py311h481aa64_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/scipy-1.14.1-py311h2929bc6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -6964,8 +6964,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-hfb2fe0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.0-pyhd8ed1ab_0.conda
@@ -7021,7 +7021,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/colorama-0.4.6-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/colorlog-6.8.2-py311h1ea47a8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/comm-0.2.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/coverage-7.6.1-py311he736701_1.conda
       - conda: https://conda.anaconda.org/pytorch/noarch/cpuonly-2.0-0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/cryptography-43.0.1-py311hfd75b31_0.conda
@@ -7036,7 +7036,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/dulwich-0.22.1-py311h533ab2d_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-data-3.16.5-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-http-2.32.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-objects-5.1.0-pyhd8ed1ab_1.conda
@@ -7229,7 +7229,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/safetensors-0.4.5-py311h533ab2d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/scipy-1.14.1-py311hd4686c6_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/seedbank-0.1.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/semver-3.0.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-73.0.1-pyhd8ed1ab_0.conda
@@ -7291,8 +7291,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
-      - pypi: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+      - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
+      - pypi: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
       - pypi: .
 packages:
 - kind: conda
@@ -10394,24 +10394,6 @@ packages:
   timestamp: 1719324091825
 - kind: conda
   name: configobj
-  version: 5.0.8
-  build: pyhd8ed1ab_0
-  subdir: noarch
-  noarch: python
-  url: https://conda.anaconda.org/conda-forge/noarch/configobj-5.0.8-pyhd8ed1ab_0.conda
-  sha256: ee523a09a70c4ef71418b12ea3086169b69969dbfa382791dbde5e1a00e41728
-  md5: 04c71f400324538d4396407ea2ffb34f
-  depends:
-  - python >=3.6
-  - six
-  license: BSD-3-Clause
-  license_family: BSD
-  purls:
-  - pkg:pypi/configobj?source=hash-mapping
-  size: 37331
-  timestamp: 1674245033732
-- kind: conda
-  name: configobj
   version: 5.0.9
   build: pyhd8ed1ab_0
   subdir: noarch
@@ -11162,18 +11144,18 @@ packages:
   timestamp: 1723108568411
 - kind: conda
   name: dvc
-  version: 3.55.2
+  version: 3.57.0
   build: pyhd8ed1ab_0
   subdir: noarch
   noarch: python
-  url: https://conda.anaconda.org/conda-forge/noarch/dvc-3.55.2-pyhd8ed1ab_0.conda
-  sha256: ee6ae1eee78d62f5d37a9b435dd07a92f893f6295732c6a722fec65474736deb
-  md5: 02d5516d6c894e6ea4cba1bf04cd0b80
+  url: https://conda.anaconda.org/conda-forge/noarch/dvc-3.57.0-pyhd8ed1ab_0.conda
+  sha256: ece5c6019588704f5f69772ccb1d6ece843d3fac4c34026b050a186d0e326e2c
+  md5: 592c413a46e7e3beb227307a2c4ebee3
   depends:
   - attrs >=22.2.0
   - celery
   - colorama >=0.3.9
-  - configobj >=5.0.6
+  - configobj >=5.0.9
   - distro >=1.3
   - dpath <3,>=2.1.0
   - dulwich
@@ -11196,7 +11178,7 @@ packages:
   - omegaconf
   - packaging >=19
   - pathspec >=0.10.3
-  - platformdirs <4,>=3.1.1
+  - platformdirs <5,>=3.1.1
   - psutil >=5.8
   - pydot >=1.2.4
   - pygtrie >=2.3.2
@@ -11205,7 +11187,7 @@ packages:
   - requests >=2.22
   - rich >=12
   - ruamel.yaml >=0.17.11
-  - scmrepo >=3.3.4,<4
+  - scmrepo >=3.3.8,<4
   - shortuuid >=0.5
   - shtab <2,>=1.3.4
   - tabulate >=0.8.7
@@ -11217,8 +11199,8 @@ packages:
   license_family: Apache
   purls:
   - pkg:pypi/dvc?source=hash-mapping
-  size: 302191
-  timestamp: 1725303231981
+  size: 303821
+  timestamp: 1732614310016
 - kind: conda
   name: dvc-data
   version: 3.16.5
@@ -20293,14 +20275,14 @@ packages:
 - kind: pypi
   name: poprox-concepts
   version: 0.0.1
-  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@3bbb5e7269ed92d9c3717aa18b538fedb61d5db6
+  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@710148f7b42063d1f83dbc6123d048c1b2267361
   requires_dist:
   - pydantic~=2.7.1
   requires_python: '>=3.10'
 - kind: pypi
   name: poprox-concepts
   version: 0.0.1
-  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@710148f7b42063d1f83dbc6123d048c1b2267361
+  url: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
   requires_dist:
   - pydantic~=2.7.1
   requires_python: '>=3.10'
@@ -20310,18 +20292,18 @@ packages:
   path: .
   sha256: 0044f458fc372da6f2de12738fa31193b0514067b5f27b037eea7e76654fe7f5
   requires_dist:
-  - colorlog<7,>=6.8
-  - enlighten<2,>=1.12
+  - colorlog>=6.8,<7
+  - enlighten>=1.12,<2
   - ipyparallel~=8.0
   - lenskit==0.14.*
-  - nltk<4,>=3.8
-  - numpy<2,>=1.26
+  - nltk>=3.8,<4
+  - numpy>=1.26,<2
   - poprox-concepts
-  - progress-api<0.2,>=0.1.0a9
-  - safetensors<1,>=0.4
+  - progress-api>=0.1.0a9,<0.2
+  - safetensors>=0.4,<1
   - smart-open==7.*
   - torch==2.*
-  - transformers<5,>=4.41
+  - transformers>=4.41,<5
   - docopt>=0.6 ; extra == 'eval'
   - pandas~=2.0 ; extra == 'eval'
   requires_python: '>=3.11'
@@ -20392,8 +20374,8 @@ packages:
   requires_python: '>=3.10'
 - kind: pypi
   name: progress-api
-  version: 0.1.0
-  url: git+https://github.com/lenskit/progress-api@62a3cff41e5c88cc0193ca2a4d4b99494e9bb8ec
+  version: 0.1.1.dev2+g7147712
+  url: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
   requires_dist:
   - setuptools>=64 ; extra == 'dev'
   - setuptools-scm>=8 ; extra == 'dev'
@@ -23299,33 +23281,6 @@ packages:
   timestamp: 1724328196061
 - kind: conda
   name: scmrepo
-  version: 3.3.7
-  build: pyhd8ed1ab_0
-  subdir: noarch
-  noarch: python
-  url: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.7-pyhd8ed1ab_0.conda
-  sha256: 27c1d2c4e370e785eed83a2706540646845cc8d4a2b973cc0e9fd42d29ae94f0
-  md5: 9591c3dce0f88054c537a23bbb4e5693
-  depends:
-  - aiohttp-retry >=2.5.0
-  - asyncssh >=2.13.1,<3
-  - dulwich >=0.22.1
-  - fsspec >=2024.2.0
-  - funcy >=1.14
-  - gitpython >3
-  - pathspec >=0.9.0
-  - pygit2 >=1.14.0
-  - pygtrie >=2.3.2
-  - python >=3.8
-  - tqdm
-  license: Apache-2.0
-  license_family: APACHE
-  purls:
-  - pkg:pypi/scmrepo?source=hash-mapping
-  size: 59582
-  timestamp: 1722886811631
-- kind: conda
-  name: scmrepo
   version: 3.3.8
   build: pyhd8ed1ab_0
   subdir: noarch
@@ -23351,6 +23306,32 @@ packages:
   - pkg:pypi/scmrepo?source=hash-mapping
   size: 59547
   timestamp: 1727590689184
+- kind: conda
+  name: scmrepo
+  version: 3.3.9
+  build: pyhd8ed1ab_0
+  subdir: noarch
+  noarch: python
+  url: https://conda.anaconda.org/conda-forge/noarch/scmrepo-3.3.9-pyhd8ed1ab_0.conda
+  sha256: 856c6f558b9d04d046a27fe21afd2433970e186573d5b423048d4f8ef2099652
+  md5: 4187e6e1b217800168dce4c3c45fe2b1
+  depends:
+  - aiohttp-retry >=2.5.0
+  - asyncssh >=2.13.1,<3
+  - dulwich >=0.22.1
+  - fsspec >=2024.2.0
+  - funcy >=1.14
+  - gitpython >3
+  - pathspec >=0.9.0
+  - pygit2 >=1.14.0
+  - pygtrie >=2.3.2
+  - python >=3.8
+  - tqdm
+  license: Apache-2.0
+  purls:
+  - pkg:pypi/scmrepo?source=hash-mapping
+  size: 59997
+  timestamp: 1732576901228
 - kind: conda
   name: secretstorage
   version: 3.3.3
