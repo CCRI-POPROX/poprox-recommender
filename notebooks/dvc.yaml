@@ -1,0 +1,27 @@
+stages:
+  results-mind-val:
+    cmd: jupytext --to notebook --execute mind-val.md
+    deps:
+      - mind-val.md
+      - ../outputs/mind-val/profile-metrics.csv.gz
+    outs:
+      - mind-val.ipynb:
+          cache: false
+
+  results-mind-small:
+    cmd: jupytext --to notebook --execute mind-small.md
+    deps:
+      - mind-small.md
+      - ../outputs/mind-small/profile-metrics.csv.gz
+    outs:
+      - mind-small.ipynb:
+          cache: false
+
+  results-mind-subset:
+    cmd: jupytext --to notebook --execute mind-subset.md
+    deps:
+      - mind-subset.md
+      - ../outputs/mind-subset/profile-metrics.csv.gz
+    outs:
+      - mind-subset.ipynb:
+          cache: false
