@@ -39,7 +39,7 @@ jobs:
 
       - name: Fetch model data
         run: |
-          dvc pull -r public -R models
+          dvc pull -vr public -R models
 
       - name: Build Docker image
         run: |
