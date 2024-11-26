@@ -3,6 +3,7 @@ functions:
     image:
       name: poprox-recommender
     memorySize: 4096
+    ephemeralStorageSize: 2048
     events:
       - httpApi:
           path: /
