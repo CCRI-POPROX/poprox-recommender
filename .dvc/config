@@ -7,3 +7,4 @@
     url = s3://poprox-recommender-shared
 ['remote "public"']
     url = s3://poprox-recommender-public
+    allow_anonymous_login = true
