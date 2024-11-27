@@ -3,7 +3,7 @@ import logging
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
-from poprox_recommender.recommenders import select_articles
+from poprox_recommender.recommend import select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
