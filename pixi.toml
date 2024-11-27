@@ -25,6 +25,7 @@ enlighten = "~=1.12"
 ipyparallel = "~=8.0"
 # poprox-concepts dependencies not covered above
 pydantic = "~=2.7.1"
+logfire = ">=2.4.1,<3"
 
 [pypi-dependencies]
 # git dep on progress-api until non-prerelease is out
