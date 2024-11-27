@@ -44,12 +44,6 @@ from IPython.display import HTML
 from poprox_recommender.eval_tables import EvalTable
 ```
 
-Set up progress:
-
-```{code-cell} ipython3
-from tqdm.autonotebook import tqdm as notebook_tqdm
-```
-
 ### 1. 2 Loading Data
 
 ```{code-cell} ipython3
@@ -85,7 +79,7 @@ The summary tables show the mean values, standard deviation, and quantiles (10%i
 
 ```{code-cell} ipython3
 for metric in effectiveness_metrics:
-    tw = EvalTable(mind_small_user_metrics, "recommender", metric, progress=notebook_tqdm)
+    tw = EvalTable(mind_small_user_metrics, "recommender", metric)
     tw.add_stat("Mean", np.mean, ci=True)
     tw.add_stat("Std Dev", np.std, ci=True)
     tw.add_quantiles(["10%ile", "Median", "90%ile"], [0.1, 0.5, 0.9], ci=True)
@@ -112,7 +106,7 @@ The summary tables show the mean values, standard deviation, and quantiles (10%i
 
 ```{code-cell} ipython3
 for metric in overlap_metrics:
-    tw = EvalTable(mind_small_user_metrics, "recommender", metric, progress=notebook_tqdm)
+    tw = EvalTable(mind_small_user_metrics, "recommender", metric)
     tw.add_stat("Mean", np.mean, ci=True)
     tw.add_stat("Std Dev", np.std, ci=True)
     tw.add_quantiles(["10%ile", "Median", "90%ile"], [0.1, 0.5, 0.9], ci=True)
