@@ -10,6 +10,11 @@ from pathlib import Path
 
 from colorlog import ColoredFormatter
 from enlighten import Manager
+from opentelemetry import trace
+from opentelemetry.sdk._logs import LoggingHandler
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from progress_api import set_backend
 
 logger = logging.getLogger(__name__)
@@ -34,6 +39,12 @@ def setup_logging(*, verbose: bool | None = False, log_file: str | Path | None =
     if log_file is None:
         log_file = os.environ.get("POPROX_LOG_FILE", None)
 
+    resource = Resource(attributes={SERVICE_NAME: "poprox-recommender"})
+    traceProvider = TracerProvider(resource=resource)
+    processor = BatchSpanProcessor(ConsoleSpanExporter())
+    traceProvider.add_span_processor(processor)
+    trace.set_tracer_provider(traceProvider)
+
     # determine level for terminal
     term_level = logging.DEBUG if verbose else logging.INFO
     # determine level for root logger — need DEBUG if anything wants debug
@@ -42,47 +53,48 @@ def setup_logging(*, verbose: bool | None = False, log_file: str | Path | None =
     # root logging level based on most verbose level needed for any output
     root = logging.getLogger()
     root.setLevel(root_level)
+    # root.addHandler(LoggingHandler())
 
-    # numba's debug logs are noisy and not very useful
-    # we don't use numba yet but in case we add deps that use it
-    logging.getLogger("numba").setLevel(logging.INFO)
+    # # numba's debug logs are noisy and not very useful
+    # # we don't use numba yet but in case we add deps that use it
+    # logging.getLogger("numba").setLevel(logging.INFO)
 
-    # set up the terminal logging
-    term_h = logging.StreamHandler(sys.stderr)
-    term_h.setLevel(term_level)
+    # # set up the terminal logging
+    # term_h = logging.StreamHandler(sys.stderr)
+    # term_h.setLevel(term_level)
 
-    term_fmt = ColoredFormatter(
-        "[%(blue)s%(asctime)s%(reset)s] %(log_color)s%(levelname)8s%(reset)s %(cyan)s%(name)s%(reset)s %(message)s",  # noqa: E501
-        datefmt="%H:%M:%S",
-        reset=True,
-        log_colors={
-            "DEBUG": "cyan",
-            "INFO": "green",
-            "WARNING": "yellow",
-            "ERROR": "red",
-            "CRITICAL": "red,bg_white",
-        },
-        secondary_log_colors={},
-        style="%",
-        # options to detect whether to colorize
-        stream=sys.stderr,
-        no_color=os.environ.get("NO_COLOR", "") != "",
-        force_color=os.environ.get("FORCE_COLOR", "") != "",
-    )
-    term_h.setFormatter(term_fmt)
+    # term_fmt = ColoredFormatter(
+    #     "[%(blue)s%(asctime)s%(reset)s] %(log_color)s%(levelname)8s%(reset)s %(cyan)s%(name)s%(reset)s %(message)s",  # noqa: E501
+    #     datefmt="%H:%M:%S",
+    #     reset=True,
+    #     log_colors={
+    #         "DEBUG": "cyan",
+    #         "INFO": "green",
+    #         "WARNING": "yellow",
+    #         "ERROR": "red",
+    #         "CRITICAL": "red,bg_white",
+    #     },
+    #     secondary_log_colors={},
+    #     style="%",
+    #     # options to detect whether to colorize
+    #     stream=sys.stderr,
+    #     no_color=os.environ.get("NO_COLOR", "") != "",
+    #     force_color=os.environ.get("FORCE_COLOR", "") != "",
+    # )
+    # term_h.setFormatter(term_fmt)
 
-    root.addHandler(term_h)
+    # root.addHandler(term_h)
 
-    # set up the log file (if any)
-    if log_file is not None:
-        logger.debug("copying logs to %s", log_file)
-        file_h = logging.FileHandler(log_file, "w")
-        file_h.setLevel(logging.DEBUG)
+    # # set up the log file (if any)
+    # if log_file is not None:
+    #     logger.debug("copying logs to %s", log_file)
+    #     file_h = logging.FileHandler(log_file, "w")
+    #     file_h.setLevel(logging.DEBUG)
 
-        file_fmt = logging.Formatter("[%(asctime)s] %(levelname)s %(name)s: %(message)s")
-        file_h.setFormatter(file_fmt)
+    #     file_fmt = logging.Formatter("[%(asctime)s] %(levelname)s %(name)s: %(message)s")
+    #     file_h.setFormatter(file_fmt)
 
-        root.addHandler(file_h)
+    #     root.addHandler(file_h)
 
     mgr = Manager(stream=sys.stderr)
     set_backend("enlighten", mgr)

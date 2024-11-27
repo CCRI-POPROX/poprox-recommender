@@ -27,6 +27,7 @@ from pathlib import Path
 
 import pandas as pd
 from docopt import docopt
+from opentelemetry import trace
 
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.mind import MindData
@@ -37,6 +38,7 @@ from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.rusage import pretty_time
 
 logger = logging.getLogger("poprox_recommender.evaluation.generate")
+tracer = trace.get_tracer("poprox_recommender.evaluation.generate")
 
 
 def generate_main():
@@ -62,10 +64,14 @@ def generate_main():
     else:
         n_jobs = available_cpu_parallelism(4)
 
-    if options["--poprox-data"]:
-        dataset = PoproxData(options["--poprox-data"])
-    elif options["--mind-data"]:
-        dataset = MindData(options["--mind-data"])
+    if data_file := options["--poprox-data"]:
+        with tracer.start_as_current_span("load-poprox") as span:
+            span.set_attribute("test.file", data_file)
+            dataset = PoproxData(data_file)
+    elif data_file := options["--mind-data"]:
+        with tracer.start_as_current_span("load-mind") as span:
+            span.set_attribute("test.file", data_file)
+            dataset = MindData(options["--mind-data"])
 
     worker_usage = generate_profile_recs(dataset, outputs, n_profiles, n_jobs)
 

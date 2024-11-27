@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 from lenskit.util import Stopwatch
+from opentelemetry import trace
 from progress_api import make_progress
 
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -20,6 +21,7 @@ from poprox_recommender.lkpipeline.state import PipelineState
 from poprox_recommender.recommenders import recommendation_pipelines
 
 logger = logging.getLogger(__name__)
+tracer = trace.get_tracer("poprox_recommender.evaluation.generate")
 
 STAGES = ["final", "ranked", "reranked"]
 
@@ -161,7 +163,7 @@ def extract_recs(
     return output_df, embeddings
 
 
-def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
+def generate_profile_recs(dataset, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
     logger.info("generating recommendations")
 
     profile_iter = dataset.iter_profiles()
@@ -173,7 +175,10 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
         profile_iter = it.islice(profile_iter, n_profiles)
 
     timer = Stopwatch()
-    with make_progress(logger, "recommend", total=n_profiles) as pb:
+    with tracer.start_as_current_span("generate") as span, make_progress(logger, "recommend", total=n_profiles) as pb:
+        span.set_attribute("n_jobs", n_jobs)
+        span.set_attribute("n_profiles", n_profiles)
+
         if n_jobs > 1:
             logger.info("starting evaluation with %d workers", n_jobs)
             with ipp.Cluster(n=n_jobs) as client:
