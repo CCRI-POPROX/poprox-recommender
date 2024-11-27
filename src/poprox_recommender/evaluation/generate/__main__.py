@@ -25,6 +25,7 @@ import logging
 import shutil
 from pathlib import Path
 
+import logfire
 import pandas as pd
 from docopt import docopt
 
@@ -44,7 +45,14 @@ def generate_main():
     For offline evaluation, set theta in mmr_diversity = 1
     """
     options = docopt(__doc__)  # type: ignore
-    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
+    logfire.configure(
+        send_to_logfire=False,
+        service_name="poprox-recommender:generator",
+        console=logfire.ConsoleOptions(verbose=options["--verbose"]),
+        data_dir="logs",
+    )
+    logging.basicConfig(handlers=[logfire.LogfireLoggingHandler()])
+    # setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
 
     out_path = Path(options["--output-path"])
     outputs = RecOutputs(out_path)
@@ -62,10 +70,15 @@ def generate_main():
     else:
         n_jobs = available_cpu_parallelism(4)
 
-    if options["--poprox-data"]:
-        dataset = PoproxData(options["--poprox-data"])
-    elif options["--mind-data"]:
-        dataset = MindData(options["--mind-data"])
+    if data_dir := options["--poprox-data"]:
+        with logfire.span("loading POPROX data from {dir=}", dir=data_dir):
+            dataset = PoproxData(data_dir)
+    elif data_dir := options["--mind-data"]:
+        with logfire.span("loading MIND data from {dir=}", dir=data_dir):
+            dataset = MindData(data_dir)
+    else:
+        logger.error("no data specified")
+        raise RuntimeError("no data specified")
 
     worker_usage = generate_profile_recs(dataset, outputs, n_profiles, n_jobs)
 

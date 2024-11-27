@@ -4,6 +4,8 @@ import multiprocessing as mp
 from uuid import UUID
 
 import ipyparallel as ipp
+import logfire
+import logfire.propagate
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -29,8 +31,8 @@ _worker_out: RecOutputs
 _emb_seen: set[UUID]
 
 
-def _init_worker(outs: RecOutputs):
-    global _worker_out, _emb_seen, _pipelines
+def _init_worker(outs: RecOutputs, ctx: logfire.propagate.ContextCarrier):
+    global _worker_out, _emb_seen, _pipelines, _lf_ctx
     proc = mp.current_process()
     _worker_out = outs
     _emb_seen = set()
@@ -38,11 +40,14 @@ def _init_worker(outs: RecOutputs):
     _worker_out.open(proc.pid)
 
     _pipelines = recommendation_pipelines(device=default_device())
+    _lf_ctx = logfire.propagate.attach_context(ctx)
+    _lf_ctx.__enter__()
 
 
 def _finish_worker():
     logger.info("closing output files")
     _worker_out.close()
+    _lf_ctx.__exit__(None, None, None)
 
     try:
         import resource
@@ -54,46 +59,48 @@ def _finish_worker():
 
 def _generate_for_request(request: RecommendationRequest) -> UUID | None:
     global _emb_seen
+    with logfire.span(
+        "recommending for profile {profile_id=}", profile_id=request.interest_profile.profile_id, _level="debug"
+    ):
+        logger.debug("recommending for profile %s", request.interest_profile.profile_id)
+        if request.num_recs != TEST_REC_COUNT:
+            logger.warning(
+                "request for %s had unexpected recommendation count %d",
+                request.interest_profile.profile_id,
+                request.num_recs,
+            )
 
-    logger.debug("recommending for profile %s", request.interest_profile.profile_id)
-    if request.num_recs != TEST_REC_COUNT:
-        logger.warning(
-            "request for %s had unexpected recommendation count %d",
-            request.interest_profile.profile_id,
-            request.num_recs,
-        )
+        pipe_names = list(_pipelines.keys())
+        inputs = {
+            "candidate": ArticleSet(articles=request.todays_articles),
+            "clicked": ArticleSet(articles=request.past_articles),
+            "profile": request.interest_profile,
+        }
 
-    pipe_names = list(_pipelines.keys())
-    inputs = {
-        "candidate": ArticleSet(articles=request.todays_articles),
-        "clicked": ArticleSet(articles=request.past_articles),
-        "profile": request.interest_profile,
-    }
+        for name, pipe in _pipelines.items():
+            try:
+                outputs = pipe.run_all(**inputs)
+            except Exception as e:
+                logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
+                raise e
 
-    for name, pipe in _pipelines.items():
-        try:
-            outputs = pipe.run_all(**inputs)
-        except Exception as e:
-            logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
-            raise e
+            rec_df, embeddings = extract_recs(name, request, outputs)
+            rec_df["recommender"] = pd.Categorical(rec_df["recommender"], categories=pipe_names)
+            rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
+            _worker_out.rec_writer.write_frame(rec_df)
 
-        rec_df, embeddings = extract_recs(name, request, outputs)
-        rec_df["recommender"] = pd.Categorical(rec_df["recommender"], categories=pipe_names)
-        rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
-        _worker_out.rec_writer.write_frame(rec_df)
+            # find any embeddings not yet written
+            emb_rows = [
+                {"article_id": str(aid), "embedding": emb} for (aid, emb) in embeddings.items() if aid not in _emb_seen
+            ]
+            _emb_seen |= embeddings.keys()
+            if emb_rows:
+                # directly use pyarrow to avoid DF overhead, small but easy to avoid here
+                emb_tbl = pa.Table.from_pylist(emb_rows)
+                _worker_out.emb_writer.write_frame(emb_tbl)
 
-        # find any embeddings not yet written
-        emb_rows = [
-            {"article_id": str(aid), "embedding": emb} for (aid, emb) in embeddings.items() if aid not in _emb_seen
-        ]
-        _emb_seen |= embeddings.keys()
-        if emb_rows:
-            # directly use pyarrow to avoid DF overhead, small but easy to avoid here
-            emb_tbl = pa.Table.from_pylist(emb_rows)
-            _worker_out.emb_writer.write_frame(emb_tbl)
-
-    # just return the ID to indicate success
-    return request.interest_profile.profile_id
+        # just return the ID to indicate success
+        return request.interest_profile.profile_id
 
 
 def extract_recs(
@@ -161,9 +168,7 @@ def extract_recs(
     return output_df, embeddings
 
 
-def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
-    logger.info("generating recommendations")
-
+def generate_profile_recs(dataset, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
     profile_iter = dataset.iter_profiles()
     if n_profiles is None:
         n_profiles = dataset.n_profiles
@@ -173,13 +178,16 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
         profile_iter = it.islice(profile_iter, n_profiles)
 
     timer = Stopwatch()
-    with make_progress(logger, "recommend", total=n_profiles) as pb:
+    with (
+        logfire.span("generating recommendations for {n=} profiles", n=n_profiles),
+        make_progress(logger, "recommend", total=n_profiles) as pb,
+    ):
         if n_jobs > 1:
             logger.info("starting evaluation with %d workers", n_jobs)
             with ipp.Cluster(n=n_jobs) as client:
                 dv = client.direct_view()
                 logger.debug("initializing workers")
-                dv.apply_sync(_init_worker, outs)
+                dv.apply_sync(_init_worker, outs, logfire.propagate.get_context())
 
                 logger.debug("dispatching jobs")
                 lbv = client.load_balanced_view()
