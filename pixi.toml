@@ -25,6 +25,9 @@ enlighten = "~=1.12"
 ipyparallel = "~=8.0"
 # poprox-concepts dependencies not covered above
 pydantic = "~=2.7.1"
+opentelemetry-distro = ">=0.49b2"
+opentelemetry-sdk = "*"
+opentelemetry-api = "*"
 
 [pypi-dependencies]
 # git dep on progress-api until non-prerelease is out
