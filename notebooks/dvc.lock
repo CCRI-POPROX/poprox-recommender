@@ -9,13 +9,13 @@ stages:
       size: 34022756
     - path: mind-val.md
       hash: md5
-      md5: 98da8d4dc5035ce161aa00570d4a57d7
-      size: 3904
+      md5: 386c3b5588f70d8a845b0faaa52c4859
+      size: 3758
     outs:
     - path: mind-val.ipynb
       hash: md5
-      md5: 2b88e611840bc5cecf8514974c130261
-      size: 238860
+      md5: 4f455a947e02d17f65891628a6528c75
+      size: 180580
   results-mind-small:
     cmd: jupytext --to notebook --execute mind-small.md
     deps:
@@ -25,13 +25,13 @@ stages:
       size: 6610049
     - path: mind-small.md
       hash: md5
-      md5: 66e2d75efa9fb3796da73ef92bcc066f
-      size: 3920
+      md5: 170f50dd7278beff3c040fed5ded0074
+      size: 3774
     outs:
     - path: mind-small.ipynb
       hash: md5
-      md5: 73e42e9837a4f7062cd6d80e95743207
-      size: 240522
+      md5: 005446bda1bdd11ecf7774229b0eb970
+      size: 182164
   results-mind-subset:
     cmd: jupytext --to notebook --execute mind-subset.md
     deps:
@@ -41,10 +41,10 @@ stages:
       size: 90985
     - path: mind-subset.md
       hash: md5
-      md5: 3694cb25f775afee76bc3eaf2729c4ec
-      size: 3928
+      md5: fd56e0a68ae9edd86be8a2a0fda2b78d
+      size: 3782
     outs:
     - path: mind-subset.ipynb
       hash: md5
-      md5: 5279703b4407243495a8756ba258b75e
-      size: 236731
+      md5: 092a19124e7bf3f3f0e336d75d112284
+      size: 178521
