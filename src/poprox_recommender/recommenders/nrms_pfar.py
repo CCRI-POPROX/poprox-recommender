@@ -1,11 +1,6 @@
 # pyright: basic
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.components.diversifiers import (
-    LocalityCalibrator,
-    MMRDiversifier,
-    PFARDiversifier,
-    TopicCalibrator,
-)
+from poprox_recommender.components.diversifiers import PFARDiversifier
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Fill
