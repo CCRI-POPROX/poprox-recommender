@@ -251,7 +251,7 @@ Timing information for generating recommendations with the MIND validation set:
 | Machine      | CPU                | GPU         | Rec. Time | Rec. Power | Eval Time |
 | ------------ | :----------------: | :---------: | :-------: | :--------: | :-------: |
 | [Cruncher][] | EPYC 7662 (2GHz)   | A40 (CUDA)  | 45m¹      | 418.5 Wh   | 24m       |
-| [Screamer][] | i9 14900K (3.2GHz) | 4090 (CUDA) | 30m²      |            | 14m       |
+| [Screamer][] | i9 14900K (3.2GHz) | 4090 (CUDA) | 28m16s²   |            | 14m       |
 | [Ranger][]   | Apple M2 Pro       | -           | <20hr³    |            | 30m³      |
 | [Ranger][]   | Apple M2 Pro       | M2 (MPS)    | <12hr³    |            |           |
 
