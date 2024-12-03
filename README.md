@@ -247,8 +247,8 @@ Silicon).  To make use of a GPU, do the following:
 
 1.  Set the `POPROX_REC_DEVICE` environment variable to `cuda` or `mps`.
 
-2.  Run `dvc repro` under the `eval` or `dev` environment (using either `pixi
-    run` or `pixi shell`).
+2.  Run `dvc repro` under the `eval-cuda` or `dev-cuda` environment (using
+    either `pixi run` or `pixi shell`).
 
 Timing information for generating recommendations with the MIND validation set:
 
