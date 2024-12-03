@@ -9,9 +9,9 @@ stages:
       size: 103456245
     - path: outputs/mind-val/recommendations
       hash: md5
-      md5: edebe062ad957f0e991f4abe1eafa834.dir
-      size: 44827588
-      nfiles: 4
+      md5: 7d1cad4d5fffb9e47e6abb62d2d27f16.dir
+      size: 44878647
+      nfiles: 8
     - path: src/poprox_recommender/evaluation/evaluate.py
       hash: md5
       md5: 63f8d61ecc6708c41f542eba397c0d59
@@ -19,12 +19,12 @@ stages:
     outs:
     - path: outputs/mind-val/metrics.csv
       hash: md5
-      md5: 316cf979567f09d888c9131dab7a51d8
-      size: 673
+      md5: 4885ed026f007b16fb6a39c48f9a9e68
+      size: 670
     - path: outputs/mind-val/profile-metrics.csv.gz
       hash: md5
-      md5: 1ee7d49c679c1508a3122a383f21fe83
-      size: 34022756
+      md5: 40e34937389500c9ce74cb3d93d215df
+      size: 34000151
   recommend-mind-val:
     cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val
     deps:
