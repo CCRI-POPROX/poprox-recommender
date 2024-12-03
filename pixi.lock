@@ -2239,7 +2239,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/matplotlib-inline-0.1.7-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mdit-py-plugins-0.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mdurl-0.1.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/mistune-3.0.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/mistune-3.0.2-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mizani-0.13.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/mkl-2024.2.2-ha957f24_16.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/more-itertools-10.5.0-pyhd8ed1ab_0.conda
@@ -2713,7 +2713,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/matplotlib-inline-0.1.7-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mdit-py-plugins-0.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mdurl-0.1.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/mistune-3.0.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/mistune-3.0.2-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mizani-0.13.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/more-itertools-10.5.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/mpc-1.3.1-h8f1351a_1.conda
@@ -3150,7 +3150,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/matplotlib-inline-0.1.7-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mdit-py-plugins-0.4.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mdurl-0.1.2-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/mistune-3.0.2-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/mistune-3.0.2-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/mizani-0.13.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/mkl-2023.1.0-h6a75c08_48682.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/more-itertools-10.5.0-pyhd8ed1ab_0.conda
@@ -19904,6 +19904,24 @@ packages:
   size: 66022
   timestamp: 1698947249750
 - kind: conda
+  name: mistune
+  version: 3.0.2
+  build: pyhd8ed1ab_1
+  build_number: 1
+  subdir: noarch
+  noarch: python
+  url: https://conda.anaconda.org/conda-forge/noarch/mistune-3.0.2-pyhd8ed1ab_1.conda
+  sha256: 0a9faaf1692b74f321cedbd37a44f108a1ec3f5d9638bc5bbf860cb3b6ff6db4
+  md5: c46df05cae629e55426773ac1f85d68f
+  depends:
+  - python >=3.9
+  license: BSD-3-Clause
+  license_family: BSD
+  purls:
+  - pkg:pypi/mistune?source=hash-mapping
+  size: 65901
+  timestamp: 1733258822603
+- kind: conda
   name: mizani
   version: 0.13.0
   build: pyhd8ed1ab_0
@@ -21924,6 +21942,31 @@ packages:
   - pandas~=2.0 ; extra == 'eval'
   requires_python: '>=3.11'
   editable: true
+- kind: pypi
+  name: poprox-recommender
+  version: 0.0.1
+  path: .
+  sha256: caf752f079c05efd6a92fa40fedcc54a3bba381b4cd077e74271cfb653983364
+  requires_dist:
+  - colorlog<7,>=6.8
+  - enlighten<2,>=1.12
+  - ipyparallel~=8.0
+  - lenskit==0.14.*
+  - nltk<4,>=3.8
+  - numpy<2,>=1.26
+  - openai==1.52.2
+  - poprox-concepts
+  - progress-api<0.2,>=0.1.0a9
+  - safetensors<1,>=0.4
+  - scikit-learn==1.5.2
+  - sentence-transformers==3.2.1
+  - smart-open==7.*
+  - torch==2.*
+  - transformers<5,>=4.41
+  - docopt>=0.6 ; extra == 'eval'
+  - pandas~=2.0 ; extra == 'eval'
+  requires_python: '>=3.11'
+  editable: true
 - kind: conda
   name: pre-commit
   version: 3.8.0
@@ -21964,6 +22007,30 @@ packages:
   - pkg:pypi/prefixed?source=hash-mapping
   size: 18192
   timestamp: 1725320870356
+- kind: pypi
+  name: progress-api
+  version: 0.1.1.dev2+g7147712
+  url: git+https://github.com/lenskit/progress-api@7147712bac9fb6991b68d5ffd7819681fdfa3592
+  requires_dist:
+  - setuptools>=64 ; extra == 'dev'
+  - setuptools-scm>=8 ; extra == 'dev'
+  - build==1.* ; extra == 'dev'
+  - ruff>=0.2 ; extra == 'dev'
+  - pyright ; extra == 'dev'
+  - copier==9.* ; extra == 'dev'
+  - unbeheader~=1.3 ; extra == 'dev'
+  - ipython ; extra == 'dev'
+  - pyproject2conda ; extra == 'dev'
+  - sphinx-autobuild ; extra == 'dev'
+  - enlighten==1.* ; extra == 'dev'
+  - tqdm==4.* ; extra == 'dev'
+  - sphinx>=4.2 ; extra == 'doc'
+  - sphinxext-opengraph>=0.5 ; extra == 'doc'
+  - furo ; extra == 'doc'
+  - enlighten ; extra == 'doc'
+  - tqdm ; extra == 'doc'
+  - pytest>=7 ; extra == 'test'
+  requires_python: '>=3.10'
 - kind: pypi
   name: progress-api
   version: 0.1.1.dev2+g7147712
