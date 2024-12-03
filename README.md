@@ -16,16 +16,28 @@ and data files are managed using [dvc][]. The `pixi.lock` file provides a locked
 dependency set for reproducibly running the recommender code with all
 dependencies, on Linux, macOS, and Windows (including with CUDA on Linux).
 
+See the Pixi [install instructions][pixi] for how to install Pixi in general. On
+macOS, you can also use Homebrew (`brew install pixi`), and on Windows you can
+use WinGet (`winget install prefix-dev.pixi`).
+
+> [!NOTE]
+>
+> If you are trying to work on poprox-recommender with WSL on Windows, you need
+> to follow the Linux install instructions, and also add the following to the
+> Pixi configuration file (`~/.pixi/config.toml`):
+>
+> ```toml
+> detached-environments = true
+> ```
+
 [pixi]: https://pixi.sh
 [dvc]: https://dvc.org
 
-To install the dependencies needed for development work:
+Once Pixi is installed, to install the dependencies needed for development work:
 
 ```console
 pixi install -e dev
 ```
-
-Alternatively, on Linux, you can use `cuda` instead of `dev`.
 
 Once you have installed the dependencies, there are 3 easy ways to run code in the environment:
 
@@ -47,6 +59,11 @@ Once you have installed the dependencies, there are 3 easy ways to run code in t
     ```console
     pixi shell -e dev
     ```
+
+> [!NOTE]
+>
+> If you have a CUDA-enabled Linux system, you can use the `dev-cuda` and
+> `eval-cuda` environments to use your GPU for POPROX batch inference.
 
 > [!NOTE]
 >
@@ -89,6 +106,12 @@ pixi update
 ```
 
 > [!NOTE]
+> We use [Pixi][] for all dependency management.  If you need to add a new dependency
+> for this code, add it to the appropriate feature(s) in `pixi.toml`.  If it is a
+> dependency of the recommendation components themselves, add it both to the
+> top-level `dependencies` table in `pixi.toml` *and* in `pyproject.toml`.
+
+> [!NOTE]
 > Currently, dependencies can only be updated on Linux.
 
 ## Local Endpoint Development
@@ -127,14 +150,38 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
       "headline": "headline 1",
       "subhead": "subhead 1",
       "url": "url 1"
+    },
+    {
+      "article_id": "a0266b75-2873-4a40-9373-4e216e88c2f7",
+      "headline": "headline 2",
+      "subhead": "subhead 2",
+      "url": "url 2"
+    },
+    {
+      "article_id": "d88ee3b6-2b5e-4821-98a8-ffd702f571de",
+      "headline": "headline 3",
+      "subhead": "subhead 3",
+      "url": "url 3"
     }
   ],
   "todays_articles": [
     {
       "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
-      "headline": "headline 2",
-      "subhead": "subhead 2",
-      "url": "url 2"
+      "headline": "headline 4",
+      "subhead": "subhead 4",
+      "url": "url 4"
+    },
+    {
+      "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
+      "headline": "headline 5",
+      "subhead": "subhead 5",
+      "url": "url 5"
+    },
+    {
+      "article_id": "2d5a25ba-0963-474a-8da6-5b312c87bb82",
+      "headline": "headline 6",
+      "subhead": "subhead 6",
+      "url": "url 6"
     }
   ],
   "interest_profile": {
@@ -142,6 +189,12 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
     "click_history": [
       {
         "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
+      },
+      {
+        "article_id": "a0266b75-2873-4a40-9373-4e216e88c2f7"
+      },
+      {
+        "article_id": "d88ee3b6-2b5e-4821-98a8-ffd702f571de"
       }
     ],
     "onboarding_topics": []
@@ -155,16 +208,26 @@ should receive this response:
 ```json
 {
     "recommendations": {
-        "977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [
+        "28838f05-23f5-4f23-bea2-30b51f67c538": [
             {
                 "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
-                "title": "title 2",
-                "content": "content 2",
-                "url": "url 2",
+                "headline": "headline 5",
+                "subhead": "subhead 5",
+                "url": "url 5",
+                "preview_image_id": null,
                 "published_at": "1970-01-01T00:00:00Z",
-                "mentions": []
-            }
+                "mentions": [],
+                "source": null,
+                "external_id": null,
+                "raw_data": null
+            },
+            ...
         ]
+    },
+    "recommender": {
+        "name": "plain-NRMS",
+        "version": null,
+        "hash": "bd076520fa51dc70d8f74dfc9c0e0169236478d342b08f35b95399437f012563"
     }
 }
 ```
@@ -173,8 +236,6 @@ You can test this by sending a request with curl:
 
 ```console
 $ curl -X POST -H "Content-Type: application/json" -d @tests/request_data/basic-request.json localhost:3000
-
-{"recommendations": {"977a3c88-937a-46fb-bbfe-94dc5dcb68c8": [{"article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff", "title": "title 2", "content": "content 2", "url": "url 2", "published_at": "1970-01-01T00:00:00Z", "mentions": []}]}}
 ```
 
 ## Running the Evaluation
@@ -184,28 +245,26 @@ and for deployment, but is very inefficient for evaluation.  The current set of
 models work on both CUDA (on Linux with NVidia cards) and MPS (macOS on Apple
 Silicon).  To make use of a GPU, do the following:
 
-1.  If on Linux, install the CUDA-based Conda environment:
+1.  Set the `POPROX_REC_DEVICE` environment variable to `cuda` or `mps`.
 
-    ```console
-    pixi install -e cuda
-    ```
-
-2.  Set the `POPROX_REC_DEVICE` environment variable to `cuda` or `mps`.
-
-3.  Run `dvc repro` under the `cuda` environment (using either `pixi run` or
-    `pixi shell`).
+2.  Run `dvc repro` under the `eval` or `dev` environment (using either `pixi
+    run` or `pixi shell`).
 
 Timing information for generating recommendations with the MIND validation set:
 
-| CPU              | GPU        | Rec. Time | Eval Time |
-| :--------------: | :--------: | :-------: | :-------: |
-| EPYC 7662 (2GHz) | A40 (CUDA) | 2h10m     | 45m       |
-| Apple M2 Pro     | -          | <20hr¹    | 30m¹      |
-| Apple M2 Pro     | M2 (MPS)   | <12hr¹    |           |
+| Machine | CPU              | GPU        | Rec. Time | Rec. Power | Eval Time |
+| ------- | :--------------: | :--------: | :-------: | :--------: | :-------: |
+| [DXC][] | EPYC 7662 (2GHz) | A40 (CUDA) | 45m¹      | 418.5 Wh   | 24m       |
+| [MBP][] | Apple M2 Pro     | -          | <20hr²    |            | 30m²      |
+| [MBP][] | Apple M2 Pro     | M2 (MPS)   | <12hr²    |            |           |
+
+[DXC]: https://codex.lenskit.org/hardware/cruncher.html
+[MBP]: https://codex.lenskit.org/hardware/mbp2.html
 
 Footnotes:
 
-1. Estimated based on early progress, not run to completion.
+1. Using 12 worker processes
+2. Estimated based on early progress, not run to completion.
 
 ## Editor Setup
 
@@ -215,4 +274,4 @@ If you are using VSCode, you should install the following plugins for best succe
 - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 - [Ruff](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)
 
-When you open the repository, they should automatically be recommended.
+When you open the repository, they should be automatically recommended.

@@ -62,12 +62,12 @@ def generate_recs(event, context):
     text_generation = False  # TODO: move to parameter
     time_decay = True  # TODO: move to parameter
     topk_similar = 5  # TODO: move to parameter
-    other_filter = "topic"  # TODO: move to parameter
 
     if text_generation:
         for article in outputs.default.articles:
-            generated_subhead = generated_context(article, clicked_articles, time_decay, topk_similar, other_filter)
-            article.subhead = generated_subhead
+            if article.flag == 1: 
+                generated_subhead = generated_context(article, clicked_articles, time_decay, topk_similar)
+                article.subhead = generated_subhead
 
     logger.info("Constructing response...")
     resp_body = RecommendationResponse.model_validate(

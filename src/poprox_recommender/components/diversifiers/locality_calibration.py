@@ -19,6 +19,7 @@ from poprox_recommender.topics import extract_general_topics, extract_locality, 
 MAX_RETRIES = 3
 DELAY = 2
 SEMANTIC_THRESHOLD = 0.2
+BASELINE_THETA_TOPIC = 0.3
 
 class LocalityCalibrator(Component):
     def __init__(self, theta_local: float = 0.1, theta_topic: float = 0.1, num_slots=10):
@@ -30,7 +31,7 @@ class LocalityCalibrator(Component):
         self.theta_topic = theta_topic
         self.num_slots = num_slots
 
-    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile, theta_topic: float, theta_locality: float) -> ArticleSet:
+    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
         normalized_topic_prefs = self.compute_topic_prefs(interest_profile)
         normalized_locality_prefs = self.compute_local_prefs(candidate_articles)
 
@@ -46,20 +47,31 @@ class LocalityCalibrator(Component):
             candidate_articles.articles,
             normalized_topic_prefs,
             normalized_locality_prefs,
-            theta_topic,
-            theta_locality,
+            self.theta_topic,
+            self.theta_locality,
             topk=self.num_slots,
         )
 
-        # Save computed kl divergence for topic and locality
-        # Only uncomment this in offline theta value exploration
-        # with open(KL_VALUE_PATH, 'a') as file:
-        #     file.write('{}_top_{}_loc_{},{},{}\n'.format(str(interest_profile.profile_id), theta_topic, theta_locality, final_calibrations[0], final_calibrations[1]))
+        baseline_indices = self.calibration(
+            article_scores, 
+            candidate_articles.articles, 
+            normalized_topic_prefs, 
+            normalized_locality_prefs, 
+            BASELINE_THETA_TOPIC, # constant 
+            0, 
+            topk = self.num_slots,
+        )
+      
+        for idx in article_indices:
+            if idx not in baseline_indices:
+                candidate_articles.articles[idx].flag = 1
+            else:
+                candidate_articles.articles[idx].flag = 0
 
         return ArticleSet(
             articles=[candidate_articles.articles[idx] for idx in article_indices]
-        )  # all selected articles
-
+        )  
+    
     def add_article_to_categories(self, rec_topics, article):
         rec_topics = rec_topics.copy()
         topics = extract_general_topics(article)

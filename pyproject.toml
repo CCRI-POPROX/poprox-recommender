@@ -36,6 +36,11 @@ dependencies = [
   "poprox-concepts",
 ]
 
+[project.optional-dependencies]
+# keep synchronized with feature.data.dependencies in pixi.toml
+# we want these here so the doc build can work with the eval code
+eval = ["docopt >=0.6", "pandas ~=2.0"]
+
 [project.urls]
 Homepage = "https://docs.poprox.ai"
 GitHub = "https://github.com/CCRI-POPROX/poprox-recommender"
@@ -50,48 +55,6 @@ only-include = ["src", "tests", "LICENSE.md", "README.md"]
 
 [tool.hatch.version]
 path = "src/poprox_recommender/__about__.py"
-
-[tool.hatch.envs.default]
-python = "3.11"
-# keep these dependencies in sync with dev/environment.yml if it exists
-dependencies = [
-  # testing and coverage
-  "coverage[toml]>=6.5",
-  "pytest>=8",
-  # development tooling
-  "pre-commit >=3.7,<4",
-  "ruff >=0.4",
-  "pyright >=1.1,<2",
-  # recommender-specific deps
-  "dvc[s3] ~=3.51",
-  "docopt~=0.6",
-  "pandas==2.*",
-  "requests~=2.13",
-  "pexpect~=4.9",
-]
-
-[tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest {args:tests}"
-
-# tooling just for code validation
-[tool.hatch.envs.lint]
-detached = true
-dependencies = ["ruff>=0.4", "pyright>=1.1,<2"]
-
-[tool.hatch.envs.lint.scripts]
-typing = "pyright {args:src/poprox_recommender tests}"
-style = ["ruff check {args:.}", "ruff format --check --diff {args:.}"]
-fmt = ["ruff format {args:.}", "ruff check --fix {args:.}", "style"]
-all = ["style", "typing"]
-
-# environment for project meta-tasks
-[tool.hatch.envs.meta]
-detached = true
-dependencies = ["copier==9.*"]
-
-[tool.hatch.envs.meta.scripts]
-update-template = "copier update"
 
 ###### tooling configurations ######
 # ruff — formatting and lints
@@ -131,14 +94,3 @@ tests = ["tests"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
-
-[tool.conda-lock]
-channels = ["pytorch", "conda-forge", "nodefaults"]
-# extra deps in the conda environment
-[tool.conda-lock.dependencies]
-# specify our Python version & make sure we have pip
-python = "=3.11"
-pip = ">=24"
-# poprox concepts comes from PyPI
-poprox-concepts = { source = "pypi" }
-progress-api = { source = "pypi" }

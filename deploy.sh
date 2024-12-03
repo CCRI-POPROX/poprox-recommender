@@ -17,7 +17,7 @@ echo "ENV: $env"
 echo "Region: $region"
 
 # Download model artifacts
-dvc pull
+dvc pull -R models
 
 # Build container and deploy functions
-serverless deploy --stage "${env}" --region "${region}"
+npx serverless deploy --stage "${env}" --region "${region}"

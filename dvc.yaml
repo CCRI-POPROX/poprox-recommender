@@ -1,39 +1,62 @@
 stages:
   recommend-mind-val:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val-recommendations.parquet
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val
     deps:
-      - src/poprox_recommender/evaluation/generate.py
+      - src/poprox_recommender/evaluation/generate/
       - data/MINDlarge_dev.zip
     outs:
-      - outputs/mind-val-recommendations.parquet
+      - outputs/mind-val/recommendations
+      - outputs/mind-val/embeddings.parquet
 
   measure-mind-val:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev mind-val
     deps:
       - src/poprox_recommender/evaluation/evaluate.py
       - data/MINDlarge_dev.zip
-      - outputs/mind-val-recommendations.parquet
+      - outputs/mind-val/recommendations
     outs:
-      - outputs/mind-val-user-metrics.csv.gz
+      - outputs/mind-val/profile-metrics.csv.gz
     metrics:
-      - outputs/mind-val-metrics.csv:
+      - outputs/mind-val/metrics.csv:
           cache: false
 
   recommend-mind-small:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small-recommendations.parquet
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small
     deps:
-      - src/poprox_recommender/evaluation/generate.py
+      - src/poprox_recommender/evaluation/generate/
       - data/MINDsmall_dev.zip
     outs:
-      - outputs/mind-small-recommendations.parquet
+      - outputs/mind-small/recommendations
+      - outputs/mind-small/embeddings.parquet
   measure-mind-small:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small
     deps:
       - src/poprox_recommender/evaluation/evaluate.py
       - data/MINDlarge_dev.zip
-      - outputs/mind-small-recommendations.parquet
+      - outputs/mind-small/recommendations
     outs:
-      - outputs/mind-small-user-metrics.csv.gz
+      - outputs/mind-small/profile-metrics.csv.gz
     metrics:
-      - outputs/mind-small-metrics.csv:
+      - outputs/mind-small/metrics.csv:
+          cache: false
+
+  # small subset for quick testing
+  recommend-mind-subset:
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000 -o outputs/mind-subset
+    deps:
+      - src/poprox_recommender/evaluation/generate/
+      - data/MINDsmall_dev.zip
+    outs:
+      - outputs/mind-subset/recommendations
+      - outputs/mind-subset/embeddings.parquet
+  measure-mind-subset:
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset
+    deps:
+      - src/poprox_recommender/evaluation/evaluate.py
+      - data/MINDlarge_dev.zip
+      - outputs/mind-subset/recommendations
+    outs:
+      - outputs/mind-subset/profile-metrics.csv.gz
+    metrics:
+      - outputs/mind-subset/metrics.csv:
           cache: false

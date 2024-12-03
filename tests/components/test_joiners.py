@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from poprox_concepts.domain import Article, ArticleSet, Click, InterestProfile
+from poprox_concepts.domain import Article, ArticleSet, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Concatenate, Fill, Interleave
 from poprox_recommender.components.samplers import UniformSampler
@@ -22,7 +22,9 @@ def build_pipeline(total_slots):
 
 total_slots = 10
 inputs = {
-    "candidate": ArticleSet(articles=[Article(article_id=uuid4(), headline="headline") for _ in range(total_slots)]),
+    "candidate": ArticleSet(
+        articles=[Article(article_id=uuid4(), headline="headline") for _ in range(2 * total_slots)]
+    ),
     "profile": InterestProfile(click_history=[], onboarding_topics=[]),
 }
 
@@ -68,7 +70,7 @@ def test_interleave_two_recs_lists():
 def test_fill_out_one_recs_list_from_another():
     sampled_slots = 7
 
-    joiner = Fill(num_slots=total_slots)
+    joiner = Fill(num_slots=total_slots, deduplicate=False)
 
     pipeline = build_pipeline(sampled_slots)
     pipeline.add_component(
@@ -85,3 +87,27 @@ def test_fill_out_one_recs_list_from_another():
     assert (
         outputs["recommender"].articles[sampled_slots:] == inputs["candidate"].articles[: total_slots - sampled_slots]
     )
+
+
+def test_fill_removes_duplicates():
+    inputs = {
+        "candidate": ArticleSet(
+            articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots / 2))]
+        ),
+        "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+    }
+
+    fill = Fill(num_slots=total_slots)
+
+    pipeline = Pipeline(name="duplicate_concat")
+    in_cand = pipeline.create_input("candidate", ArticleSet)
+
+    pipeline.add_component("fill", fill, candidates1=in_cand, candidates2=in_cand)
+    pipeline.alias("recommender", "fill")
+
+    outputs = pipeline.run_all(**inputs)
+
+    article_ids = [article.article_id for article in outputs["recommender"].articles]
+
+    assert len(outputs["recommender"].articles) == 5
+    assert len(article_ids) == len(set(article_ids))

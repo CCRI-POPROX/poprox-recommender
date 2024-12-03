@@ -43,9 +43,9 @@ cpuonly = "*"
 
 # production runs in a trimmed-down environment - no MKL, no CUDA
 # we also do *not* include the poprox-recommender as a dep, since
-# its dependency lock vesion is always out of date.
+# its dependency lock version is always out of date.
 [feature.production]
-platforms = ['linux-64']
+platforms = ["linux-64"]
 
 [feature.production.dependencies]
 pip = ">=24"
@@ -76,15 +76,38 @@ hatch = "*"
 ipython = ">=8"
 notebook = ">=7.2"
 jupytext = ">=1.16"
+pyarrow-stubs = ">=17.11,<18"
 
-# tooling for environments, data, and evaluation
+# dependencies for project meta-work (e.g. updating project files from templates)
+[feature.meta.dependencies]
+copier = "~=9.0"
+
+[feature.meta.tasks]
+update-template = "copier update"
+
+# dependencies for working with the data files and querying servers,
+# but *not* running any recommender code
 [feature.data.dependencies]
 dvc = "~=3.51"
 dvc-s3 = "*"
+# keep below dependencies synchronized with 'eval' extra deps in pyproject.toml
+docopt = ">=0.6"
+pandas = "~=2.0"
+matplotlib = "~=3.6"
+seaborn = "~=0.13.2"
+plotnine = "~=0.14.1"
+jupytext = ">=1.16"
+scipy = "~=1.14.1"
+pylatex = "~=1.4.2"
+
+# dependencies for running the evaluation code
+
+[feature.eval.dependencies]
+# keep below dependencies synchronized with 'eval' extra deps in pyproject.toml
 docopt = ">=0.6"
 pandas = "~=2.0"
 
-[feature.data.pypi-dependencies]
+[feature.eval.pypi-dependencies]
 poprox-recommender = { path = ".", editable = true }
 
 # dependencies for tests
@@ -99,6 +122,9 @@ poprox-recommender = { path = ".", editable = true }
 
 [feature.test.tasks]
 test = { cmd = "pytest tests", depends-on = ["install-serverless"] }
+test-cov = { cmd = "coverage run -m pytest tests", depends-on = [
+  "install-serverless",
+] }
 
 # tooling for code validation
 [feature.lint.dependencies]
@@ -106,10 +132,12 @@ pre-commit = "~=3.7"
 ruff = ">=0.4"
 pyright = "~=1.1"
 
-# make CUDA available on Linux
+# CUDA support
 [feature.cuda]
-platforms = ['linux-64']
-system-requirements = { cuda = "12" }
+platforms = ["linux-64"]
+
+[feature.cuda.system-requirements]
+cuda = "12"
 
 [feature.cuda.dependencies]
 pytorch-gpu = "*"
@@ -129,11 +157,24 @@ test = { features = ["test", "data", "serverless"], solve-group = "main" }
 # environment for just getting & processing the data
 data = { features = ["data"], no-default-feature = true, solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
+eval = { features = ["data", "eval"], solve-group = "main" }
+eval-cuda = { features = ["data", "eval", "cuda"], solve-group = "cuda" }
 dev = { features = [
   "dev",
+  "meta",
   "test",
   "lint",
   "data",
+  "eval",
   "serverless",
 ], solve-group = "main" }
-cuda = ["dev", "test", "lint", "data", "cuda", "serverless"]
+dev-cuda = { features = [
+  "dev",
+  "meta",
+  "test",
+  "lint",
+  "data",
+  "eval",
+  "serverless",
+  "cuda",
+], solve-group = "cuda" }
