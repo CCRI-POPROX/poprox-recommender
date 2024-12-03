@@ -252,19 +252,22 @@ Silicon).  To make use of a GPU, do the following:
 
 Timing information for generating recommendations with the MIND validation set:
 
-| Machine | CPU              | GPU        | Rec. Time | Rec. Power | Eval Time |
-| ------- | :--------------: | :--------: | :-------: | :--------: | :-------: |
-| [DXC][] | EPYC 7662 (2GHz) | A40 (CUDA) | 45m¹      | 418.5 Wh   | 24m       |
-| [MBP][] | Apple M2 Pro     | -          | <20hr²    |            | 30m²      |
-| [MBP][] | Apple M2 Pro     | M2 (MPS)   | <12hr²    |            |           |
+| Machine | CPU                | GPU         | Rec. Time | Rec. Power | Eval Time |
+| ------- | :----------------: | :---------: | :-------: | :--------: | :-------: |
+| [DXC][] | EPYC 7662 (2GHz)   | A40 (CUDA)  | 45m¹      | 418.5 Wh   | 24m       |
+| [DXS][] | i9 14900K (3.2GHz) | 4090 (CUDA) | 30m²      |            |           |
+| [MBP][] | Apple M2 Pro       | -           | <20hr³    |            | 30m³      |
+| [MBP][] | Apple M2 Pro       | M2 (MPS)    | <12hr³    |            |           |
 
 [DXC]: https://codex.lenskit.org/hardware/cruncher.html
+[DXS]: https://codex.lenskit.org/hardware/screamer.html
 [MBP]: https://codex.lenskit.org/hardware/mbp2.html
 
 Footnotes:
 
 1. Using 12 worker processes
-2. Estimated based on early progress, not run to completion.
+2. Using 8 worker processes
+3. Estimated based on early progress, not run to completion.
 
 ## Editor Setup
 
