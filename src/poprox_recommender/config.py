@@ -8,10 +8,19 @@ import os
 def default_device() -> str:
     """
     Get the default device for POPROX components.  This is read from the
-    ``POPROX_REC_DEVICE`` environment variable, and defaults to ``cpu`` if that
-    variable is not set.
+    ``POPROX_REC_DEVICE`` environment variable, if it exists; otherwise it
+    selects ``cuda`` if it is available and ``cpu`` otherwise.
     """
-    return os.environ.get("POPROX_REC_DEVICE", "cpu")
+    import torch
+
+    configured = os.environ.get("POPROX_REC_DEVICE", None)
+
+    if configured:
+        return configured
+    elif torch.cuda.is_available():
+        return "cuda"
+    else:
+        return "cpu"
 
 
 def available_cpu_parallelism(max: int | None = None) -> int:
