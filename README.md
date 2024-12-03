@@ -248,16 +248,16 @@ Silicon).  To make use of a GPU, do the following:, run `dvc repro` under the
 
 Timing information for generating recommendations with the MIND validation set:
 
-| Machine | CPU                | GPU         | Rec. Time | Rec. Power | Eval Time |
-| ------- | :----------------: | :---------: | :-------: | :--------: | :-------: |
-| [DXC][] | EPYC 7662 (2GHz)   | A40 (CUDA)  | 45m¹      | 418.5 Wh   | 24m       |
-| [DXS][] | i9 14900K (3.2GHz) | 4090 (CUDA) | 30m²      |            | 14m       |
-| [MBP][] | Apple M2 Pro       | -           | <20hr³    |            | 30m³      |
-| [MBP][] | Apple M2 Pro       | M2 (MPS)    | <12hr³    |            |           |
+| Machine      | CPU                | GPU         | Rec. Time | Rec. Power | Eval Time |
+| ------------ | :----------------: | :---------: | :-------: | :--------: | :-------: |
+| [Cruncher][] | EPYC 7662 (2GHz)   | A40 (CUDA)  | 45m¹      | 418.5 Wh   | 24m       |
+| [Screamer][] | i9 14900K (3.2GHz) | 4090 (CUDA) | 30m²      |            | 14m       |
+| [Ranger][]   | Apple M2 Pro       | -           | <20hr³    |            | 30m³      |
+| [Ranger][]   | Apple M2 Pro       | M2 (MPS)    | <12hr³    |            |           |
 
-[DXC]: https://codex.lenskit.org/hardware/cruncher.html
-[DXS]: https://codex.lenskit.org/hardware/screamer.html
-[MBP]: https://codex.lenskit.org/hardware/ranger.html
+[Cruncher]: https://codex.lenskit.org/hardware/cruncher.html
+[Screamer]: https://codex.lenskit.org/hardware/screamer.html
+[Ranger]: https://codex.lenskit.org/hardware/ranger.html
 
 Footnotes:
 
