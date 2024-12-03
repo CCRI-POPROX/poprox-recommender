@@ -153,3 +153,6 @@ $RECYCLE.BIN/
 # pixi environments
 .pixi
 *.egg-info
+
+# poprox data
+data/POPROX/*
