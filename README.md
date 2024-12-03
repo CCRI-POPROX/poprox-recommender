@@ -257,7 +257,7 @@ Timing information for generating recommendations with the MIND validation set:
 
 [DXC]: https://codex.lenskit.org/hardware/cruncher.html
 [DXS]: https://codex.lenskit.org/hardware/screamer.html
-[MBP]: https://codex.lenskit.org/hardware/mbp2.html
+[MBP]: https://codex.lenskit.org/hardware/ranger.html
 
 Footnotes:
 
