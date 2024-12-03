@@ -13,7 +13,6 @@ platforms = ["linux-64", "osx-arm64", "win-64"]
 python = "~=3.11.0"
 hatchling = "*"
 # poprox-recommender dependencies
-lenskit = "~=0.14.4"
 nltk = "~=3.8"
 numpy = "~=1.26"
 pytorch = "~=2.0"
@@ -30,6 +29,8 @@ pydantic = "~=2.7.1"
 # git dep on progress-api until non-prerelease is out
 progress-api = { git = "https://github.com/lenskit/progress-api" }
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
+lenskit = { git = "https://github.com/lenskit/lkpy.git", subdirectory = "lenskit" }
+manylog = { git = "https://github.com/mdekstrand/manylog.git" }
 
 # turn off CUDA on Windows
 [target.win.dependencies]
