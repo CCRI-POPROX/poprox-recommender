@@ -3,7 +3,9 @@ from typing import Any, NamedTuple
 from uuid import UUID
 
 import pandas as pd
-from lenskit.metrics import topn
+from lenskit.data import ItemList
+from lenskit.metrics import call_metric
+from lenskit.metrics.ranking import NDCG, RecipRank
 
 from poprox_concepts import Article, ArticleSet
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
@@ -35,16 +37,22 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
     Measure a single user profile's recommendations.  Returns the profile ID and
     a data frame of evaluation metrics.
     """
-    profile_id, all_recs, truth = profile
-    truth.index = truth.index.astype(str)
+    profile_id, all_recs, test = profile
+    test.index = test.index.astype(str)
+
+    test_list = ItemList.from_df(test)
+    filtered_test = test[test["rating"] > 0]
+    test_list_pos = ItemList.from_df(filtered_test)
 
     results = []
 
     for name, recs in all_recs.groupby("recommender", observed=True):
         final_rec_df = recs[recs["stage"] == "final"]
-        single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
-        single_ndcg5 = topn.ndcg(final_rec_df, truth, k=5)
-        single_ndcg10 = topn.ndcg(final_rec_df, truth, k=10)
+        final_rec_list = ItemList.from_df(final_rec_df)
+
+        single_rr = call_metric(RecipRank, final_rec_list, test_list_pos)
+        single_ndcg5 = call_metric(NDCG, final_rec_list, test_list, k=5)
+        single_ndcg10 = call_metric(NDCG, final_rec_list, test_list, k=10)
 
         ranked_rec_df = recs[recs["stage"] == "ranked"]
         ranked = convert_df_to_article_set(ranked_rec_df)
