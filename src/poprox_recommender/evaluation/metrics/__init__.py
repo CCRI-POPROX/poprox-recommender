@@ -40,9 +40,8 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
     profile_id, all_recs, test = profile
     test.index = test.index.astype(str)
 
-    test_list = ItemList.from_df(test)
     filtered_test = test[test["rating"] > 0]
-    test_list_pos = ItemList.from_df(filtered_test)
+    test_list = ItemList.from_df(filtered_test)
 
     results = []
 
@@ -50,7 +49,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         final_rec_df = recs[recs["stage"] == "final"]
         final_rec_list = ItemList.from_df(final_rec_df)
 
-        single_rr = call_metric(RecipRank, final_rec_list, test_list_pos)
+        single_rr = call_metric(RecipRank, final_rec_list, test_list)
         single_ndcg5 = call_metric(NDCG, final_rec_list, test_list, k=5)
         single_ndcg10 = call_metric(NDCG, final_rec_list, test_list, k=10)
 
