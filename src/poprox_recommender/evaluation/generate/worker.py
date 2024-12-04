@@ -29,7 +29,7 @@ _worker_out: RecOutputs
 _emb_seen: set[UUID]
 
 
-def _init_worker(outs: RecOutputs):
+def _init_worker(outs: RecOutputs, pipelines: list[str] | None):
     global _worker_out, _emb_seen, _pipelines
     proc = mp.current_process()
     _worker_out = outs
@@ -38,6 +38,8 @@ def _init_worker(outs: RecOutputs):
     _worker_out.open(proc.pid)
 
     _pipelines = recommendation_pipelines(device=default_device())
+    if pipelines:
+        _pipelines = {name: _pipelines[name] for name in pipelines}
 
 
 def _finish_worker():
@@ -161,7 +163,9 @@ def extract_recs(
     return output_df, embeddings
 
 
-def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
+def generate_profile_recs(
+    dataset: str, outs: RecOutputs, pipelines: list[str] | None = None, n_profiles: int | None = None, n_jobs: int = 1
+):
     logger.info("generating recommendations")
 
     profile_iter = dataset.iter_profiles()
@@ -179,7 +183,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
             with ipp.Cluster(n=n_jobs) as client:
                 dv = client.direct_view()
                 logger.debug("initializing workers")
-                dv.apply_sync(_init_worker, outs)
+                dv.apply_sync(_init_worker, outs, pipelines)
 
                 logger.debug("dispatching jobs")
                 lbv = client.load_balanced_view()
@@ -192,7 +196,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
 
         else:
             # directly call things in-process
-            _init_worker(outs)
+            _init_worker(outs, pipelines)
 
             for request in profile_iter:
                 _generate_for_request(request)
