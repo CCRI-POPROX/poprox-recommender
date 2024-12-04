@@ -288,22 +288,24 @@ def generated_context(
 
 
 def semantic_narrative(news_list):
-    system_prompt = ("You are an expert to rewrite the subheadline of MAIN NEWS in a natural and factural tone. "
-    "I will provide you with two news articles: MAIN NEWS and RELATED NEWS that occurred before the MAIN NEWS. "
-    "Please rewrite the subhead of MAIN NEWS by incorporting the user interests detected from the RELATED NEWS "
-    "and how the RELATED NEWS set the stage for the MAIN NEWS. "
-    "Please ensure that you maintain a logical flow, and present in a neutral and fatual tone in the rewritten subhead."
+    system_prompt = ("You are an professional editor to rewrite the MAIN NEWS in a natural and factural tone. "
+    "You are provided a MAIN NEWS to be recommended and a RELATED NEWS that a user read before. "
+    "Please rewrite the MAIN NEWS by implicitly connecting it to RELATED NEWS and "
+    "incorporatinig the relevant user interests detected from RELATED NEWS. "
+    "Please ensure that the rewritten MAIN NEWS is presented concisely in a neutral and fatual tone."
     )
+
+
     
     input_prompt = "News List: \n" + f"{news_list}"
     return gpt_generate(system_prompt, input_prompt)
 
 def highlevel_narrative(news_list):
-    system_prompt = ("You are an expert to rewrite the subheadline of MAIN NEWS in a natural and factural tone. "
-    "I will provide you with MAIN NEWS and a list of RELATED NEWS that occurred before the MAIN NEWS."
-    "Please rewrite the subhead of MAIN NEWS by incorporting the user interests detected from the RELATED NEWS "
-    "and how the RELATED NEWS set the stage for the MAIN NEWS. "
-    "Please ensure that you maintain a logical flow, and present in a neutral and fatual tone in the rewritten subhead."
+    system_prompt = ("You are an professional editor to rewrite the MAIN NEWS in a natural and factural tone. "
+    "You are provided a MAIN NEWS to be recommended and a list of RELATED NEWS that a user read before. "
+    "Please rewrite the MAIN NEWS by implicitly connecting it to RELATED NEWS and "
+    "incorporatinig the relevant user interests detected from RELATED NEWS. "
+    "Please ensure that the rewritten MAIN NEWS is presented concisely in a neutral and fatual tone."
     )
     
     input_prompt = "News List: \n" + f"{news_list}"
