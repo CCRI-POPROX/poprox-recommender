@@ -3,8 +3,9 @@ import logging
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
+from poprox_recommender.components.diversifiers.locality_calibration import user_interest_generate
 from poprox_recommender.recommenders import select_articles
-from poprox_recommender.topics import user_locality_preference, user_topic_preference
+from poprox_recommender.topics import user_topic_preference
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -41,15 +42,20 @@ def generate_recs(event, context):
     # Similarly, the platform should provided pre-filtered clicked articles
     # and compute the topic counts but this shim lets us ignore that issue
     # in the actual article selection
+
     profile = req.interest_profile
     click_history = profile.click_history
     clicked_articles = list(
         filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
     )
-    clicked_articles = ArticleSet(articles=clicked_articles)
 
+    clicked_articles = ArticleSet(articles=clicked_articles)
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
-    profile.click_locality_counts = user_locality_preference(req.past_articles, profile.click_history)
+
+    # TODO: modify the k in the user_interest_generate to a pre-defined parameter
+    user_interests = user_interest_generate(ArticleSet(articles=req.past_articles), 3)
+    profile.user_interests = user_interests
+    profile.clicked_articles = ArticleSet(articles=req.past_articles)
 
     outputs = select_articles(
         candidate_articles,
