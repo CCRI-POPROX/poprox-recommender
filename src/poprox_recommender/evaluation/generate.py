@@ -13,8 +13,8 @@ Options:
             write output to FILE [default: outputs/recommendations.parquet]
     -M DATA, --mind-data=DATA
             read MIND test data DATA
-    --data_path=<data_path>
-            path to PopRox data
+    -P DATA, --poprox-data=DATA
+            read POPROX test data DATA
     --subset=N
             test only on the first N test users
     --pipelines=<pipelines>...
@@ -174,12 +174,19 @@ if __name__ == "__main__":
     pipelines = options["--pipelines"]
     print("Pipelines:", pipelines)
 
-    mind_data = options["--mind-data"]
-    data_path = options["--data_path"]
-    if mind_data is not None:
-        user_recs = generate_user_recs(MindData(mind_data), pipelines, n_users)
-    elif data_path is not None:
-        user_recs = generate_user_recs(PoproxData(data_path), pipelines, n_users)
+    if options["--poprox-data"]:
+        eval_data = PoproxData(options["--poprox-data"])
+    else:
+        eval_data = MindData(options["--mind-data"])
+
+    user_recs = generate_user_recs(eval_data, pipelines, n_users)
+
+    # mind_data = options["--mind-data"]
+    # data_path = options["--data_path"]
+    # if mind_data is not None:
+    #     user_recs = generate_user_recs(MindData(mind_data), pipelines, n_users)
+    # elif data_path is not None:
+    #     user_recs = generate_user_recs(PoproxData(data_path), pipelines, n_users)
 
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]
