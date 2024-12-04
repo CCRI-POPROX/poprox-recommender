@@ -5,8 +5,8 @@ stages:
     deps:
     - path: ../outputs/mind-val/profile-metrics.csv.gz
       hash: md5
-      md5: 1ee7d49c679c1508a3122a383f21fe83
-      size: 34022756
+      md5: 40e34937389500c9ce74cb3d93d215df
+      size: 34000151
     - path: mind-val.md
       hash: md5
       md5: 386c3b5588f70d8a845b0faaa52c4859
@@ -14,15 +14,15 @@ stages:
     outs:
     - path: mind-val.ipynb
       hash: md5
-      md5: 4f455a947e02d17f65891628a6528c75
-      size: 180580
+      md5: 82246ae5007d7196ed65601dd3999742
+      size: 180360
   results-mind-small:
     cmd: jupytext --to notebook --execute mind-small.md
     deps:
     - path: ../outputs/mind-small/profile-metrics.csv.gz
       hash: md5
-      md5: 885321013d5c4d6d59093edb503104d5
-      size: 6610049
+      md5: e1ddec19dc5ff6cf886186524fbf1a4c
+      size: 6606761
     - path: mind-small.md
       hash: md5
       md5: 170f50dd7278beff3c040fed5ded0074
@@ -30,15 +30,15 @@ stages:
     outs:
     - path: mind-small.ipynb
       hash: md5
-      md5: 005446bda1bdd11ecf7774229b0eb970
-      size: 182164
+      md5: c99231a9284b9690992f4deaee20be7b
+      size: 182179
   results-mind-subset:
     cmd: jupytext --to notebook --execute mind-subset.md
     deps:
     - path: ../outputs/mind-subset/profile-metrics.csv.gz
       hash: md5
-      md5: fb0373335e5e7c7fb3c998c0ed930f49
-      size: 90985
+      md5: 4a658459093af34e63ec8905f64b8146
+      size: 90608
     - path: mind-subset.md
       hash: md5
       md5: fd56e0a68ae9edd86be8a2a0fda2b78d
@@ -46,5 +46,5 @@ stages:
     outs:
     - path: mind-subset.ipynb
       hash: md5
-      md5: 092a19124e7bf3f3f0e336d75d112284
-      size: 178521
+      md5: 7e6630067ae4444c84c5f27a005a9182
+      size: 177386
