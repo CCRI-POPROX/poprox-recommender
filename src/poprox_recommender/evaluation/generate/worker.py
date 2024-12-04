@@ -17,7 +17,7 @@ from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.lkpipeline import Pipeline
 from poprox_recommender.lkpipeline.state import PipelineState
-from poprox_recommender.recommenders import recommendation_pipelines
+from poprox_recommender.recommend import recommendation_pipelines
 
 logger = logging.getLogger(__name__)
 

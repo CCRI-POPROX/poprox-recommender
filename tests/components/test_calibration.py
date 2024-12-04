@@ -10,7 +10,7 @@ from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
-from poprox_recommender.recommenders import PipelineLoadError, select_articles
+from poprox_recommender.recommend import PipelineLoadError, select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
