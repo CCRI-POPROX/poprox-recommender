@@ -28,7 +28,7 @@ dependencies = [
   "progress-api >=0.1.0a9,<0.2",
   "enlighten >=1.12,<2",
   "ipyparallel ~=8.0",
-  "openai==1.52.2",
+  "openai==1.55.3",
   "sentence-transformers ==3.2.1",
   "scikit-learn ==1.5.2",
   # this expresses the dep, but since we only install with pixi,
