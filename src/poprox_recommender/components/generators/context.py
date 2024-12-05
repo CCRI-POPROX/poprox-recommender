@@ -11,9 +11,12 @@ from poprox_recommender.topics import extract_general_topics
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-client = OpenAI(
-    api_key="Put your key here",
-)
+dev_mode = True
+
+if not dev_mode:
+    client = OpenAI(
+        api_key="Put your key here",
+    )
 
 
 class ContextGenerator(Component):
@@ -24,11 +27,12 @@ class ContextGenerator(Component):
         self.other_filter = other_filter
 
     def __call__(self, clicked: ArticleSet, recommended: ArticleSet) -> ArticleSet:
-        for article in recommended.articles:
-            generated_subhead = generated_context(
-                article, clicked, self.time_decay, self.topk_similar, self.other_filter
-            )
-            article.subhead = generated_subhead
+        if not dev_mode:
+            for article in recommended.articles:
+                generated_subhead = generated_context(
+                    article, clicked, self.time_decay, self.topk_similar, self.other_filter
+                )
+                article.subhead = generated_subhead
 
         return recommended
 

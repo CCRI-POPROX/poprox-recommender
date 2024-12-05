@@ -5,6 +5,7 @@ Support for loading POPROX data for evaluation.
 # pyright: basic
 from __future__ import annotations
 
+from datetime import datetime
 import logging
 from typing import Generator
 from uuid import UUID
@@ -21,7 +22,12 @@ TEST_REC_COUNT = 10
 
 
 class PoproxData(EvalData):
-    def __init__(self, archive: str = "POPROX"):
+    def __init__(
+        self,
+        archive: str = "POPROX",
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ):
         (
             articles_df,
             mentions_df,
@@ -30,7 +36,7 @@ class PoproxData(EvalData):
             clicked_articles_df,
             clicked_mentions_df,
             interests_df,
-        ) = load_poprox_frames(archive)
+        ) = load_poprox_frames(archive, start_date, end_date)
 
         self.newsletters_df = newsletters_df
 
@@ -159,11 +165,19 @@ class PoproxData(EvalData):
         )
 
 
-def load_poprox_frames(archive: str = "POPROX"):
+def load_poprox_frames(archive: str = "POPROX", start_date: datetime | None = None, end_date: datetime | None = None):
     data = project_root() / "data"
     logger.info("loading POPROX data from %s", archive)
 
     newsletters_df = pd.read_parquet(data / "POPROX" / "newsletters.parquet")
+    newsletters_df["created_at_date"] = pd.to_datetime(newsletters_df["created_at"])
+
+    if start_date:
+        logger.info("loading newsleters on or after %s", start_date)
+        newsletters_df = newsletters_df[newsletters_df["created_at_date"] >= start_date]
+    if end_date:
+        logger.info("loading newsleters before %s", end_date)
+        newsletters_df = newsletters_df[newsletters_df["created_at_date"] < end_date]
 
     articles_df = pd.read_parquet(data / "POPROX" / "articles.parquet")
     mentions_df = pd.read_parquet(data / "POPROX" / "mentions.parquet")
