@@ -6,3 +6,5 @@
 /mind-small-recommendations.parquet
 /mind-small-user-metrics.csv.gz
 /poprox.parquet
+/recommendations/*
+/embeddings.parquet

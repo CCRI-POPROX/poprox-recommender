@@ -13,8 +13,8 @@ Options:
             write output to FILE [default: outputs/recommendations.parquet]
     -M DATA, --mind-data=DATA
             read MIND test data DATA
-    --data_path=<data_path>
-            path to PopRox data
+    -P DATA, --poprox-data=DATA
+            read POPROX test data DATA
     --subset=N
             test only on the first N test users
     --pipelines=<pipelines>...
@@ -37,7 +37,7 @@ from progress_api import make_progress
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
 from poprox_recommender.config import default_device
-from poprox_recommender.data.data import Data
+from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.lkpipeline import PipelineState
@@ -108,7 +108,7 @@ def extract_recs(
     return output_df
 
 
-def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users: int | None = None):
+def generate_user_recs(data: EvalData, pipe_names: list[str] | None = None, n_users: int | None = None):
     pipelines = recommendation_pipelines(device=default_device())
     if pipe_names is not None:
         pipelines = {name: pipelines[name] for name in pipe_names}  # type: ignore
@@ -118,9 +118,9 @@ def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users:
     logger.info("generating recommendations")
     user_recs = []
 
-    user_iter = data.iter_users()
+    user_iter = data.iter_profiles()
     if n_users is None:
-        n_users = data.n_users
+        n_users = data.n_profiles
         logger.info("recommending for all %d users", n_users)
     else:
         logger.info("running on subset of %d users", n_users)
@@ -174,12 +174,19 @@ if __name__ == "__main__":
     pipelines = options["--pipelines"]
     print("Pipelines:", pipelines)
 
-    mind_data = options["--mind-data"]
-    data_path = options["--data_path"]
-    if mind_data is not None:
-        user_recs = generate_user_recs(MindData(mind_data), pipelines, n_users)
-    elif data_path is not None:
-        user_recs = generate_user_recs(PoproxData(data_path), pipelines, n_users)
+    if options["--poprox-data"]:
+        eval_data = PoproxData(options["--poprox-data"])
+    else:
+        eval_data = MindData(options["--mind-data"])
+
+    user_recs = generate_user_recs(eval_data, pipelines, n_users)
+
+    # mind_data = options["--mind-data"]
+    # data_path = options["--data_path"]
+    # if mind_data is not None:
+    #     user_recs = generate_user_recs(MindData(mind_data), pipelines, n_users)
+    # elif data_path is not None:
+    #     user_recs = generate_user_recs(PoproxData(data_path), pipelines, n_users)
 
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]
