@@ -191,7 +191,8 @@ class LocalityCalibrator(Component):
 
     def compute_topic_prefs(self, interest_profile):
         topic_preferences: dict[str, int] = defaultdict(int)
-
+        # TODO uncomment to verify interest profile bug
+        # logger.info(f"Interest Profile {interest_profile.click_topic_counts}")
         for interest in interest_profile.onboarding_topics:
             topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
 

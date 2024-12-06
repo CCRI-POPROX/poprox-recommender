@@ -19,6 +19,7 @@ from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.lkpipeline import Pipeline
 from poprox_recommender.lkpipeline.state import PipelineState
 from poprox_recommender.recommenders import recommendation_pipelines
+from poprox_recommender.topics import user_topic_preference
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +79,12 @@ def _generate_for_hyperparamter_request(
         )
 
     pipe_names = list(_pipelines.keys())
+
+    # Calculate the clicked topic count
+    request.interest_profile.click_topic_counts = user_topic_preference(
+        request.past_articles, request.interest_profile.click_history
+    )
+
     inputs = {
         "candidate": ArticleSet(articles=request.todays_articles),
         "clicked": ArticleSet(articles=request.past_articles),
