@@ -43,7 +43,7 @@ class NRMSArticleEmbedder(Component):
         checkpoint = load_file(model_path)
         config = ModelConfig()
         self.news_encoder = NewsEncoder(
-            config.pretrained_model,
+            model_file_path(config.pretrained_model),
             config.num_attention_heads,
             config.additive_attn_hidden_dim,
         )
