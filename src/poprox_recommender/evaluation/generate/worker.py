@@ -112,9 +112,9 @@ def extract_recs(
         pd.DataFrame(
             {
                 "recommender": name,
-                "profile": str(profile),
+                "profile_id": str(profile),
                 "stage": "final",
-                "item": [str(a.article_id) for a in recs.articles],
+                "item_id": [str(a.article_id) for a in recs.articles],
                 "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
             }
         )
@@ -126,9 +126,9 @@ def extract_recs(
             pd.DataFrame(
                 {
                     "recommender": name,
-                    "profile": str(profile),
+                    "profile_id": str(profile),
                     "stage": "ranked",
-                    "item": [str(a.article_id) for a in ranked.articles],
+                    "item_id": [str(a.article_id) for a in ranked.articles],
                     "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
                 }
             )
@@ -140,9 +140,9 @@ def extract_recs(
             pd.DataFrame(
                 {
                     "recommender": name,
-                    "profile": str(profile),
+                    "profile_id": str(profile),
                     "stage": "reranked",
-                    "item": [str(a.article_id) for a in reranked.articles],
+                    "item_id": [str(a.article_id) for a in reranked.articles],
                     "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
                 }
             )

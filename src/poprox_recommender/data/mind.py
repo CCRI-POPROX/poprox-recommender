@@ -94,8 +94,8 @@ class MindData(EvalData):
             split_records(),
             columns=["mind_item_id", "rating"],
         )
-        truth["item"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
-        return truth.set_index("item")
+        truth["item_id"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
+        return truth.set_index("item_id")
 
     def iter_profiles(self) -> Generator[RecommendationRequest]:
         for row in self.behavior_df.itertuples():

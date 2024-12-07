@@ -46,7 +46,7 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[Pr
     whether the profile is personalized.  This supports parallel computation of the
     final metrics.
     """
-    for profile_id, recs in profile_recs.groupby("profile"):
+    for profile_id, recs in profile_recs.groupby("profile_id"):
         profile_id = UUID(str(profile_id))
         truth = eval_data.profile_truth(profile_id)
         assert truth is not None
@@ -94,7 +94,7 @@ def main():
     recs_fn = project_root() / "outputs" / eval_name / "recommendations"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
-    n_profiles = recs_df["profile"].nunique()
+    n_profiles = recs_df["profile_id"].nunique()
     logger.info("loaded recommendations for %d profiles", n_profiles)
 
     logger.info("measuring recommendations")
