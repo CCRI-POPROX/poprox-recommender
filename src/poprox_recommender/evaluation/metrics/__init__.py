@@ -28,7 +28,7 @@ class ProfileRecs(NamedTuple):
 def convert_df_to_article_set(rec_df):
     articles = []
     for _, row in rec_df.iterrows():
-        articles.append(Article(article_id=row["item"], headline=""))
+        articles.append(Article(article_id=row["item_id"], headline=""))
     return ArticleSet(articles=articles)
 
 
@@ -37,23 +37,23 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
     Measure a single user profile's recommendations.  Returns the profile ID and
     an ItemList of evaluation metrics.
     """
-    profile_id, all_recs, test = profile
-    test = test.reset_index()
-    # test.index = test.index.astype(str)
+    profile_id, all_recs, truth = profile
 
-    filtered_test = test[test["rating"] > 0]
-    test_list = ItemList.from_df(filtered_test)
+    truth = truth.reset_index()
+    all_recs = all_recs.reset_index()
+
+    truth = truth[truth["rating"] > 0]
+    truth = ItemList.from_df(truth)
 
     results = []
 
     for name, recs in all_recs.groupby("recommender", observed=True):
         final_rec_df = recs[recs["stage"] == "final"]
-        final_rec_df = final_rec_df.reset_index()
-        final_rec_list = ItemList.from_df(final_rec_df)
+        final_rec = ItemList.from_df(final_rec_df)
 
-        single_rr = call_metric(RecipRank, final_rec_list, test_list)
-        single_ndcg5 = call_metric(NDCG, final_rec_list, test_list, k=5)
-        single_ndcg10 = call_metric(NDCG, final_rec_list, test_list, k=10)
+        single_rr = call_metric(RecipRank, final_rec, truth)
+        single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
+        single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
 
         ranked_rec_df = recs[recs["stage"] == "ranked"]
         ranked = convert_df_to_article_set(ranked_rec_df)
