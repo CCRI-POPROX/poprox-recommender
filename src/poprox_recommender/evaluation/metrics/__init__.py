@@ -38,9 +38,9 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
     an ItemList of evaluation metrics.
     """
     profile_id, all_recs, truth = profile
+    truth.index = truth.index.astype(str)
 
     truth = truth.reset_index()
-    all_recs = all_recs.reset_index()
 
     truth = truth[truth["rating"] > 0]
     truth = ItemList.from_df(truth)
