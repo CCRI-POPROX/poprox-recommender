@@ -35,10 +35,11 @@ def convert_df_to_article_set(rec_df):
 def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
     """
     Measure a single user profile's recommendations.  Returns the profile ID and
-    a data frame of evaluation metrics.
+    an ItemList of evaluation metrics.
     """
     profile_id, all_recs, test = profile
-    test.index = test.index.astype(str)
+    test = test.reset_index()
+    # test.index = test.index.astype(str)
 
     filtered_test = test[test["rating"] > 0]
     test_list = ItemList.from_df(filtered_test)
@@ -47,6 +48,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
 
     for name, recs in all_recs.groupby("recommender", observed=True):
         final_rec_df = recs[recs["stage"] == "final"]
+        final_rec_df = final_rec_df.reset_index()
         final_rec_list = ItemList.from_df(final_rec_df)
 
         single_rr = call_metric(RecipRank, final_rec_list, test_list)
