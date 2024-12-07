@@ -243,28 +243,27 @@ $ curl -X POST -H "Content-Type: application/json" -d @tests/request_data/basic-
 The default setup for this package is CPU-only, which works for basic testing
 and for deployment, but is very inefficient for evaluation.  The current set of
 models work on both CUDA (on Linux with NVidia cards) and MPS (macOS on Apple
-Silicon).  To make use of a GPU, do the following:
-
-1.  Set the `POPROX_REC_DEVICE` environment variable to `cuda` or `mps`.
-
-2.  Run `dvc repro` under the `eval` or `dev` environment (using either `pixi
-    run` or `pixi shell`).
+Silicon).  To make use of a GPU, do the following:, run `dvc repro` under the
+`eval-cuda` or `dev-cuda` environment (using either `pixi run` or `pixi shell`).
 
 Timing information for generating recommendations with the MIND validation set:
 
-| Machine | CPU              | GPU        | Rec. Time | Rec. Power | Eval Time |
-| ------- | :--------------: | :--------: | :-------: | :--------: | :-------: |
-| [DXC][] | EPYC 7662 (2GHz) | A40 (CUDA) | 45m¹      | 418.5 Wh   | 24m       |
-| [MBP][] | Apple M2 Pro     | -          | <20hr²    |            | 30m²      |
-| [MBP][] | Apple M2 Pro     | M2 (MPS)   | <12hr²    |            |           |
+| Machine      | CPU                | GPU         | Rec. Time | Rec. Power | Eval Time |
+| ------------ | :----------------: | :---------: | :-------: | :--------: | :-------: |
+| [Cruncher][] | EPYC 7662 (2GHz)   | A40 (CUDA)  | 45m¹      | 418.5 Wh   | 24m       |
+| [Screamer][] | i9 14900K (3.2GHz) | 4090 (CUDA) | 28m16s²   |            | 14m       |
+| [Ranger][]   | Apple M2 Pro       | -           | <20hr³    |            | 30m³      |
+| [Ranger][]   | Apple M2 Pro       | M2 (MPS)    | <12hr³    |            |           |
 
-[DXC]: https://codex.lenskit.org/hardware/cruncher.html
-[MBP]: https://codex.lenskit.org/hardware/mbp2.html
+[Cruncher]: https://codex.lenskit.org/hardware/cruncher.html
+[Screamer]: https://codex.lenskit.org/hardware/screamer.html
+[Ranger]: https://codex.lenskit.org/hardware/ranger.html
 
 Footnotes:
 
 1. Using 12 worker processes
-2. Estimated based on early progress, not run to completion.
+2. Using 8 worker processes
+3. Estimated based on early progress, not run to completion.
 
 ## Editor Setup
 

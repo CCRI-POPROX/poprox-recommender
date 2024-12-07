@@ -2,21 +2,16 @@ import torch
 from torch import nn
 from transformers import AutoConfig, AutoModel
 
-from poprox_recommender.model.general.attention.newsadditive import (
-    NewsAdditiveAttention,
-)
-from poprox_recommender.paths import model_file_path
+from ..general.attention.newsadditive import NewsAdditiveAttention
 
 
 class NewsEncoder(torch.nn.Module):
-    def __init__(self, pretrained_model, num_attention_heads, additive_attn_hidden_dim):
+    def __init__(self, model_path, num_attention_heads, additive_attn_hidden_dim):
         super(NewsEncoder, self).__init__()
 
-        self.plm = AutoModel.from_pretrained(model_file_path(pretrained_model), cache_dir="/tmp/")
+        self.plm = AutoModel.from_pretrained(model_path, cache_dir="/tmp/")
 
-        self.plm_hidden_size = AutoConfig.from_pretrained(
-            model_file_path(pretrained_model), cache_dir="/tmp/"
-        ).hidden_size
+        self.plm_hidden_size = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/").hidden_size
 
         self.multihead_attention = nn.MultiheadAttention(
             embed_dim=self.plm_hidden_size,
