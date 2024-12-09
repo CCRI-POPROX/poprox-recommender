@@ -10,7 +10,6 @@ from poprox_recommender.lkpipeline import Component
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics
 
-
 class ContextGenerator(Component):
     def __init__(self, text_generation=False, time_decay=True, topk_similar=5, other_filter="topic"):
         self.text_generation = text_generation

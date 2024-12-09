@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 
 import torch as th
@@ -10,6 +11,9 @@ from poprox_recommender.topics import extract_general_topics, extract_locality, 
 
 # Only uncomment this in offline theta value exploration
 # KL_VALUE_PATH = '/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/outputs/theta_kl_values_11-17.txt'
+LOCALITY_DISTANCE_THRESHOLD = 0.1
+
+logger = logging.getLogger(__name__)
 
 
 class LocalityCalibrator(Component):
@@ -26,7 +30,12 @@ class LocalityCalibrator(Component):
         self,
         candidate_articles: ArticleSet,
         interest_profile: InterestProfile,
+        theta_topic: float | None,
+        theta_local: float | None,
     ) -> ArticleSet:
+        theta_topic = self.theta_topic if theta_topic is None else theta_topic
+        theta_local = self.theta_local if theta_local is None else theta_local
+
         normalized_topic_prefs = self.compute_topic_prefs(interest_profile)
         normalized_locality_prefs = self.compute_local_prefs(candidate_articles)
 
@@ -37,14 +46,16 @@ class LocalityCalibrator(Component):
 
         article_scores = article_scores.cpu().detach().numpy()
 
-        article_indices, final_calibrations = self.calibration(
-            article_scores,
-            candidate_articles.articles,
-            normalized_topic_prefs,
-            normalized_locality_prefs,
-            self.theta_topic,
-            self.theta_local,
-            topk=self.num_slots,
+        article_indices, topic_only_article_indices, final_calibrations, localities_outside_threshold = (
+            self.calibration(
+                article_scores,
+                candidate_articles.articles,
+                normalized_topic_prefs,
+                normalized_locality_prefs,
+                theta_topic,
+                theta_local,
+                topk=self.num_slots,
+            )
         )
 
         # Save computed kl divergence for topic and locality
@@ -52,9 +63,17 @@ class LocalityCalibrator(Component):
         # with open(KL_VALUE_PATH, 'a') as file:
         #     file.write('{}_top_{}_loc_{},{},{}\n'.format(str(interest_profile.profile_id), theta_topic, theta_locality, final_calibrations[0], final_calibrations[1]))
 
-        return ArticleSet(
+        article_set = ArticleSet(
             articles=[candidate_articles.articles[idx] for idx in article_indices]
         )  # all selected articles
+
+        article_set.treatment_flags = [index not in topic_only_article_indices for index in article_indices]
+        article_set.k1_topic = final_calibrations[0]
+        article_set.k1_locality = final_calibrations[1]
+
+        article_set.is_inside_locality_threshold = not localities_outside_threshold
+
+        return article_set
 
     def add_article_to_categories(self, rec_topics, article):
         rec_topics = rec_topics.copy()
@@ -87,15 +106,19 @@ class LocalityCalibrator(Component):
         # R is all candidates (not selected yet)
 
         recommendations = []  # final recommendation (topk index)
+        topic_only_recommendations = []
 
         topic_categories = defaultdict(int)
+        topic_only_categories = defaultdict(int)
         local_categories = defaultdict(int)
 
         final_calibrations = [None, None]
 
         for _ in range(topk):
             candidate = None  # next item
+            topic_candidate = None
             best_candidate_score = float("-inf")
+            best_topic_candidate_score = float("-inf")
 
             for article_idx, article_score in enumerate(relevance_scores):  # iterate R for next item
                 if article_idx in recommendations:
@@ -104,11 +127,15 @@ class LocalityCalibrator(Component):
                 normalized_candidate_topics = self.normalized_categories_with_candidate(
                     topic_categories, articles[article_idx]
                 )
+                normalized_topic_candidate_topics = self.normalized_categories_with_candidate(
+                    topic_only_categories, articles[article_idx]
+                )
                 normalized_candidate_locality = self.normalized_localities_with_candidate(
                     local_categories, articles[article_idx]
                 )
 
                 calibration_topic = compute_kl_divergence(topic_preferences, normalized_candidate_topics)
+                calibration_topic_only = compute_kl_divergence(topic_preferences, normalized_topic_candidate_topics)
                 calibration_local = compute_kl_divergence(locality_preferences, normalized_candidate_locality)
 
                 # TODO or other MOE
@@ -117,17 +144,39 @@ class LocalityCalibrator(Component):
                     - (theta_topic * calibration_topic)
                     - (theta_local * calibration_local)
                 )
+                adjusted_topic_candidate_score = (1 - theta_local - theta_topic) * article_score - (
+                    theta_topic + theta_local * calibration_topic_only
+                )
                 if adjusted_candidate_score > best_candidate_score:
                     best_candidate_score = adjusted_candidate_score
                     candidate = article_idx
                     final_calibrations = [calibration_topic, calibration_local]
+
+                if adjusted_topic_candidate_score > best_topic_candidate_score:
+                    best_topic_candidate_score = adjusted_topic_candidate_score
+                    topic_candidate = article_idx
 
             if candidate is not None:
                 recommendations.append(candidate)
                 topic_categories = self.add_article_to_categories(topic_categories, articles[candidate])
                 local_categories = self.add_article_to_localities(local_categories, articles[candidate])
 
-        return recommendations, final_calibrations
+            if topic_candidate is not None:
+                topic_only_recommendations.append(topic_candidate)
+                topic_only_categories = self.add_article_to_categories(topic_only_categories, articles[topic_candidate])
+
+        # logger.info(f"Rec'ed newsletter distribution {local_categories}")
+        # logger.info(f"Todays news  distribution {locality_preferences}")
+        normalized_local_categories = normalized_category_count(local_categories)
+        localities_outside_threshold = [
+            locality
+            for locality in normalized_local_categories
+            if locality in locality_preferences
+            and abs(normalized_local_categories[locality] - locality_preferences[locality])
+            > LOCALITY_DISTANCE_THRESHOLD
+        ]
+
+        return recommendations, topic_only_recommendations, final_calibrations, localities_outside_threshold
 
     def compute_local_prefs(self, candidate_articles: ArticleSet):
         locality_preferences: dict[str, int] = defaultdict(int)
@@ -143,7 +192,8 @@ class LocalityCalibrator(Component):
 
     def compute_topic_prefs(self, interest_profile):
         topic_preferences: dict[str, int] = defaultdict(int)
-
+        # TODO uncomment to verify interest profile bug
+        # logger.info(f"Interest Profile {interest_profile.click_topic_counts}")
         for interest in interest_profile.onboarding_topics:
             topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
 

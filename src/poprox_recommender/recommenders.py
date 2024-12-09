@@ -208,6 +208,10 @@ def build_locality_pipeline(name, article_embedder, user_embedder, ranker, num_s
     clicked = pipeline.create_input("clicked", ArticleSet)
     profile = pipeline.create_input("profile", InterestProfile)
 
+    # locality-calibration specific inputs
+    theta_topic = pipeline.create_input("theta_topic", float, None)
+    theta_locality = pipeline.create_input("theta_locality", float, None)
+
     # Compute embeddings
     e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
     e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
@@ -224,6 +228,8 @@ def build_locality_pipeline(name, article_embedder, user_embedder, ranker, num_s
             ranker,
             candidate_articles=o_scored,
             interest_profile=e_user,
+            theta_topic=theta_topic,
+            theta_locality=theta_locality,
         )
 
     o_context = pipeline.add_component("generator", generator, clicked=e_click, recommended=o_rank)

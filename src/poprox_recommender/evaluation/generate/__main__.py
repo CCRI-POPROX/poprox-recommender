@@ -19,10 +19,24 @@ Options:
             use N parallel jobs
     --subset=N
             test only on the first N test profiles
+    --start_date=START_DATE
+            regenerate newsletters on and after START_DATE in the form mm/dd/yyyy
+    --end_date=END_DATE
+            regenerate newsleters before END_DATE in the form mm/dd/yyyy
+    --click_threshold=N
+            test only profiles with N clicks from start_date to end_date
+    --topic_thetas=TUPLE
+            test all theta values in TUPLE in the form (start, end)
+    --locality_thetas=TUPLE
+            test all theta values in TUPLE in the form (start, end)
+    --pipelines=<pipelines>...
+            list of pipeline names (separated by spaces)
 """
 
+import ast
 import logging
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -62,12 +76,35 @@ def generate_main():
     else:
         n_jobs = available_cpu_parallelism(4)
 
+    # parse start and end dates
+    start_date = None
+    end_date = None
+    if options["--start_date"]:
+        start_date = datetime.strptime(options["--start_date"], "%m/%d/%Y")
+    if options["--end_date"]:
+        end_date = datetime.strptime(options["--end_date"], "%m/%d/%Y")
+
+    # Ok if None
+    topic_thetas = options["--topic_thetas"]
+    locality_thetas = options["--locality_thetas"]
+
+    topic_thetas = ast.literal_eval(topic_thetas) if topic_thetas else None
+    locality_thetas = ast.literal_eval(locality_thetas) if locality_thetas else None
+
+    # subset pipelines
     if options["--poprox-data"]:
-        dataset = PoproxData(options["--poprox-data"])
+        dataset = PoproxData(options["--poprox-data"], start_date, end_date)
     elif options["--mind-data"]:
         dataset = MindData(options["--mind-data"])
 
-    worker_usage = generate_profile_recs(dataset, outputs, n_profiles, n_jobs)
+    pipelines = None
+    if options["--pipelines"]:
+        pipelines = options["--pipelines"]
+        if isinstance(pipelines, str):
+            pipelines = [pipelines]
+        logger.info("generating pipelines: %s", pipelines)
+
+    worker_usage = generate_profile_recs(dataset, outputs, pipelines, n_profiles, n_jobs, topic_thetas, locality_thetas)
 
     logger.info("de-duplicating embeddings")
     emb_df = pd.read_parquet(outputs.emb_temp_dir)
