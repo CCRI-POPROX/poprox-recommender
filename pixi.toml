@@ -1,7 +1,7 @@
 [project]
 name = "poprox-recommender"
 channels = ["conda-forge", "pytorch", "nvidia"]
-platforms = ["linux-64", "osx-arm64", "win-64"]
+platforms = ["linux-64", "osx-arm64", "win-64", "linux-aarch64"]
 
 [tasks]
 
@@ -40,7 +40,7 @@ cpuonly = "*"
 # we also do *not* include the poprox-recommender as a dep, since
 # its dependency lock version is always out of date.
 [feature.production]
-platforms = ["linux-64"]
+platforms = ["linux-64", "linux-aarch64"]
 
 [feature.production.dependencies]
 pip = ">=24"
