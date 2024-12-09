@@ -14,7 +14,7 @@ from pytest import fail, fixture, mark, skip
 
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
-from poprox_recommender.recommenders import recommendation_pipelines
+from poprox_recommender.recommend import recommendation_pipelines
 
 logger = logging.getLogger(__name__)
 try:
