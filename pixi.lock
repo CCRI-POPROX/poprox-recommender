@@ -30562,7 +30562,7 @@ packages:
   name: poprox-recommender
   version: 0.0.1
   path: .
-  sha256: 423ccd18f269b92395b38630b507cb725cf3c33c1f3c36d33996e38d65bf72e9
+  sha256: 0cb43140e32c45d9d762eb3c8ccadb12086edea7e220f933d2c68c84b4a830da
   requires_dist:
   - colorlog>=6.8,<7
   - enlighten>=1.12,<2
