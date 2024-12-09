@@ -1,7 +1,7 @@
 [project]
 name = "poprox-recommender"
 channels = ["conda-forge", "pytorch", "nvidia"]
-platforms = ["linux-64", "osx-arm64", "win-64"]
+platforms = ["linux-64", "osx-arm64", "win-64", "linux-aarch64"]
 
 [tasks]
 
@@ -40,7 +40,7 @@ cpuonly = "*"
 # we also do *not* include the poprox-recommender as a dep, since
 # its dependency lock version is always out of date.
 [feature.production]
-platforms = ["linux-64"]
+platforms = ["linux-64", "linux-aarch64"]
 
 [feature.production.dependencies]
 pip = ">=24"
@@ -72,6 +72,7 @@ ipython = ">=8"
 notebook = ">=7.2"
 jupytext = ">=1.16"
 pyarrow-stubs = ">=17.11,<18"
+taplo = ">=0.9.3,<0.10"
 
 # dependencies for project meta-work (e.g. updating project files from templates)
 [feature.meta.dependencies]
@@ -129,13 +130,15 @@ pyright = "~=1.1"
 
 # CUDA support
 [feature.cuda]
-platforms = ["linux-64"]
+platforms = ["linux-64", "linux-aarch64"]
 
 [feature.cuda.system-requirements]
 cuda = "12"
 
 [feature.cuda.dependencies]
 pytorch-gpu = "*"
+
+[feature.cuda.target.linux-64.dependencies]
 libblas = { build = "*mkl*" }
 
 # define the actual environments from these component features.
