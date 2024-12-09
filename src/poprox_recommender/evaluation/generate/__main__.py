@@ -25,10 +25,15 @@ Options:
             regenerate newsleters before END_DATE in the form mm/dd/yyyy
     --click_threshold=N
             test only profiles with N clicks from start_date to end_date
+    --topic_thetas=TUPLE
+            test all theta values in TUPLE in the form (start, end)
+    --locality_thetas=TUPLE
+            test all theta values in TUPLE in the form (start, end)
     --pipelines=<pipelines>...
             list of pipeline names (separated by spaces)
 """
 
+import ast
 import logging
 import shutil
 from datetime import datetime
@@ -79,8 +84,14 @@ def generate_main():
     if options["--end_date"]:
         end_date = datetime.strptime(options["--end_date"], "%m/%d/%Y")
 
-    # subset pipelines
+    # Ok if None
+    topic_thetas = options["--topic_thetas"]
+    locality_thetas = options["--locality_thetas"]
 
+    topic_thetas = ast.literal_eval(topic_thetas) if topic_thetas else None
+    locality_thetas = ast.literal_eval(locality_thetas) if locality_thetas else None
+
+    # subset pipelines
     if options["--poprox-data"]:
         dataset = PoproxData(options["--poprox-data"], start_date, end_date)
     elif options["--mind-data"]:
@@ -93,7 +104,7 @@ def generate_main():
             pipelines = [pipelines]
         logger.info("generating pipelines: %s", pipelines)
 
-    worker_usage = generate_profile_recs(dataset, outputs, pipelines, n_profiles, n_jobs)
+    worker_usage = generate_profile_recs(dataset, outputs, pipelines, n_profiles, n_jobs, topic_thetas, locality_thetas)
 
     logger.info("de-duplicating embeddings")
     emb_df = pd.read_parquet(outputs.emb_temp_dir)

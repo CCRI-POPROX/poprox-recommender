@@ -8,3 +8,5 @@
 /poprox.parquet
 /recommendations/*
 /embeddings.parquet
+/metrics.csv
+/profile-metrics.csv.gz

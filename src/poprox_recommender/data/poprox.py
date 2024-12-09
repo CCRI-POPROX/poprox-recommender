@@ -5,11 +5,14 @@ Support for loading POPROX data for evaluation.
 # pyright: basic
 from __future__ import annotations
 
-from datetime import datetime
 import logging
-from typing import Generator
+import random
+from datetime import datetime
+from itertools import chain, product
+from typing import Generator, Tuple
 from uuid import UUID
 
+import numpy as np
 import pandas as pd
 
 from poprox_concepts import AccountInterest, Article, Click, Entity, InterestProfile, Mention
@@ -54,9 +57,16 @@ class PoproxData(EvalData):
 
         self.interests_df = interests_df
 
+        # Default to 1 for when iter_hyperparameters is never called
+        self.num_hyperparameters = 1
+
     @property
     def n_profiles(self) -> int:
         return len(self.newsletters_df["newsletter_id"].unique())
+
+    @property
+    def n_hyperparameters(self) -> int:
+        return self.num_hyperparameters
 
     @property
     def n_articles(self) -> int:
@@ -71,7 +81,59 @@ class PoproxData(EvalData):
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item")
 
-    def iter_profiles(self) -> Generator[RecommendationRequest]:
+    def iter_hyperparameters(
+        self,
+        topic_thetas: Tuple[float, float],
+        topic_theta_incr: float,
+        locality_thetas: Tuple[float, float],
+        locality_theta_incr: float,
+        random_sample: int | None = None,
+    ) -> Generator[Tuple[RecommendationRequest, Tuple[float, float]], None, None]:
+        """
+        A wrapper around iter_profiles that extends its results with combinations of topic and locality thetas.
+
+        Args:
+            topic_thetas (Tuple[float, float]): Start and end values (inclusive) for topic theta range.
+            topic_theta_incr (float): Increment for topic theta range.
+            locality_thetas (Tuple[float, float]): Start and end values (inclusive) for locality theta range.
+            locality_theta_incr (float): Increment for locality theta range.
+            random_sample (int | None): If provided, randomly sample this many points from the Cartesian product of thetas.
+
+        Yields:
+            Tuple[RecommendationRequest, Tuple[float, float]]: A recommendation request paired with theta values.
+        """
+        # Generate lists of theta values
+        topic_range = np.arange(topic_thetas[0], topic_thetas[1] + 0.01, topic_theta_incr)
+        locality_range = np.arange(locality_thetas[0], locality_thetas[1] + 0.01, locality_theta_incr)
+
+        theta_combinations = list(product(topic_range, locality_range))
+
+        logger.info(
+            f"Generated cross product of topic_theta:{topic_thetas} X locality_theta:{locality_thetas} resulting in {len(theta_combinations)} combinations"  # noqa: E501
+        )
+
+        # Select a random sample of the full combinations
+        # @mdekstrand 60 is sufficient for 95% confidence
+        if random_sample is not None and random_sample < len(theta_combinations):
+            theta_combinations = random.sample(theta_combinations, random_sample)
+            logger.info(
+                f"Down sampling to {random_sample} random combinations"  # noqa: E501
+            )
+
+        self.num_hyperparameters = len(theta_combinations)
+
+        # Extend iter_profiles to iterate over each profile with each theta combination
+        profile_iter = self.iter_profiles()
+        extended_iter = chain.from_iterable(
+            ((profile, theta) for theta in theta_combinations) for profile in profile_iter
+        )
+
+        for profile_with_theta in extended_iter:
+            yield profile_with_theta
+
+    def iter_profiles(
+        self,
+    ) -> Generator[RecommendationRequest, None, None]:
         newsletter_ids = self.newsletters_df["newsletter_id"].unique()
 
         for newsletter_id in newsletter_ids:
@@ -128,7 +190,7 @@ class PoproxData(EvalData):
                 todays_articles=candidate_articles,
                 past_articles=past_articles,
                 interest_profile=profile,
-                num_recs=TEST_REC_COUNT,
+                num_recs=TEST_REC_COUNT,  # Check to make sure None inputs are ok in the diversifier
             )
 
     def lookup_candidate_article(self, article_id: UUID):
