@@ -12,7 +12,7 @@
   "forwardPorts": [
     3000
   ],
-  // Set up mounts for loaclly-installed software
+  // Set up mounts for locally-installed software
   "mounts": [
     "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume",
     "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
@@ -28,8 +28,7 @@
         "redhat.vscode-yaml",
         "tamasfe.even-better-toml",
         "ms-toolsai.jupyter",
-        "ms-azuretools.vscode-docker",
-        "dprint.dprint"
+        "ms-azuretools.vscode-docker"
       ]
     }
   }

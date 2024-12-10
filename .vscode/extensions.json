@@ -5,7 +5,6 @@
     "charliermarsh.ruff",
     "redhat.vscode-yaml",
     "tamasfe.even-better-toml",
-    "ms-toolsai.jupyter",
-    "dprint.dprint"
+    "ms-toolsai.jupyter"
   ]
 }
