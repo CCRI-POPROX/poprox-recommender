@@ -18,12 +18,6 @@ repos:
     rev: v8.21.1
     hooks:
       - id: gitleaks
-  - repo: https://github.com/google/yamlfmt
-    rev: v0.13.0
-    hooks:
-      - id: yamlfmt
-        name: format yaml files
-        exclude: (cloudformation|conda-lock.*)\.yml
   # - repo: https://github.com/ComPWA/taplo-pre-commit
   #   rev: v0.9.3
   #   hooks:
@@ -45,7 +39,13 @@ repos:
       - id: shfmt
   - repo: local
     hooks:
-      - id: taplo
-        name: Format TOML files
-        entry: taplo format
-        language: system
+      - id: dprint
+        name: format source files
+        entry: dprint fmt
+        language: node
+        types:
+          - yaml
+          - toml
+          - json
+        additional_dependencies:
+          - dprint
