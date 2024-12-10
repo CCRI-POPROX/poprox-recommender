@@ -72,7 +72,7 @@ ipython = ">=8"
 notebook = ">=7.2"
 jupytext = ">=1.16"
 pyarrow-stubs = ">=17.11,<18"
-taplo = ">=0.9.3,<0.10"
+dprint = ">=0.47"
 
 # dependencies for project meta-work (e.g. updating project files from templates)
 [feature.meta.dependencies]

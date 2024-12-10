@@ -28,7 +28,8 @@
         "redhat.vscode-yaml",
         "tamasfe.even-better-toml",
         "ms-toolsai.jupyter",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "dprint.dprint"
       ]
     }
   }
