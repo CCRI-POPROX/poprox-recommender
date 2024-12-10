@@ -77,7 +77,7 @@ known-first-party = ["poprox_*"]
 ban-relative-imports = "all"
 
 [tool.pyright]
-exclude = [".pixi/"]
+exclude = [".pixi/", "node_modules"]
 
 [tool.coverage.run]
 source_pkgs = ["poprox_recommender", "tests"]
