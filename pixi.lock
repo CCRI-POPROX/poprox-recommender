@@ -1480,7 +1480,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/a8/a1/ad7b84b91ab5a324e707f4c9761633e357820b011a01e34ce658c1dda7cc/msgpack-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -1879,7 +1879,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zlib-1.3.1-h86ecc28_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/dc/17/6313325a6ff40ce9c3207293aee3ba50104aed6c2c1559d20d09e5c1ff54/msgpack-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -2224,7 +2224,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/42/ae/d3adea9bb4a1342763556078b5765e666f8fdf242e00f3f6657380920972/msgpack-1.1.0-cp311-cp311-macosx_11_0_arm64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -2575,7 +2575,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/aa/c4/5a582fc9a87991a3e6f6800e9bb2f3c82972912235eb9539954f3e9997c7/msgpack-1.1.0-cp311-cp311-win_amd64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -2685,6 +2685,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/double-conversion-3.3.0-h59595ed_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/dprint-0.47.6-h6c30b3d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.6-py311h9e33e62_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.58.0-pyhd8ed1ab_0.conda
@@ -3005,7 +3006,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/statsmodels-0.14.4-py311h9f3472d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sympy-1.13.3-pyh2585a3b_104.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tabulate-0.9.0-pyhd8ed1ab_1.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/taplo-0.9.3-h53e704d_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/tbb-2021.13.0-hceb3a55_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/terminado-0.18.1-pyh0d859eb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tinycss2-1.4.0-pyhd8ed1ab_0.conda
@@ -3075,7 +3075,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/a8/a1/ad7b84b91ab5a324e707f4c9761633e357820b011a01e34ce658c1dda7cc/msgpack-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -3177,6 +3177,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/double-conversion-3.3.0-h2f0025b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/dprint-0.47.6-ha3529ed_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/dulwich-0.22.6-py311h0ca61a2_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.58.0-pyhd8ed1ab_0.conda
@@ -3497,7 +3498,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/statsmodels-0.14.4-py311hec9beba_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sympy-1.13.3-pyh2585a3b_104.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tabulate-0.9.0-pyhd8ed1ab_2.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/taplo-0.9.3-h112f5b8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/terminado-0.18.1-pyh0d859eb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tinycss2-1.4.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/tk-8.6.13-h194ca79_0.conda
@@ -3564,7 +3564,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zlib-1.3.1-h86ecc28_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/dc/17/6313325a6ff40ce9c3207293aee3ba50104aed6c2c1559d20d09e5c1ff54/msgpack-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -3662,6 +3662,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/distro-1.9.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dprint-0.47.6-h8dba533_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/dulwich-0.22.6-py311h3ff9189_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.58.0-pyhd8ed1ab_0.conda
@@ -3952,7 +3953,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/statsmodels-0.14.4-py311h0f07fe1_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sympy-1.13.3-pyh2585a3b_104.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tabulate-0.9.0-pyhd8ed1ab_1.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/taplo-0.9.3-hdf53557_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/terminado-0.18.1-pyh31c8845_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tinycss2-1.4.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/tk-8.6.13-h5083fa2_1.conda
@@ -3999,7 +3999,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/42/ae/d3adea9bb4a1342763556078b5765e666f8fdf242e00f3f6657380920972/msgpack-1.1.0-cp311-cp311-macosx_11_0_arm64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -4094,6 +4094,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/win-64/double-conversion-3.3.0-h63175ca_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/dprint-0.47.6-ha073cba_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/dulwich-0.22.6-py311h533ab2d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.58.0-pyhd8ed1ab_0.conda
@@ -4379,7 +4380,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/statsmodels-0.14.4-py311h0a17f05_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sympy-1.13.3-pyh04b8f61_4.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tabulate-0.9.0-pyhd8ed1ab_1.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/win-64/taplo-0.9.3-ha073cba_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/tbb-2021.13.0-h62715c5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/terminado-0.18.1-pyh5737063_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tinycss2-1.4.0-pyhd8ed1ab_0.conda
@@ -4442,7 +4442,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/aa/c4/5a582fc9a87991a3e6f6800e9bb2f3c82972912235eb9539954f3e9997c7/msgpack-1.1.0-cp311-cp311-win_amd64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -4560,6 +4560,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/double-conversion-3.3.0-h59595ed_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/dprint-0.47.6-h6c30b3d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/dulwich-0.22.6-py311h9e33e62_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.58.0-pyhd8ed1ab_0.conda
@@ -4900,7 +4901,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/statsmodels-0.14.4-py311h9f3472d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sympy-1.13.3-pyh2585a3b_104.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tabulate-0.9.0-pyhd8ed1ab_1.tar.bz2
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/taplo-0.9.3-h53e704d_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/tbb-2021.13.0-hceb3a55_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/terminado-0.18.1-pyh0d859eb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tinycss2-1.4.0-pyhd8ed1ab_0.conda
@@ -4970,7 +4970,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/a8/a1/ad7b84b91ab5a324e707f4c9761633e357820b011a01e34ce658c1dda7cc/msgpack-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -5079,6 +5079,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/docopt-0.6.2-py_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/double-conversion-3.3.0-h2f0025b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dpath-2.2.0-pyha770c72_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/dprint-0.47.6-ha3529ed_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/dulwich-0.22.6-py311h0ca61a2_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dunamai-1.22.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/dvc-3.58.0-pyhd8ed1ab_0.conda
@@ -5417,7 +5418,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/statsmodels-0.14.4-py311hec9beba_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/sympy-1.13.3-pyh2585a3b_104.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tabulate-0.9.0-pyhd8ed1ab_2.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/taplo-0.9.3-h112f5b8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/terminado-0.18.1-pyh0d859eb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tinycss2-1.4.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/tk-8.6.13-h194ca79_0.conda
@@ -5484,7 +5484,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zlib-1.3.1-h86ecc28_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/dc/17/6313325a6ff40ce9c3207293aee3ba50104aed6c2c1559d20d09e5c1ff54/msgpack-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -5896,7 +5896,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/a8/a1/ad7b84b91ab5a324e707f4c9761633e357820b011a01e34ce658c1dda7cc/msgpack-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -6296,7 +6296,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zlib-1.3.1-h86ecc28_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/dc/17/6313325a6ff40ce9c3207293aee3ba50104aed6c2c1559d20d09e5c1ff54/msgpack-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -6642,7 +6642,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/42/ae/d3adea9bb4a1342763556078b5765e666f8fdf242e00f3f6657380920972/msgpack-1.1.0-cp311-cp311-macosx_11_0_arm64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -6994,7 +6994,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/aa/c4/5a582fc9a87991a3e6f6800e9bb2f3c82972912235eb9539954f3e9997c7/msgpack-1.1.0-cp311-cp311-win_amd64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -7433,7 +7433,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/a8/a1/ad7b84b91ab5a324e707f4c9761633e357820b011a01e34ce658c1dda7cc/msgpack-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -7858,7 +7858,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zlib-1.3.1-h86ecc28_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/dc/17/6313325a6ff40ce9c3207293aee3ba50104aed6c2c1559d20d09e5c1ff54/msgpack-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -8093,7 +8093,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/a8/a1/ad7b84b91ab5a324e707f4c9761633e357820b011a01e34ce658c1dda7cc/msgpack-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -8316,7 +8316,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zlib-1.3.1-h86ecc28_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/dc/17/6313325a6ff40ce9c3207293aee3ba50104aed6c2c1559d20d09e5c1ff54/msgpack-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -8530,7 +8530,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/42/ae/d3adea9bb4a1342763556078b5765e666f8fdf242e00f3f6657380920972/msgpack-1.1.0-cp311-cp311-macosx_11_0_arm64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -8737,7 +8737,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-3.21.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/aa/c4/5a582fc9a87991a3e6f6800e9bb2f3c82972912235eb9539954f3e9997c7/msgpack-1.1.0-cp311-cp311-win_amd64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -10790,7 +10790,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.1-hb9d3cd8_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/a8/a1/ad7b84b91ab5a324e707f4c9761633e357820b011a01e34ce658c1dda7cc/msgpack-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -11194,7 +11194,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zlib-1.3.1-h86ecc28_2.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/dc/17/6313325a6ff40ce9c3207293aee3ba50104aed6c2c1559d20d09e5c1ff54/msgpack-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -11544,7 +11544,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/42/ae/d3adea9bb4a1342763556078b5765e666f8fdf242e00f3f6657380920972/msgpack-1.1.0-cp311-cp311-macosx_11_0_arm64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -11902,7 +11902,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-1.3.1-h2466b09_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
-      - pypi: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+      - pypi: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
       - pypi: git+https://github.com/mdekstrand/manylog.git@0592011daa8acdbdbf9632466cb39cc50ab4756c
       - pypi: https://files.pythonhosted.org/packages/aa/c4/5a582fc9a87991a3e6f6800e9bb2f3c82972912235eb9539954f3e9997c7/msgpack-1.1.0-cp311-cp311-win_amd64.whl
       - pypi: git+https://github.com/CCRI-POPROX/poprox-concepts.git@a4bdf286bee8ea79641841aa345a5ec65debf4f8
@@ -17027,6 +17027,75 @@ packages:
   size: 21344
   timestamp: 1718243548474
 - kind: conda
+  name: dprint
+  version: 0.47.6
+  build: h6c30b3d_0
+  subdir: linux-64
+  url: https://conda.anaconda.org/conda-forge/linux-64/dprint-0.47.6-h6c30b3d_0.conda
+  sha256: aaf7e0d0b3262922c1a65750d0dc456f2f11df898cef529b3e9791147ee57646
+  md5: b5f7c180cf651803a2fd1c144affc772
+  depends:
+  - libgcc >=13
+  - __glibc >=2.17,<3.0.a0
+  constrains:
+  - __glibc >=2.17
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 5954890
+  timestamp: 1733266559797
+- kind: conda
+  name: dprint
+  version: 0.47.6
+  build: h8dba533_0
+  subdir: osx-arm64
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/dprint-0.47.6-h8dba533_0.conda
+  sha256: 2489b0df756d9ae804da8e355b28a41ea3a254ec4af26215be950398bc1b4a87
+  md5: c80a36d439d2dd28f05c564936be3045
+  depends:
+  - __osx >=11.0
+  constrains:
+  - __osx >=11.0
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 6109720
+  timestamp: 1733266607045
+- kind: conda
+  name: dprint
+  version: 0.47.6
+  build: ha073cba_0
+  subdir: win-64
+  url: https://conda.anaconda.org/conda-forge/win-64/dprint-0.47.6-ha073cba_0.conda
+  sha256: 0eaaa975789b273256cb525bcf3d0a3c4d2e345451755f12befb2b92ba1f352c
+  md5: 8a8cb08d5637d04e4471f2f1d7334c39
+  depends:
+  - ucrt >=10.0.20348.0
+  - vc >=14.2,<15
+  - vc14_runtime >=14.29.30139
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 5646473
+  timestamp: 1733115301419
+- kind: conda
+  name: dprint
+  version: 0.47.6
+  build: ha3529ed_0
+  subdir: linux-aarch64
+  url: https://conda.anaconda.org/conda-forge/linux-aarch64/dprint-0.47.6-ha3529ed_0.conda
+  sha256: 70954d1ae55ad992b8c9f96cdc202a9553b6455a7f4feb48fdc4b0eab3da33db
+  md5: 12d73de060d28f823b85c47f99b7a379
+  depends:
+  - libgcc >=13
+  constrains:
+  - __glibc >=2.17
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 5267076
+  timestamp: 1733124760505
+- kind: conda
   name: dulwich
   version: 0.22.6
   build: py311h0ca61a2_0
@@ -21535,6 +21604,29 @@ packages:
   name: lenskit
   version: 2025.0.0a1.dev40+g0823c7d4
   url: git+https://github.com/lenskit/lkpy.git@0823c7d4441be5389f66cf22055050cb27d2e066#subdirectory=lenskit
+  requires_dist:
+  - numpy>=1.24
+  - pandas~=2.0
+  - pydantic~=2.7
+  - pyzmq>=24
+  - rich~=13.5
+  - scipy>=1.10.0
+  - structlog>=23.2
+  - threadpoolctl>=3.0
+  - torch~=2.1
+  - scikit-learn>=1.1 ; extra == 'sklearn'
+  - hypothesis>=6.16 ; extra == 'test'
+  - pyprojroot==0.3.* ; extra == 'test'
+  - pytest-benchmark==4.* ; extra == 'test'
+  - pytest-cov>=2.12 ; extra == 'test'
+  - pytest-doctestplus>=1.2.1,<2 ; extra == 'test'
+  - pytest-repeat>=0.9 ; extra == 'test'
+  - pytest>=8.2,<9 ; extra == 'test'
+  requires_python: '>=3.11'
+- kind: pypi
+  name: lenskit
+  version: 2025.0.0a1.dev49+g0e27ced8
+  url: git+https://github.com/lenskit/lkpy.git@0e27ced8793920d0511727962b48ee17dd868e55#subdirectory=lenskit
   requires_dist:
   - numpy>=1.24
   - pandas~=2.0
@@ -35554,82 +35646,6 @@ packages:
   - pkg:pypi/tabulate?source=hash-mapping
   size: 37554
   timestamp: 1733589854804
-- kind: conda
-  name: taplo
-  version: 0.9.3
-  build: h112f5b8_1
-  build_number: 1
-  subdir: linux-aarch64
-  url: https://conda.anaconda.org/conda-forge/linux-aarch64/taplo-0.9.3-h112f5b8_1.conda
-  sha256: fa8f652347208e63f0d9190dedf8c76e452468bd562d159905fd501b3e584e63
-  md5: 54ac19b576977e5c67ab9a786a9a4ea6
-  depends:
-  - libgcc >=13
-  - openssl >=3.3.2,<4.0a0
-  constrains:
-  - __glibc >=2.17
-  license: MIT
-  license_family: MIT
-  purls: []
-  size: 3633592
-  timestamp: 1727792638698
-- kind: conda
-  name: taplo
-  version: 0.9.3
-  build: h53e704d_1
-  build_number: 1
-  subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/taplo-0.9.3-h53e704d_1.conda
-  sha256: c6043d0e7df9bf3a4752cf965c04586e268040a563aaa97e60279e87b1da4b7b
-  md5: b8a6d8df78c43e3ffd4459313c9bcf84
-  depends:
-  - __glibc >=2.17,<3.0.a0
-  - libgcc >=13
-  - openssl >=3.3.2,<4.0a0
-  constrains:
-  - __glibc >=2.17
-  license: MIT
-  license_family: MIT
-  purls: []
-  size: 3835339
-  timestamp: 1727786201305
-- kind: conda
-  name: taplo
-  version: 0.9.3
-  build: ha073cba_1
-  build_number: 1
-  subdir: win-64
-  url: https://conda.anaconda.org/conda-forge/win-64/taplo-0.9.3-ha073cba_1.conda
-  sha256: 92a705d40a3ab1587058049ac1ad22a9c1e372dfa4f3788730393c776b5af84b
-  md5: d4d5e0723a7b8f53e04ea65b374ba3a9
-  depends:
-  - ucrt >=10.0.20348.0
-  - vc >=14.2,<15
-  - vc14_runtime >=14.29.30139
-  license: MIT
-  license_family: MIT
-  purls: []
-  size: 3862809
-  timestamp: 1727787217223
-- kind: conda
-  name: taplo
-  version: 0.9.3
-  build: hdf53557_1
-  build_number: 1
-  subdir: osx-arm64
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/taplo-0.9.3-hdf53557_1.conda
-  sha256: 5dd8f44aa881f45821c4d460ba20a6c6b2ac9564fd4682c48ff5d8048f6afeef
-  md5: c6ab80dfebf091636c1e0570660e368c
-  depends:
-  - __osx >=11.0
-  - openssl >=3.3.2,<4.0a0
-  constrains:
-  - __osx >=11.0
-  license: MIT
-  license_family: MIT
-  purls: []
-  size: 3522930
-  timestamp: 1727786418703
 - kind: conda
   name: tbb
   version: 2021.13.0
