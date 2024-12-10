@@ -43,7 +43,7 @@ repos:
         name: format source files
         entry: dprint fmt
         language: node
-        types:
+        types_or:
           - yaml
           - toml
           - json
