@@ -12,14 +12,13 @@
   "forwardPorts": [
     3000
   ],
-  // Configure tool-specific properties.
-  // "customizations": {},
-  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-  // "remoteUser": "root"
+  // Set up mounts for loaclly-installed software
   "mounts": [
-    "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume"
+    "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume",
+    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
   ],
-  "postCreateCommand": "sudo chown vscode .pixi && ./.devcontainer/setup.sh",
+  "postCreateCommand": "./.devcontainer/setup.sh",
+  // VS Code settings
   "customizations": {
     "vscode": {
       "extensions": [
