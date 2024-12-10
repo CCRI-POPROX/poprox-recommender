@@ -11,53 +11,86 @@ trained models.
 
 ## Installation for Development
 
-Software environments for this repository are managed with [pixi][], and model
-and data files are managed using [dvc][]. The `pixi.lock` file provides a locked
-dependency set for reproducibly running the recommender code with all
-dependencies, on Linux, macOS, and Windows (including with CUDA on Linux).
+This repository includes a devcontainer configuration that we recommend using
+for development and testing of the recommender code.  It is not a good solution
+for running evaluations (see below for non-container setup), but is the easiest
+and most reliable way to set up your development environment across platforms.
 
-See the Pixi [install instructions][pixi] for how to install Pixi in general. On
-macOS, you can also use Homebrew (`brew install pixi`), and on Windows you can
-use WinGet (`winget install prefix-dev.pixi`).
+To use the devcontainer, you need:
 
-> [!NOTE]
->
-> If you are trying to work on poprox-recommender with WSL on Windows, you need
-> to follow the Linux install instructions, and also add the following to the
-> Pixi configuration file (`~/.pixi/config.toml`):
->
-> ```toml
-> detached-environments = true
-> ```
+- VS Code (other editors supporting DevContainer may also work, but this is the
+  best-supported and best-tested).
+- Docker (probably also works with Podman or other container CLIs, but we test
+  with Docker).
+
+With those installed, open the repository in VS Code, and it should prompt you
+to re-open in the dev container; if it does not, open the command palette
+(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) and choose “Dev Containers:
+Rebuild and Reopen in Container”.
+
+### Installing Docker
+
+On Linux, install the [Docker Engine][engine], and add your user to the `docker`
+group so you can create containers without root.
+
+On Windows, install [Docker Desktop][dd], [Rancher Desktop][rancher], or
+similar.
+
+On MacOS, you can install Docker or Rancher Desktop linked above, or you can use
+[Colima][], which we recommend for simplicity and licensing clarity.  To install
+and use Colima:
+
+```console
+$ brew install colima docker
+$ colima start -m 4
+```
+
+It should also be possible to directly use Lima, but we have not tested or
+documented support for that.
+
+[engine]: https://docs.docker.com/engine/install/
+[dd]: https://www.docker.com/products/docker-desktop/
+[rancher]: https://rancherdesktop.io/
+[Colima]: https://github.com/abiosoft/colima
+
+## Working with the Software
+
+We manage software environments for this repository with [pixi][], and model and
+data files with [dvc][]. The `pixi.lock` file provides a locked dependency set
+for reproducibly running the recommender code with all dependencies on Linux and
+macOS (we use the devcontainer for development support on Windows).
 
 [pixi]: https://pixi.sh
 [dvc]: https://dvc.org
 
-Once Pixi is installed, to install the dependencies needed for development work:
+The devcontainer automatically installs the development Pixi environment; if you
+want to manually install it, you can run:
 
 ```console
 pixi install -e dev
 ```
 
-Once you have installed the dependencies, there are 3 easy ways to run code in the environment:
+VS Code will also usually activate this environment by default when opening a
+terminal; you can also directly run code in in the Pixi environment with any of
+the following methods:
 
 1.  Run a defined task, like `test`, with `pixi run`:
 
     ```console
-    pixi run -e dev test
+    $ pixi run -e dev test
     ```
 
 2.  Run individual commands with `pixi run`, e.g.:
 
     ```console
-    pixi run -e dev pytest tests
+    $ pixi run -e dev pytest tests
     ```
 
 3.  Run a Pixi shell, which activates the environment and adds the appropriate
     Python to your `PATH`:
 
     ```console
-    pixi shell -e dev
+    $ pixi shell -e dev
     ```
 
 > [!NOTE]
@@ -71,48 +104,12 @@ Once you have installed the dependencies, there are 3 easy ways to run code in t
 > you type `exit` in this shell, it will exit the nested shell and return you to
 > you original shell session without the environment active.
 
-Finally, set up `pre-commit` to make sure that code formatting rules are applied
-as you make changes:
-
-```console
-pre-commit install
-```
-
-> [!NOTE]
->
-> If you will be working with `git` outside of the `pixi` shell, you may want to
-> install `pre-commit` separately.  You can do this with Brew or your preferred
-> system or user package manager, or with `pixi global install pre-commit`.
+## Data and Model Access
 
 To get the data and models, there are two steps:
 
 1.  Obtain the credentials for the S3 bucket and put them in `.env` (the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`)
 2.  `dvc pull`
-
-### Dependency Updates
-
-If you update the dependencies in poprox-recommender, or add code that requires
-a newer version of `poprox-concepts`, you need to regenerate the lock file with
-`pixi update`.  To update just `poprox-concepts`, run:
-
-```console
-pixi update poprox_concepts
-```
-
-To update all dependencies, run:
-
-```console
-pixi update
-```
-
-> [!NOTE]
-> We use [Pixi][] for all dependency management.  If you need to add a new dependency
-> for this code, add it to the appropriate feature(s) in `pixi.toml`.  If it is a
-> dependency of the recommendation components themselves, add it both to the
-> top-level `dependencies` table in `pixi.toml` *and* in `pyproject.toml`.
-
-> [!NOTE]
-> Currently, dependencies can only be updated on Linux.
 
 ## Local Endpoint Development
 
@@ -238,6 +235,7 @@ You can test this by sending a request with curl:
 $ curl -X POST -H "Content-Type: application/json" -d @tests/request_data/basic-request.json localhost:3000
 ```
 
+
 ## Running the Evaluation
 
 The default setup for this package is CPU-only, which works for basic testing
@@ -265,12 +263,36 @@ Footnotes:
 2. Using 8 worker processes
 3. Estimated based on early progress, not run to completion.
 
-## Editor Setup
 
-If you are using VSCode, you should install the following plugins for best success with this repository:
+## Additional Software Environment Notes
 
-- [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
-- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
-- [Ruff](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)
+### Non-Container Development Notes
 
-When you open the repository, they should be automatically recommended.
+If you are not using the devcontainer, set up `pre-commit` to make sure that
+code formatting rules are applied as you make changes:
+
+```console
+pre-commit install
+```
+
+### Dependency Updates
+
+If you update the dependencies in poprox-recommender, or add code that requires
+a newer version of `poprox-concepts`, you need to regenerate the lock file with
+`pixi update`.  To update just `poprox-concepts`, run:
+
+```console
+pixi update poprox_concepts
+```
+
+To update all dependencies, run:
+
+```console
+pixi update
+```
+
+### Editor Setup
+
+The devcontainer automatically configures several VS Code extensions and
+settings; we also provide an `extensions.json` listing recommended extensions
+for this repository.
