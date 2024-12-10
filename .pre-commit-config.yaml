@@ -37,6 +37,7 @@ repos:
     rev: v3.10.0-1
     hooks:
       - id: shfmt
+        name: format shell scripts
   - repo: local
     hooks:
       - id: dprint
