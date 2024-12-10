@@ -47,5 +47,6 @@ repos:
           - yaml
           - toml
           - json
+        exclude: ^models/
         additional_dependencies:
           - dprint
