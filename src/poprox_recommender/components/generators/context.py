@@ -10,23 +10,27 @@ from poprox_recommender.lkpipeline import Component
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics
 
+
 class ContextGenerator(Component):
-    def __init__(self, text_generation=False, time_decay=True, topk_similar=5, other_filter="topic"):
+    def __init__(self, text_generation=False, time_decay=True, topk_similar=5, other_filter="topic", dev_mode="true"):
         self.text_generation = text_generation
         self.time_decay = time_decay
         self.topk_similar = topk_similar
         self.other_filter = other_filter
-        self.client = OpenAI(
-            api_key="Put your key here",
-        )
+        self.dev_mode = dev_mode
+        if self.dev_mode:
+            self.client = OpenAI(
+                api_key="Put your key here",
+            )
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
     def __call__(self, clicked: ArticleSet, recommended: ArticleSet) -> ArticleSet:
-        for article in recommended.articles:
-            generated_subhead = self.generated_context(
-                article, clicked, self.time_decay, self.topk_similar, self.other_filter
-            )
-            article.subhead = generated_subhead
+        if not self.dev_mode:
+            for article in recommended.articles:
+                generated_subhead = self.generated_context(
+                    article, clicked, self.time_decay, self.topk_similar, self.other_filter
+                )
+                article.subhead = generated_subhead
 
         return recommended
 
