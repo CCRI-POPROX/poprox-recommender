@@ -31,7 +31,6 @@ class LocalityCalibrator(Component):
         theta_topic: float | None,
         theta_locality: float | None,
     ) -> ArticleSet:
-        logger.info(f"    call inputs -> Topic theta: {theta_topic} locality theta: {theta_locality}")
         theta_topic = self.theta_topic if theta_topic is None else theta_topic
         theta_locality = self.theta_locality if theta_locality is None else theta_locality
 
@@ -98,8 +97,6 @@ class LocalityCalibrator(Component):
     ) -> list[Article]:
         # MR_i = (1 - theta_topic - theta_local) * reward_i - theta_topic * C_topic - theta_local * C_local
         # R is all candidates (not selected yet)
-        logger.info(f"    calibration inputs -> Topic theta: {theta_topic} locality theta: {theta_locality}")
-
         recommendations = []  # final recommendation (topk index)
         topic_only_recommendations = []
         topic_categories = defaultdict(int)

@@ -92,7 +92,6 @@ def _generate_for_hyperparamter_request(
         "theta_topic": thetas[0],
         "theta_locality": thetas[1],
     }
-    logger.info(f"Theta inputs -> Topic theta: {thetas[0]} locality theta: {thetas[1]}")
 
     for name, pipe in _pipelines.items():
         try:
