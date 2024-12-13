@@ -9,20 +9,18 @@ from poprox_recommender.lkpipeline import Component
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics, extract_locality, normalized_category_count
 
-# Only uncomment this in offline theta value exploration
-# KL_VALUE_PATH = '/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/outputs/theta_kl_values_11-17.txt'
 LOCALITY_DISTANCE_THRESHOLD = 0.1
 
 logger = logging.getLogger(__name__)
 
 
 class LocalityCalibrator(Component):
-    def __init__(self, theta_local: float = 0.1, theta_topic: float = 0.1, num_slots=10):
+    def __init__(self, theta_locality: float = 0.1, theta_topic: float = 0.1, num_slots=10):
         """
         TODOs: If set different theta_topic and theta_local values for different users,
         then can save them in interest_profile
         """
-        self.theta_local = theta_local
+        self.theta_locality = theta_locality
         self.theta_topic = theta_topic
         self.num_slots = num_slots
 
@@ -31,10 +29,10 @@ class LocalityCalibrator(Component):
         candidate_articles: ArticleSet,
         interest_profile: InterestProfile,
         theta_topic: float | None,
-        theta_local: float | None,
+        theta_locality: float | None,
     ) -> ArticleSet:
         theta_topic = self.theta_topic if theta_topic is None else theta_topic
-        theta_local = self.theta_local if theta_local is None else theta_local
+        theta_locality = self.theta_locality if theta_locality is None else theta_locality
 
         normalized_topic_prefs = self.compute_topic_prefs(interest_profile)
         normalized_locality_prefs = self.compute_local_prefs(candidate_articles)
@@ -53,15 +51,10 @@ class LocalityCalibrator(Component):
                 normalized_topic_prefs,
                 normalized_locality_prefs,
                 theta_topic,
-                theta_local,
+                theta_locality,
                 topk=self.num_slots,
             )
         )
-
-        # Save computed kl divergence for topic and locality
-        # Only uncomment this in offline theta value exploration
-        # with open(KL_VALUE_PATH, 'a') as file:
-        #     file.write('{}_top_{}_loc_{},{},{}\n'.format(str(interest_profile.profile_id), theta_topic, theta_locality, final_calibrations[0], final_calibrations[1]))
 
         article_set = ArticleSet(
             articles=[candidate_articles.articles[idx] for idx in article_indices]
@@ -100,14 +93,12 @@ class LocalityCalibrator(Component):
         return normalized_category_count(rec_localities_with_candidate)
 
     def calibration(
-        self, relevance_scores, articles, topic_preferences, locality_preferences, theta_topic, theta_local, topk
+        self, relevance_scores, articles, topic_preferences, locality_preferences, theta_topic, theta_locality, topk
     ) -> list[Article]:
         # MR_i = (1 - theta_topic - theta_local) * reward_i - theta_topic * C_topic - theta_local * C_local
         # R is all candidates (not selected yet)
-
         recommendations = []  # final recommendation (topk index)
         topic_only_recommendations = []
-
         topic_categories = defaultdict(int)
         topic_only_categories = defaultdict(int)
         local_categories = defaultdict(int)
@@ -140,12 +131,12 @@ class LocalityCalibrator(Component):
 
                 # TODO or other MOE
                 adjusted_candidate_score = (
-                    (1 - theta_local - theta_topic) * article_score
+                    (1 - theta_locality - theta_topic) * article_score
                     - (theta_topic * calibration_topic)
-                    - (theta_local * calibration_local)
+                    - (theta_locality * calibration_local)
                 )
-                adjusted_topic_candidate_score = (1 - theta_local - theta_topic) * article_score - (
-                    theta_topic + theta_local * calibration_topic_only
+                adjusted_topic_candidate_score = (1 - theta_locality - theta_topic) * article_score - (
+                    (theta_topic + theta_locality) * calibration_topic_only
                 )
                 if adjusted_candidate_score > best_candidate_score:
                     best_candidate_score = adjusted_candidate_score
