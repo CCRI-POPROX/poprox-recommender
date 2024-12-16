@@ -8,55 +8,6 @@ from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUse
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
 
-# Three options:
-# - Embed descriptions of the topics (simplest) -> static topic embedding
-# - Topic embedding is the average embedding of today's articles for that topic -> topic embedding for today's news
-# - Topic embedding is based on the user's clicks in that topic ->topic embeding for user's article
-
-# At this point, we have 15-16 topic embeddings
-
-# Click history:
-# 8 business articles
-# 2 sports articles
-
-# Onboarding selections:
-# Sports 5
-# Business 3
-
-# Turn onboarding selections into virtual "clicks"
-# The topic level from onboarding includes the topic embedding in the list of
-# virtual clicks once for each level (selecting 5 -> 5 sports "clicks")
-
-# Then we have to decide where in the process to merge them:
-# - Make one big list of real and virtual clicks together, turn that into a user embedding
-# - Keep separate lists of real and virtual clicks, turn each one into an embedding, merge the embeddings
-# - Keep separate lists of real and virtual clicks, turn each one into an embedding, merge the scores
-
-# Merge the click history with the onboarding selections into one list
-# [sports, sports, sports, sports, sports, business, business, business, 1st click, 2nd click, 3rd article, ...]
-
-# Keep two separate lists
-# [sports, sports, sports, sports, sports, business, business, business] -> user embedding 1
-# [1st click, 2nd click, 3rd article, ...] -> user embedding 2
-
-# Scores_n  = user embedding_n * article_embeddings
-
-# How could we merge the embeddings?
-# - Average them?
-
-# How could we merge the scores?
-# - Add the scores from the two user embeddings
-# - Build a list with each of the sets of scores, interleave the lists
-# - Apply
-
-# - 3rd approach : 16 user embeddings -> score the articles with each, weighted sum of the scores?
-
-
-# TODO: Write descriptions of US News, World News, Oddities
-# TODO: Build an Article object for each topic
-# TODO: Turn the "articles" into an ArticleSet
-# TODO: Pass it through NRMSArticleEmbedder to get topic embeddings
-
 topic_descriptions = {
     "U.S. news": "News and events within the United States, \
         covering a wide range of topics including politics, \
@@ -160,8 +111,8 @@ def virtual_clicks(onboarding_topics, topic_embeddings):
 
 class TopicUserEmbedder(NRMSUserEmbedder):
     @torch_inference
-    def __call__(self, clicked: ArticleSet, interest_profile: InterestProfile, topics: ArticleSet) -> InterestProfile:
-        if len(clicked.articles) == 0:
+    def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
+        if len(clicked_articles.articles) == 0:
             interest_profile.embedding = None
         else:
             # TODO: Add descriptions of the topics, maybe in a dictionary?
@@ -170,22 +121,27 @@ class TopicUserEmbedder(NRMSUserEmbedder):
             # TODO: Create virtual "clicks" based on the topics
             # TODO: Feed the combined history of real and virtual clicks into `build_user_embedding`
             article_embedder = NRMSArticleEmbedder(
-                model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device="cpu"
+                model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
             )
-            topic_article_set = article_embedder(topics)
-            topic_embeddings = {
+            topic_article_set = article_embedder(ArticleSet(articles=topic_articles))
+            topic_embeddings_by_name = {
                 article.external_id: embedding
-                for article, embedding in zip(topics.articles, topic_article_set.embeddings)
+                for article, embedding in zip(topic_articles, topic_article_set.embeddings)
             }
-            topic_clicks = virtual_clicks(interest_profile.onboarding_topics, topic_embeddings)
+            topic_embeddings_by_uuid = {
+                article.article_id: embedding
+                for article, embedding in zip(topic_articles, topic_article_set.embeddings)
+            }
+
+            topic_clicks = virtual_clicks(interest_profile.onboarding_topics, topic_embeddings_by_name)
             combined_click_history = interest_profile.click_history + topic_clicks
 
             embedding_lookup = {}
-            for article, article_vector in zip(clicked.articles, clicked.embeddings, strict=True):
+            for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):
                 if article.article_id not in embedding_lookup:
                     embedding_lookup[article.article_id] = article_vector
 
-            embedding_lookup.update({topic_name: emb for topic_name, emb in topic_embeddings.items()})
+            embedding_lookup.update({topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()})
             embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
             interest_profile.click_history = combined_click_history
