@@ -65,7 +65,6 @@ class LocalityCalibrator(Component):
         article_set.k1_locality = final_calibrations[1]
 
         article_set.is_inside_locality_threshold = not localities_outside_threshold
-
         return article_set
 
     def add_article_to_categories(self, rec_topics, article):
