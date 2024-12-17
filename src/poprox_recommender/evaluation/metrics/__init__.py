@@ -40,7 +40,9 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
 
     results = []
 
-    for name, recs in all_recs.groupby("recommender", observed=True):
+    for (name, theta_topic, theta_loc), recs in all_recs.groupby(
+        ["recommender", "theta_topic", "theta_locality"], observed=True
+    ):
         final_rec_df = recs[recs["stage"] == "final"]
         single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
         single_ndcg5 = topn.ndcg(final_rec_df, truth, k=5)
@@ -51,6 +53,21 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
 
         reranked_rec_df = recs[recs["stage"] == "reranked"]
         reranked = convert_df_to_article_set(reranked_rec_df)
+
+        # Locality tuning metrcis
+        if name == "locality-cali":
+            # newsletter metrics
+            k1_topic = reranked_rec_df["k1_topic"].iloc[0]
+            k1_loc = reranked_rec_df["k1_locality"].iloc[0]
+            is_inside_locality_threshold = reranked_rec_df["is_inside_locality_threshold"].iloc[0]
+
+            # individual rec metrics
+            num_treatment = reranked_rec_df["treatment"].sum()
+        else:
+            k1_topic = None
+            k1_loc = None
+            is_inside_locality_threshold = None
+            num_treatment = None
 
         if ranked and reranked:
             single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
@@ -74,6 +91,8 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             {
                 "profile_id": profile_id,
                 "recommender": name,
+                "theta_topic": theta_topic,
+                "theta_loc": theta_loc,
                 # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
                 # whole function should be revised for generality when we want to support
                 # other pipelines.
@@ -83,6 +102,10 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "RR": single_rr,
                 "RBO@5": single_rbo5,
                 "RBO@10": single_rbo10,
+                "KL_TOPIC": k1_topic,
+                "KL_LOC": k1_loc,
+                "inside_loc_threshold": is_inside_locality_threshold,
+                "num_treatment": num_treatment,
             }
         )
 

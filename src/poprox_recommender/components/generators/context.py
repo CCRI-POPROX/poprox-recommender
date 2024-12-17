@@ -1,146 +1,170 @@
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 
 import numpy as np
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from poprox_concepts import Article, ArticleSet
+from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_recommender.components.diversifiers.locality_calibration import LocalityCalibrator
 from poprox_recommender.lkpipeline import Component
-from poprox_recommender.topics import extract_general_topics
+from poprox_recommender.paths import model_file_path
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
-
-dev_mode = True
-
-if not dev_mode:
-    client = OpenAI(
-        api_key="Put your key here",
-    )
+MAX_RETRIES = 3
+DELAY = 2
+SEMANTIC_THRESHOLD = 0.2
+BASELINE_THETA_TOPIC = 0.3
+NUM_TOPICS = 3
+DAYS = 4
 
 
 class ContextGenerator(Component):
-    def __init__(self, text_generation=False, time_decay=True, topk_similar=5, other_filter="topic"):
+    def __init__(self, text_generation=False, time_decay=True, dev_mode="true"):
         self.text_generation = text_generation
         self.time_decay = time_decay
-        self.topk_similar = topk_similar
-        self.other_filter = other_filter
+        self.dev_mode = dev_mode
+        if self.dev_mode:
+            self.client = OpenAI(
+                api_key="Put your key here",
+            )
+        self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
-    def __call__(self, clicked: ArticleSet, recommended: ArticleSet) -> ArticleSet:
-        if not dev_mode:
-            for article in recommended.articles:
-                generated_subhead = generated_context(
-                    article, clicked, self.time_decay, self.topk_similar, self.other_filter
-                )
-                article.subhead = generated_subhead
+    def __call__(self, clicked: ArticleSet, recommended: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+        topic_distribution = LocalityCalibrator.compute_topic_prefs(interest_profile)
+        treatment = ArticleSet.treatment_flags
+
+        if not self.dev_mode:
+            for i in range(len(recommended.articles)):
+                article = recommended.articles[i]
+                if treatment[i]:  # if True
+                    generated_subhead = self.generated_context(
+                        article, clicked, self.time_decay, topic_distribution, self.other_filter
+                    )
+                    article.subhead = generated_subhead
 
         return recommended
 
+    def generated_context(
+        self,
+        article: Article,
+        clicked_articles: ArticleSet,
+        time_decay: bool,
+        topic_distribution: dict,
+    ):
+        related_articles = self.related_context(article, clicked_articles, time_decay)
 
-def generated_context(
-    article: Article, clicked_articles: ArticleSet, time_decay: bool, topk_similar: int, other_filter: str | None = None
-):
-    # TODO: add fallback that based on user interests
+        if len(related_articles) == 1:
+            # high similarity, use the top-1 article to rewrite the subhead
+            news_list = {"MAIN NEWS": article.subhead, "RELATED NEWS": related_articles[0].subhead}
 
-    topk_similar = min(topk_similar, len(clicked_articles.articles))
-    related_articles = related_context(article, clicked_articles, time_decay, topk_similar, other_filter)
+            input_prompt = f"{news_list}"
+            generated_subhead = self.semantic_narrative(input_prompt)
+        else:
+            generated_subhead = self.highlevel_narrative(article.subhead, topic_distribution)
 
-    input_prompt = []
-    input_prompt.append({"ID": "Main News", "subhead": article.subhead})
+        return generated_subhead
 
-    for i in range(topk_similar):
-        input_prompt.append({"ID": "Related News", "subhead": related_articles[i].subhead})
+    def related_context(
+        self,
+        article: Article,
+        clicked: ArticleSet,
+        time_decay: bool,
+    ):
+        selected_subhead = article.subhead
+        selected_date = article.published_at
 
-    generated_subhead = generate_narrative(input_prompt)
-    return generated_subhead
-
-
-def related_context(
-    article: Article, clicked: ArticleSet, time_decay: bool, topk_similar: int, other_filter: str | None = None
-):
-    selected_subhead = article.subhead
-    selected_date = article.published_at
-    selected_topic = extract_general_topics(article)
-
-    if other_filter == "topic":
-        filtered_candidates = [
-            candidate for candidate in clicked.articles if set(extract_general_topics(candidate)) & set(selected_topic)
-        ]
-        clicked_articles = filtered_candidates if filtered_candidates else clicked.articles
-
-    else:
         clicked_articles = clicked.articles
+        time0 = selected_date - timedelta(days=DAYS)
 
-    candidate_indices = related_indices(selected_subhead, selected_date, clicked_articles, time_decay, topk_similar)
+        clicked_articles = [article for article in clicked_articles if article.published_at >= time0]
 
-    return [clicked_articles[index] for index in candidate_indices]
+        candidate_indices = self.related_indices(selected_subhead, selected_date, clicked_articles, time_decay)
 
+        return [clicked_articles[index] for index in candidate_indices]
 
-def related_indices(
-    selected_subhead: str, selected_date: datetime, clicked_articles: list, time_decay: bool, topk_similar: int
-):
-    all_subheads = [selected_subhead] + [article.subhead for article in clicked_articles]
-    embeddings = model.encode(all_subheads)
+    def related_indices(
+        self,
+        selected_subhead: str,
+        selected_date: datetime,
+        clicked_articles: list,
+        time_decay: bool,
+    ):
+        all_subheads = [selected_subhead] + [article.subhead for article in clicked_articles]
+        embeddings = self.model.encode(all_subheads)
 
-    target_embedding = embeddings[0].reshape(1, -1)
-    clicked_embeddings = embeddings[1:]
-    similarities = cosine_similarity(target_embedding, clicked_embeddings)[0]
+        target_embedding = embeddings[0].reshape(1, -1)
+        clicked_embeddings = embeddings[1:]
+        similarities = cosine_similarity(target_embedding, clicked_embeddings)[0]
 
-    if time_decay:
-        weights = [
-            get_time_weight(selected_date, published_date)
-            for published_date in [article.published_at for article in clicked_articles]
-        ]
-        weighted_similarities = similarities * weights
-        return np.argsort(weighted_similarities)[-topk_similar:][::-1]
+        if time_decay:
+            weights = [
+                self.get_time_weight(selected_date, published_date)
+                for published_date in [article.published_at for article in clicked_articles]
+            ]
+            weighted_similarities = similarities * weights
+            return np.argsort(weighted_similarities)[-1:][::-1]
 
-    return np.argsort(similarities)[-topk_similar:][::-1]
+        return np.argsort(similarities)[-1:][::-1]
 
+    def semantic_narrative(self, news_list):
+        system_prompt = (
+            "You are an editor to rewrite the MAIN NEWS in a natural and factural tone. "
+            "You are provided a MAIN NEWS to be recommended and a RELATED NEWS that a user read before. "
+            "Please rewrite the MAIN NEWS by implicitly connecting it to RELATED NEWS and "
+            "incorporatinig the relevant user interests detected from RELATED NEWS. "
+            "Please ensure that the rewritten MAIN NEWS is presented concisely in a neutral and fatual tone."
+        )
 
-def generate_narrative(news_list):
-    system_prompt = (
-        "You are a personalized text generator."
-        " First, i will provide you with a news list that"
-        " includes both the [Main News] and [Related News]."
-        " Based on the input news list and user interests,"
-        " please generate a new personalized news summary centered around the [Main News]."
-    )
+        input_prompt = "News List: \n" + f"{news_list}"
+        return self.gpt_generate(system_prompt, input_prompt)
 
-    input_prompt = "News List: \n" + f"{news_list}"
-    return gpt_generate(system_prompt, input_prompt)
+    def highlevel_narrative(self, main_news, topic_distribution):
+        sorted_items = sorted(topic_distribution.items(), key=lambda item: item[1], reverse=True)
+        top_keys = [key for key, _ in sorted_items[:NUM_TOPICS]]
 
+        system_prompt = (
+            "You are an editor to rewrite the MAIN NEWS in one sentence, using a natural and factural tone. "
+            "You are provided a MAIN NEWS to be recommended and user INTERESTED TOPICS. "
+            "Please rewrite the MAIN NEWS to make it more attractive, "
+            "and the user can feel that the news is more inclined to his INTERESTED TOPICS. "
+            "Please ensure that the rewritten MAIN NEWS is presented concisely and narratively. "
+            "Make sure the rewritten MAIN NEWS is more attractive. "
+        )
 
-def get_time_weight(published_target, published_clicked):
-    time_distance = abs((published_clicked - published_target).days)
-    weight = 1 / np.log(1 + time_distance) if time_distance > 0 else 1  # Avoid log(1) when x = 0
-    return weight
+        news_list = {"MAIN NEWS": main_news, "INTERESTED TOPICS": top_keys}
 
+        input_prompt = f"{news_list}"
+        return self.gpt_generate(system_prompt, input_prompt)
 
-###################### text generation part
-def gpt_generate(system_prompt, content_prompt):
-    message = [{"role": "system", "content": system_prompt}, {"role": "user", "content": content_prompt}]
-    temperature = 0.2
-    max_tokens = 512
-    frequency_penalty = 0.0
+    def get_time_weight(self, published_target, published_clicked):
+        time_distance = abs((published_clicked - published_target).days)
+        weight = 1 / np.log(1 + time_distance) if time_distance > 0 else 1  # Avoid log(1) when x = 0
+        return weight
 
-    chat_completion = client.chat.completions.create(
-        messages=message,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        frequency_penalty=frequency_penalty,
-        model="gpt-4o-mini",
-    )
-    return chat_completion.choices[0].message.content
+    def gpt_generate(self, system_prompt, content_prompt):
+        retries = 0
+        message = [{"role": "system", "content": system_prompt}, {"role": "user", "content": content_prompt}]
+        temperature = 0.2
+        max_tokens = 512
+        frequency_penalty = 0.0
 
+        while retries < MAX_RETRIES:
+            try:
+                chat_completion = self.client.chat.completions.create(
+                    messages=message,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    frequency_penalty=frequency_penalty,
+                    model="gpt-4o-mini",
+                )
+                return chat_completion.choices[0].message.content
 
-"""
-# TODO: check backward or forward for past k articles
-def user_interest_generate(past_articles: Article, past_k: int):
-    system_prompt = (
-        "You are asked to describe user interest based on his/her browsed news list."
-        " User interest includes the news [categories] and news [topics]"
-        " (under each [category] that users are interested in."
-    )
-
-    return gpt_generate(system_prompt, f"{past_article_infor}")
-"""
+            except Exception as e:
+                print(f"Fail to call OPENAI API: {e}")
+                retries += 1
+                if retries < MAX_RETRIES:
+                    print(f"{retries} try to regenerate the context")
+                    time.sleep(DELAY)
+                else:
+                    raise

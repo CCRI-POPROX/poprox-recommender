@@ -115,7 +115,9 @@ def main():
     logger.info("saving per-profile metrics to %s", profile_out_fn)
     metrics.to_csv(profile_out_fn)
 
-    agg_metrics = metrics.drop(columns=["profile_id", "personalized"]).groupby("recommender").mean()
+    agg_metrics = (
+        metrics.drop(columns=["profile_id", "personalized"]).groupby(["recommender", "theta_topic", "theta_loc"]).mean()
+    )
     # reciprocal rank means to MRR
     agg_metrics = agg_metrics.rename(columns={"RR": "MRR"})
 

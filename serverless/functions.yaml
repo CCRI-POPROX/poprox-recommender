@@ -2,8 +2,8 @@ functions:
   generateRecommendations:
     image:
       name: poprox-recommender-locality
-    memorySize: 4096
-    ephemeralStorageSize: 2048
+    memorySize: 8192
+    ephemeralStorageSize: 8192
     events:
       - httpApi:
           path: /

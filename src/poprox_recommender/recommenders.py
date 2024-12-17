@@ -127,7 +127,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    locality_cali_pipe = build_pipeline(
+    locality_cali_pipe = build_locality_pipeline(
         "NRMS+Locality+Calibration",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
@@ -159,7 +159,6 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     sampler = UniformSampler(num_slots=num_slots)
     fill = Fill(num_slots=num_slots)
     topk_ranker = TopkRanker(num_slots=num_slots)
-    generator = ContextGenerator()
 
     pipeline = Pipeline(name=name)
 
@@ -168,10 +167,6 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     clicked = pipeline.create_input("clicked", ArticleSet)
     profile = pipeline.create_input("profile", InterestProfile)
 
-    # locality-calibration specific inputs
-    theta_topic = pipeline.create_input("theta_topic", float)
-    theta_locality = pipeline.create_input("theta_locality", float)
-    
     # Compute embeddings
     e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
     e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
@@ -190,7 +185,56 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
             interest_profile=e_user,
         )
 
-    o_context = pipeline.add_component("generator", generator, clicked=e_click, recommended=o_rank)
+    # Fallback in case not enough articles came from the ranker
+    o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
+    o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
+    pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
+
+    return pipeline
+
+
+def build_locality_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
+    article_scorer = ArticleScorer()
+    topic_filter = TopicFilter()
+    sampler = UniformSampler(num_slots=num_slots)
+    fill = Fill(num_slots=num_slots)
+    topk_ranker = TopkRanker(num_slots=num_slots)
+    generator = ContextGenerator()
+
+    pipeline = Pipeline(name=name)
+
+    # Define pipeline inputs
+    candidates = pipeline.create_input("candidate", ArticleSet)
+    clicked = pipeline.create_input("clicked", ArticleSet)
+    profile = pipeline.create_input("profile", InterestProfile)
+
+    # locality-calibration specific inputs
+    theta_topic = pipeline.create_input("theta_topic", float, None)
+    theta_locality = pipeline.create_input("theta_locality", float, None)
+
+    # Compute embeddings
+    e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
+    e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
+    e_user = pipeline.add_component("user-embedder", user_embedder, clicked_articles=e_click, interest_profile=profile)
+
+    # Score and rank articles with diversification/calibration reranking
+    o_scored = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)
+    o_topk = pipeline.add_component("ranker", topk_ranker, candidate_articles=o_scored, interest_profile=e_user)
+    if ranker is topk_ranker:
+        o_rank = o_topk
+    else:
+        o_rank = pipeline.add_component(
+            "reranker",
+            ranker,
+            candidate_articles=o_scored,
+            interest_profile=e_user,
+            theta_topic=theta_topic,
+            theta_locality=theta_locality,
+        )  # ArticleSet
+
+    o_context = pipeline.add_component(
+        "generator", generator, clicked=clicked, recommended=o_rank, interest_profile=profile
+    )
 
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
