@@ -11,7 +11,7 @@ from poprox_recommender.pytorch.decorators import torch_inference
 
 
 class NRMSUserEmbedder(Component):
-    def __init__(self, model_path: PathLike, device, max_clicks_per_user: int = 50):
+    def __init__(self, model_path: PathLike, device: str = "cpu", max_clicks_per_user: int = 50):
         self.model_path = model_path
         self.device = device
         self.max_clicks_per_user = max_clicks_per_user
@@ -60,5 +60,4 @@ class NRMSUserEmbedder(Component):
             .unsqueeze(0)
             .to(self.device)
         )
-
         return self.user_encoder(clicked_news_vector)
