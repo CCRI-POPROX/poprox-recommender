@@ -60,5 +60,4 @@ class NRMSUserEmbedder(Component):
             .unsqueeze(0)
             .to(self.device)
         )
-        result = self.user_encoder(clicked_news_vector)
-        return result
+        return self.user_encoder(clicked_news_vector)
