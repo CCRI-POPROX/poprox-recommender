@@ -115,11 +115,6 @@ class TopicUserEmbedder(NRMSUserEmbedder):
         if len(clicked_articles.articles) == 0:
             interest_profile.embedding = None
         else:
-            # TODO: Add descriptions of the topics, maybe in a dictionary?
-            # TODO: Embed the topic description to make a lookup table of topics
-            #    - Need the news encoder from NRMSArticleEmbedder in order to feed the descriptions into
-            # TODO: Create virtual "clicks" based on the topics
-            # TODO: Feed the combined history of real and virtual clicks into `build_user_embedding`
             article_embedder = NRMSArticleEmbedder(
                 model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
             )
