@@ -10,6 +10,7 @@ from poprox_recommender.components.diversifiers import (
     TopicCalibrator,
 )
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
+from poprox_recommender.components.embedders.topic_wise_user import TopicUserEmbedder
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Fill
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -86,6 +87,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
 
     article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
     user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
+    topic_user_embedder = TopicUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
 
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
@@ -98,6 +100,14 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         "plain-NRMS",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
+        ranker=topk_ranker,
+        num_slots=num_slots,
+    )
+
+    nrms_onboarding_pipe = build_pipeline(
+        "plain-NRMS-with-onboarding-topics",
+        article_embedder=article_embedder,
+        user_embedder=topic_user_embedder,
         ranker=topk_ranker,
         num_slots=num_slots,
     )
@@ -144,6 +154,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
 
     return {
         "nrms": nrms_pipe,
+        "nrms-topics": nrms_onboarding_pipe,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
