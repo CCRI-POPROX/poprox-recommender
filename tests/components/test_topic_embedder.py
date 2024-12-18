@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 import numpy as np
+import pytest
 import torch as th
 
 from poprox_concepts.domain import AccountInterest, Article, ArticleSet, Click, InterestProfile
@@ -12,7 +13,11 @@ from poprox_recommender.paths import model_file_path
 
 
 def test_embed_user():
-    topic_aware_embedder = TopicUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
+    try:
+        plain_nrms_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
+        topic_aware_embedder = TopicUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
+    except FileNotFoundError:
+        pytest.xfail("NRMS model not found, so test failure is expected")
 
     interests = [
         AccountInterest(
@@ -54,7 +59,6 @@ def test_embed_user():
 
     plain_profile = deepcopy(profile)
 
-    plain_nrms_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
     plain_profile = plain_nrms_embedder(clicked_articles=clicked, interest_profile=plain_profile)
 
     assert not np.allclose(enriched_profile.embedding, plain_profile.embedding)
