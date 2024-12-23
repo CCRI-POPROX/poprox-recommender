@@ -8,7 +8,7 @@ from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUse
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
 
-topic_descriptions = {
+TOPIC_DESCRIPTIONS = {
     "U.S. news": "News and events within the United States, \
         covering a wide range of topics including politics, \
         economy, social issues, cultural developments, crime, \
@@ -79,7 +79,7 @@ topic_descriptions = {
         peculiar behaviors, or bizarre phenomena.",
 }
 
-topic_articles = [
+TOPIC_ARTICLES = [
     Article(
         article_id=uuid4(),
         headline=description,
@@ -92,20 +92,21 @@ topic_articles = [
         external_id=topic,
         raw_data={},
     )
-    for topic, description in topic_descriptions.items()
+    for topic, description in TOPIC_DESCRIPTIONS.items()
 ]
 
 
-def virtual_clicks(onboarding_topics, topic_embeddings):
+def virtual_clicks(onboarding_topics, topic_articles):
+    topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
     virtual_clicks = []
     for interest in onboarding_topics:
         topic_name = interest.entity_name
-        preference = interest.preference or 0
+        preference = interest.preference or 1
 
-        if topic_name in topic_embeddings:
-            entity_id = interest.entity_id
+        if topic_name in topic_uuids_by_name:
+            article_id = topic_uuids_by_name[topic_name]
 
-            virtual_clicks.extend([Click(article_id=entity_id)] * preference)
+            virtual_clicks.extend([Click(article_id=article_id)] * (preference - 1))
     return virtual_clicks
 
 
@@ -120,7 +121,9 @@ class TopicUserEmbedder(NRMSUserEmbedder):
         )
 
     @torch_inference
-    def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
+    def __call__(
+        self, candidate_articles: ArticleSet, clicked_articles: ArticleSet, interest_profile: InterestProfile
+    ) -> InterestProfile:
         if self.embedded_topic_articles is None:
             self.embedded_topic_articles = self.article_embedder(ArticleSet(articles=topic_articles))
         topic_embeddings_by_name = {
@@ -131,19 +134,115 @@ class TopicUserEmbedder(NRMSUserEmbedder):
             article.article_id: embedding
             for article, embedding in zip(topic_articles, self.embedded_topic_articles.embeddings)
         }
+        
+        topic_clicks = virtual_clicks(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        topic_clicks = virtual_clicks(interest_profile.onboarding_topics, topic_embeddings_by_name)
+        # topic_embeddings_by_uuid = self.build_embeddings_from_definitions()
+        topic_embeddings_by_uuid = self.build_embeddings_from_candidates(candidate_articles, TOPIC_ARTICLES)
+
         combined_click_history = interest_profile.click_history + topic_clicks
 
-        embedding_lookup = {}
-        for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):
-            if article.article_id not in embedding_lookup:
-                embedding_lookup[article.article_id] = article_vector
+        click_lookup = self.build_article_lookup(clicked_articles)
+        topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
 
-        embedding_lookup.update({topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()})
+        embedding_lookup = {**click_lookup, **topic_lookup}
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
         interest_profile.click_history = combined_click_history
         interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
 
         return interest_profile
+
+    def build_article_lookup(self, article_set: ArticleSet):
+        embedding_lookup = {}
+        for article, article_vector in zip(article_set.articles, article_set.embeddings, strict=True):
+            if article.article_id not in embedding_lookup:
+                embedding_lookup[article.article_id] = article_vector
+
+        return embedding_lookup
+
+    def build_embeddings_from_candidates(self, candidate_articles: ArticleSet, topic_articles: list[Article]):
+        topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
+
+        topic_embeddings_by_uuid = {}
+        for topic_name in TOPIC_DESCRIPTIONS.keys():
+            embedding_lookup = self.build_article_lookup(candidate_articles)
+            embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
+            relevant_articles = self.find_topical_articles(topic_name, candidate_articles.articles)
+            article_clicks = [Click(article_id=article.article_id) for article in relevant_articles]
+            # topic_embedding = self.build_user_embedding(article_clicks, embedding_lookup)
+            topic_embedding = self.average_click_embeddings(article_clicks, embedding_lookup)
+
+            topic_uuid = topic_uuids_by_name[topic_name]
+            topic_embeddings_by_uuid[topic_uuid] = topic_embedding
+        return topic_embeddings_by_uuid
+
+    def find_topical_articles(self, topic: str, articles: list[Article]) -> list[Article]:
+        topical_articles = []
+        for article in articles:
+            article_topics = {mention.entity.name for mention in article.mentions}
+            if topic in article_topics:
+                topical_articles.append(article)
+        return topical_articles
+
+    def build_embeddings_from_definitions(self):
+        article_embedder = NRMSArticleEmbedder(
+            model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
+        )
+        topic_article_set = article_embedder(ArticleSet(articles=TOPIC_ARTICLES))
+
+        topic_embeddings_by_uuid = {
+            article.article_id: embedding for article, embedding in zip(TOPIC_ARTICLES, topic_article_set.embeddings)
+        }
+
+        return topic_embeddings_by_uuid
+
+    def build_user_embedding(self, click_history: list[Click], article_embeddings):
+        article_ids = [click.article_id for click in click_history][-self.max_clicks_per_user :]
+
+        padded_positions = self.max_clicks_per_user - len(article_ids)
+        assert padded_positions >= 0
+
+        article_ids = ["PADDED_NEWS"] * padded_positions + article_ids
+        default = article_embeddings["PADDED_NEWS"]
+        clicked_article_embeddings = [
+            article_embeddings.get(clicked_article, default).squeeze().to(self.device)
+            for clicked_article in article_ids
+        ]
+
+        clicked_news_vector = (
+            th.stack(
+                clicked_article_embeddings,
+                dim=0,
+            )
+            .unsqueeze(0)
+            .to(self.device)
+        )
+
+        return self.user_encoder(clicked_news_vector)
+
+    def average_click_embeddings(self, click_history: list[Click], article_embeddings):
+        article_ids = [click.article_id for click in click_history][-self.max_clicks_per_user :]
+
+        padded_positions = self.max_clicks_per_user - len(article_ids)
+        assert padded_positions >= 0
+
+        default = article_embeddings["PADDED_NEWS"]
+        clicked_article_embeddings = [
+            article_embeddings.get(clicked_article, default).squeeze().to(self.device)
+            for clicked_article in article_ids
+        ]
+
+        if len(clicked_article_embeddings) == 0:
+            return default
+
+        stacked = th.stack(
+            clicked_article_embeddings,
+            dim=0,
+        )
+        averaged_click_vector = th.mean(
+            stacked,
+            dim=0,
+        ).to(self.device)
+
+        return averaged_click_vector
