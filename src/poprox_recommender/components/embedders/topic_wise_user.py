@@ -112,34 +112,29 @@ def virtual_clicks(onboarding_topics, topic_embeddings):
 class TopicUserEmbedder(NRMSUserEmbedder):
     @torch_inference
     def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
-        if len(clicked_articles.articles) == 0:
-            interest_profile.embedding = None
-        else:
-            article_embedder = NRMSArticleEmbedder(
-                model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
-            )
-            topic_article_set = article_embedder(ArticleSet(articles=topic_articles))
-            topic_embeddings_by_name = {
-                article.external_id: embedding
-                for article, embedding in zip(topic_articles, topic_article_set.embeddings)
-            }
-            topic_embeddings_by_uuid = {
-                article.article_id: embedding
-                for article, embedding in zip(topic_articles, topic_article_set.embeddings)
-            }
+        article_embedder = NRMSArticleEmbedder(
+            model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
+        )
+        topic_article_set = article_embedder(ArticleSet(articles=topic_articles))
+        topic_embeddings_by_name = {
+            article.external_id: embedding for article, embedding in zip(topic_articles, topic_article_set.embeddings)
+        }
+        topic_embeddings_by_uuid = {
+            article.article_id: embedding for article, embedding in zip(topic_articles, topic_article_set.embeddings)
+        }
 
-            topic_clicks = virtual_clicks(interest_profile.onboarding_topics, topic_embeddings_by_name)
-            combined_click_history = interest_profile.click_history + topic_clicks
+        topic_clicks = virtual_clicks(interest_profile.onboarding_topics, topic_embeddings_by_name)
+        combined_click_history = interest_profile.click_history + topic_clicks
 
-            embedding_lookup = {}
-            for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):
-                if article.article_id not in embedding_lookup:
-                    embedding_lookup[article.article_id] = article_vector
+        embedding_lookup = {}
+        for article, article_vector in zip(clicked_articles.articles, clicked_articles.embeddings, strict=True):
+            if article.article_id not in embedding_lookup:
+                embedding_lookup[article.article_id] = article_vector
 
-            embedding_lookup.update({topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()})
-            embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
+        embedding_lookup.update({topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()})
+        embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
-            interest_profile.click_history = combined_click_history
-            interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
+        interest_profile.click_history = combined_click_history
+        interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
 
         return interest_profile
