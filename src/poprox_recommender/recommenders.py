@@ -180,7 +180,13 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     # Compute embeddings
     e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
     e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
-    e_user = pipeline.add_component("user-embedder", user_embedder, clicked_articles=e_click, interest_profile=profile)
+    e_user = pipeline.add_component(
+        "user-embedder",
+        user_embedder,
+        candidate_articles=candidates,
+        clicked_articles=e_click,
+        interest_profile=profile,
+    )
 
     # Score and rank articles with diversification/calibration reranking
     o_scored = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)

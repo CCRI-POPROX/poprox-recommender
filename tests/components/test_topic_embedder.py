@@ -8,7 +8,7 @@ import torch as th
 
 from poprox_concepts.domain import AccountInterest, Article, ArticleSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSUserEmbedder
-from poprox_recommender.components.embedders.topic_wise_user import TopicUserEmbedder, topic_articles
+from poprox_recommender.components.embedders.topic_wise_user import TOPIC_ARTICLES, TopicUserEmbedder
 from poprox_recommender.paths import model_file_path
 
 
@@ -23,7 +23,7 @@ def test_embed_user():
         AccountInterest(
             entity_id=topic_article.article_id, entity_name=topic_article.external_id, preference=1, frequency=None
         )
-        for topic_article in topic_articles
+        for topic_article in TOPIC_ARTICLES
     ]
 
     article_id = uuid4()
