@@ -7,6 +7,8 @@
 /mind-small-user-metrics.csv.gz
 /poprox.parquet
 /recommendations/*
+/alt_theta_recs/*
+/joint_theta_recs/*
 /embeddings.parquet
 /metrics.csv
 /profile-metrics.csv.gz
