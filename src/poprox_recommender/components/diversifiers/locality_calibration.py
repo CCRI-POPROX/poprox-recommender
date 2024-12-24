@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class LocalityCalibrator(Component):
-    def __init__(self, theta_locality: float = 0.1, theta_topic: float = 0.1, num_slots=10):
+    def __init__(self, theta_locality: float = 0.55, theta_topic: float = 0.3, num_slots=10):
         """
         TODOs: If set different theta_topic and theta_local values for different users,
         then can save them in interest_profile
@@ -136,7 +136,7 @@ class LocalityCalibrator(Component):
                     - (theta_locality * calibration_local)
                 )
                 adjusted_topic_candidate_score = (1 - theta_locality - theta_topic) * article_score - (
-                    (theta_topic + theta_locality) * calibration_topic_only
+                    (theta_topic) * calibration_topic_only
                 )
                 if adjusted_candidate_score > best_candidate_score:
                     best_candidate_score = adjusted_candidate_score
