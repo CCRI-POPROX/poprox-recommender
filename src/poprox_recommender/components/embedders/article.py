@@ -53,7 +53,7 @@ class NRMSArticleEmbedder(Component):
         plm_path = model_file_path(config.pretrained_model)
         logger.debug("loading tokenizer from %s", plm_path)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/")
+        self.tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/", clean_up_tokenization_spaces=True)
         self.device = device
         self.embedding_cache = {}
 
