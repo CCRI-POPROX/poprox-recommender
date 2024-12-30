@@ -48,13 +48,17 @@ def generate_recs(event, context):
         for topic in clicked_topics:
             topic_count_dict[topic] += 1
 
-    print(topic_count_dict)
+    print(f"\n Candidate article topics: {dict(topic_count_dict)}")
 
     # Similarly, the platform should provided pre-filtered clicked articles
     # and compute the topic counts but this shim lets us ignore that issue
     # in the actual article selection
     profile = req.interest_profile
     click_history = profile.click_history
+
+    onboarding_topics = {interest.entity_name: interest.preference for interest in profile.onboarding_topics}
+    print(f"\nOnboarding topic selections: {onboarding_topics}")
+
     clicked_articles = list(
         filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
     )
