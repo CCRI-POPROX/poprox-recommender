@@ -26,6 +26,10 @@ jobs:
           environments: data
           activate-environment: true
 
+      - name: Configure sharing
+        run: |
+          dvc remote modify --local public allow_anonymous_login false
+
       - name: Fetch model data
         run: |
           dvc pull
