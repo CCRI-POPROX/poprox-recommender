@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 from lenskit.logging import item_progress
+from lenskit.logging.worker import WorkerContext, WorkerLogConfig
 from lenskit.util import Stopwatch
 
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -26,14 +27,17 @@ STAGES = ["final", "ranked", "reranked"]
 # globals used for workers
 _pipelines: dict[str, Pipeline]
 _worker_out: RecOutputs
+_worker_log: WorkerContext
 _emb_seen: set[UUID]
 
 
-def _init_worker(outs: RecOutputs):
-    global _worker_out, _emb_seen, _pipelines
+def _init_worker(outs: RecOutputs, logging: WorkerLogConfig):
+    global _worker_out, _emb_seen, _pipelines, _worker_log
     proc = mp.current_process()
     _worker_out = outs
     _emb_seen = set()
+    _worker_log = WorkerContext(logging)
+    _worker_log.start()
 
     _worker_out.open(proc.pid)
 
@@ -43,6 +47,7 @@ def _init_worker(outs: RecOutputs):
 def _finish_worker():
     logger.info("closing output files")
     _worker_out.close()
+    _worker_log.shutdown()
 
     try:
         import resource
