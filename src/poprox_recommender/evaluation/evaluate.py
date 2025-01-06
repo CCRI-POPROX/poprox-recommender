@@ -27,14 +27,13 @@ from uuid import UUID
 import ipyparallel as ipp
 import pandas as pd
 from docopt import docopt
-from progress_api import make_progress
+from lenskit.logging import LoggingConfig, item_progress
 
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.metrics import ProfileRecs, measure_profile_recs
-from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
@@ -71,7 +70,11 @@ def profile_eval_results(
 
 def main():
     options = docopt(__doc__)  # type: ignore
-    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
+    log_cfg = LoggingConfig()
+    if options["--verbose"]:
+        log_cfg.set_verbose(True)
+    log_cfg.set_log_file(options["--log-file"])
+    log_cfg.apply()
 
     global eval_data
 
@@ -102,7 +105,7 @@ def main():
     n_procs = available_cpu_parallelism(4)
     records = []
     with (
-        make_progress(logger, "evaluate", total=n_profiles, unit="profiles") as pb,
+        item_progress("evaluate", total=n_profiles) as pb,
     ):
         for profile_rows in profile_eval_results(eval_data, recs_df, n_procs):
             records += profile_rows

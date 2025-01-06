@@ -7,8 +7,8 @@ import ipyparallel as ipp
 import numpy as np
 import pandas as pd
 import pyarrow as pa
+from lenskit.logging import item_progress
 from lenskit.util import Stopwatch
-from progress_api import make_progress
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
@@ -173,7 +173,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
         profile_iter = it.islice(profile_iter, n_profiles)
 
     timer = Stopwatch()
-    with make_progress(logger, "recommend", total=n_profiles) as pb:
+    with item_progress("recommend", total=n_profiles) as pb:
         if n_jobs > 1:
             logger.info("starting evaluation with %d workers", n_jobs)
             with ipp.Cluster(n=n_jobs) as client:
