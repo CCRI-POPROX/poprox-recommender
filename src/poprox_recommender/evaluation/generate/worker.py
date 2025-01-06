@@ -184,7 +184,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
             with ipp.Cluster(n=n_jobs) as client:
                 dv = client.direct_view()
                 logger.debug("initializing workers")
-                dv.apply_sync(_init_worker, outs)
+                dv.apply_sync(_init_worker, outs, WorkerLogConfig.current())
 
                 logger.debug("dispatching jobs")
                 lbv = client.load_balanced_view()
