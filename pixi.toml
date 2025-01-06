@@ -28,7 +28,7 @@ pydantic = "~=2.7.1"
 # git dep on progress-api until non-prerelease is out
 progress-api = { git = "https://github.com/lenskit/progress-api" }
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
-lenskit = { git = "https://github.com/lenskit/lkpy.git", subdirectory = "lenskit" }
+lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch="feature/json-logging", subdirectory = "lenskit" }
 manylog = { git = "https://github.com/mdekstrand/manylog.git" }
 
 # turn off CUDA on Windows
