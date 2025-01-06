@@ -26,7 +26,7 @@ pydantic = "~=2.7.1"
 
 [pypi-dependencies]
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
-lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/json-logging", subdirectory = "lenskit" }
+lenskit = { git = "https://github.com/lenskit/lkpy.git", subdirectory = "lenskit" }
 
 # turn off CUDA on Windows
 [target.win.dependencies]
