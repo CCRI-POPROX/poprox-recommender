@@ -47,7 +47,8 @@ def generate_main():
     log_cfg = LoggingConfig()
     if options["--verbose"]:
         log_cfg.set_verbose(True)
-    log_cfg.set_log_file(options["--log-file"])
+    if options["--log-file"]:
+        log_cfg.set_log_file(options["--log-file"])
     log_cfg.apply()
 
     out_path = Path(options["--output-path"])
