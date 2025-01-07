@@ -32,3 +32,35 @@ jobs:
       - name: Check pipeline status
         run: |
           exec /bin/bash scripts/check-dvc-status.sh
+
+  rerun-subset-recs:
+    name: "Rerun MIND subset recommendations"
+    # run this on MacOS for performance
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install environment
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: latest
+          cache: true
+          environments: eval
+          activate-environment: true
+
+      - name: Fetch pipeline data
+        run: |
+          dvc pull
+        env:
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+
+      - name: Re-run MIND subset outputs
+        run: |
+          dvc repro -f measure-mind-subset
+        env:
+          POPROX_REC_DEVICE: mps
