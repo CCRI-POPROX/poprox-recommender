@@ -14,7 +14,6 @@ from poprox_recommender.recommenders import PipelineLoadError, select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def test_request_with_topic_calibrator():

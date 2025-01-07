@@ -21,7 +21,6 @@ from poprox_recommender.lkpipeline import Pipeline, PipelineState
 from poprox_recommender.paths import model_file_path
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 _cached_pipelines = None

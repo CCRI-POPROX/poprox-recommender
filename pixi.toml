@@ -18,18 +18,17 @@ pytorch = "~=2.0"
 smart_open = "~=7.0"
 safetensors = ">=0.4,<1"
 transformers = "~=4.41"
-colorlog = "~=6.8"
-enlighten = "~=1.12"
+rich = "~=13.9"
 ipyparallel = "~=8.0"
 # poprox-concepts dependencies not covered above
 pydantic = "~=2.7.1"
+# lenskit dependencies from conda
+structlog = ">=24.0"
+threadpoolctl = "~=3.5"
 
 [pypi-dependencies]
-# git dep on progress-api until non-prerelease is out
-progress-api = { git = "https://github.com/lenskit/progress-api" }
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
-lenskit = { git = "https://github.com/lenskit/lkpy.git", subdirectory = "lenskit" }
-manylog = { git = "https://github.com/mdekstrand/manylog.git" }
+lenskit = ">=2025.0.0a3"
 
 # turn off CUDA on Windows
 [target.win.dependencies]

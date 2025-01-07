@@ -27,13 +27,13 @@ from pathlib import Path
 
 import pandas as pd
 from docopt import docopt
+from lenskit.logging import LoggingConfig
 
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.evaluation.generate.worker import generate_profile_recs
-from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.rusage import pretty_time
 
 logger = logging.getLogger("poprox_recommender.evaluation.generate")
@@ -44,7 +44,12 @@ def generate_main():
     For offline evaluation, set theta in mmr_diversity = 1
     """
     options = docopt(__doc__)  # type: ignore
-    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
+    log_cfg = LoggingConfig()
+    if options["--verbose"]:
+        log_cfg.set_verbose(True)
+    if options["--log-file"]:
+        log_cfg.set_log_file(options["--log-file"])
+    log_cfg.apply()
 
     out_path = Path(options["--output-path"])
     outputs = RecOutputs(out_path)

@@ -1,5 +1,8 @@
 import base64
 import logging
+import os
+
+import structlog
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
@@ -7,7 +10,6 @@ from poprox_recommender.recommenders import select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def generate_recs(event, context):
@@ -68,3 +70,34 @@ def generate_recs(event, context):
 
     logger.info("Finished.")
     return response
+
+
+if "AWS_LAMBDA_FUNCTION_NAME" in os.environ and not structlog.is_configured():
+    # Serverless doesn't set up logging like the AWS Lambda runtime does, so we
+    # need to configure base logging ourselves. The AWS_LAMBDA_RUNTIME_API
+    # environment variable is set in a real runtime environment but not the
+    # local Serverless run, so we can check for that.  We will log at DEBUG
+    # level for local testing.
+    if "AWS_LAMBDA_RUNTIME_API" not in os.environ:
+        logging.basicConfig(level=logging.DEBUG)
+        # make sure we have debug for all of our code
+        logging.getLogger("poprox_recommender").setLevel(logging.DEBUG)
+        logger.info("local logging enabled")
+
+    # set up structlog to dump to standard logging
+    # TODO: enable JSON logs
+    structlog.configure(
+        [
+            structlog.processors.add_log_level,
+            structlog.stdlib.add_logger_name,
+            structlog.stdlib.PositionalArgumentsFormatter(),
+            structlog.processors.MaybeTimeStamper(),
+            structlog.processors.KeyValueRenderer(key_order=["event", "timestamp"]),
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+    )
+    structlog.stdlib.get_logger(__name__).info(
+        "structured logging initialized",
+        function=os.environ["AWS_LAMBDA_FUNCTION_NAME"],
+        region=os.environ.get("AWS_REGION", None),
+    )
