@@ -64,3 +64,4 @@ jobs:
           dvc repro -f measure-mind-subset
         env:
           POPROX_REC_DEVICE: mps
+          POPROX_CPU_COUNT: 1
