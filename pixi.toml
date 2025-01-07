@@ -23,10 +23,13 @@ enlighten = "~=1.12"
 ipyparallel = "~=8.0"
 # poprox-concepts dependencies not covered above
 pydantic = "~=2.7.1"
+# lenskit dependencies from conda
+structlog = ">=24.0"
+threadpoolctl = "~=3.5"
 
 [pypi-dependencies]
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
-lenskit = { git = "https://github.com/lenskit/lkpy.git", subdirectory = "lenskit" }
+lenskit = ">=2025.0.0a3"
 
 # turn off CUDA on Windows
 [target.win.dependencies]
