@@ -31,7 +31,7 @@ jobs:
 
       - name: Check pipeline status
         run: |
-          n_changed=$(dvc status --json |jq length)
+          n_changed=$(dvc status --no-updates --json |jq length)
           if [ "$n_changed" -gt 0 ]; then
             echo "::error file=dvc.yaml,title=Workflow out-of-date::$n_changed stages of the DVC workflow are out-of-date"
             dvc status
