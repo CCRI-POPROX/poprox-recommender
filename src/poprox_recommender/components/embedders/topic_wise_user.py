@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from os import PathLike
 from uuid import uuid4
 
 import torch as th
@@ -106,7 +107,8 @@ def virtual_clicks(onboarding_topics, topic_articles):
         if topic_name in topic_uuids_by_name:
             article_id = topic_uuids_by_name[topic_name]
 
-            virtual_clicks.extend([Click(article_id=article_id)] * (preference - 1))
+            # virtual_clicks.extend([Click(article_id=article_id)] * (preference - 1))
+            virtual_clicks.extend([Click(article_id=article_id)] * (preference - 1) * (preference - 1))
     return virtual_clicks
 
 
@@ -114,11 +116,13 @@ class TopicUserEmbedder(NRMSUserEmbedder):
     article_embedder: NRMSArticleEmbedder
     embedded_topic_articles: ArticleSet | None = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, embedding_source: str = "static", topic_embedding: str = "nrms", **kwargs):
         super().__init__(*args, **kwargs)
         self.article_embedder = NRMSArticleEmbedder(
             model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
         )
+        self.embedding_source = embedding_source
+        self.topic_embedding = topic_embedding
 
     @torch_inference
     def __call__(
@@ -137,10 +141,18 @@ class TopicUserEmbedder(NRMSUserEmbedder):
         
         topic_clicks = virtual_clicks(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        # topic_embeddings_by_uuid = self.build_embeddings_from_definitions()
-        topic_embeddings_by_uuid = self.build_embeddings_from_candidates(candidate_articles, TOPIC_ARTICLES)
+        if self.embedding_source == "candidates":
+            topic_embeddings_by_uuid = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
+        elif self.embedding_source == "clicked":
+            topic_embeddings_by_uuid = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
+        else:
+            topic_embeddings_by_uuid = self.build_embeddings_from_definitions()
+
+        # TODO: Add an option for generating embeddings from the clicks
 
         combined_click_history = interest_profile.click_history + topic_clicks
+
+        # TODO: using different click combinations
 
         click_lookup = self.build_article_lookup(clicked_articles)
         topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
@@ -161,17 +173,22 @@ class TopicUserEmbedder(NRMSUserEmbedder):
 
         return embedding_lookup
 
-    def build_embeddings_from_candidates(self, candidate_articles: ArticleSet, topic_articles: list[Article]):
+    def build_embeddings_from_articles(self, articles: ArticleSet, topic_articles: list[Article]):
         topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
 
         topic_embeddings_by_uuid = {}
         for topic_name in TOPIC_DESCRIPTIONS.keys():
-            embedding_lookup = self.build_article_lookup(candidate_articles)
-            embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
-            relevant_articles = self.find_topical_articles(topic_name, candidate_articles.articles)
+            embedding_lookup = self.build_article_lookup(articles)
+
+            embedding_lookup["PADDED_NEWS"] = th.zeros([768], device=self.device)
+            relevant_articles = self.find_topical_articles(topic_name, articles.articles)
             article_clicks = [Click(article_id=article.article_id) for article in relevant_articles]
-            # topic_embedding = self.build_user_embedding(article_clicks, embedding_lookup)
-            topic_embedding = self.average_click_embeddings(article_clicks, embedding_lookup)
+            if self.topic_embedding == "nrms":
+                topic_embedding = self.build_user_embedding(article_clicks, embedding_lookup)
+            else:
+                topic_embedding = self.average_click_embeddings(article_clicks, embedding_lookup)
+
+            # TODO: Adding customizable topic_embedding as perameter
 
             topic_uuid = topic_uuids_by_name[topic_name]
             topic_embeddings_by_uuid[topic_uuid] = topic_embedding

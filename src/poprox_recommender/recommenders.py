@@ -87,7 +87,24 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
 
     article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
     user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
-    topic_user_embedder = TopicUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
+    topic_user_embedder_candidate = TopicUserEmbedder(
+        model_file_path("nrms-mind/user_encoder.safetensors"),
+        device,
+        embedding_source="candidate",
+        topic_embedding="nrms",
+    )
+    topic_user_embedder_clicked = TopicUserEmbedder(
+        model_file_path("nrms-mind/user_encoder.safetensors"),
+        device,
+        embedding_source="clicked",
+        topic_embedding="nrms",
+    )
+    topic_user_embedder_static = TopicUserEmbedder(
+        model_file_path("nrms-mind/user_encoder.safetensors"),
+        device,
+        embedding_source="static",
+        topic_embedding="nrms",
+    )
 
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
@@ -104,10 +121,26 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    nrms_onboarding_pipe = build_pipeline(
+    nrms_onboarding_pipe_cadidate = build_pipeline(
         "plain-NRMS-with-onboarding-topics",
         article_embedder=article_embedder,
-        user_embedder=topic_user_embedder,
+        user_embedder=topic_user_embedder_candidate,
+        ranker=topk_ranker,
+        num_slots=num_slots,
+    )
+
+    nrms_onboarding_pipe_clicked = build_pipeline(
+        "plain-NRMS-with-onboarding-topics",
+        article_embedder=article_embedder,
+        user_embedder=topic_user_embedder_clicked,
+        ranker=topk_ranker,
+        num_slots=num_slots,
+    )
+
+    nrms_onboarding_pipe_static = build_pipeline(
+        "plain-NRMS-with-onboarding-topics",
+        article_embedder=article_embedder,
+        user_embedder=topic_user_embedder_static,
         ranker=topk_ranker,
         num_slots=num_slots,
     )
@@ -154,7 +187,9 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
 
     return {
         "nrms": nrms_pipe,
-        "nrms-topics": nrms_onboarding_pipe,
+        "nrms-topics-candidate": nrms_onboarding_pipe_cadidate,
+        "nrms-topics-clicked": nrms_onboarding_pipe_clicked,
+        "nrms-topics-static": nrms_onboarding_pipe_static,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
