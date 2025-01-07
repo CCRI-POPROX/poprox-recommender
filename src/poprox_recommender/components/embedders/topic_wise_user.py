@@ -110,22 +110,29 @@ def virtual_clicks(onboarding_topics, topic_embeddings):
 
 
 class TopicUserEmbedder(NRMSUserEmbedder):
+    article_embedder: NRMSArticleEmbedder
+    embedded_topic_articles: ArticleSet | None = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.article_embedder = NRMSArticleEmbedder(
+            model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
+        )
+
     @torch_inference
     def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
         if len(clicked_articles.articles) == 0:
             interest_profile.embedding = None
         else:
-            article_embedder = NRMSArticleEmbedder(
-                model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
-            )
-            topic_article_set = article_embedder(ArticleSet(articles=topic_articles))
+            if self.embedded_topic_articles is None:
+                self.embedded_topic_articles = self.article_embedder(ArticleSet(articles=topic_articles))
             topic_embeddings_by_name = {
                 article.external_id: embedding
-                for article, embedding in zip(topic_articles, topic_article_set.embeddings)
+                for article, embedding in zip(topic_articles, self.embedded_topic_articles.embeddings)
             }
             topic_embeddings_by_uuid = {
                 article.article_id: embedding
-                for article, embedding in zip(topic_articles, topic_article_set.embeddings)
+                for article, embedding in zip(topic_articles, self.embedded_topic_articles.embeddings)
             }
 
             topic_clicks = virtual_clicks(interest_profile.onboarding_topics, topic_embeddings_by_name)
