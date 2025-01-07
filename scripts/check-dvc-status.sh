@@ -19,7 +19,7 @@ jq -r 'keys | .[] | sub(":"; " ")' <$status_file | (while read file stage; do
         stage="$file"
         file="dvc.yaml"
     fi
-    grep -n "$stage:" "$file" | sed -Ee "s#([[:digit:]]+):.*#::error file=$file,line=\1,title=Stage out-of-date::The DVC stage is out-of-date#"
+    grep -n "$stage:" "$file" | sed -Ee "s#([[:digit:]]+):.*#::error file=$file,line=\1,title=Stage out-of-date::The DVC stage $file/$stage is out-of-date#"
 done)
 
 echo "::error::$n_changed stages are out-of-date"
