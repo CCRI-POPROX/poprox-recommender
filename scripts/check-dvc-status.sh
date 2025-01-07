@@ -15,7 +15,6 @@ fi
 
 # emit GitHub error messages attached to each individual stage
 jq -r 'keys | .[] | sub(":"; " ")' <$status_file | (while read file stage; do
-    echo $file $stage
     if [[ -z $stage ]]; then
         stage="$file"
         file="dvc.yaml"
