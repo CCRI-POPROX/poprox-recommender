@@ -86,7 +86,7 @@ if "AWS_LAMBDA_FUNCTION_NAME" in os.environ and not structlog.is_configured():
         logger.info("local logging enabled")
 
     # set up structlog to dump to standard logging
-    # TODO: enable JSON logs & better log level control
+    # TODO: enable JSON logs
     structlog.configure(
         [
             structlog.processors.add_log_level,
