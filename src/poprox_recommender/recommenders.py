@@ -91,19 +91,19 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="candidate",
-        topic_embedding="nrms",
+        topic_embedding="avg",
     )
     topic_user_embedder_clicked = TopicUserEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="clicked",
-        topic_embedding="nrms",
+        topic_embedding="avg",
     )
     topic_user_embedder_static = TopicUserEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="static",
-        topic_embedding="nrms",
+        topic_embedding="avg",
     )
 
     topk_ranker = TopkRanker(num_slots=num_slots)
