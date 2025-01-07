@@ -9,7 +9,6 @@ from poprox_recommender.paths import project_root
 from poprox_recommender.recommenders import PipelineLoadError, select_articles
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def test_request_with_softmax_sampler():

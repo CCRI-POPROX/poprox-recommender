@@ -7,8 +7,9 @@ import ipyparallel as ipp
 import numpy as np
 import pandas as pd
 import pyarrow as pa
+from lenskit.logging import item_progress
+from lenskit.logging.worker import WorkerContext, WorkerLogConfig
 from lenskit.util import Stopwatch
-from progress_api import make_progress
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import ArticleSet
@@ -26,14 +27,17 @@ STAGES = ["final", "ranked", "reranked"]
 # globals used for workers
 _pipelines: dict[str, Pipeline]
 _worker_out: RecOutputs
+_worker_log: WorkerContext
 _emb_seen: set[UUID]
 
 
-def _init_worker(outs: RecOutputs):
-    global _worker_out, _emb_seen, _pipelines
+def _init_worker(outs: RecOutputs, logging: WorkerLogConfig):
+    global _worker_out, _emb_seen, _pipelines, _worker_log
     proc = mp.current_process()
     _worker_out = outs
     _emb_seen = set()
+    _worker_log = WorkerContext(logging)
+    _worker_log.start()
 
     _worker_out.open(proc.pid)
 
@@ -43,6 +47,7 @@ def _init_worker(outs: RecOutputs):
 def _finish_worker():
     logger.info("closing output files")
     _worker_out.close()
+    _worker_log.shutdown()
 
     try:
         import resource
@@ -173,13 +178,13 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
         profile_iter = it.islice(profile_iter, n_profiles)
 
     timer = Stopwatch()
-    with make_progress(logger, "recommend", total=n_profiles) as pb:
+    with item_progress("recommend", total=n_profiles) as pb:
         if n_jobs > 1:
             logger.info("starting evaluation with %d workers", n_jobs)
             with ipp.Cluster(n=n_jobs) as client:
                 dv = client.direct_view()
                 logger.debug("initializing workers")
-                dv.apply_sync(_init_worker, outs)
+                dv.apply_sync(_init_worker, outs, WorkerLogConfig.current())
 
                 logger.debug("dispatching jobs")
                 lbv = client.load_balanced_view()
