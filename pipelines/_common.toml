@@ -1,0 +1,56 @@
+# Commmon layout components for POPROX pipelines
+
+[meta]
+name = "NRMS"
+
+# Define convenient aliases for components so we do not need to re-type their
+# full names everywhere.  Inherting configurations can override these to change
+# the component without overwriting it!
+[definitions]
+# the name of the final personalized ranking component
+ranker = "ranker"
+# number of recommendation slots to configure
+N = 10
+
+[inputs.candidate]
+type = "poprox_concepts.domain.article.ArticleSet"
+[inputs.profile]
+type = "poprox_concepts.domain.article.ArticleSet"
+[inputs.clicked]
+type = "poprox_concepts.domain.article.InterestProfile"
+
+[components.candidate-embedder]
+code = "poprox_recommender.components.embedders.article:NRMSArticleEmbedder"
+config = { model_path = "nrms-mind/news_encoder.safetensors" }
+inputs = { article_set = "candidate" }
+
+[components.history-embedder]
+code = "poprox_recommender.components.embedders.article:NRMSArticleEmbedder"
+config = { model_path = "nrms-mind/news_encoder.safetensors" }
+inputs = { article_set = "candidate" }
+
+[components.user-embedder]
+code = "poprox_recommender.components.embedders.user:NRMSUserEmbedder"
+config = { max_clicks_per_user = 50, model_path = "nrms-mind/user_encoder.safetensors" }
+inputs = { clicked_articles = "history-embedder", interest_profile = "profile" }
+
+[components.scorer]
+code = "poprox_recommender.components.scorers.article:ArticleScorer"
+inputs = { candidate_articles = "candidate-embedder", interest_profile = "user-embedder" }
+
+[components.ranker]
+code = "poprox_recommender.components.rankers.topk:TopKRanker"
+config = { num_slots = "$N" }
+inputs = { candidate_articles = "scorer", interest_profile = "user-embedder" }
+
+[components.topic-filter]
+code = "poprox_recommender.components.filters.topic:TopicFilter"
+inputs = { candidate = "candidate", interest_profile = "profile" }
+
+[components.sampler]
+code = "poprox_recommender.components.samplers.uniform:UniformSampler"
+
+[components.recommender]
+code = "poprox_recommender.components.joiners.fill:Fill"
+config = { num_slots = "$N" }
+inputs = { candidates1 = "$ranker", candidates2 = "sampler" }
