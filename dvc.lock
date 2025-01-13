@@ -34,9 +34,9 @@ stages:
       size: 103456245
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
-      md5: d04ad711fcf47483221ab14efaad5876.dir
-      size: 33102
-      nfiles: 8
+      md5: 024611c66259a246b94350366957f154.dir
+      size: 12469
+      nfiles: 4
     outs:
     - path: outputs/mind-val/embeddings.parquet
       hash: md5
@@ -56,9 +56,9 @@ stages:
       size: 30948560
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
-      md5: d04ad711fcf47483221ab14efaad5876.dir
-      size: 33102
-      nfiles: 8
+      md5: 024611c66259a246b94350366957f154.dir
+      size: 12469
+      nfiles: 4
     outs:
     - path: outputs/mind-small/embeddings.parquet
       hash: md5
@@ -104,9 +104,9 @@ stages:
       size: 30948560
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
-      md5: d04ad711fcf47483221ab14efaad5876.dir
-      size: 33102
-      nfiles: 8
+      md5: 024611c66259a246b94350366957f154.dir
+      size: 12469
+      nfiles: 4
     outs:
     - path: outputs/mind-subset/embeddings.parquet
       hash: md5
