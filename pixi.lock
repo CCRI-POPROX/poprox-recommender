@@ -24899,7 +24899,7 @@ packages:
 - pypi: .
   name: poprox-recommender
   version: 0.0.1
-  sha256: 3f2b3b8d7e70cb6292904edaf1b2a1c1ce562fd37576dabe1921ca2b4b18556c
+  sha256: ef888b541d1f2bdbf42b4759f973658b4726da79a37446abd7cc6d95972cbb1a
   requires_dist:
   - ipyparallel~=8.0
   - lenskit==2025.0.0a4

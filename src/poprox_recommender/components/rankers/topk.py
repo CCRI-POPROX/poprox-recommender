@@ -1,7 +1,7 @@
 import numpy as np
+from lenskit.pipeline import Component
 
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.lkpipeline import Component
 
 
 class TopkRanker(Component):
