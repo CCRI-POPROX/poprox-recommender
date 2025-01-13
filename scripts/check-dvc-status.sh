@@ -11,6 +11,8 @@ echo "$n_changed stages have changed"
 if [[ $n_changed -eq 0 ]]; then
     echo "::notice::DVC pipeline is up-to-date"
     exit 0
+else
+    dvc status --no-updates
 fi
 
 # emit GitHub error messages attached to each individual stage
