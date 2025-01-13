@@ -27,17 +27,18 @@ STAGES = ["final", "ranked", "reranked"]
 # globals used for workers
 _pipelines: dict[str, Pipeline]
 _worker_out: RecOutputs
-_worker_log: WorkerContext
+_worker_log: WorkerContext | None = None
 _emb_seen: set[UUID]
 
 
-def _init_worker(outs: RecOutputs, logging: WorkerLogConfig):
+def _init_worker(outs: RecOutputs, logging: WorkerLogConfig | None = None):
     global _worker_out, _emb_seen, _pipelines, _worker_log
     proc = mp.current_process()
     _worker_out = outs
     _emb_seen = set()
-    _worker_log = WorkerContext(logging)
-    _worker_log.start()
+    if logging is not None:
+        _worker_log = WorkerContext(logging)
+        _worker_log.start()
 
     _worker_out.open(proc.pid)
 
@@ -45,9 +46,12 @@ def _init_worker(outs: RecOutputs, logging: WorkerLogConfig):
 
 
 def _finish_worker():
+    global _worker_log
     logger.info("closing output files")
     _worker_out.close()
-    _worker_log.shutdown()
+    if _worker_log is not None:
+        _worker_log.shutdown()
+        _worker_log = None
 
     try:
         import resource
