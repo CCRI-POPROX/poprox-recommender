@@ -28,27 +28,33 @@ inputs = { article_set = "candidate" }
 code = "poprox_recommender.components.embedders.article:NRMSArticleEmbedder"
 config = { model_path = "nrms-mind/news_encoder.safetensors" }
 inputs = { article_set = "candidate" }
+meta.group = "history-based ranking"
 
 [components.user-embedder]
 code = "poprox_recommender.components.embedders.user:NRMSUserEmbedder"
 config = { max_clicks_per_user = 50, model_path = "nrms-mind/user_encoder.safetensors" }
 inputs = { clicked_articles = "history-embedder", interest_profile = "profile" }
+meta.group = "history-based ranking"
 
 [components.scorer]
 code = "poprox_recommender.components.scorers.article:ArticleScorer"
 inputs = { candidate_articles = "candidate-embedder", interest_profile = "user-embedder" }
+meta.group = "history-based ranking"
 
 [components.ranker]
 code = "poprox_recommender.components.rankers.topk:TopKRanker"
 config = { num_slots = "$N" }
 inputs = { candidate_articles = "scorer", interest_profile = "user-embedder" }
+meta.group = "history-based ranking"
 
 [components.topic-filter]
 code = "poprox_recommender.components.filters.topic:TopicFilter"
 inputs = { candidate = "candidate", interest_profile = "profile" }
+meta.group = "topic-based ranking"
 
 [components.sampler]
 code = "poprox_recommender.components.samplers.uniform:UniformSampler"
+meta.group = "topic-based ranking"
 
 [components.recommender]
 code = "poprox_recommender.components.joiners.fill:Fill"

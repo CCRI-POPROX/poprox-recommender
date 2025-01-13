@@ -8,3 +8,4 @@ ranker = "reranker"
 [components.reranker]
 code = "poprox_recommender.components.samplers.softmax:SoftmaxSampler"
 inputs = { candidate_articles = "scorer", interest_profile = "user-embedder" }
+meta.group = "history-based ranking"
