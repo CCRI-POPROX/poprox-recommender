@@ -1,9 +1,9 @@
 import math
 
 import torch as th
+from lenskit.pipeline import Component
 
 from poprox_concepts import Article, ArticleSet, InterestProfile
-from poprox_recommender.lkpipeline import Component
 from poprox_recommender.pytorch.decorators import torch_inference
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_category_count
 

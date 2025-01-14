@@ -17,7 +17,7 @@ dynamic = ["version"]
 # Dependencies for the POPROX code — keep in sync w/ pixi.toml
 # `dependencies` table.
 dependencies = [
-  "lenskit>=2025.0.0a3",
+  "lenskit==2025.0.0a4",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
   "torch==2.*",
@@ -76,6 +76,9 @@ ban-relative-imports = "all"
 
 [tool.pyright]
 exclude = [".pixi/", "node_modules"]
+
+# Component's interface creates a lot of noise with this check
+reportIncompatibleMethodOverride = false
 
 [tool.coverage.run]
 source_pkgs = ["poprox_recommender", "tests"]

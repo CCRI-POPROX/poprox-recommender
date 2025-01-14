@@ -5,11 +5,11 @@ from typing import Protocol
 from uuid import UUID
 
 import torch as th
+from lenskit.pipeline import Component
 from safetensors.torch import load_file
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
 from poprox_concepts import ArticleSet
-from poprox_recommender.lkpipeline import Component
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.news_encoder import NewsEncoder
 from poprox_recommender.paths import model_file_path
