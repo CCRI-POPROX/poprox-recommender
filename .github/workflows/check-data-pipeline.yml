@@ -38,6 +38,7 @@ jobs:
     name: "Rerun MIND subset recommendations"
     # run this on MacOS for performance
     runs-on: macos-latest
+    environment: data-fetch
 
     steps:
       - name: Checkout
@@ -57,7 +58,7 @@ jobs:
         run: |
           dvc pull
         env:
-          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Re-run MIND subset outputs
