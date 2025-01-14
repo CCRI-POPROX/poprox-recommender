@@ -1,7 +1,7 @@
 import torch
+from lenskit.pipeline import Component
 
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.lkpipeline import Component
 from poprox_recommender.pytorch.decorators import torch_inference
 
 

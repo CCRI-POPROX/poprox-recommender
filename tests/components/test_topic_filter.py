@@ -1,10 +1,11 @@
 from uuid import uuid4
 
+from lenskit.pipeline import Pipeline
+
 from poprox_concepts import Article, ArticleSet, Click, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.samplers import UniformSampler
-from poprox_recommender.lkpipeline import Pipeline
 
 
 def test_select_by_topic_filters_articles():

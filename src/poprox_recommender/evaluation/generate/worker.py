@@ -9,6 +9,8 @@ import pandas as pd
 import pyarrow as pa
 from lenskit.logging import item_progress
 from lenskit.logging.worker import WorkerContext, WorkerLogConfig
+from lenskit.pipeline import Pipeline
+from lenskit.pipeline.state import PipelineState
 from lenskit.util import Stopwatch
 
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -16,8 +18,6 @@ from poprox_concepts.domain import ArticleSet
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
-from poprox_recommender.lkpipeline import Pipeline
-from poprox_recommender.lkpipeline.state import PipelineState
 from poprox_recommender.recommenders import recommendation_pipelines
 
 logger = logging.getLogger(__name__)

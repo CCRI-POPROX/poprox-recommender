@@ -1,8 +1,9 @@
 import logging
 import random
 
+from lenskit.pipeline import Component
+
 from poprox_concepts import ArticleSet
-from poprox_recommender.lkpipeline import Component
 
 logger = logging.getLogger(__name__)
 

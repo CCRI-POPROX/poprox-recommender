@@ -1,7 +1,8 @@
 from itertools import zip_longest
 
+from lenskit.pipeline import Component
+
 from poprox_concepts import ArticleSet
-from poprox_recommender.lkpipeline import Component
 
 
 class Interleave(Component):
