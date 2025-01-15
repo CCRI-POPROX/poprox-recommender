@@ -146,7 +146,7 @@ class ContextGenerator(Component):
         retries = 0
         message = [{"role": "system", "content": system_prompt}, {"role": "user", "content": content_prompt}]
         temperature = 0.2
-        max_tokens = 512
+        max_tokens = 256
         frequency_penalty = 0.0
 
         while retries < MAX_RETRIES:
@@ -156,7 +156,7 @@ class ContextGenerator(Component):
                     temperature=temperature,
                     max_tokens=max_tokens,
                     frequency_penalty=frequency_penalty,
-                    model="gpt-4o-mini",
+                    model="gpt-3.5-turbo",
                 )
                 return chat_completion.choices[0].message.content
 
