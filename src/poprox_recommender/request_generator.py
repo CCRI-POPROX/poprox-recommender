@@ -1,4 +1,5 @@
 import random
+from datetime import datetime, timedelta
 from typing import List
 from uuid import uuid4
 
@@ -10,21 +11,37 @@ from poprox_recommender.data.mind import MindData
 
 
 class RequestGenerator:
-    def __init__(self, mind_data: MindData, num_recs: int = 10):
+    """
+    Class to generate recommendation request using click history, onboarding topics, and candidate articles from MIND
+    """
+
+    def __init__(self, mind_data: MindData):
         self.mind_data = mind_data
-        self.num_recs = num_recs
-        self.candidate_articles = []
-        self.past_articles = []
-        self.added_topics = []
-        self.clicks = []
+        self.candidate_articles = list()
+        self.past_articles = list()
+        self.added_topics = list()
+        self.clicks = list()
 
     def set_num_recs(self, num_recs: int):
         self.num_recs = num_recs
 
-    def add_clicks(self, num_clicks: int):
+    def add_clicks(self, num_clicks: int, num_days: int | None = None):
         all_articles = list(self.mind_data.news_df.index)
+
+        if num_days:
+            start_date = datetime.now() - timedelta(days=num_days - 1)
+            timestamps = [start_date + timedelta(days=random.randint(0, num_days - 1)) for _ in range(num_clicks)]
+            random.shuffle(timestamps)
+        else:
+            timestamps = [datetime.now()] * num_clicks
+        # generate click history
         self.clicks = [
-            Click(article_id=self.mind_data.news_uuid_for_id(random.choice(all_articles))) for _ in range(num_clicks)
+            Click(
+                article_id=self.mind_data.news_uuid_for_id(random.choice(all_articles)),
+                newsletter_id=uuid4(),
+                timestamp=timestamps[i],
+            )
+            for i in range(num_clicks)
         ]
 
     def add_topics(self, topics: List[str]):
@@ -39,7 +56,7 @@ class RequestGenerator:
             for topic in topics
         ]
 
-    def add_candidates(self, num_candidates: int):
+    def add_candidates(self, num_candidates):
         all_articles = list(self.mind_data.news_df.index)
         selected_candidates = random.sample(all_articles, num_candidates)
 
@@ -63,18 +80,3 @@ class RequestGenerator:
             return request
         except ValidationError as e:
             raise ValueError(f"Generated request is invalid: {e}")
-
-
-mind_data = MindData()
-request_generator = RequestGenerator(mind_data)
-
-user_uuid = random.choice(list(mind_data.behavior_id_map.keys()))
-
-request_generator.set_num_recs(2)
-request_generator.add_clicks(2)
-request_generator.add_topics([])
-request_generator.add_candidates(num_candidates=3)
-
-request = request_generator.get_request()
-
-print(request)
