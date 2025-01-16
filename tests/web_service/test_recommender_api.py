@@ -82,9 +82,10 @@ def test_recommender_api(sl_listener, pipeline):
     request_generator.set_num_recs(2)
 
     request_data = request_generator.get_request()
+    request_data = request_data.model_dump_json()
 
     logger.info("sending request")
-    res = requests.post(f"http://localhost:3002?pipeline={pipeline}", json=request_data)
+    res = requests.post(f"http://localhost:3000?pipeline={pipeline}", json=request_data)
     assert res.status_code == 200
     logger.info("response: %s", res.text)
 
