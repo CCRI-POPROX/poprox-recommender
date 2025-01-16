@@ -1,0 +1,14 @@
+stages:
+  unzip:
+    foreach:
+      - MINDlarge_dev
+      - MINDlarge_test
+      - MINDlarge_train
+      - MINDsmall_dev
+      - MINDsmall_train
+    do:
+      cmd: python -m zipfile -e ${item}.zip ${item}
+      deps:
+        - ${item}.zip
+      outs:
+        - ${item}
