@@ -193,6 +193,7 @@ class TopicUserEmbedder(NRMSUserEmbedder):
             embedding_lookup["PADDED_NEWS"] = th.zeros([768], device=self.device)
             relevant_articles = self.find_topical_articles(topic_name, articles.articles)
             article_clicks = [Click(article_id=article.article_id) for article in relevant_articles]
+
             if self.topic_embedding == "nrms":
                 topic_embedding = self.build_user_embedding(article_clicks, embedding_lookup)
             else:
@@ -200,7 +201,7 @@ class TopicUserEmbedder(NRMSUserEmbedder):
 
             # TODO: Adding customizable topic_embedding as perameter
 
-            if any(topic_embedding != embedding_lookup["PADDED_NEWS"]):
+            if any(topic_embedding.squeeze() != embedding_lookup["PADDED_NEWS"]):
                 topic_uuid = topic_uuids_by_name[topic_name]
                 topic_embeddings_by_uuid[topic_uuid] = topic_embedding
         return topic_embeddings_by_uuid
