@@ -6,7 +6,7 @@ from lenskit.pipeline import Pipeline, PipelineState
 
 from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.components.diversifiers import (
-    LocalityCalibrator,
+    # LocalityCalibrator,
     MMRDiversifier,
     PFARDiversifier,
     TopicCalibrator,
@@ -115,7 +115,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
     pfar = PFARDiversifier(num_slots=num_slots)
-    locality_calibrator = LocalityCalibrator(num_slots=num_slots)
+    # locality_calibrator = LocalityCalibrator(num_slots=num_slots)
     topic_calibrator = TopicCalibrator(num_slots=num_slots)
     sampler = SoftmaxSampler(num_slots=num_slots, temperature=30.0)
 
@@ -183,13 +183,13 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    locality_cali_pipe = build_pipeline(
-        "NRMS+Locality+Calibration",
-        article_embedder=article_embedder,
-        user_embedder=user_embedder,
-        ranker=locality_calibrator,
-        num_slots=num_slots,
-    )
+    # locality_cali_pipe = build_pipeline(
+    #     "NRMS+Locality+Calibration",
+    #     article_embedder=article_embedder,
+    #     user_embedder=user_embedder,
+    #     ranker=locality_calibrator,
+    #     num_slots=num_slots,
+    # )
 
     softmax_pipe = build_pipeline(
         "NRMS+Softmax",
@@ -199,23 +199,23 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    nrms_rrf_static_candidate = build_RRF_pipeline(
-        "NRMS+RRF",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_static,
-        user_embedder2=topic_user_embedder_candidate,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
+    # nrms_rrf_static_candidate = build_RRF_pipeline(
+    #     "NRMS+RRF",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_static,
+    #     user_embedder2=topic_user_embedder_candidate,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    # )
 
-    nrms_rrf_static_clicked = build_RRF_pipeline(
-        "NRMS+RRF",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_static,
-        user_embedder2=topic_user_embedder_clicked,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
+    # nrms_rrf_static_clicked = build_RRF_pipeline(
+    #     "NRMS+RRF",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_static,
+    #     user_embedder2=topic_user_embedder_clicked,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    # )
 
     return {
         "nrms": nrms_pipe,
@@ -226,10 +226,10 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
-        "locality-cali": locality_cali_pipe,
+        # "locality-cali": locality_cali_pipe,
         "softmax": softmax_pipe,
-        "nrms_rrf_static_candidate": nrms_rrf_static_candidate,
-        "nrms_rrf_static_clicked": nrms_rrf_static_clicked,
+        # "nrms_rrf_static_candidate": nrms_rrf_static_candidate,
+        # "nrms_rrf_static_clicked": nrms_rrf_static_clicked,
     }
 
 
