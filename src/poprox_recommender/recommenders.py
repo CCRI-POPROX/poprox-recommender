@@ -12,7 +12,7 @@ from poprox_recommender.components.diversifiers import (
     TopicCalibrator,
 )
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
-from poprox_recommender.components.embedders.user_onboarding import UserOnboardingEmbedder
+from poprox_recommender.components.embedders.topic_wise_user import UserOnboardingEmbedder
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Fill, ReciprocalRankFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
