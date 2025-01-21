@@ -3,13 +3,14 @@ import warnings
 
 from poprox_concepts.api.recommendations import RecommendationResponse
 from poprox_recommender.handler import generate_recs
+from poprox_recommender.paths import project_root
 from poprox_recommender.topics import extract_general_topics
 
 warnings.filterwarnings("ignore")
 
 
 if __name__ == "__main__":
-    with open("tests/request_data/no_clicks.json", "r") as req_file:
+    with open(project_root() / "tests/request_data/onboarding.json", "r") as req_file:
         raw_json = req_file.read()
 
     event_nrms = {
