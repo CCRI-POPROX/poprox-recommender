@@ -110,8 +110,7 @@ def virtual_clicks(onboarding_topics, topic_articles):
         if topic_name in topic_uuids_by_name:
             article_id = topic_uuids_by_name[topic_name]
 
-            # virtual_clicks.extend([Click(article_id=article_id)] * (preference - 1))
-            virtual_clicks.extend([Click(article_id=article_id)] * (preference - 1) * (preference - 1))
+            virtual_clicks.extend([Click(article_id=article_id)] * (preference - 1))
     return virtual_clicks
 
 
