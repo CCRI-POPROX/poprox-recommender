@@ -18,9 +18,13 @@ TOPIC_DESCRIPTIONS = {
         focusing on international developments, global politics, \
         conflicts, diplomacy, trade, cultural exchanges, and \
         issues that affect multiple nations or regions.",
-    "Politics": "Regulation of the use, sale and ownership of \
-        guns. Includes legislative action, political debate, \
-        and general discussion of the role of government in regulating guns.",
+    "Politics": "The activities and functions of a governing body, \
+        the administration of its internal and external affairs, \
+        and the political issues that governments confront. \
+        Includes governance of political entities at all levels \
+        (country, state, city, etc.), and all government branches \
+        (executive, judicial, legislative, military, law enforcement). \
+        Also includes international governing bodies such as the UN.",
     "Business": "All commercial, industrial, financial and \
         economic activities involving individuals, corporations, \
         financial markets, governments and other organizations \
