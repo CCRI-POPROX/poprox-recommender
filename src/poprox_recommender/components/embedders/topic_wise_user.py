@@ -155,6 +155,18 @@ class TopicUserEmbedder(NRMSUserEmbedder):
                 **embeddings_from_candidates,
                 **embeddings_from_clicked,
             }
+        elif self.embedding_source == "hybrid":
+            all_topic_uuids = (
+                set(embeddings_from_definitions) | set(embeddings_from_candidates) | set(embeddings_from_clicked)
+            )
+            topic_embeddings_by_uuid = {}
+            for topic_uuid in all_topic_uuids:
+                def_emb = embeddings_from_definitions.get(topic_uuid, th.zeros(768, device=self.device))
+                cand_emb = embeddings_from_candidates.get(topic_uuid, th.zeros(768, device=self.device))
+                clicked_emb = embeddings_from_clicked.get(topic_uuid, th.zeros(768, device=self.device))
+
+                avg_emb = 0.6 * def_emb + 0.3 * cand_emb + 0.1 * clicked_emb
+                topic_embeddings_by_uuid[topic_uuid] = avg_emb
         else:
             raise ValueError(f"Unknown embedding source: {self.embedding_source}")
 
