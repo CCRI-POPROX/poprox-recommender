@@ -90,7 +90,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     topic_user_embedder_candidate = TopicUserEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
-        embedding_source="candidate",
+        embedding_source="candidates",
         topic_embedding="avg",
     )
     topic_user_embedder_clicked = TopicUserEmbedder(
