@@ -141,12 +141,22 @@ class TopicUserEmbedder(NRMSUserEmbedder):
         
         topic_clicks = virtual_clicks(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        if self.embedding_source == "candidates":
-            topic_embeddings_by_uuid = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
+        embeddings_from_definitions = self.build_embeddings_from_definitions()
+        embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
+        embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
+
+        if self.embedding_source == "static":
+            topic_embeddings_by_uuid = embeddings_from_definitions
+        elif self.embedding_source == "candidates":
+            topic_embeddings_by_uuid = {**embeddings_from_definitions, **embeddings_from_candidates}
         elif self.embedding_source == "clicked":
-            topic_embeddings_by_uuid = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
+            topic_embeddings_by_uuid = {
+                **embeddings_from_definitions,
+                **embeddings_from_candidates,
+                **embeddings_from_clicked,
+            }
         else:
-            topic_embeddings_by_uuid = self.build_embeddings_from_definitions()
+            raise ValueError(f"Unknown embedding source: {self.embedding_source}")
 
         # TODO: Add an option for generating embeddings from the clicks
 
@@ -190,8 +200,9 @@ class TopicUserEmbedder(NRMSUserEmbedder):
 
             # TODO: Adding customizable topic_embedding as perameter
 
-            topic_uuid = topic_uuids_by_name[topic_name]
-            topic_embeddings_by_uuid[topic_uuid] = topic_embedding
+            if any(topic_embedding != embedding_lookup["PADDED_NEWS"]):
+                topic_uuid = topic_uuids_by_name[topic_name]
+                topic_embeddings_by_uuid[topic_uuid] = topic_embedding
         return topic_embeddings_by_uuid
 
     def find_topical_articles(self, topic: str, articles: list[Article]) -> list[Article]:
