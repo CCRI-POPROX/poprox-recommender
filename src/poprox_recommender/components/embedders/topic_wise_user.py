@@ -133,16 +133,13 @@ class TopicUserEmbedder(NRMSUserEmbedder):
         self, candidate_articles: ArticleSet, clicked_articles: ArticleSet, interest_profile: InterestProfile
     ) -> InterestProfile:
         if self.embedded_topic_articles is None:
-            self.embedded_topic_articles = self.article_embedder(ArticleSet(articles=topic_articles))
-        topic_embeddings_by_name = {
-            article.external_id: embedding
-            for article, embedding in zip(topic_articles, self.embedded_topic_articles.embeddings)
-        }
+            self.embedded_topic_articles = self.article_embedder(ArticleSet(articles=TOPIC_ARTICLES))
+
         topic_embeddings_by_uuid = {
             article.article_id: embedding
-            for article, embedding in zip(topic_articles, self.embedded_topic_articles.embeddings)
+            for article, embedding in zip(TOPIC_ARTICLES, self.embedded_topic_articles.embeddings)
         }
-        
+
         topic_clicks = virtual_clicks(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
         embeddings_from_definitions = self.build_embeddings_from_definitions()
@@ -174,11 +171,7 @@ class TopicUserEmbedder(NRMSUserEmbedder):
         else:
             raise ValueError(f"Unknown embedding source: {self.embedding_source}")
 
-        # TODO: Add an option for generating embeddings from the clicks
-
         combined_click_history = interest_profile.click_history + topic_clicks
-
-        # TODO: using different click combinations
 
         click_lookup = self.build_article_lookup(clicked_articles)
         topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
