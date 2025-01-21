@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from os import PathLike
 from uuid import uuid4
 
 import torch as th
