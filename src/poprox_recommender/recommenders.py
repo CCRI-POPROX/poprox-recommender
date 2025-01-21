@@ -12,7 +12,7 @@ from poprox_recommender.components.diversifiers import (
     TopicCalibrator,
 )
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
-from poprox_recommender.components.embedders.topic_wise_user import TopicUserEmbedder
+from poprox_recommender.components.embedders.user_onboarding import UserOnboardingEmbedder
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Fill, ReciprocalRankFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -87,25 +87,25 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
 
     article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
     user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
-    topic_user_embedder_candidate = TopicUserEmbedder(
+    topic_user_embedder_candidate = UserOnboardingEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="candidates",
         topic_embedding="avg",
     )
-    topic_user_embedder_clicked = TopicUserEmbedder(
+    topic_user_embedder_clicked = UserOnboardingEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="clicked",
         topic_embedding="avg",
     )
-    topic_user_embedder_static = TopicUserEmbedder(
+    topic_user_embedder_static = UserOnboardingEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="static",
         topic_embedding="avg",
     )
-    topic_user_embedder_hybrid = TopicUserEmbedder(
+    topic_user_embedder_hybrid = UserOnboardingEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="hybrid",

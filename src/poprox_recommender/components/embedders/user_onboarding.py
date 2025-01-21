@@ -115,7 +115,7 @@ def virtual_clicks(onboarding_topics, topic_articles):
     return virtual_clicks
 
 
-class TopicUserEmbedder(NRMSUserEmbedder):
+class UserOnboardingEmbedder(NRMSUserEmbedder):
     article_embedder: NRMSArticleEmbedder
     embedded_topic_articles: ArticleSet | None = None
 

@@ -8,14 +8,14 @@ import torch as th
 
 from poprox_concepts.domain import AccountInterest, Article, ArticleSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSUserEmbedder
-from poprox_recommender.components.embedders.topic_wise_user import TOPIC_ARTICLES, TopicUserEmbedder
+from poprox_recommender.components.embedders.user_onboarding import TOPIC_ARTICLES, UserOnboardingEmbedder
 from poprox_recommender.paths import model_file_path
 
 
 def test_embed_user():
     try:
         plain_nrms_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
-        topic_aware_embedder = TopicUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
+        topic_aware_embedder = UserOnboardingEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
     except FileNotFoundError:
         pytest.xfail("NRMS model not found, so test failure is expected")
 
