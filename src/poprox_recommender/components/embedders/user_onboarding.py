@@ -207,8 +207,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
             else:
                 topic_embedding = self.average_click_embeddings(article_clicks, embedding_lookup)
 
-            # TODO: Adding customizable topic_embedding as perameter
-
             if any(topic_embedding.squeeze() != embedding_lookup["PADDED_NEWS"]):
                 topic_uuid = topic_uuids_by_name[topic_name]
                 topic_embeddings_by_uuid[topic_uuid] = topic_embedding
