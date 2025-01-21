@@ -52,7 +52,9 @@ def test_embed_user():
 
     enriched_profile = deepcopy(profile)
 
-    enriched_profile = topic_aware_embedder(clicked_articles=clicked, interest_profile=enriched_profile)
+    enriched_profile = topic_aware_embedder(
+        clicked_articles=clicked, candidate_articles=clicked, interest_profile=enriched_profile
+    )
 
     assert len(enriched_profile.click_history) > initial_clicks
     assert len(enriched_profile.click_history) == 15
