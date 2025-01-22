@@ -44,6 +44,8 @@ class RequestGenerator:
             for i in range(num_clicks)
         ]
 
+        self.past_articles = [self.mind_data.lookup_article(uuid=click.article_id) for click in self.clicks]
+
     def add_topics(self, topics: List[str]):
         self.added_topics = [
             AccountInterest(
@@ -60,7 +62,6 @@ class RequestGenerator:
         all_articles = list(self.mind_data.news_df.index)
         selected_candidates = random.sample(all_articles, num_candidates)
 
-        self.past_articles = [self.mind_data.lookup_article(uuid=click.article_id) for click in self.clicks]
         self.candidate_articles = [self.mind_data.lookup_article(id=article_id) for article_id in selected_candidates]
 
     def get_request(self) -> RecommendationRequest:

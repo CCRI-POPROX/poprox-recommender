@@ -52,16 +52,16 @@ and set the number of recommendations.
 mind_data = MindData()
 request_generator = RequestGenerator(mind_data)
 request_generator.add_candidates(100)
-request_generator.add_clicks(0)  # no click history
-request_generator.add_topics([])  # no onboarding topics
+request_generator.add_clicks(num_clicks=46, num_days=7)
+request_generator.add_topics(["Science", "Technology", "Sports", "Lifestyle", "Oddities"])  # out of 14 GENERAL_TOPICS
 request_generator.set_num_recs(10)
 
 
 @mark.serverless
 @mark.parametrize("pipeline", PIPELINES)
-def test_edge_cases(sl_listener, pipeline):  # noqa:F811
+def test_recommender_api(sl_listener, pipeline):  # noqa:F811
     """
-    Test edge cases.
+    Test the recommendation API.
     """
     request = request_generator.get_request()
     send_request_and_validate(request, pipeline)
