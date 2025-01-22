@@ -42,7 +42,7 @@ def send_request_and_validate(request, pipeline):
     recommended_articles = list(validated_response.recommendations.values())[0]
     assert (
         len(recommended_articles) == request_generator.num_recs
-    ), f"Expected {request_generator.num_recs} recommendations, but got {recommended_articles}"
+    ), f"Expected {request_generator.num_recs} recommendations, but got {len(recommended_articles)}"
 
 
 """
