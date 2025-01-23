@@ -1,6 +1,6 @@
 # Use Lambda "Provided" base image for the build container
 FROM public.ecr.aws/lambda/provided:al2023 AS build
-ARG PIXI_VERSION=0.39.5
+ARG PIXI_VERSION=0.40.3
 
 # install necessary system packages
 RUN dnf -y install git-core
