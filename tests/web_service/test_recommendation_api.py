@@ -59,7 +59,7 @@ request_generator.set_num_recs(10)
 
 @mark.serverless
 @mark.parametrize("pipeline", PIPELINES)
-def test_recommender_api(sl_listener, pipeline):  # noqa:F811
+def test_recommendation_api(sl_listener, pipeline):  # noqa:F811
     """
     Test the recommendation API.
     """
