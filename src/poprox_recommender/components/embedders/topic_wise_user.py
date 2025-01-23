@@ -220,10 +220,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         return topical_articles
 
     def build_embeddings_from_definitions(self):
-        article_embedder = NRMSArticleEmbedder(
-            model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
-        )
-        topic_article_set = article_embedder(ArticleSet(articles=TOPIC_ARTICLES))
+        topic_article_set = self.article_embedder(ArticleSet(articles=TOPIC_ARTICLES))
 
         topic_embeddings_by_uuid = {
             article.article_id: embedding for article, embedding in zip(TOPIC_ARTICLES, topic_article_set.embeddings)
