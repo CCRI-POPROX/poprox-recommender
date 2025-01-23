@@ -65,3 +65,41 @@ stages:
       md5: 5fd32df12f72621449c4bfccb4860f41.dir
       size: 1500075888
       nfiles: 5
+  preprocess-training-data:
+    cmd: python -m poprox_recommender.training.preprocess
+    deps:
+    - path: ../src/poprox_recommender/training/preprocess.py
+      hash: md5
+      md5: 1564e172ad7c9494c33996a28510411c
+      size: 5156
+    - path: MINDlarge_dev
+      hash: md5
+      md5: a90bc1810ca5c0c4c4ef4320474cb67f.dir
+      size: 322720668
+      nfiles: 5
+    - path: MINDlarge_test
+      hash: md5
+      md5: 0c6ffa13aff376a03efef4e6fe8bfb4a.dir
+      size: 1607849223
+      nfiles: 5
+    - path: MINDlarge_train
+      hash: md5
+      md5: 5fd32df12f72621449c4bfccb4860f41.dir
+      size: 1500075888
+      nfiles: 5
+    outs:
+    - path: MINDlarge_post_dev
+      hash: md5
+      md5: b46257fa21d5847dbb140fffee7bc289.dir
+      size: 65658285
+      nfiles: 1
+    - path: MINDlarge_post_test
+      hash: md5
+      md5: 76ef57e4d4f5c9c965bfc4b99334ce84.dir
+      size: 112514303
+      nfiles: 1
+    - path: MINDlarge_post_train
+      hash: md5
+      md5: 6b312ce0fa94e51252cc4b659b351d10.dir
+      size: 1163364294
+      nfiles: 3

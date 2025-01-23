@@ -12,3 +12,15 @@ stages:
         - ${item}.zip
       outs:
         - ${item}
+
+  preprocess-training-data:
+    cmd: python -m poprox_recommender.training.preprocess
+    deps:
+      - ../src/poprox_recommender/training/preprocess.py
+      - MINDlarge_train
+      - MINDlarge_dev
+      - MINDlarge_test
+    outs:
+      - MINDlarge_post_train
+      - MINDlarge_post_dev
+      - MINDlarge_post_test

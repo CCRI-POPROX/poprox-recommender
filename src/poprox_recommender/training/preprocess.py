@@ -1,4 +1,5 @@
 import csv
+import os
 import random
 from os import path
 
@@ -21,7 +22,7 @@ def parse_behaviors(source, target, user2int_path, negative_sampling_ratio):
     )
 
     # during the training, allow the existence of users who have no past interactions
-    behaviors.clicked_news.fillna(" ", inplace=True)
+    behaviors.fillna({"clicked_news": " "}, inplace=True)
     behaviors.impressions = behaviors.impressions.str.split()
 
     # convert raw user ID to int
@@ -106,6 +107,10 @@ if __name__ == "__main__":
     post_train_dir = root / "data/MINDlarge_post_train"
     post_val_dir = root / "data/MINDlarge_post_dev"
     post_test_dir = root / "data/MINDlarge_post_test"
+
+    os.makedirs(post_train_dir, exist_ok=True)
+    os.makedirs(post_val_dir, exist_ok=True)
+    os.makedirs(post_test_dir, exist_ok=True)
 
     pretrain_tokenizer = (
         "distilbert-base-uncased"  # the model needs to be consistent with the pretrained model during training
