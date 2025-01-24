@@ -200,6 +200,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
                 rusage = dv.apply_sync(_finish_worker)
 
         else:
+            logger.info("starting serial evaluation")
             # directly call things in-process
             _init_worker(outs)
 

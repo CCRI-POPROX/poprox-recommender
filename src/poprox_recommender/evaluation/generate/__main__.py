@@ -22,6 +22,7 @@ Options:
 """
 
 import logging
+import os
 import shutil
 from pathlib import Path
 
@@ -45,7 +46,8 @@ def generate_main():
     """
     options = docopt(__doc__)  # type: ignore
     log_cfg = LoggingConfig()
-    if options["--verbose"]:
+    # turn on verbose logging when GitHub actions run in debug mode
+    if options["--verbose"] or os.environ.get("RUNNER_DEBUG", 0):
         log_cfg.set_verbose(True)
     if options["--log-file"]:
         log_cfg.set_log_file(options["--log-file"])
