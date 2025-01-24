@@ -10,4 +10,3 @@ pre-commit install-hooks
 
 # install the development environment
 pixi install -e dev
-pixi run -e dev install-serverless
