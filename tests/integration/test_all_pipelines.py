@@ -8,13 +8,13 @@ import sys
 import warnings
 from threading import Condition, Lock, Thread
 
-import requests
 from pexpect import EOF, spawn
 from pytest import fail, fixture, mark, skip
 
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.recommenders import recommendation_pipelines
+from poprox_recommender.testing import local_service as service  # noqa: F401
 
 logger = logging.getLogger(__name__)
 try:
@@ -69,15 +69,12 @@ class ServerlessBackground(Thread):
 
 @mark.serverless
 @mark.parametrize("pipeline", PIPELINES)
-def test_basic_request(sl_listener, pipeline):
+def test_basic_request(service, pipeline):  # noqa: F811
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "request_body.json"
     req_body = req_f.read_text()
 
     logger.info("sending request")
-    res = requests.post(f"http://localhost:3000?pipeline={pipeline}", req_body)
-    assert res.status_code == 200
-    logger.info("response: %s", res.text)
-    body = res.json()
-    assert "recommendations" in body
-    assert len(body["recommendations"]) > 0
+    response = service.request(req_body, pipeline)
+    logger.info("response: %s", response.model_dump_json(indent=2))
+    assert response.recommendations
