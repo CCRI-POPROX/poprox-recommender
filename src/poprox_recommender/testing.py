@@ -93,13 +93,14 @@ class DockerTestService:
         return RecommendationResponse.model_validate_json(res_data["body"])
 
 
-@fixture
-def local_service() -> Generator[TestService, None, None]:
+def local_service_impl() -> Generator[TestService, None, None]:
     yield InProcessTestService()
 
 
-@fixture(scope="session")
-def docker_service() -> Generator[TestService, None, None]:
+local_service = fixture(local_service_impl)
+
+
+def docker_service_impl() -> Generator[TestService, None, None]:
     logger.info("building docker container")
     sp.check_call(["docker-buildx", "build", "-t", "poprox-recommender:test", "."])
     logger.info("starting docker container")
@@ -113,13 +114,16 @@ def docker_service() -> Generator[TestService, None, None]:
         proc.wait()
 
 
+docker_service = fixture(scope="session")(docker_service_impl)
+
+
 @fixture(scope="session")
 def auto_service() -> Generator[TestService, None, None]:
     backend = os.environ.get("POPROX_TEST_TARGET", "local")
     if backend == "local":
-        yield from local_service()
-    elif backend == "autodocker":
-        yield from docker_service()
+        yield from local_service_impl()
+    elif backend == "docker-auto":
+        yield from docker_service_impl()
     elif backend == "docker":
         # use already-running docker
         port = os.environ.get("POPROX_TEST_PORT", "9000")
