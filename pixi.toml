@@ -53,13 +53,12 @@ awslambdaric = "~=2.2"
 hatch = "*"
 conda-pack = "~=0.8"
 
-# dependencies for working with serverless
+# dependencies for working with serverless (for deploy)
 [feature.serverless.dependencies]
 nodejs = "~=22.1"
 
 [feature.serverless.tasks]
 install-serverless = "npm ci"
-start-serverless = { cmd = "npx serverless offline start --reloadHandler", depends-on = ["install-serverless"] }
 
 # general development dependencies
 [feature.dev.dependencies]
