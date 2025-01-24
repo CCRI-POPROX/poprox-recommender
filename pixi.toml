@@ -111,7 +111,6 @@ poprox-recommender = { path = ".", editable = true }
 requests = ">=2.31,<3"
 coverage = ">=6.5"
 pytest = ">=8"
-pexpect = "~=4.9"
 
 [feature.test.pypi-dependencies]
 poprox-recommender = { path = ".", editable = true }
