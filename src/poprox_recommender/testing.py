@@ -32,7 +32,7 @@ class InProcessTestService:
     Test service that directly runs the request handler in-process.
     """
 
-    def request(self, req: RecommendationRequest | str) -> RecommendationResponse:
+    def request(self, req: RecommendationRequest | str, pipeline: str) -> RecommendationResponse:
         # defer to here so we don't always import the handler
         from poprox_recommender.handler import generate_recs
 
@@ -41,7 +41,7 @@ class InProcessTestService:
 
         event = {
             "body": req,
-            "queryStringParameters": {"pipeline": "nrms"},
+            "queryStringParameters": {"pipeline": pipeline},
             "isBase64Encoded": False,
         }
         res = generate_recs(event, {})
