@@ -14,7 +14,7 @@ from pytest import fail, fixture, mark, skip
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.recommenders import recommendation_pipelines
-from poprox_recommender.testing import local_service as service  # noqa: F401
+from poprox_recommender.testing import docker_service as service  # noqa: F401
 
 logger = logging.getLogger(__name__)
 try:
@@ -67,7 +67,6 @@ class ServerlessBackground(Thread):
         self.proc.expect(EOF)
 
 
-@mark.serverless
 @mark.parametrize("pipeline", PIPELINES)
 def test_basic_request(service, pipeline):  # noqa: F811
     test_dir = project_root() / "tests"
