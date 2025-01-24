@@ -7,6 +7,7 @@ tests, regardless of their subdirectories.
 
 import json
 import logging
+import os
 import subprocess as sp
 from collections.abc import Generator
 from signal import SIGINT
@@ -110,3 +111,16 @@ def docker_service() -> Generator[TestService, None, None]:
         logger.info("stopping docker container")
         proc.send_signal(SIGINT)
         proc.wait()
+
+
+@fixture(scope="session")
+def auto_service() -> Generator[TestService, None, None]:
+    backend = os.environ.get("POPROX_TEST_TARGET", "local")
+    if backend == "local":
+        yield from local_service()
+    elif backend == "autodocker":
+        yield from docker_service()
+    elif backend == "docker":
+        # use already-running docker
+        port = os.environ.get("POPROX_TEST_PORT", "9000")
+        yield DockerTestService(f"http://localhost:{port}/2015-03-31/functions/function/invocations")
