@@ -3,13 +3,15 @@ Test the Lambda endpoint as run in a Docker container, encoding our request
 as the AWS API gateway would.
 
 Usage:
-    test-docker-lambda.py [-v] [-p PORT] [-r FILE]
+    test-docker-lambda.py [-v] [-P PIPE] [-p PORT] [-r FILE]
 
 Args:
     -v, --verbose
         enable verbose log messages
     -p PORT, --port=PORT
         the port number where Docker is listening [default: 9000]
+    -P PIPE, --pipeline=PIPE
+        the pipeline to run
     -r FILE, --request=FILE
         load request payload from FILE [default: tests/request_data/basic-request.json]
 """
@@ -20,6 +22,7 @@ Args:
 # dependencies = ["docopt>=0.6", "requests~=2.31"]
 # ///
 
+import base64
 import json
 import logging
 import sys
@@ -43,9 +46,17 @@ def main(args):
     logger.info("loading request from %s", req_file)
     req_txt = req_file.read_text()
     logger.debug("request content: %s", req_txt)
+    # the docker lambda runtime chokes on this test request, re-encoding solves it
+    req_txt = json.dumps(json.loads(req_txt))
 
     logger.info("sending request")
-    result = requests.post(url, json={"body": req_txt})
+    request = {
+        "body": base64.encodebytes(req_txt.encode()).decode("ascii"),
+        "isBase64Encoded": True,
+    }
+    if args["--pipeline"]:
+        request["queryStringParameters"] = {"pipeline": args["--pipeline"]}
+    result = requests.post(url, json=request)
 
     logger.info("received response, code %s", result.status_code)
     logger.debug("response headers: %s", json.dumps(dict(result.headers), indent=2))
