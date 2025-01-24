@@ -199,23 +199,23 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    # nrms_rrf_static_candidate = build_RRF_pipeline(
-    #     "NRMS+RRF",
-    #     article_embedder=article_embedder,
-    #     user_embedder=topic_user_embedder_static,
-    #     user_embedder2=topic_user_embedder_candidate,
-    #     ranker=topk_ranker,
-    #     num_slots=num_slots,
-    # )
+    nrms_rrf_static_candidate = build_RRF_pipeline(
+        "NRMS+RRF",
+        article_embedder=article_embedder,
+        user_embedder=topic_user_embedder_static,
+        user_embedder2=topic_user_embedder_candidate,
+        ranker=topk_ranker,
+        num_slots=num_slots,
+    )
 
-    # nrms_rrf_static_clicked = build_RRF_pipeline(
-    #     "NRMS+RRF",
-    #     article_embedder=article_embedder,
-    #     user_embedder=topic_user_embedder_static,
-    #     user_embedder2=topic_user_embedder_clicked,
-    #     ranker=topk_ranker,
-    #     num_slots=num_slots,
-    # )
+    nrms_rrf_static_clicked = build_RRF_pipeline(
+        "NRMS+RRF",
+        article_embedder=article_embedder,
+        user_embedder=topic_user_embedder_static,
+        user_embedder2=topic_user_embedder_clicked,
+        ranker=topk_ranker,
+        num_slots=num_slots,
+    )
 
     return {
         "nrms": nrms_pipe,
@@ -228,8 +228,8 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         "topic-cali": topic_cali_pipe,
         # "locality-cali": locality_cali_pipe,
         "softmax": softmax_pipe,
-        # "nrms_rrf_static_candidate": nrms_rrf_static_candidate,
-        # "nrms_rrf_static_clicked": nrms_rrf_static_clicked,
+        "nrms_rrf_static_candidate": nrms_rrf_static_candidate,
+        "nrms_rrf_static_clicked": nrms_rrf_static_clicked,
     }
 
 
