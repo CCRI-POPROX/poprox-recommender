@@ -54,7 +54,10 @@ jobs:
 
       - name: Submit test request
         run: |
-          python ./tests/integration/test-docker-lambda.py
+          python -m pytest -v tests/integration
+        env:
+          POPROX_TEST_TARGET: docker
+          POPROX_TEST_PORT: 9000
 
       - name: Dump Docker logs
         if: always()
