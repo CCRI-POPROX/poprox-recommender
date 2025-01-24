@@ -288,6 +288,8 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
     # Compute embeddings
     e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
     e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
+
+    # First user embedding strategy
     e_user_1 = pipeline.add_component(
         "user-embedder",
         user_embedder,
@@ -304,7 +306,7 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
     else:
         o_rank_1 = pipeline.add_component("reranker", ranker, candidate_articles=o_scored_1, interest_profile=e_user_1)
 
-    # Fallback in case not enough articles came from the ranker
+    # Second user embedding strategy
     e_user_2 = pipeline.add_component(
         "user-embedder2",
         user_embedder2,
@@ -320,6 +322,7 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
     else:
         o_rank_2 = pipeline.add_component("reranker2", ranker, candidate_articles=o_scored_2, interest_profile=e_user_2)
 
+    # Merge recommendations from each strategy
     pipeline.add_component("recommender", rrf, candidates1=o_rank_1, candidates2=o_rank_2)
 
     return pipeline
