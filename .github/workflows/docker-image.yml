@@ -38,11 +38,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .dvc/cache
-          key: docker-dvc-cache-${{ hashFiles('models/**.dvc') }}
+          key: docker-dvc-cache-${{ hashFiles('models/**.dvc', 'tests/**.dvc') }}
 
       - name: Fetch model data
         run: |
-          dvc pull -vr public -R models
+          dvc pull -vr public -R models tests
 
       - name: Build Docker image
         run: |
