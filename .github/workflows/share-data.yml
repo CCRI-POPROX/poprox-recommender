@@ -10,6 +10,8 @@ jobs:
     name: Share data to S3
     runs-on: ubuntu-latest
 
+    environment: data-publish
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,21 +26,25 @@ jobs:
           environments: data
           activate-environment: true
 
+      - name: Configure sharing
+        run: |
+          dvc remote modify --local public allow_anonymous_login false
+
       - name: Fetch model data
         run: |
           dvc pull
         env:
-          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Upload shared data
         run: ./scripts/upload-shared-data.sh --shared
         env:
-          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Upload public data
         run: ./scripts/upload-shared-data.sh --public
         env:
-          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}

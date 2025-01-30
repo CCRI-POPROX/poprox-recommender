@@ -1,6 +1,7 @@
+from lenskit.pipeline import Component
+from lenskit.pipeline.types import Lazy
+
 from poprox_concepts import ArticleSet
-from poprox_recommender.lkpipeline import Component
-from poprox_recommender.lkpipeline.types import Lazy
 
 
 class Fill(Component):

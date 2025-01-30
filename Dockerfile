@@ -1,6 +1,6 @@
 # Use Lambda "Provided" base image for the build container
 FROM public.ecr.aws/lambda/provided:al2023 AS build
-ARG PIXI_VERSION=0.35.0
+ARG PIXI_VERSION=0.40.3
 
 # install necessary system packages
 RUN dnf -y install git-core
@@ -8,7 +8,7 @@ RUN dnf -y install git-core
 # Fetch the pixi executable from GitHub
 # see: https://github.com/prefix-dev/pixi-docker/blob/main/Dockerfile
 RUN curl -fsL \
-    "https://github.com/prefix-dev/pixi/releases/download/v${PIXI_VERSION}/pixi-x86_64-unknown-linux-musl" \
+    "https://github.com/prefix-dev/pixi/releases/download/v${PIXI_VERSION}/pixi-$(uname -m)-unknown-linux-musl" \
     -o /usr/local/bin/pixi && chmod +x /usr/local/bin/pixi
 
 # Copy the soure code into the image to install it and create the environment

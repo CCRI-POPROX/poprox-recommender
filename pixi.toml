@@ -18,18 +18,17 @@ pytorch = "~=2.0"
 smart_open = "~=7.0"
 safetensors = ">=0.4,<1"
 transformers = "~=4.41"
-colorlog = "~=6.8"
-enlighten = "~=1.12"
+rich = "~=13.9"
 ipyparallel = "~=8.0"
 # poprox-concepts dependencies not covered above
 pydantic = "~=2.7.1"
+# lenskit dependencies from conda
+structlog = ">=24.0"
+threadpoolctl = "~=3.5"
 
 [pypi-dependencies]
-# git dep on progress-api until non-prerelease is out
-progress-api = { git = "https://github.com/lenskit/progress-api" }
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
-lenskit = { git = "https://github.com/lenskit/lkpy.git", subdirectory = "lenskit" }
-manylog = { git = "https://github.com/mdekstrand/manylog.git" }
+lenskit = "==2025.0.0a4"
 
 # turn off CUDA on Windows
 [target.win.dependencies]
@@ -54,13 +53,12 @@ awslambdaric = "~=2.2"
 hatch = "*"
 conda-pack = "~=0.8"
 
-# dependencies for working with serverless
+# dependencies for working with serverless (for deploy)
 [feature.serverless.dependencies]
 nodejs = "~=22.1"
 
 [feature.serverless.tasks]
 install-serverless = "npm ci"
-start-serverless = { cmd = "npx serverless offline start --reloadHandler", depends-on = ["install-serverless"] }
 
 # general development dependencies
 [feature.dev.dependencies]
@@ -93,6 +91,11 @@ jupytext = ">=1.16"
 scipy = "~=1.14.1"
 pylatex = "~=1.4.2"
 
+# Linux-only so long as we keep Windows usable with pixi.toml
+# TODO: move to normal dependencies when we drop Windows
+[feature.data.target.linux.dependencies]
+jq = "*"
+
 # dependencies for running the evaluation code
 
 [feature.eval.dependencies]
@@ -108,7 +111,6 @@ poprox-recommender = { path = ".", editable = true }
 requests = ">=2.31,<3"
 coverage = ">=6.5"
 pytest = ">=8"
-pexpect = "~=4.9"
 
 [feature.test.pypi-dependencies]
 poprox-recommender = { path = ".", editable = true }

@@ -41,8 +41,8 @@ repos:
   - repo: local
     hooks:
       - id: dprint
-        name: format source files
-        entry: dprint fmt
+        name: format configuration files
+        entry: dprint fmt --allow-no-files
         language: node
         types_or:
           - yaml

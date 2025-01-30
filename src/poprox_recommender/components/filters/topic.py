@@ -1,7 +1,8 @@
 import logging
 
+from lenskit.pipeline import Component
+
 from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.lkpipeline import Component
 
 logger = logging.getLogger(__name__)
 

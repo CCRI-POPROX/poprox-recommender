@@ -2,6 +2,8 @@
 import logging
 from typing import Any
 
+from lenskit.pipeline import Pipeline, PipelineState
+
 from poprox_concepts import ArticleSet, InterestProfile
 from poprox_recommender.components.diversifiers import (
     LocalityCalibrator,
@@ -17,11 +19,9 @@ from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers import SoftmaxSampler, UniformSampler
 from poprox_recommender.components.scorers import ArticleScorer
 from poprox_recommender.config import default_device
-from poprox_recommender.lkpipeline import Pipeline, PipelineState
 from poprox_recommender.paths import model_file_path
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 _cached_pipelines = None

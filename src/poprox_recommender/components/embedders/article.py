@@ -5,11 +5,11 @@ from typing import Protocol
 from uuid import UUID
 
 import torch as th
+from lenskit.pipeline import Component
 from safetensors.torch import load_file
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
 from poprox_concepts import ArticleSet
-from poprox_recommender.lkpipeline import Component
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.news_encoder import NewsEncoder
 from poprox_recommender.paths import model_file_path
@@ -53,7 +53,7 @@ class NRMSArticleEmbedder(Component):
         plm_path = model_file_path(config.pretrained_model)
         logger.debug("loading tokenizer from %s", plm_path)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/")
+        self.tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/", clean_up_tokenization_spaces=True)
         self.device = device
         self.embedding_cache = {}
 
