@@ -20,6 +20,7 @@ SEMANTIC_THRESHOLD = 0.2
 BASELINE_THETA_TOPIC = 0.3
 NUM_TOPICS = 3
 DAYS = 4
+USED_indices = set()
 
 
 class ContextGenerator(Component):
@@ -111,9 +112,9 @@ class ContextGenerator(Component):
             article for article in clicked_articles if article.published_at >= time0
         ]
 
-        candidate_indices = self.related_indices(
-            selected_subhead, selected_date, clicked_articles, time_decay
-        )
+        candidate_indices = self.related_indices(selected_subhead, selected_date, clicked_articles, time_decay)
+        if len(candidate_indices) == 0:
+            return []
 
         return [clicked_articles[index] for index in candidate_indices]
 
@@ -133,7 +134,16 @@ class ContextGenerator(Component):
         clicked_embeddings = embeddings[1:]
         similarities = cosine_similarity(target_embedding, clicked_embeddings)[0]
 
-        if time_decay:
+        # CHECK threshold [0.2, 0, 0.2]
+        for i in range(len(similarities)):
+            val = similarities[i]
+            if val < SEMANTIC_THRESHOLD or i in USED_indices:
+                similarities[i] = 0
+
+        if np.sort(similarities)[-1] < SEMANTIC_THRESHOLD:
+            return []
+
+        elif time_decay:
             weights = [
                 self.get_time_weight(selected_date, published_date)
                 for published_date in [
@@ -141,9 +151,15 @@ class ContextGenerator(Component):
                 ]
             ]
             weighted_similarities = similarities * weights
-            return np.argsort(weighted_similarities)[-1:][::-1]
 
-        return np.argsort(similarities)[-1:][::-1]
+            selected_indices = np.argsort(weighted_similarities)[-1:]
+            USED_indices.add(selected_indices)
+            return selected_indices
+
+        else:
+            selected_indices = np.argsort(weighted_similarities)[-1:]
+            USED_indices.add(selected_indices)
+            return selected_indices
 
     async def semantic_narrative(self, news_list):
         system_prompt = (
