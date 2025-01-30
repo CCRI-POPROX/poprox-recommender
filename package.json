@@ -3,6 +3,6 @@
     "serverless-python-requirements": "^6.1.0"
   },
   "dependencies": {
-    "serverless": "^3.39.0"
+    "serverless": "^3.40.0"
   }
 }
