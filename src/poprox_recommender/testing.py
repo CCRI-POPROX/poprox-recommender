@@ -18,6 +18,8 @@ import requests
 from pytest import fixture
 
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
+from poprox_recommender.data.mind import MindData
+from poprox_recommender.request_generator import RequestGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -128,3 +130,23 @@ def auto_service() -> Generator[TestService, None, None]:
         # use already-running docker
         port = os.environ.get("POPROX_TEST_PORT", "9000")
         yield DockerTestService(f"http://localhost:{port}/2015-03-31/functions/function/invocations")
+
+
+def send_request_and_validate(test_service: TestService, request: RecommendationRequest, pipeline: str):
+    response = test_service.request(request, pipeline)
+
+    assert isinstance(response.recommendations, dict)
+    assert len(response.recommendations) > 0, "No recommendations in response"
+
+
+@fixture(scope="session")
+def request_generator():
+    """
+    Initialize request data
+    """
+    mind_data = MindData()
+    request_generator = RequestGenerator(mind_data)
+    request_generator.add_candidates(100)
+    request_generator.add_clicks(num_clicks=37, num_days=7)
+    request_generator.add_topics(["Science", "Technology", "Sports", "Lifestyle", "Oddities"])
+    request_generator.set_num_recs(10)
