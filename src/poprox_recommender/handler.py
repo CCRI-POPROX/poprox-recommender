@@ -1,13 +1,14 @@
 import base64
 import logging
 import os
+from collections import defaultdict
 
 import structlog
 
 from poprox_concepts import ArticleSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
 from poprox_recommender.recommenders import select_articles
-from poprox_recommender.topics import user_locality_preference, user_topic_preference
+from poprox_recommender.topics import find_topic, user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +41,24 @@ def generate_recs(event, context):
     # The platform should send an ArticleSet but we'll do it here for now
     candidate_articles = ArticleSet(articles=req.todays_articles)
 
+    topic_count_dict = defaultdict(int)
+
+    for article_id in [article.article_id for article in candidate_articles.articles]:
+        clicked_topics = find_topic(candidate_articles.articles, article_id) or set()
+        for topic in clicked_topics:
+            topic_count_dict[topic] += 1
+
+    print(f"\n Candidate article topics: {dict(topic_count_dict)}")
+
     # Similarly, the platform should provided pre-filtered clicked articles
     # and compute the topic counts but this shim lets us ignore that issue
     # in the actual article selection
     profile = req.interest_profile
     click_history = profile.click_history
+
+    onboarding_topics = {interest.entity_name: interest.preference for interest in profile.onboarding_topics}
+    print(f"\nOnboarding topic selections: {onboarding_topics}")
+
     clicked_articles = list(
         filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
     )
