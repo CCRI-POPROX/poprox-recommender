@@ -1,3 +1,7 @@
+"""
+Validate edge case: user has no click history
+"""
+
 import logging
 import warnings
 
@@ -6,9 +10,10 @@ from pytest import mark, skip
 
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
 from poprox_recommender.config import allow_data_test_failures
-from poprox_recommender.data.mind import MindData
 from poprox_recommender.recommenders import recommendation_pipelines
-from poprox_recommender.testing import docker_service, request_generator, send_request_and_validate
+from poprox_recommender.request_generator import RequestGenerator
+from poprox_recommender.testing import auto_service as service
+from poprox_recommender.testing import mind_data
 
 logger = logging.getLogger(__name__)
 try:
@@ -23,12 +28,18 @@ except Exception as e:
 
 @mark.docker
 @mark.parametrize("pipeline", PIPELINES)
-def test_edge_cases(docker_service, request_generator, pipeline):  # noqa:F811
+def test_basic_request(service, mind_data, pipeline):  # noqa: F811
     """
-    Test no-clicks case.
+    Initialize request data
     """
-    request_generator.add_clicks(0)
-    request = request_generator.get_request()
+    request_generator = RequestGenerator(mind_data())
+    request_generator.add_candidates(100)
+    request_generator.add_clicks(num_clicks=0, num_days=0)
+    request_generator.add_topics(["Science", "Technology", "Sports", "Lifestyle", "Oddities"])
+    request_generator.set_num_recs(10)
+    req_body = request_generator.get_request()
 
-    send_request_and_validate(docker_service, request, pipeline)
-    logger.info("No clicks case passed validation")
+    logger.info("sending request")
+    response = service.request(req_body, pipeline)
+    logger.info("response: %s", response.model_dump_json(indent=2))
+    assert response.recommendations
