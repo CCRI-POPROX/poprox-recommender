@@ -29,17 +29,6 @@ provider:
         path: "./"
         platform: linux/amd64
 
-plugins:
-  - serverless-offline
-custom:
-  "offline:true": # offline enabled parameters
-    enabled: true
-    filePrefix: "offline."
-  "offline:false": # offline disabled parameters
-    enabled: false
-    filePrefix: ""
-  offline: ${self:custom.offline:${strToBool(${env:IS_OFFLINE, false})}}
-
 package:
   patterns:
     - "!venv/**"
@@ -49,5 +38,13 @@ package:
     - "**.py"
     - "**.html"
 
-# if offline mode enabled filePrefix = 'offline.' else filePrefix = ''
-functions: ${file(./serverless/${self:custom.offline.filePrefix}functions.yaml):functions}
+functions:
+  generateRecommendations:
+    image:
+      name: poprox-recommender
+    memorySize: 4096
+    ephemeralStorageSize: 2048
+    events:
+      - httpApi:
+          path: /
+          method: post
