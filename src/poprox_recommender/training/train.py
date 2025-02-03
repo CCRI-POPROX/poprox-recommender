@@ -40,11 +40,9 @@ def train(device, load_checkpoint):
     2. Load Data & Create Dataset
     """
     logger.info("Initialize Dataset")
-    train_dir = root / "data/MINDlarge_train"
-    val_dir = root / "data/MINDlarge_dev"
 
-    train_dataset = {"behaviors": train_dir / "behaviors.tsv", "news": train_dir / "news.tsv"}
-    eval_dataset = {"behaviors": val_dir / "behaviors.tsv", "news": val_dir / "news.tsv"}
+    train_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
+    eval_dataset = root / "data/MINDlarge_dev/behaviors.tsv"
 
     """
     3. Train
@@ -58,7 +56,7 @@ def train(device, load_checkpoint):
         weight_decay=0.0,
         optim="adamw_torch",
         save_strategy="epoch",
-        evaluation_strategy="no",
+        eval_strategy="no",
         gradient_accumulation_steps=8,
         learning_rate=1e-4,
         per_device_train_batch_size=16,
