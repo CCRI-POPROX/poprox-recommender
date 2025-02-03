@@ -108,9 +108,7 @@ if __name__ == "__main__":
     parser.add_argument("--evaluate_batch_size", type=int, default=16)
     parser.add_argument("--evaluate_num_worker", type=int, default=4)
     parser.add_argument("--load_checkpoint", type=bool, default=False)
-    parser.add_argument(
-        "--checkpoint_path", type=str, default="/home/XLL1713/POPROX/NRMS_bert/NRMS_BERT_MINDLarge/model.safetensors"
-    )
+    parser.add_argument("--checkpoint_path", type=str, default="models/nrms-mind/checkpoint/model.safetensors")
     """
     The followings need to be consistent with the hyperparameter settings in preprocess.py
     """
