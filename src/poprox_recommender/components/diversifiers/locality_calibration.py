@@ -6,10 +6,10 @@ import torch as th
 from poprox_concepts import Article, ArticleSet, InterestProfile
 from poprox_recommender.components.diversifiers.calibration import compute_kl_divergence
 from poprox_recommender.lkpipeline import Component
-from poprox_recommender.paths import model_file_path
 from poprox_recommender.topics import extract_general_topics, extract_locality, normalized_category_count
 
 LOCALITY_DISTANCE_THRESHOLD = 0.1
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class LocalityCalibrator(Component):
         theta_topic = self.theta_topic if theta_topic is None else theta_topic
         theta_locality = self.theta_locality if theta_locality is None else theta_locality
 
-        normalized_topic_prefs = self.compute_topic_prefs(interest_profile)
+        normalized_topic_prefs = LocalityCalibrator.compute_topic_prefs(interest_profile)
         normalized_locality_prefs = self.compute_local_prefs(candidate_articles)
 
         if candidate_articles.scores is not None:
@@ -65,7 +65,6 @@ class LocalityCalibrator(Component):
         article_set.k1_locality = final_calibrations[1]
 
         article_set.is_inside_locality_threshold = not localities_outside_threshold
-
         return article_set
 
     def add_article_to_categories(self, rec_topics, article):
@@ -181,7 +180,8 @@ class LocalityCalibrator(Component):
         normalized_locality_pres = normalized_category_count(locality_preferences)
         return normalized_locality_pres
 
-    def compute_topic_prefs(self, interest_profile):
+    @staticmethod
+    def compute_topic_prefs(interest_profile):
         topic_preferences: dict[str, int] = defaultdict(int)
         # TODO uncomment to verify interest profile bug
         # logger.info(f"Interest Profile {interest_profile.click_topic_counts}")

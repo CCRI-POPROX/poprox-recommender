@@ -144,7 +144,7 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     )
 
     return {
-        "nrms": nrms_pipe,
+        "nrms": locality_cali_pipe,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
@@ -230,9 +230,11 @@ def build_locality_pipeline(name, article_embedder, user_embedder, ranker, num_s
             interest_profile=e_user,
             theta_topic=theta_topic,
             theta_locality=theta_locality,
-        )
+        )  # ArticleSet
 
-    o_context = pipeline.add_component("generator", generator, clicked=e_click, recommended=o_rank)
+    o_context = pipeline.add_component(
+        "generator", generator, clicked=clicked, recommended=o_rank, interest_profile=profile
+    )
 
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
