@@ -217,7 +217,7 @@ class ContextGenerator(Component):
                     temperature=temperature,
                     max_tokens=max_tokens,
                     frequency_penalty=frequency_penalty,
-                    model="gpt-3.5-turbo",
+                    model="gpt-4o-mini",
                 )
                 return chat_completion.choices[0].message.content
 
