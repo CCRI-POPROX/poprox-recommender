@@ -1,6 +1,7 @@
 import numpy as np
 
-from poprox_concepts import ArticleSet
+from poprox_concepts import CandidateSet
+from poprox_concepts.domain import RecommendationList
 
 
 class SoftmaxSampler:
@@ -8,7 +9,7 @@ class SoftmaxSampler:
         self.num_slots = num_slots
         self.temperature = temperature
 
-    def __call__(self, candidate_articles: ArticleSet) -> ArticleSet:
+    def __call__(self, candidate_articles: CandidateSet) -> CandidateSet:
         if candidate_articles.scores is None:
             scores = np.ones(len(candidate_articles.articles))
         else:
@@ -40,7 +41,7 @@ class SoftmaxSampler:
         sorted_indices = np.argsort(exponentials)
         sampled = [candidate_articles.articles[idx] for idx in sorted_indices[: self.num_slots]]
 
-        return ArticleSet(articles=sampled)
+        return RecommendationList(articles=sampled)
 
 
 def sigmoid(x):

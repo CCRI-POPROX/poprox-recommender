@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import torch as th
 
-from poprox_concepts.domain import AccountInterest, Article, ArticleSet, Click, InterestProfile
+from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSUserEmbedder
 from poprox_recommender.components.embedders.topic_wise_user import TOPIC_ARTICLES, UserOnboardingEmbedder
 from poprox_recommender.paths import model_file_path
@@ -28,7 +28,7 @@ def test_embed_user():
 
     article_id = uuid4()
 
-    clicked = ArticleSet(
+    clicked = CandidateSet(
         articles=[
             Article(
                 article_id=article_id,

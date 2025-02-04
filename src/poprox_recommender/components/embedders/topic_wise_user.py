@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import torch as th
 
-from poprox_concepts import Article, ArticleSet, Click, InterestProfile
+from poprox_concepts import Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
@@ -116,7 +116,7 @@ def virtual_clicks(onboarding_topics, topic_articles):
 
 class UserOnboardingEmbedder(NRMSUserEmbedder):
     article_embedder: NRMSArticleEmbedder
-    embedded_topic_articles: ArticleSet | None = None
+    embedded_topic_articles: CandidateSet | None = None
 
     def __init__(self, *args, embedding_source: str = "static", topic_embedding: str = "nrms", **kwargs):
         super().__init__(*args, **kwargs)
@@ -128,10 +128,10 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
 
     @torch_inference
     def __call__(
-        self, candidate_articles: ArticleSet, clicked_articles: ArticleSet, interest_profile: InterestProfile
+        self, candidate_articles: CandidateSet, clicked_articles: CandidateSet, interest_profile: InterestProfile
     ) -> InterestProfile:
         if self.embedded_topic_articles is None:
-            self.embedded_topic_articles = self.article_embedder(ArticleSet(articles=TOPIC_ARTICLES))
+            self.embedded_topic_articles = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
 
         topic_embeddings_by_uuid = {
             article.article_id: embedding
@@ -182,7 +182,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
 
         return interest_profile
 
-    def build_article_lookup(self, article_set: ArticleSet):
+    def build_article_lookup(self, article_set: CandidateSet):
         embedding_lookup = {}
         for article, article_vector in zip(article_set.articles, article_set.embeddings, strict=True):
             if article.article_id not in embedding_lookup:
@@ -190,7 +190,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
 
         return embedding_lookup
 
-    def build_embeddings_from_articles(self, articles: ArticleSet, topic_articles: list[Article]):
+    def build_embeddings_from_articles(self, articles: CandidateSet, topic_articles: list[Article]):
         topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
 
         topic_embeddings_by_uuid = {}
@@ -220,7 +220,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         return topical_articles
 
     def build_embeddings_from_definitions(self):
-        topic_article_set = self.article_embedder(ArticleSet(articles=TOPIC_ARTICLES))
+        topic_article_set = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
 
         topic_embeddings_by_uuid = {
             article.article_id: embedding for article, embedding in zip(TOPIC_ARTICLES, topic_article_set.embeddings)
