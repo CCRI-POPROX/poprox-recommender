@@ -114,6 +114,28 @@ def virtual_clicks(onboarding_topics, topic_articles):
     return virtual_clicks
 
 
+def compute_topic_weights(onboarding_topics, topic_articles):
+    topic_weight = {}
+
+    topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
+    topic_preference_count = {}
+    for interest in onboarding_topics:
+        topic_name = interest.entity_name
+        preference = interest.preference or 1
+
+        if topic_name in topic_uuids_by_name:
+            article_id = topic_uuids_by_name[topic_name]
+
+            topic_preference_count[article_id] = (topic_name, preference)
+
+    total_preference = sum(count[1] for count in topic_preference_count.values())
+    topic_weight = {
+        article_id: {"topic_name": name, "weight": preference / total_preference}
+        for article_id, (name, preference) in topic_preference_count.items()
+    }
+    return topic_weight
+
+
 class UserOnboardingEmbedder(NRMSUserEmbedder):
     article_embedder: NRMSArticleEmbedder
     embedded_topic_articles: ArticleSet | None = None
@@ -174,11 +196,16 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         click_lookup = self.build_article_lookup(clicked_articles)
         topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
 
-        embedding_lookup = {**click_lookup, **topic_lookup}
+        # embedding_lookup = {**click_lookup, **topic_lookup}
+        embedding_lookup = {**click_lookup}
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
         interest_profile.click_history = combined_click_history
         interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
+
+        # adding topic_embeddings separately
+        interest_profile.topic_embeddings = topic_lookup
+        interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
         return interest_profile
 
