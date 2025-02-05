@@ -41,15 +41,15 @@ def train(device, load_checkpoint):
     """
     logger.info("Initialize Dataset")
 
-    train_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
-    eval_dataset = root / "data/MINDlarge_dev/behaviors.tsv"
+    train_dataset = root / "data/MINDlarge_train/behaviors.tsv"
+    eval_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
 
     """
     3. Train
     """
     logger.info("Training Start")
     training_args = TrainingArguments(
-        output_dir=root / "models/nrms-mind",
+        output_dir="models/nrms-mind",
         logging_strategy="steps",
         save_total_limit=5,
         lr_scheduler_type="constant",
@@ -63,7 +63,7 @@ def train(device, load_checkpoint):
         per_device_eval_batch_size=1,
         num_train_epochs=3,
         remove_unused_columns=False,
-        logging_dir=root / "models/nrms-mind",
+        logging_dir="models/nrms-mind",
         logging_steps=1,
         report_to=None,
     )
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     parser.add_argument("--evaluate_batch_size", type=int, default=16)
     parser.add_argument("--evaluate_num_worker", type=int, default=4)
     parser.add_argument("--load_checkpoint", type=bool, default=False)
-    parser.add_argument("--checkpoint_path", type=str, default="models/nrms-mind/checkpoint/model.safetensors")
+    parser.add_argument("--checkpoint_path", type=str, default="models/nrms-mind/model.safetensors")
     """
     The followings need to be consistent with the hyperparameter settings in preprocess.py
     """
