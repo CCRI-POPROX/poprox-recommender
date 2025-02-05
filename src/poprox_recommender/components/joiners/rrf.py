@@ -2,7 +2,6 @@ from collections import defaultdict
 
 from lenskit.pipeline import Component
 
-from poprox_concepts import CandidateSet
 from poprox_concepts.domain import RecommendationList
 
 

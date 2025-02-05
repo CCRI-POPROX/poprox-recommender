@@ -2,9 +2,8 @@ from uuid import uuid4
 
 from lenskit.pipeline import Pipeline
 
-from poprox_concepts.domain import Article, CandidateSet, InterestProfile
+from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.components.joiners.rrf import ReciprocalRankFusion
-from poprox_concepts.domain import RecommendationList
 
 total_slots = 10
 

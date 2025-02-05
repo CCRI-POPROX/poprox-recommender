@@ -2,8 +2,7 @@ from uuid import uuid4
 
 from lenskit.pipeline import Pipeline
 
-from poprox_concepts.domain import Article, CandidateSet, InterestProfile
-from poprox_concepts.domain import RecommendationList
+from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Concatenate, Fill, Interleave
 from poprox_recommender.components.samplers import UniformSampler
@@ -75,9 +74,7 @@ def test_fill_out_one_recs_list_from_another():
     joiner = Fill(num_slots=total_slots, deduplicate=False)
 
     pipeline = build_pipeline(sampled_slots)
-    pipeline.add_component(
-        "joiner", joiner, recs1=pipeline.node("sampler"), recs2=pipeline.node("candidate")
-    )
+    pipeline.add_component("joiner", joiner, recs1=pipeline.node("sampler"), recs2=pipeline.node("candidate"))
     pipeline.alias("recommender", "joiner")
 
     outputs = pipeline.run_all(**inputs)

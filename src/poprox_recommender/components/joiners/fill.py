@@ -10,7 +10,9 @@ class Fill(Component):
         self.num_slots = num_slots
         self.deduplicate = deduplicate
 
-    def __call__(self, recs1: CandidateSet | RecommendationList, recs2: Lazy[CandidateSet | RecommendationList]) -> RecommendationList:
+    def __call__(
+        self, recs1: CandidateSet | RecommendationList, recs2: Lazy[CandidateSet | RecommendationList]
+    ) -> RecommendationList:
         articles = recs1.articles
 
         if self.deduplicate:
