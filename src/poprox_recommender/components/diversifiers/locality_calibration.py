@@ -189,6 +189,7 @@ class LocalityCalibrator(Component):
             topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
 
         if interest_profile.click_topic_counts:
+            print(f"click topic counts: {interest_profile.click_topic_counts}")
             for topic, click_count in interest_profile.click_topic_counts.items():
                 topic_preferences[topic] = topic_preferences.get(topic, 0) + click_count
         normalized_topic_prefs = normalized_category_count(topic_preferences)

@@ -88,7 +88,10 @@ class ContextGenerator(Component):
             generated_rec = await self.semantic_narrative(main_news, related_news)
 
         else:
-            generated_rec = await self.highlevel_narrative(article, topic_distribution)
+            if topic_distribution:
+                generated_rec = await self.highlevel_narrative(article, topic_distribution)
+            else:
+                generated_rec = {"HEADLINE": article.headline, "SUB_HEADLINE": article.subhead}
 
         generated_dict = ast.literal_eval(generated_rec)
 
