@@ -28,14 +28,22 @@ except Exception as e:
 
 @mark.docker
 @mark.parametrize("pipeline", PIPELINES)
-def test_basic_request(service, mind_data, pipeline):  # noqa: F811
+def test_no_clicks(service, mind_data, pipeline):  # noqa: F811
     """
     Initialize request data
     """
     request_generator = RequestGenerator(mind_data())
     request_generator.add_candidates(100)
-    request_generator.add_clicks(num_clicks=0, num_days=0)
-    request_generator.add_topics(["Science", "Technology", "Sports", "Lifestyle", "Oddities"])
+    request_generator.add_clicks(num_clicks=0, num_days=10)
+    request_generator.add_topics(
+        [
+            "Science",
+            "Technology",
+            "Sports",
+            "Lifestyle",
+            "Oddities",
+        ]
+    )
     request_generator.set_num_recs(10)
     req_body = request_generator.get_request()
 
@@ -43,3 +51,9 @@ def test_basic_request(service, mind_data, pipeline):  # noqa: F811
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     assert response.recommendations
+    assert response.recommendations.values()
+    recs = next(iter(response.recommendations.values()))
+    assert len(recs) > 0
+    assert len(recs) == request_generator.num_recs
+    article_ids = [article.article_id for article in recs]
+    assert len(article_ids) == len(set(article_ids))

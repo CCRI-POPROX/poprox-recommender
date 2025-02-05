@@ -1,5 +1,5 @@
 """
-Test basic request by initializing test data.
+Validate edge case: a user with only one click over several days
 """
 
 import logging
@@ -28,13 +28,13 @@ except Exception as e:
 
 @mark.docker
 @mark.parametrize("pipeline", PIPELINES)
-def test_basic_request(service, mind_data, pipeline):  # noqa: F811
+def test_sparse_interaction_history(service, mind_data, pipeline):  # noqa: F811
     """
     Initialize request data
     """
     request_generator = RequestGenerator(mind_data())
     request_generator.add_candidates(100)
-    request_generator.add_clicks(num_clicks=37, num_days=7)
+    request_generator.add_clicks(num_clicks=1, num_days=10)
     request_generator.add_topics(
         [
             "Science",

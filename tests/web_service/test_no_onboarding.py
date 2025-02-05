@@ -28,7 +28,7 @@ except Exception as e:
 
 @mark.docker
 @mark.parametrize("pipeline", PIPELINES)
-def test_basic_request(service, mind_data, pipeline):  # noqa: F811
+def test_no_onboarding(service, mind_data, pipeline):  # noqa: F811
     """
     Initialize request data
     """
@@ -43,3 +43,9 @@ def test_basic_request(service, mind_data, pipeline):  # noqa: F811
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     assert response.recommendations
+    assert response.recommendations.values()
+    recs = next(iter(response.recommendations.values()))
+    assert len(recs) > 0
+    assert len(recs) == request_generator.num_recs
+    article_ids = [article.article_id for article in recs]
+    assert len(article_ids) == len(set(article_ids))
