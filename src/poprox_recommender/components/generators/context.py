@@ -1,5 +1,6 @@
+import ast
 import asyncio
-import time
+import logging
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -19,8 +20,9 @@ DELAY = 2
 SEMANTIC_THRESHOLD = 0.2
 BASELINE_THETA_TOPIC = 0.3
 NUM_TOPICS = 3
-DAYS = 4
-USED_indices = set()
+DAYS = 14
+
+logger = logging.getLogger(__name__)
 
 
 class ContextGenerator(Component):
@@ -28,10 +30,9 @@ class ContextGenerator(Component):
         self.text_generation = text_generation
         self.time_decay = time_decay
         self.dev_mode = dev_mode
+        self.previous_context_articles = []
         if self.dev_mode:
-            self.client = AsyncOpenAI(
-                api_key="PUT YOUR ACCESS KEY HERE",
-            )
+            self.client = AsyncOpenAI(api_key="Insert Key Here")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
     def __call__(
@@ -40,7 +41,6 @@ class ContextGenerator(Component):
         recommended: ArticleSet,
         interest_profile: InterestProfile,
     ) -> ArticleSet:
-
         if self.dev_mode:
             recommended = asyncio.run(self.generate_newsletter(clicked, recommended, interest_profile))
         return recommended
@@ -58,23 +58,19 @@ class ContextGenerator(Component):
         for i in range(len(recommended.articles)):
             article = recommended.articles[i]
             if treatment[i]:
-                task = self.generated_context(
-                    article, clicked, self.time_decay, topic_distribution
-                )
+                task = self.generated_context(article, clicked, self.time_decay, topic_distribution)
                 tasks.append((article, task))
 
-        results = await asyncio.gather(
-            *(task[1] for task in tasks), return_exceptions=True
-        )
+        results = await asyncio.gather(*(task[1] for task in tasks), return_exceptions=True)
 
         for (article, _), result in zip(tasks, results):
             if isinstance(result, Exception):
-                print(f"Error generating context for article: {result}")
+                logger.error(f"Error generating context for article: {result}")
             else:
-                article.subhead = result
-        
+                article.headline, article.subhead = result
+
         return recommended
-    
+
     async def generated_context(
         self,
         article: Article,
@@ -82,19 +78,30 @@ class ContextGenerator(Component):
         time_decay: bool,
         topic_distribution: dict,
     ):
-        related_articles = self.related_context(article, clicked_articles, time_decay)
+        related_article = self.related_context(article, clicked_articles, time_decay)
 
-        if len(related_articles) == 1:
-            # high similarity, use the top-1 article to rewrite the subhead
-            news_list = {"MAIN NEWS": article.subhead, "RELATED NEWS": related_articles[0].subhead}
+        if related_article is not None:
+            # high similarity, use the top-1 article to rewrite the rec
+            main_news = {"HEADING": article.headline, "SUB_HEADING": article.subhead}
+            related_news = {"HEADING": related_article.headline, "SUB_HEADING": related_article.subhead}
 
-            input_prompt = f"{news_list}"
-            generated_subhead = await self.semantic_narrative(input_prompt)
+            generated_rec = await self.semantic_narrative(main_news, related_news)
 
         else:
-            generated_subhead = await self.highlevel_narrative(article.subhead, topic_distribution)
+            if topic_distribution:
+                generated_rec = await self.highlevel_narrative(article, topic_distribution)
+            else:
+                generated_rec = {"HEADLINE": article.headline, "SUB_HEADLINE": article.subhead}
 
-        return generated_subhead
+        generated_dict = ast.literal_eval(generated_rec)
+
+        generated_headline = generated_dict.get("HEADLINE", "")
+        generated_subhead = generated_dict.get("SUB_HEADLINE", "")
+        if generated_headline == "" or generated_subhead == "":
+            logger.warning("GPT response invald, falling back to original headline...")
+            return article.headline, article.subhead
+        else:
+            return generated_headline, generated_subhead
 
     def related_context(
         self,
@@ -109,14 +116,18 @@ class ContextGenerator(Component):
         time0 = selected_date - timedelta(days=DAYS)
 
         clicked_articles = [
-            article for article in clicked_articles if article.published_at >= time0
+            article
+            for article in clicked_articles
+            if article.published_at >= time0 and article not in self.previous_context_articles
         ]
 
         candidate_indices = self.related_indices(selected_subhead, selected_date, clicked_articles, time_decay)
         if len(candidate_indices) == 0:
-            return []
+            return None
 
-        return [clicked_articles[index] for index in candidate_indices]
+        self.previous_context_articles.append(clicked_articles[candidate_indices[0]])
+
+        return clicked_articles[candidate_indices[0]]
 
     def related_indices(
         self,
@@ -125,9 +136,7 @@ class ContextGenerator(Component):
         clicked_articles: list,
         time_decay: bool,
     ):
-        all_subheads = [selected_subhead] + [
-            article.subhead for article in clicked_articles
-        ]
+        all_subheads = [selected_subhead] + [article.subhead for article in clicked_articles]
         embeddings = self.model.encode(all_subheads)
 
         target_embedding = embeddings[0].reshape(1, -1)
@@ -137,7 +146,7 @@ class ContextGenerator(Component):
         # CHECK threshold [0.2, 0, 0.2]
         for i in range(len(similarities)):
             val = similarities[i]
-            if val < SEMANTIC_THRESHOLD or i in USED_indices:
+            if val < SEMANTIC_THRESHOLD:
                 similarities[i] = 0
 
         if np.sort(similarities)[-1] < SEMANTIC_THRESHOLD:
@@ -146,58 +155,57 @@ class ContextGenerator(Component):
         elif time_decay:
             weights = [
                 self.get_time_weight(selected_date, published_date)
-                for published_date in [
-                    article.published_at for article in clicked_articles
-                ]
+                for published_date in [article.published_at for article in clicked_articles]
             ]
             weighted_similarities = similarities * weights
 
             selected_indices = np.argsort(weighted_similarities)[-1:]
-            USED_indices.add(selected_indices)
             return selected_indices
 
         else:
             selected_indices = np.argsort(weighted_similarities)[-1:]
-            USED_indices.add(selected_indices)
             return selected_indices
 
-    async def semantic_narrative(self, news_list):
+    async def semantic_narrative(self, main_news, related_news):
         system_prompt = (
-            "You are an editor to rewrite the MAIN NEWS in a natural and factual tone. "
-            "You are provided a MAIN NEWS to be recommended and a RELATED NEWS that a user read before. "
-            "Please rewrite the MAIN NEWS by implicitly connecting it to RELATED NEWS and "
-            "incorporating the relevant user interests detected from RELATED NEWS. "
-            "Please ensure that the rewritten MAIN NEWS is presented concisely in a neutral and factual tone."
+            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "
+            "You are provided a [[MAIN_NEWS]] to be recommended and a [[RELATED_NEWS]] that a user read before. "
+            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[RELATED_NEWS]] and "
+            "highlight points from [[RELATED_NEWS]] relevant to why the user should also be interested in [[MAIN_NEWS]]. "
+            "Your response should only include a dictionary parsable by ast.literal_eval(string_dict) in the form {'HEADLINE': '[REWRITTEN HEADLINE], 'SUB_HEADLINE': '[REWRITTEN_SUBHEADLINE]}. "
+            "[REWRITTEN HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
+            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
         )
 
-        input_prompt = "News List: \n" + f"{news_list}"
+        input_prompt = f"[[MAIN_NEWS]]: {main_news} \n[[RELATED_NEWS]]: {related_news}"
+
+        logger.info(f"Semantic narrative: {input_prompt}")
         return await self.gpt_generate(system_prompt, input_prompt)
 
     async def highlevel_narrative(self, main_news, topic_distribution):
-        sorted_items = sorted(
-            topic_distribution.items(), key=lambda item: item[1], reverse=True
-        )
+        logger.info(f"Topic distribution narrative: {topic_distribution}")
+        sorted_items = sorted(topic_distribution.items(), key=lambda item: item[1], reverse=True)
         top_keys = [key for key, _ in sorted_items[:NUM_TOPICS]]
 
         system_prompt = (
-            "You are an editor to rewrite the MAIN NEWS in one sentence, using a natural and factual tone. "
-            "You are provided a MAIN NEWS to be recommended and user INTERESTED TOPICS. "
-            "Please rewrite the MAIN NEWS to make it more attractive, "
-            "and the user can feel that the news is more inclined to his INTERESTED TOPICS. "
-            "Please ensure that the rewritten MAIN NEWS is presented concisely and narratively. "
-            "Make sure the rewritten MAIN NEWS is more attractive. "
+            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "
+            "You are provided a [[MAIN_NEWS]] to be recommended to a user interested in [[INTERESTED_TOPICS]]."
+            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[INTERESTED_TOPICS]] "
+            "and highlight points relevant to why the user should also be interested in [[MAIN_NEWS]]. "
+            "Your response should only include a dictionary parsable by ast.literal_eval(string_dict) in the form {'HEADLINE': '[REWRITTEN HEADLINE], 'SUB_HEADLINE': '[REWRITTEN_SUBHEADLINE]}. "
+            "[REWRITTEN HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
+            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
         )
 
-        news_list = {"MAIN NEWS": main_news, "INTERESTED TOPICS": top_keys}
+        main_news = {"HEADING": main_news.headline, "SUB_HEADING": main_news.subhead}
+        input_prompt = f"[[MAIN_NEWS]]: {main_news} \n[[INTERESTED_TOPICS]]: {top_keys}"
 
-        input_prompt = f"{news_list}"
+        logger.info(f"Highlevel narrative: {input_prompt}")
         return await self.gpt_generate(system_prompt, input_prompt)
 
     def get_time_weight(self, published_target, published_clicked):
         time_distance = abs((published_clicked - published_target).days)
-        weight = (
-            1 / np.log(1 + time_distance) if time_distance > 0 else 1
-        )  # Avoid log(1) when x = 0
+        weight = 1 / np.log(1 + time_distance) if time_distance > 0 else 1  # Avoid log(1) when x = 0
         return weight
 
     async def gpt_generate(self, system_prompt, content_prompt):
@@ -219,6 +227,7 @@ class ContextGenerator(Component):
                     frequency_penalty=frequency_penalty,
                     model="gpt-4o-mini",
                 )
+                logger.info(f"GPT response: {chat_completion.choices[0].message.content}")
                 return chat_completion.choices[0].message.content
 
             except Exception as e:

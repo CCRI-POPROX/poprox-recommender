@@ -49,7 +49,8 @@ def generate_recs(event, context):
     )
 
     clicked_articles = ArticleSet(articles=clicked_articles)
-    profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
+    if not profile.click_topic_counts:
+        profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
 
     outputs = select_articles(
         candidate_articles,
@@ -62,6 +63,8 @@ def generate_recs(event, context):
     resp_body = RecommendationResponse.model_validate(
         {"recommendations": {profile.profile_id: outputs.default.articles}, "recommender": outputs.meta.model_dump()}
     )
+    # extract properties from the articleset new fields
+    # replace the articles with new recommendation object?
 
     logger.info("Serializing response...")
     response = {"statusCode": 200, "body": resp_body.model_dump_json()}
