@@ -140,13 +140,21 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
     article_embedder: NRMSArticleEmbedder
     embedded_topic_articles: ArticleSet | None = None
 
-    def __init__(self, *args, embedding_source: str = "static", topic_embedding: str = "nrms", **kwargs):
+    def __init__(
+        self,
+        *args,
+        embedding_source: str = "static",
+        topic_embedding: str = "nrms",
+        scorer_source: str = "ArticleScorer",
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.article_embedder = NRMSArticleEmbedder(
             model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
         )
         self.embedding_source = embedding_source
         self.topic_embedding = topic_embedding
+        self.scorer_source = scorer_source
 
     @torch_inference
     def __call__(
@@ -191,13 +199,16 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         else:
             raise ValueError(f"Unknown embedding source: {self.embedding_source}")
 
-        combined_click_history = interest_profile.click_history + topic_clicks
-
         click_lookup = self.build_article_lookup(clicked_articles)
         topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
 
-        # embedding_lookup = {**click_lookup, **topic_lookup}
-        embedding_lookup = {**click_lookup}
+        if self.scorer_source == "TopicalArticleScorer":
+            combined_click_history = interest_profile.click_history
+            embedding_lookup = {**click_lookup}
+        else:
+            combined_click_history = interest_profile.click_history + topic_clicks
+            embedding_lookup = {**click_lookup, **topic_lookup}
+
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
         interest_profile.click_history = combined_click_history
