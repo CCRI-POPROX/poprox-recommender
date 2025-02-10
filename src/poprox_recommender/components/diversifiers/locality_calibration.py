@@ -1,6 +1,7 @@
 import torch as th
 
-from poprox_concepts import ArticleSet, InterestProfile
+from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import RecommendationList
 from poprox_recommender.components.diversifiers.calibration import Calibrator
 from poprox_recommender.topics import extract_locality, normalized_category_count
 
@@ -12,7 +13,7 @@ class LocalityCalibrator(Calibrator):
     def __init__(self, theta: float = 0.1, num_slots=10):
         super().__init__(theta, num_slots)
 
-    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         normalized_locality_prefs = normalized_category_count(interest_profile.click_locality_counts)
 
         if candidate_articles.scores is not None:
@@ -29,7 +30,7 @@ class LocalityCalibrator(Calibrator):
             self.theta,
             topk=self.num_slots,
         )
-        return ArticleSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
+        return RecommendationList(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 
     def add_article_to_categories(self, rec_categories, article):
         locality_list = extract_locality(article)

@@ -4,7 +4,7 @@ from typing import Any
 
 from lenskit.pipeline import Pipeline, PipelineState
 
-from poprox_concepts import ArticleSet, InterestProfile
+from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.diversifiers import (
     # LocalityCalibrator,
     MMRDiversifier,
@@ -35,8 +35,8 @@ class PipelineLoadError(Exception):
 
 
 def select_articles(
-    candidate_articles: ArticleSet,
-    clicked_articles: ArticleSet,
+    candidate_articles: CandidateSet,
+    clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
 ) -> PipelineState:
@@ -242,8 +242,8 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     pipeline = Pipeline(name=name)
 
     # Define pipeline inputs
-    candidates = pipeline.create_input("candidate", ArticleSet)
-    clicked = pipeline.create_input("clicked", ArticleSet)
+    candidates = pipeline.create_input("candidate", CandidateSet)
+    clicked = pipeline.create_input("clicked", CandidateSet)
     profile = pipeline.create_input("profile", InterestProfile)
 
     # Compute embeddings
@@ -267,8 +267,8 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
 
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
-    o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
-    pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
+    o_sampled = pipeline.add_component("sampler", sampler, candidates1=o_filtered, candidates2=candidates)
+    pipeline.add_component("recommender", fill, recs1=o_rank, recs2=o_sampled)
 
     return pipeline
 
@@ -281,8 +281,8 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
     pipeline = Pipeline(name=name)
 
     # Define pipeline inputs
-    candidates = pipeline.create_input("candidate", ArticleSet)
-    clicked = pipeline.create_input("clicked", ArticleSet)
+    candidates = pipeline.create_input("candidate", CandidateSet)
+    clicked = pipeline.create_input("clicked", CandidateSet)
     profile = pipeline.create_input("profile", InterestProfile)
 
     # Compute embeddings
@@ -323,6 +323,6 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
         o_rank_2 = pipeline.add_component("reranker2", ranker, candidate_articles=o_scored_2, interest_profile=e_user_2)
 
     # Merge recommendations from each strategy
-    pipeline.add_component("recommender", rrf, candidates1=o_rank_1, candidates2=o_rank_2)
+    pipeline.add_component("recommender", rrf, recs1=o_rank_1, recs2=o_rank_2)
 
     return pipeline
