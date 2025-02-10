@@ -25,10 +25,10 @@ jobs:
       - name: Install environment
         uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          pixi-version: v0.29.0
+          pixi-version: latest
           cache: true
           cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-          environments: data
+          environments: test
           activate-environment: true
 
       - name: Show DVC config
@@ -38,11 +38,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .dvc/cache
-          key: docker-dvc-cache-${{ hashFiles('models/**.dvc') }}
+          key: docker-dvc-cache-${{ hashFiles('models/**.dvc', 'tests/**.dvc') }}
 
       - name: Fetch model data
         run: |
-          dvc pull -vr public -R models
+          dvc pull -vr public -R models tests
 
       - name: Build Docker image
         run: |
@@ -52,9 +52,12 @@ jobs:
         run: |
           docker run -d -p 9000:8080 --name=poprox-recommender poprox-recommender:ci
 
-      - name: Submit test request
+      - name: Run integration tests
         run: |
-          python ./tests/integration/test-docker-lambda.py
+          python -m pytest -v tests/integration
+        env:
+          POPROX_TEST_TARGET: docker
+          POPROX_TEST_PORT: 9000
 
       - name: Dump Docker logs
         if: always()

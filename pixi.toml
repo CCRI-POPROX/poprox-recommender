@@ -1,10 +1,9 @@
 [project]
 name = "poprox-recommender"
 channels = ["conda-forge", "pytorch", "nvidia"]
-platforms = ["linux-64", "osx-arm64", "win-64"]
+platforms = ["linux-64", "osx-arm64", "win-64", "linux-aarch64"]
 
 [tasks]
-
 # core dependencies for the poprox recommender code. Keep this in
 # sync with the `pyproject.toml` dependencies (both in recommender
 # and concepts), to prioritize using Conda packages
@@ -13,15 +12,13 @@ platforms = ["linux-64", "osx-arm64", "win-64"]
 python = "~=3.11.0"
 hatchling = "*"
 # poprox-recommender dependencies
-lenskit = "~=0.14.4"
 nltk = "~=3.8"
 numpy = "~=1.26"
 pytorch = "~=2.0"
 smart_open = "~=7.0"
 safetensors = ">=0.4,<1"
 transformers = "~=4.41"
-colorlog = "~=6.8"
-enlighten = "~=1.12"
+rich = "~=13.9"
 ipyparallel = "~=8.0"
 openai = "~=1.55.3"
 sentence-transformers = "~=3.2.1"
@@ -31,11 +28,13 @@ hydra-core = "~=1.3.2"
 omegaconf = "~=2.3.0"
 # poprox-concepts dependencies not covered above
 pydantic = "~=2.7.1"
+# lenskit dependencies from conda
+structlog = ">=24.0"
+threadpoolctl = "~=3.5"
 
 [pypi-dependencies]
-# git dep on progress-api until non-prerelease is out
-progress-api = { git = "https://github.com/lenskit/progress-api" }
 poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
+lenskit = "==2025.0.0a4"
 
 # turn off CUDA on Windows
 [target.win.dependencies]
@@ -45,7 +44,7 @@ cpuonly = "*"
 # we also do *not* include the poprox-recommender as a dep, since
 # its dependency lock version is always out of date.
 [feature.production]
-platforms = ["linux-64"]
+platforms = ["linux-64", "linux-aarch64"]
 
 [feature.production.dependencies]
 pip = ">=24"
@@ -60,15 +59,12 @@ awslambdaric = "~=2.2"
 hatch = "*"
 conda-pack = "~=0.8"
 
-# dependencies for working with serverless
+# dependencies for working with serverless (for deploy)
 [feature.serverless.dependencies]
 nodejs = "~=22.1"
 
 [feature.serverless.tasks]
 install-serverless = "npm ci"
-start-serverless = { cmd = "npx serverless offline start --reloadHandler", depends-on = [
-  "install-serverless",
-] }
 
 # general development dependencies
 [feature.dev.dependencies]
@@ -77,6 +73,7 @@ ipython = ">=8"
 notebook = ">=7.2"
 jupytext = ">=1.16"
 pyarrow-stubs = ">=17.11,<18"
+dprint = ">=0.47"
 
 # dependencies for project meta-work (e.g. updating project files from templates)
 [feature.meta.dependencies]
@@ -100,6 +97,11 @@ jupytext = ">=1.16"
 scipy = "~=1.14.1"
 pylatex = "~=1.4.2"
 
+# Linux-only so long as we keep Windows usable with pixi.toml
+# TODO: move to normal dependencies when we drop Windows
+[feature.data.target.linux.dependencies]
+jq = "*"
+
 # dependencies for running the evaluation code
 
 [feature.eval.dependencies]
@@ -115,16 +117,13 @@ poprox-recommender = { path = ".", editable = true }
 requests = ">=2.31,<3"
 coverage = ">=6.5"
 pytest = ">=8"
-pexpect = "~=4.9"
 
 [feature.test.pypi-dependencies]
 poprox-recommender = { path = ".", editable = true }
 
 [feature.test.tasks]
 test = { cmd = "pytest tests", depends-on = ["install-serverless"] }
-test-cov = { cmd = "coverage run -m pytest tests", depends-on = [
-  "install-serverless",
-] }
+test-cov = { cmd = "coverage run -m pytest tests", depends-on = ["install-serverless"] }
 
 # tooling for code validation
 [feature.lint.dependencies]
@@ -134,13 +133,15 @@ pyright = "~=1.1"
 
 # CUDA support
 [feature.cuda]
-platforms = ["linux-64"]
+platforms = ["linux-64", "linux-aarch64"]
 
 [feature.cuda.system-requirements]
 cuda = "12"
 
 [feature.cuda.dependencies]
 pytorch-gpu = "*"
+
+[feature.cuda.target.linux-64.dependencies]
 libblas = { build = "*mkl*" }
 
 # define the actual environments from these component features.
@@ -148,33 +149,12 @@ libblas = { build = "*mkl*" }
 [environments]
 default = { features = ["data"], solve-group = "main" }
 production = { features = ["production"] }
-pkg = { features = [
-  "pkg",
-  "data",
-  "serverless",
-], no-default-feature = true, solve-group = "main" }
+pkg = { features = ["pkg", "data", "serverless"], no-default-feature = true, solve-group = "main" }
 test = { features = ["test", "data", "serverless"], solve-group = "main" }
 # environment for just getting & processing the data
 data = { features = ["data"], no-default-feature = true, solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
 eval = { features = ["data", "eval"], solve-group = "main" }
 eval-cuda = { features = ["data", "eval", "cuda"], solve-group = "cuda" }
-dev = { features = [
-  "dev",
-  "meta",
-  "test",
-  "lint",
-  "data",
-  "eval",
-  "serverless",
-], solve-group = "main" }
-dev-cuda = { features = [
-  "dev",
-  "meta",
-  "test",
-  "lint",
-  "data",
-  "eval",
-  "serverless",
-  "cuda",
-], solve-group = "cuda" }
+dev = { features = ["dev", "meta", "test", "lint", "data", "eval", "serverless"], solve-group = "main" }
+dev-cuda = { features = ["dev", "meta", "test", "lint", "data", "eval", "serverless", "cuda"], solve-group = "cuda" }

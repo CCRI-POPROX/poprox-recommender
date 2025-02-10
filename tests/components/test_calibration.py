@@ -4,9 +4,10 @@ Test the topic calibration logic.
 
 import logging
 
+import pytest
 from pytest import skip, xfail
 
-from poprox_concepts import ArticleSet
+from poprox_concepts import CandidateSet
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
@@ -14,7 +15,6 @@ from poprox_recommender.recommenders import PipelineLoadError, select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def test_request_with_topic_calibrator():
@@ -30,13 +30,13 @@ def test_request_with_topic_calibrator():
 
     try:
         base_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
         )
         topic_calibrated_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
             pipeline_params={"pipeline": "topic-cali"},
         )
@@ -59,6 +59,7 @@ def test_request_with_topic_calibrator():
     assert base_article_ids != calibrated_article_ids
 
 
+@pytest.mark.skip("Locality calibrator currently disabled")
 def test_request_with_locality_calibrator():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "request_body.json"
@@ -71,13 +72,13 @@ def test_request_with_locality_calibrator():
     )
     try:
         base_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
         )
         locality_calibrated_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
             pipeline_params={"pipeline": "locality-cali"},
         )

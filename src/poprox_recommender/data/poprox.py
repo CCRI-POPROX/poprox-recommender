@@ -74,12 +74,12 @@ class PoproxData(EvalData):
 
     def profile_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
         # Create one row per clicked article with this newsletter_id
-        # Returned dataframe must have an "item" column containing the clicked article ids
-        # and the "item" column must be the index of the dataframe
+        # Returned dataframe must have an "item_id" column containing the clicked article ids
+        # and the "item_id" column must be the index of the dataframe
         # There must also be a "rating" columns
         newsletter_clicks = self.clicks_df[self.clicks_df["newsletter_id"] == str(newsletter_id)]
         clicked_items = newsletter_clicks["article_id"].unique()
-        return pd.DataFrame({"item": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item")
+        return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
     def iter_hyperparameters(
         self,
@@ -97,7 +97,8 @@ class PoproxData(EvalData):
             topic_theta_incr (float): Increment for topic theta range.
             locality_thetas (Tuple[float, float]): Start and end values (inclusive) for locality theta range.
             locality_theta_incr (float): Increment for locality theta range.
-            random_sample (int | None): If provided, randomly sample this many points from the Cartesian product of thetas.
+            random_sample (int | None): If provided, randomly sample this many points from
+                                        the Cartesian product of thetas.
 
         Yields:
             Tuple[RecommendationRequest, Tuple[float, float]]: A recommendation request paired with theta values.

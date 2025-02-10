@@ -1,9 +1,10 @@
-from poprox_concepts import ArticleSet
-from poprox_recommender.lkpipeline import Component
+from lenskit.pipeline import Component
+
+from poprox_concepts.domain import RecommendationList
 
 
 class Concatenate(Component):
-    def __call__(self, candidates1: ArticleSet, candidates2: ArticleSet) -> ArticleSet:
+    def __call__(self, recs1: RecommendationList, recs2: RecommendationList) -> RecommendationList:
         """
         Concatenates two sets of candidates, while deduplicating them, keeping the
         first occurrence of each article (by id), and maintaining their original order.
@@ -14,7 +15,7 @@ class Concatenate(Component):
         the dict keys can be ignored and the dict values are the deduplicated candidates
         in reverse order. Reversing them one more time returns them to the original order.
         """
-        reverse_articles = reversed(candidates1.articles + candidates2.articles)
+        reverse_articles = reversed(recs1.articles + recs2.articles)
         articles = {article.article_id: article for article in reverse_articles}
 
-        return ArticleSet(articles=list(reversed(articles.values())))
+        return RecommendationList(articles=list(reversed(articles.values())))

@@ -2,21 +2,16 @@ import torch
 from torch import nn
 from transformers import AutoConfig, AutoModel
 
-from poprox_recommender.model.general.attention.newsadditive import (
-    NewsAdditiveAttention,
-)
-from poprox_recommender.paths import model_file_path
+from ..general.attention.newsadditive import NewsAdditiveAttention
 
 
 class NewsEncoder(torch.nn.Module):
-    def __init__(self, pretrained_model, num_attention_heads, additive_attn_hidden_dim):
+    def __init__(self, model_path, num_attention_heads, additive_attn_hidden_dim):
         super(NewsEncoder, self).__init__()
 
-        self.plm = AutoModel.from_pretrained(model_file_path(pretrained_model), cache_dir="/tmp/")
+        self.plm = AutoModel.from_pretrained(model_path, cache_dir="/tmp/")
 
-        self.plm_hidden_size = AutoConfig.from_pretrained(
-            model_file_path(pretrained_model), cache_dir="/tmp/"
-        ).hidden_size
+        self.plm_hidden_size = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/").hidden_size
 
         self.multihead_attention = nn.MultiheadAttention(
             embed_dim=self.plm_hidden_size,
@@ -33,7 +28,7 @@ class NewsEncoder(torch.nn.Module):
     def forward(self, news_input: torch.Tensor) -> torch.Tensor:
         # batch_size, num_words_title, word_embedding_dim
 
-        V = self.plm(news_input).last_hidden_state
+        V = self.plm(news_input, attention_mask=news_input.bool().int()).last_hidden_state
         multihead_attn_output, _ = self.multihead_attention(
             V, V, V
         )  # [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size]

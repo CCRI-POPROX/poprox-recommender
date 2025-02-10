@@ -1,13 +1,13 @@
 import torch
+from lenskit.pipeline import Component
 
-from poprox_concepts import ArticleSet, InterestProfile
-from poprox_recommender.lkpipeline import Component
+from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
 class ArticleScorer(Component):
     @torch_inference
-    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> CandidateSet:
         candidate_embeddings = candidate_articles.embeddings
         user_embedding = interest_profile.embedding
 
