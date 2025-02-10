@@ -9,7 +9,7 @@ from lenskit.pipeline import Component
 from safetensors.torch import load_file
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
-from poprox_concepts import ArticleSet
+from poprox_concepts import CandidateSet
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.news_encoder import NewsEncoder
 from poprox_recommender.paths import model_file_path
@@ -58,7 +58,7 @@ class NRMSArticleEmbedder(Component):
         self.embedding_cache = {}
 
     @torch_inference
-    def __call__(self, article_set: ArticleSet) -> ArticleSet:
+    def __call__(self, article_set: CandidateSet) -> CandidateSet:
         if not article_set.articles:
             article_set.embeddings = th.zeros((0, self.news_encoder.embedding_size))  # type: ignore
             return article_set
@@ -116,21 +116,21 @@ class NRMSArticleEmbedder(Component):
 
 class EmbeddingCopier(Component):
     @torch_inference
-    def __call__(self, candidate_set: ArticleSet, selected_set: ArticleSet) -> ArticleSet:
+    def __call__(self, candidate_set: CandidateSet, selected_set: CandidateSet) -> CandidateSet:
         """
         Copies article embeddings from a candidate set to a set of selected/recommended articles
 
         Parameters
         ----------
-        candidate_set : ArticleSet
+        candidate_set : CandidateSet
             A set of candidate articles with the `.embeddings` property filled in
             (e.g. with ArticleEmbedder)
-        selected_set : ArticleSet
+        selected_set : CandidateSet
             A set of selected or recommended articles chosen from `candidate_set`
 
         Returns
         -------
-        ArticleSet
+        CandidateSet
             selected_set with `.embeddings` set using the embeddings from `candidate_set`
         """
         candidate_article_ids = [article.article_id for article in candidate_set.articles]
