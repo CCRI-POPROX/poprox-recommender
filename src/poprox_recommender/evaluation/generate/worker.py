@@ -14,7 +14,7 @@ from lenskit.pipeline.state import PipelineState
 from lenskit.util import Stopwatch
 
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_concepts.domain import CandidateSet
+from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
@@ -130,7 +130,7 @@ def extract_recs(
     ]
     ranked = pipeline_state.get("ranker", None)
     if ranked is not None:
-        assert isinstance(ranked, CandidateSet)
+        assert isinstance(ranked, RecommendationList)
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -144,7 +144,7 @@ def extract_recs(
         )
     reranked = pipeline_state.get("reranker", None)
     if reranked is not None:
-        assert isinstance(reranked, CandidateSet)
+        assert isinstance(reranked, RecommendationList)
         rec_lists.append(
             pd.DataFrame(
                 {
