@@ -4,6 +4,7 @@ Test the topic calibration logic.
 
 import logging
 
+import pytest
 from pytest import skip, xfail
 
 from poprox_concepts import ArticleSet
@@ -58,6 +59,7 @@ def test_request_with_topic_calibrator():
     assert base_article_ids != calibrated_article_ids
 
 
+@pytest.mark.skip("Locality calibrator currently disabled")
 def test_request_with_locality_calibrator():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "request_body.json"
