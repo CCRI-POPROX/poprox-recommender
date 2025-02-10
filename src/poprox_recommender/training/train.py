@@ -40,9 +40,8 @@ def train(device, load_checkpoint):
     2. Load Data & Create Dataset
     """
     logger.info("Initialize Dataset")
-
-    train_dataset = root / "data/MINDlarge_train/behaviors.tsv"
-    eval_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
+    train_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
+    eval_dataset = root / "data/MINDlarge_dev/behaviors.tsv"
 
     """
     3. Train
