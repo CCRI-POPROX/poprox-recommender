@@ -130,7 +130,7 @@ def extract_recs(
     ]
     ranked = pipeline_state.get("ranker", None)
     if ranked is not None:
-        assert isinstance(ranked, RecommendationList)
+        assert isinstance(ranked, RecommendationList), f"reranked has unexpected type {type(ranked)} in pipeline {name}"
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -144,7 +144,9 @@ def extract_recs(
         )
     reranked = pipeline_state.get("reranker", None)
     if reranked is not None:
-        assert isinstance(reranked, RecommendationList)
+        assert isinstance(
+            reranked, RecommendationList
+        ), f"reranked has unexpected type {type(reranked)} in pipeline {name}"
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -162,7 +164,7 @@ def extract_recs(
     embedded = pipeline_state.get("candidate-embedder", None)
     embeddings = {}
     if embedded is not None:
-        assert isinstance(embedded, CandidateSet)
+        assert isinstance(embedded, CandidateSet), f"embedded has unexpected type {type(embedded)} in pipeline {name}"
         assert hasattr(embedded, "embeddings")
 
         for idx, article in enumerate(embedded.articles):
