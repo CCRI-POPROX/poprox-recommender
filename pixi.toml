@@ -102,6 +102,7 @@ jq = "*"
 # keep below dependencies synchronized with 'eval' extra deps in pyproject.toml
 docopt = ">=0.6"
 pandas = "~=2.0"
+accelerate = ">=0.26.0"
 
 [feature.eval.pypi-dependencies]
 poprox-recommender = { path = ".", editable = true }
