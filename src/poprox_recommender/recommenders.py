@@ -11,7 +11,10 @@ from poprox_recommender.components.diversifiers import (
     PFARDiversifier,
     TopicCalibrator,
 )
-from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
+from poprox_recommender.components.embedders import (
+    NRMSArticleEmbedder,
+    NRMSUserEmbedder,
+)
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.generators.context import ContextGenerator
 from poprox_recommender.components.joiners import Fill
@@ -58,7 +61,12 @@ def select_articles(
     else:
         wanted = (topk, recs)
 
-    return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
+    return pipeline.run_all(
+        *wanted,
+        candidate=candidate_articles,
+        clicked=clicked_articles,
+        profile=interest_profile,
+    )
 
 
 def recommendation_pipelines(device: str | None = None, num_slots: int = 10) -> dict[str, Pipeline]:
@@ -219,7 +227,12 @@ def build_locality_pipeline(name, article_embedder, user_embedder, ranker, num_s
     # Compute embeddings
     e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
     e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
-    e_user = pipeline.add_component("user-embedder", user_embedder, clicked_articles=e_click, interest_profile=profile)
+    e_user = pipeline.add_component(
+        "user-embedder",
+        user_embedder,
+        clicked_articles=e_click,
+        interest_profile=profile,
+    )
 
     # Score and rank articles with diversification/calibration reranking
     o_scored = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)
@@ -237,12 +250,16 @@ def build_locality_pipeline(name, article_embedder, user_embedder, ranker, num_s
         )  # ArticleSet
 
     o_context = pipeline.add_component(
-        "generator", generator, clicked=clicked, recommended=o_rank, interest_profile=profile
+        "generator",
+        generator,
+        clicked=clicked,
+        selected=o_rank,
+        interest_profile=profile,
     )
 
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
     o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
-    pipeline.add_component("recommender", fill, candidates1=o_context, candidates2=o_sampled)
+    pipeline.add_component("recommender", fill, recs1=o_context, recs2=o_sampled)
 
     return pipeline
