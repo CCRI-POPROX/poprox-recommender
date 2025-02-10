@@ -14,14 +14,15 @@ class MMRDiversifier(Component):
     @torch_inference
     def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         if candidate_articles.scores is None:
-            return candidate_articles
+            recommended = candidate_articles.articles
+        else:
+            similarity_matrix = compute_similarity_matrix(candidate_articles.embeddings)
 
-        similarity_matrix = compute_similarity_matrix(candidate_articles.embeddings)
+            scores = torch.as_tensor(candidate_articles.scores).to(similarity_matrix.device)
+            article_indices = mmr_diversification(scores, similarity_matrix, theta=self.theta, topk=self.num_slots)
+            recommended = [candidate_articles.articles[int(idx)] for idx in article_indices]
 
-        scores = torch.as_tensor(candidate_articles.scores).to(similarity_matrix.device)
-        article_indices = mmr_diversification(scores, similarity_matrix, theta=self.theta, topk=self.num_slots)
-
-        return RecommendationList(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
+        return RecommendationList(articles=recommended)
 
 
 def compute_similarity_matrix(todays_article_vectors):

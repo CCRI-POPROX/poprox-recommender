@@ -17,31 +17,33 @@ class PFARDiversifier(Component):
     @torch_inference
     def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         if candidate_articles.scores is None:
-            return candidate_articles
+            articles = candidate_articles.articles
+        else:
+            article_scores = th.sigmoid(th.tensor(candidate_articles.scores)).cpu().detach().numpy()
 
-        article_scores = th.sigmoid(th.tensor(candidate_articles.scores)).cpu().detach().numpy()
+            topic_preferences: dict[str, int] = {}
 
-        topic_preferences: dict[str, int] = {}
+            for interest in interest_profile.onboarding_topics:
+                topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
 
-        for interest in interest_profile.onboarding_topics:
-            topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
+            if interest_profile.click_topic_counts:
+                for topic, click_count in interest_profile.click_topic_counts.items():
+                    topic_preferences[topic] = click_count
 
-        if interest_profile.click_topic_counts:
-            for topic, click_count in interest_profile.click_topic_counts.items():
-                topic_preferences[topic] = click_count
+            normalized_topic_prefs = normalized_category_count(topic_preferences)
 
-        normalized_topic_prefs = normalized_category_count(topic_preferences)
+            article_indices = pfar_diversification(
+                article_scores,
+                candidate_articles.articles,
+                normalized_topic_prefs,
+                self.lambda_,
+                self.tau,
+                topk=self.num_slots,
+            )
 
-        article_indices = pfar_diversification(
-            article_scores,
-            candidate_articles.articles,
-            normalized_topic_prefs,
-            self.lambda_,
-            self.tau,
-            topk=self.num_slots,
-        )
+            articles = [candidate_articles.articles[int(idx)] for idx in article_indices]
 
-        return RecommendationList(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
+        return RecommendationList(articles=articles)
 
 
 def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, tau, topk) -> list[Article]:
