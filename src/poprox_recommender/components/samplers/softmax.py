@@ -9,7 +9,7 @@ class SoftmaxSampler:
         self.num_slots = num_slots
         self.temperature = temperature
 
-    def __call__(self, candidate_articles: CandidateSet) -> CandidateSet:
+    def __call__(self, candidate_articles: CandidateSet) -> RecommendationList:
         if candidate_articles.scores is None:
             scores = np.ones(len(candidate_articles.articles))
         else:

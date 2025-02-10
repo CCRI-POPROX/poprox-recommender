@@ -1,7 +1,7 @@
 import torch
 from lenskit.pipeline import Component
 
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.pytorch.datachecks import assert_tensor_size
 from poprox_recommender.pytorch.decorators import torch_inference
 
@@ -12,7 +12,7 @@ class MMRDiversifier(Component):
         self.num_slots = num_slots
 
     @torch_inference
-    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> CandidateSet:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         if candidate_articles.scores is None:
             return candidate_articles
 
@@ -21,7 +21,7 @@ class MMRDiversifier(Component):
         scores = torch.as_tensor(candidate_articles.scores).to(similarity_matrix.device)
         article_indices = mmr_diversification(scores, similarity_matrix, theta=self.theta, topk=self.num_slots)
 
-        return CandidateSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
+        return RecommendationList(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 
 
 def compute_similarity_matrix(todays_article_vectors):

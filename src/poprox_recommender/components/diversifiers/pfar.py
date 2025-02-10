@@ -3,7 +3,7 @@ import math
 import torch as th
 from lenskit.pipeline import Component
 
-from poprox_concepts import Article, CandidateSet, InterestProfile
+from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.pytorch.decorators import torch_inference
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_category_count
 
@@ -15,7 +15,7 @@ class PFARDiversifier(Component):
         self.num_slots = num_slots
 
     @torch_inference
-    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> CandidateSet:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         if candidate_articles.scores is None:
             return candidate_articles
 
@@ -41,7 +41,7 @@ class PFARDiversifier(Component):
             topk=self.num_slots,
         )
 
-        return CandidateSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
+        return RecommendationList(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 
 
 def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, tau, topk) -> list[Article]:

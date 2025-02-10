@@ -35,5 +35,5 @@ class Fill(Component):
         else:
             articles = articles + recs2.get().articles
 
-        # Return the resulting CandidateSet, limiting the size to num_slots
-        return CandidateSet(articles=articles[: self.num_slots])
+        # Return the resulting RecommendationList, limiting the size to num_slots
+        return RecommendationList(articles=articles[: self.num_slots])
