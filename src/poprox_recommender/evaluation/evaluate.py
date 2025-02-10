@@ -21,20 +21,20 @@ Options:
 
 # pyright: basic
 import logging
+import os
 from typing import Any, Iterator
 from uuid import UUID
 
 import ipyparallel as ipp
 import pandas as pd
 from docopt import docopt
-from progress_api import make_progress
+from lenskit.logging import LoggingConfig, item_progress
 
 from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.metrics import ProfileRecs, measure_profile_recs
-from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
@@ -46,7 +46,7 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[Pr
     whether the profile is personalized.  This supports parallel computation of the
     final metrics.
     """
-    for profile_id, recs in profile_recs.groupby("profile"):
+    for profile_id, recs in profile_recs.groupby("profile_id"):
         profile_id = UUID(str(profile_id))
         truth = eval_data.profile_truth(profile_id)
         assert truth is not None
@@ -62,7 +62,10 @@ def profile_eval_results(
         with ipp.Cluster(n=n_procs) as client:
             lb = client.load_balanced_view()
             yield from lb.imap(
-                measure_profile_recs, rec_profiles(eval_data, profile_recs), ordered=False, max_outstanding=n_procs * 10
+                measure_profile_recs,
+                rec_profiles(eval_data, profile_recs),
+                ordered=False,
+                max_outstanding=n_procs * 10,
             )
     else:
         for profile in rec_profiles(eval_data, profile_recs):
@@ -71,7 +74,12 @@ def profile_eval_results(
 
 def main():
     options = docopt(__doc__)  # type: ignore
-    setup_logging(verbose=options["--verbose"], log_file=options["--log-file"])
+    log_cfg = LoggingConfig()
+    if options["--verbose"] or os.environ.get("RUNNER_DEBUG", 0):
+        log_cfg.set_verbose(True)
+    if options["--log-file"]:
+        log_cfg.set_log_file(options["--log-file"])
+    log_cfg.apply()
 
     global eval_data
 
@@ -94,7 +102,7 @@ def main():
     recs_fn = project_root() / "outputs" / eval_name / "recommendations"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
-    n_profiles = recs_df["profile"].nunique()
+    n_profiles = recs_df["profile_id"].nunique()
     logger.info("loaded recommendations for %d profiles", n_profiles)
 
     logger.info("measuring recommendations")
@@ -102,7 +110,7 @@ def main():
     n_procs = available_cpu_parallelism(4)
     records = []
     with (
-        make_progress(logger, "evaluate", total=n_profiles, unit="profiles") as pb,
+        item_progress("evaluate", total=n_profiles) as pb,
     ):
         for profile_rows in profile_eval_results(eval_data, recs_df, n_procs):
             records += profile_rows

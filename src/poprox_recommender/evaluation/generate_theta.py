@@ -29,22 +29,19 @@ import logging
 import logging.config
 
 import hydra
-from omegaconf import DictConfig
-
 import numpy as np
 import pandas as pd
-from docopt import docopt
 from lenskit.util import Stopwatch
+from omegaconf import DictConfig
 from progress_api import make_progress
 
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_concepts.domain import ArticleSet
+from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
 from poprox_recommender.data.data import Data
-from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.lkpipeline import PipelineState
-from poprox_recommender.logging_config import setup_logging
 from poprox_recommender.recommenders import recommendation_pipelines
 from poprox_recommender.topics import user_topic_preference
 
@@ -55,6 +52,7 @@ logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 # - support our data
 
 STAGES = ["final", "ranked", "reranked"]
+
 
 def extract_recs(
     name: str,
@@ -81,7 +79,7 @@ def extract_recs(
     ]
     ranked = pipeline_state.get("ranker", None)
     if ranked is not None:
-        assert isinstance(ranked, ArticleSet)
+        assert isinstance(ranked, RecommendationList)
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -95,7 +93,7 @@ def extract_recs(
         )
     reranked = pipeline_state.get("reranker", None)
     if reranked is not None:
-        assert isinstance(reranked, ArticleSet)
+        assert isinstance(reranked, RecommendationList)
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -111,8 +109,9 @@ def extract_recs(
     return output_df
 
 
-def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users: int | None = None, 
-                       theta_topic=0.1, theta_locality=0.1):
+def generate_user_recs(
+    data: Data, pipe_names: list[str] | None = None, n_users: int | None = None, theta_topic=0.1, theta_locality=0.1
+):
     pipelines = recommendation_pipelines(device=default_device())
     if pipe_names is not None:
         pipelines = {name: pipelines[name] for name in pipe_names}  # type: ignore
@@ -142,13 +141,14 @@ def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users:
                 )
             # Calculate the clicked topic count
             request.interest_profile.click_topic_counts = user_topic_preference(
-                request.past_articles, request.interest_profile.click_history)
+                request.past_articles, request.interest_profile.click_history
+            )
             inputs = {
-                "candidate": ArticleSet(articles=request.todays_articles),
-                "clicked": ArticleSet(articles=request.past_articles),
+                "candidate": CandidateSet(articles=request.todays_articles),
+                "clicked": CandidateSet(articles=request.past_articles),
                 "profile": request.interest_profile,
                 "theta_topic": theta_topic,
-                "theta_locality": theta_locality
+                "theta_locality": theta_locality,
             }
             for name, pipe in pipelines.items():
                 try:
@@ -167,16 +167,23 @@ def generate_user_recs(data: Data, pipe_names: list[str] | None = None, n_users:
 
     return user_recs
 
-@hydra.main(config_path="/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/src/", config_name="config", version_base="1.1")
+
+@hydra.main(
+    config_path="/home/sun00587/research/News_Locality_Polarization/poprox-recommender-locality/src/",
+    config_name="config",
+    version_base="1.1",
+)
 def main(cfg: DictConfig) -> None:
-    user_recs = generate_user_recs(PoproxData(cfg.data_path), cfg.pipelines, 
-                                   theta_topic=cfg.theta_topic, theta_locality=cfg.theta_locality)
-    
+    user_recs = generate_user_recs(
+        PoproxData(cfg.data_path), cfg.pipelines, theta_topic=cfg.theta_topic, theta_locality=cfg.theta_locality
+    )
+
     print(f"Starting run with theta_topic={round(cfg.theta_topic, 2)}, theta_locality={round(cfg.theta_locality, 2)}")
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = "{}top_{}_loc_{}.parquet".format(cfg.output_dir, round(cfg.theta_topic, 2), round(cfg.theta_locality, 2))
     logger.info("saving recommendations to %s", out_fn)
     all_recs.to_parquet(out_fn, compression="zstd", index=False)
+
 
 if __name__ == "__main__":
     main()
