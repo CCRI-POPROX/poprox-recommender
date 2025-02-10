@@ -4,15 +4,20 @@ import logging
 from datetime import datetime, timedelta
 
 import numpy as np
+from lenskit.pipeline import Component
 from openai import AsyncOpenAI
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_concepts.domain import (
+    Article,
+    CandidateSet,
+    InterestProfile,
+    RecommendationList,
+)
 from poprox_recommender.components.diversifiers.locality_calibration import (
     LocalityCalibrator,
 )
-from poprox_recommender.lkpipeline import Component
 from poprox_recommender.paths import model_file_path
 
 MAX_RETRIES = 3
@@ -37,26 +42,26 @@ class ContextGenerator(Component):
 
     def __call__(
         self,
-        clicked: ArticleSet,
-        recommended: ArticleSet,
+        clicked: CandidateSet,
+        selected: CandidateSet,
         interest_profile: InterestProfile,
-    ) -> ArticleSet:
+    ) -> RecommendationList:
         if self.dev_mode:
-            recommended = asyncio.run(self.generate_newsletter(clicked, recommended, interest_profile))
-        return recommended
+            selected = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
+        return selected
 
     async def generate_newsletter(
         self,
-        clicked: ArticleSet,
-        recommended: ArticleSet,
+        clicked: CandidateSet,
+        selected: CandidateSet,
         interest_profile: InterestProfile,
     ):
         topic_distribution = LocalityCalibrator.compute_topic_prefs(interest_profile)
-        treatment = recommended.treatment_flags
+        treatment = selected.treatment_flags
         tasks = []
 
-        for i in range(len(recommended.articles)):
-            article = recommended.articles[i]
+        for i in range(len(selected.articles)):
+            article = selected.articles[i]
             if treatment[i]:
                 task = self.generated_context(article, clicked, self.time_decay, topic_distribution)
                 tasks.append((article, task))
@@ -69,12 +74,12 @@ class ContextGenerator(Component):
             else:
                 article.headline, article.subhead = result
 
-        return recommended
+        return selected
 
     async def generated_context(
         self,
         article: Article,
-        clicked_articles: ArticleSet,
+        clicked_articles: CandidateSet,
         time_decay: bool,
         topic_distribution: dict,
     ):
@@ -83,7 +88,10 @@ class ContextGenerator(Component):
         if related_article is not None:
             # high similarity, use the top-1 article to rewrite the rec
             main_news = {"HEADING": article.headline, "SUB_HEADING": article.subhead}
-            related_news = {"HEADING": related_article.headline, "SUB_HEADING": related_article.subhead}
+            related_news = {
+                "HEADING": related_article.headline,
+                "SUB_HEADING": related_article.subhead,
+            }
 
             generated_rec = await self.semantic_narrative(main_news, related_news)
 
@@ -91,7 +99,10 @@ class ContextGenerator(Component):
             if topic_distribution:
                 generated_rec = await self.highlevel_narrative(article, topic_distribution)
             else:
-                generated_rec = {"HEADLINE": article.headline, "SUB_HEADLINE": article.subhead}
+                generated_rec = {
+                    "HEADLINE": article.headline,
+                    "SUB_HEADLINE": article.subhead,
+                }
 
         generated_dict = ast.literal_eval(generated_rec)
 
@@ -106,7 +117,7 @@ class ContextGenerator(Component):
     def related_context(
         self,
         article: Article,
-        clicked: ArticleSet,
+        clicked: CandidateSet,
         time_decay: bool,
     ):
         selected_subhead = article.subhead
@@ -168,13 +179,16 @@ class ContextGenerator(Component):
 
     async def semantic_narrative(self, main_news, related_news):
         system_prompt = (
-            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "
-            "You are provided a [[MAIN_NEWS]] to be recommended and a [[RELATED_NEWS]] that a user read before. "
-            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[RELATED_NEWS]] and "
-            "highlight points from [[RELATED_NEWS]] relevant to why the user should also be interested in [[MAIN_NEWS]]. "
-            "Your response should only include a dictionary parsable by ast.literal_eval(string_dict) in the form {'HEADLINE': '[REWRITTEN HEADLINE], 'SUB_HEADLINE': '[REWRITTEN_SUBHEADLINE]}. "
+            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in "
+            " a natural and factual tone. You are provided a [[MAIN_NEWS]] to be recommended and a [[RELATED_NEWS]] "
+            "that a user read before. Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting "
+            "it to [[RELATED_NEWS]] and highlight points from [[RELATED_NEWS]] relevant to why the user should also be "
+            "interested in [[MAIN_NEWS]]. Your response should only include a dictionary parsable by "
+            "ast.literal_eval(string_dict) in the form "
+            "{'HEADLINE': '[REWRITTEN HEADLINE], 'SUB_HEADLINE': '[REWRITTEN_SUBHEADLINE]}. "
             "[REWRITTEN HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
-            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
+            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe "
+            "[[MAIN_NEWS]]."
         )
 
         input_prompt = f"[[MAIN_NEWS]]: {main_news} \n[[RELATED_NEWS]]: {related_news}"
@@ -188,13 +202,15 @@ class ContextGenerator(Component):
         top_keys = [key for key, _ in sorted_items[:NUM_TOPICS]]
 
         system_prompt = (
-            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "
-            "You are provided a [[MAIN_NEWS]] to be recommended to a user interested in [[INTERESTED_TOPICS]]."
-            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[INTERESTED_TOPICS]] "
-            "and highlight points relevant to why the user should also be interested in [[MAIN_NEWS]]. "
-            "Your response should only include a dictionary parsable by ast.literal_eval(string_dict) in the form {'HEADLINE': '[REWRITTEN HEADLINE], 'SUB_HEADLINE': '[REWRITTEN_SUBHEADLINE]}. "
+            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a "
+            "natural and factual tone. You are provided a [[MAIN_NEWS]] to be recommended to a user interested in "
+            "[[INTERESTED_TOPICS]]. Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it "
+            "to [[INTERESTED_TOPICS]] and highlight points relevant to why the user should also be interested in "
+            "[[MAIN_NEWS]]. Your response should only include a dictionary parsable by ast.literal_eval(string_dict) "
+            "in the form {'HEADLINE': '[REWRITTEN HEADLINE], 'SUB_HEADLINE': '[REWRITTEN_SUBHEADLINE]}. "
             "[REWRITTEN HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
-            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
+            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe "
+            "[[MAIN_NEWS]]."
         )
 
         main_news = {"HEADING": main_news.headline, "SUB_HEADING": main_news.subhead}
