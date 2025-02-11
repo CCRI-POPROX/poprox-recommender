@@ -194,7 +194,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
                 cand_emb = embeddings_from_candidates.get(topic_uuid, th.zeros(768, device=self.device))
                 clicked_emb = embeddings_from_clicked.get(topic_uuid, th.zeros(768, device=self.device))
 
-                avg_emb = 0.6 * def_emb + 0.3 * cand_emb + 0.1 * clicked_emb
+                avg_emb = 0.5 * def_emb + 0.5 * cand_emb + 0.0 * clicked_emb
                 topic_embeddings_by_uuid[topic_uuid] = avg_emb
         else:
             raise ValueError(f"Unknown embedding source: {self.embedding_source}")

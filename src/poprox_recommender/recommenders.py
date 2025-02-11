@@ -87,58 +87,60 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
 
     article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
     user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
-    topic_user_embedder_candidate = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="candidates",
-        topic_embedding="avg",
-    )
-    topic_user_embedder_clicked = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="clicked",
-        topic_embedding="avg",
-    )
+
     topic_user_embedder_static = UserOnboardingEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="static",
         topic_embedding="avg",
     )
-    topic_user_embedder_hybrid = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="hybrid",
-        topic_embedding="avg",
-    )
-    topic_user_embedder_candidate_score = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="candidates",
-        topic_embedding="avg",
-        scorer_source="TopicalArticleScorer",
-    )
-    topic_user_embedder_clicked_score = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="clicked",
-        topic_embedding="avg",
-        scorer_source="TopicalArticleScorer",
-    )
-    topic_user_embedder_static_score = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="static",
-        topic_embedding="avg",
-        scorer_source="TopicalArticleScorer",
-    )
-    topic_user_embedder_hybrid_score = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="hybrid",
-        topic_embedding="avg",
-        scorer_source="TopicalArticleScorer",
-    )
+
+    # topic_user_embedder_candidate = UserOnboardingEmbedder(
+    #     model_file_path("nrms-mind/user_encoder.safetensors"),
+    #     device,
+    #     embedding_source="candidates",
+    #     topic_embedding="avg",
+    # )
+    # topic_user_embedder_clicked = UserOnboardingEmbedder(
+    #     model_file_path("nrms-mind/user_encoder.safetensors"),
+    #     device,
+    #     embedding_source="clicked",
+    #     topic_embedding="avg",
+    # )
+    # topic_user_embedder_hybrid = UserOnboardingEmbedder(
+    #     model_file_path("nrms-mind/user_encoder.safetensors"),
+    #     device,
+    #     embedding_source="hybrid",
+    #     topic_embedding="avg",
+    # )
+    # topic_user_embedder_candidate_score = UserOnboardingEmbedder(
+    #     model_file_path("nrms-mind/user_encoder.safetensors"),
+    #     device,
+    #     embedding_source="candidates",
+    #     topic_embedding="avg",
+    #     scorer_source="TopicalArticleScorer",
+    # )
+    # topic_user_embedder_clicked_score = UserOnboardingEmbedder(
+    #     model_file_path("nrms-mind/user_encoder.safetensors"),
+    #     device,
+    #     embedding_source="clicked",
+    #     topic_embedding="avg",
+    #     scorer_source="TopicalArticleScorer",
+    # )
+    # topic_user_embedder_static_score = UserOnboardingEmbedder(
+    #     model_file_path("nrms-mind/user_encoder.safetensors"),
+    #     device,
+    #     embedding_source="static",
+    #     topic_embedding="avg",
+    #     scorer_source="TopicalArticleScorer",
+    # )
+    # topic_user_embedder_hybrid_score = UserOnboardingEmbedder(
+    #     model_file_path("nrms-mind/user_encoder.safetensors"),
+    #     device,
+    #     embedding_source="hybrid",
+    #     topic_embedding="avg",
+    #     scorer_source="TopicalArticleScorer",
+    # )
 
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
@@ -155,22 +157,6 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    nrms_onboarding_pipe_cadidate = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_candidate,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
-
-    nrms_onboarding_pipe_clicked = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_clicked,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
-
     nrms_onboarding_pipe_static = build_pipeline(
         "plain-NRMS-with-onboarding-topics",
         article_embedder=article_embedder,
@@ -179,49 +165,74 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    nrms_onboarding_pipe_hybrid = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
+    nrms_rrf_static_user = build_RRF_pipeline(
+        "NRMS+RRF",
         article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_hybrid,
+        user_embedder=user_embedder,
+        user_embedder2=topic_user_embedder_static,
         ranker=topk_ranker,
         num_slots=num_slots,
     )
 
-    nrms_onboarding_pipe_cadidate_topic_scorer = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_candidate_score,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-        scorer_source="TopicalArticleScorer",
-    )
+    # nrms_onboarding_pipe_cadidate = build_pipeline(
+    #     "plain-NRMS-with-onboarding-topics",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_candidate,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    # )
 
-    nrms_onboarding_pipe_clicked_topic_scorer = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_clicked_score,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-        scorer_source="TopicalArticleScorer",
-    )
+    # nrms_onboarding_pipe_clicked = build_pipeline(
+    #     "plain-NRMS-with-onboarding-topics",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_clicked,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    # )
 
-    nrms_onboarding_pipe_static_topic_scorer = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_static_score,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-        scorer_source="TopicalArticleScorer",
-    )
+    # nrms_onboarding_pipe_hybrid = build_pipeline(
+    #     "plain-NRMS-with-onboarding-topics",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_hybrid,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    # )
 
-    nrms_onboarding_pipe_hybrid_topic_scorer = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_hybrid_score,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-        scorer_source="TopicalArticleScorer",
-    )
+    # nrms_onboarding_pipe_cadidate_topic_scorer = build_pipeline(
+    #     "plain-NRMS-with-onboarding-topics",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_candidate_score,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    #     scorer_source="TopicalArticleScorer",
+    # )
+
+    # nrms_onboarding_pipe_clicked_topic_scorer = build_pipeline(
+    #     "plain-NRMS-with-onboarding-topics",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_clicked_score,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    #     scorer_source="TopicalArticleScorer",
+    # )
+
+    # nrms_onboarding_pipe_static_topic_scorer = build_pipeline(
+    #     "plain-NRMS-with-onboarding-topics",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_static_score,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    #     scorer_source="TopicalArticleScorer",
+    # )
+
+    # nrms_onboarding_pipe_hybrid_topic_scorer = build_pipeline(
+    #     "plain-NRMS-with-onboarding-topics",
+    #     article_embedder=article_embedder,
+    #     user_embedder=topic_user_embedder_hybrid_score,
+    #     ranker=topk_ranker,
+    #     num_slots=num_slots,
+    #     scorer_source="TopicalArticleScorer",
+    # )
 
     mmr_pipe = build_pipeline(
         "NRMS+MMR",
@@ -263,41 +274,22 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    nrms_rrf_static_candidate = build_RRF_pipeline(
-        "NRMS+RRF",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_static,
-        user_embedder2=topic_user_embedder_candidate,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
-
-    nrms_rrf_static_clicked = build_RRF_pipeline(
-        "NRMS+RRF",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_static,
-        user_embedder2=topic_user_embedder_clicked,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
-
     return {
         "nrms": nrms_pipe,
-        "nrms-topics-candidate": nrms_onboarding_pipe_cadidate,
-        "nrms-topics-clicked": nrms_onboarding_pipe_clicked,
-        "nrms-topics-static": nrms_onboarding_pipe_static,
-        "nrms-topics-hybrid": nrms_onboarding_pipe_hybrid,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
         # "locality-cali": locality_cali_pipe,
         "softmax": softmax_pipe,
-        "nrms_rrf_static_candidate": nrms_rrf_static_candidate,
-        "nrms_rrf_static_clicked": nrms_rrf_static_clicked,
-        "nrms-topics-candidate-score": nrms_onboarding_pipe_cadidate_topic_scorer,
-        "nrms-topics-clicked-score": nrms_onboarding_pipe_clicked_topic_scorer,
-        "nrms-topics-static-score": nrms_onboarding_pipe_static_topic_scorer,
-        "nrms-topics-hybrid-score": nrms_onboarding_pipe_hybrid_topic_scorer,
+        "nrms-topics-static": nrms_onboarding_pipe_static,
+        "nrms_rrf_static_user": nrms_rrf_static_user,
+        # "nrms-topics-candidate": nrms_onboarding_pipe_cadidate,
+        # "nrms-topics-clicked": nrms_onboarding_pipe_clicked,
+        # "nrms-topics-hybrid": nrms_onboarding_pipe_hybrid,
+        # "nrms-topics-candidate-score": nrms_onboarding_pipe_cadidate_topic_scorer,
+        # "nrms-topics-clicked-score": nrms_onboarding_pipe_clicked_topic_scorer,
+        # "nrms-topics-static-score": nrms_onboarding_pipe_static_topic_scorer,
+        # "nrms-topics-hybrid-score": nrms_onboarding_pipe_hybrid_topic_scorer,
     }
 
 
