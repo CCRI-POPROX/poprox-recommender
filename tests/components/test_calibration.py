@@ -7,7 +7,7 @@ import logging
 import pytest
 from pytest import skip, xfail
 
-from poprox_concepts import ArticleSet
+from poprox_concepts import CandidateSet
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
@@ -30,13 +30,13 @@ def test_request_with_topic_calibrator():
 
     try:
         base_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
         )
         topic_calibrated_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
             pipeline_params={"pipeline": "topic-cali"},
         )
@@ -72,13 +72,13 @@ def test_request_with_locality_calibrator():
     )
     try:
         base_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
         )
         locality_calibrated_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
             pipeline_params={"pipeline": "locality-cali"},
         )

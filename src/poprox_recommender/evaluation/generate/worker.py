@@ -14,7 +14,7 @@ from lenskit.pipeline.state import PipelineState
 from lenskit.util import Stopwatch
 
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_concepts.domain import ArticleSet
+from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
@@ -74,8 +74,8 @@ def _generate_for_request(request: RecommendationRequest) -> UUID | None:
 
     pipe_names = list(_pipelines.keys())
     inputs = {
-        "candidate": ArticleSet(articles=request.todays_articles),
-        "clicked": ArticleSet(articles=request.past_articles),
+        "candidate": CandidateSet(articles=request.todays_articles),
+        "clicked": CandidateSet(articles=request.past_articles),
         "profile": request.interest_profile,
     }
 
@@ -130,7 +130,7 @@ def extract_recs(
     ]
     ranked = pipeline_state.get("ranker", None)
     if ranked is not None:
-        assert isinstance(ranked, ArticleSet)
+        assert isinstance(ranked, RecommendationList), f"reranked has unexpected type {type(ranked)} in pipeline {name}"
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -144,7 +144,9 @@ def extract_recs(
         )
     reranked = pipeline_state.get("reranker", None)
     if reranked is not None:
-        assert isinstance(reranked, ArticleSet)
+        assert isinstance(
+            reranked, RecommendationList
+        ), f"reranked has unexpected type {type(reranked)} in pipeline {name}"
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -162,7 +164,7 @@ def extract_recs(
     embedded = pipeline_state.get("candidate-embedder", None)
     embeddings = {}
     if embedded is not None:
-        assert isinstance(embedded, ArticleSet)
+        assert isinstance(embedded, CandidateSet), f"embedded has unexpected type {type(embedded)} in pipeline {name}"
         assert hasattr(embedded, "embeddings")
 
         for idx, article in enumerate(embedded.articles):

@@ -5,7 +5,7 @@ import random
 import pytest
 from pytest import skip
 
-from poprox_concepts import Article, ArticleSet, Click
+from poprox_concepts import Article, CandidateSet, Click
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, match_news_topics_to_general
@@ -22,8 +22,8 @@ def load_test_articles():
     with open(event_path, "r") as j:
         req_body = json.loads(j.read())
 
-        candidate = ArticleSet(articles=[Article.model_validate(attrs) for attrs in req_body["todays_articles"]])
-        past = ArticleSet(articles=[Article.model_validate(attrs) for attrs in req_body["past_articles"]])
+        candidate = CandidateSet(articles=[Article.model_validate(attrs) for attrs in req_body["todays_articles"]])
+        past = CandidateSet(articles=[Article.model_validate(attrs) for attrs in req_body["past_articles"]])
         click_history = [Click.model_validate(attrs) for attrs in req_body["interest_profile"]["click_history"]]
         num_recs = req_body["num_recs"]
 

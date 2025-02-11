@@ -7,7 +7,7 @@ from lenskit.data import ItemList
 from lenskit.metrics import call_metric
 from lenskit.metrics.ranking import NDCG, RecipRank
 
-from poprox_concepts import Article, ArticleSet
+from poprox_concepts import Article, CandidateSet
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 
 __all__ = ["rank_biased_overlap", "ProfileRecs", "measure_profile_recs"]
@@ -29,7 +29,7 @@ def convert_df_to_article_set(rec_df):
     articles = []
     for _, row in rec_df.iterrows():
         articles.append(Article(article_id=row["item_id"], headline=""))
-    return ArticleSet(articles=articles)
+    return CandidateSet(articles=articles)
 
 
 def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
