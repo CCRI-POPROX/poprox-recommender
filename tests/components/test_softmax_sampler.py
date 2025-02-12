@@ -22,13 +22,13 @@ def test_request_with_softmax_sampler():
 
     try:
         base_outputs = select_articles(
-            CandidateSet(articles=req.todays_articles),
-            CandidateSet(articles=req.past_articles),
+            req.todays_articles,
+            req.past_articles,
             req.interest_profile,
         )
         sampled_outputs = select_articles(
-            CandidateSet(articles=req.todays_articles),
-            CandidateSet(articles=req.past_articles),
+            req.todays_articles,
+            req.past_articles,
             req.interest_profile,
             pipeline_params={"pipeline": "softmax"},
         )

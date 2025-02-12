@@ -23,8 +23,8 @@ def test_direct_basic_request():
     logger.info("generating recommendations")
     try:
         outputs = select_articles(
-            CandidateSet(articles=req.todays_articles),
-            CandidateSet(articles=req.past_articles),
+            req.todays_articles,
+            req.past_articles,
             req.interest_profile,
         )
     except PipelineLoadError as e:
@@ -48,8 +48,8 @@ def test_direct_basic_request_without_clicks():
     profile.click_history = []
     try:
         outputs = select_articles(
-            CandidateSet(articles=req.todays_articles),
-            CandidateSet(articles=req.past_articles),
+            req.todays_articles,
+            req.past_articles,
             req.interest_profile,
         )
     except PipelineLoadError as e:

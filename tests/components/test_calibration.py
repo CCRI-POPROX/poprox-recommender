@@ -25,18 +25,18 @@ def test_request_with_topic_calibrator():
 
     req = RecommendationRequest.model_validate_json(req_f.read_text())
     req.interest_profile.click_topic_counts = user_topic_preference(
-        req.past_articles, req.interest_profile.click_history
+        req.past_articles.articles, req.interest_profile.click_history
     )
 
     try:
         base_outputs = select_articles(
-            CandidateSet(articles=req.todays_articles),
-            CandidateSet(articles=req.past_articles),
+            req.todays_articles,
+            req.past_articles,
             req.interest_profile,
         )
         topic_calibrated_outputs = select_articles(
-            CandidateSet(articles=req.todays_articles),
-            CandidateSet(articles=req.past_articles),
+            req.todays_articles,
+            req.past_articles,
             req.interest_profile,
             pipeline_params={"pipeline": "topic-cali"},
         )
