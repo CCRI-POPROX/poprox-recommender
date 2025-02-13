@@ -8,16 +8,17 @@ import ipyparallel as ipp
 import numpy as np
 import pandas as pd
 import pyarrow as pa
+from lenskit.logging import item_progress
+from lenskit.logging.worker import WorkerContext, WorkerLogConfig
+from lenskit.pipeline import Pipeline
+from lenskit.pipeline.state import PipelineState
 from lenskit.util import Stopwatch
-from progress_api import make_progress
 
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_concepts.domain import ArticleSet
+from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
-from poprox_recommender.lkpipeline import Pipeline
-from poprox_recommender.lkpipeline.state import PipelineState
 from poprox_recommender.recommenders import recommendation_pipelines
 from poprox_recommender.topics import user_topic_preference
 
@@ -30,25 +31,31 @@ THETA_RANDOM_SAMPLES = 60
 # globals used for workers
 _pipelines: dict[str, Pipeline]
 _worker_out: RecOutputs
+_worker_log: WorkerContext | None = None
 _emb_seen: set[UUID]
 
 
-def _init_worker(outs: RecOutputs, pipelines: list[str] | None):
-    global _worker_out, _emb_seen, _pipelines
+def _init_worker(outs: RecOutputs, logging: WorkerLogConfig | None = None):
+    global _worker_out, _emb_seen, _pipelines, _worker_log
     proc = mp.current_process()
     _worker_out = outs
     _emb_seen = set()
+    if logging is not None:
+        _worker_log = WorkerContext(logging)
+        _worker_log.start()
 
     _worker_out.open(proc.pid)
 
     _pipelines = recommendation_pipelines(device=default_device())
-    if pipelines:
-        _pipelines = {name: _pipelines[name] for name in pipelines}
 
 
 def _finish_worker():
+    global _worker_log
     logger.info("closing output files")
     _worker_out.close()
+    if _worker_log is not None:
+        _worker_log.shutdown()
+        _worker_log = None
 
     try:
         import resource
@@ -86,8 +93,8 @@ def _generate_for_hyperparamter_request(
     )
 
     inputs = {
-        "candidate": ArticleSet(articles=request.todays_articles),
-        "clicked": ArticleSet(articles=request.past_articles),
+        "candidate": CandidateSet(articles=request.todays_articles),
+        "clicked": CandidateSet(articles=request.past_articles),
         "profile": request.interest_profile,
         "theta_topic": thetas[0],
         "theta_locality": thetas[1],
@@ -137,9 +144,9 @@ def extract_recs(
         pd.DataFrame(
             {
                 "recommender": name,
-                "profile": str(profile),
+                "profile_id": str(profile),
                 "stage": "final",
-                "item": [str(a.article_id) for a in recs.articles],
+                "item_id": [str(a.article_id) for a in recs.articles],
                 "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
                 "treatment": False,
                 "k1_topic": -1,
@@ -150,14 +157,14 @@ def extract_recs(
     ]
     ranked = pipeline_state.get("ranker", None)
     if ranked is not None:
-        assert isinstance(ranked, ArticleSet)
+        assert isinstance(ranked, RecommendationList), f"reranked has unexpected type {type(ranked)} in pipeline {name}"
         rec_lists.append(
             pd.DataFrame(
                 {
                     "recommender": name,
-                    "profile": str(profile),
+                    "profile_id": str(profile),
                     "stage": "ranked",
-                    "item": [str(a.article_id) for a in ranked.articles],
+                    "item_id": [str(a.article_id) for a in ranked.articles],
                     "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
                     "treatment": False,
                     "k1_topic": -1,
@@ -168,14 +175,16 @@ def extract_recs(
         )
     reranked = pipeline_state.get("reranker", None)
     if reranked is not None:
-        assert isinstance(reranked, ArticleSet)
+        assert isinstance(
+            reranked, RecommendationList
+        ), f"reranked has unexpected type {type(reranked)} in pipeline {name}"
         rec_lists.append(
             pd.DataFrame(
                 {
                     "recommender": name,
-                    "profile": str(profile),
+                    "profile_id": str(profile),
                     "stage": "reranked",
-                    "item": [str(a.article_id) for a in reranked.articles],
+                    "item_id": [str(a.article_id) for a in reranked.articles],
                     "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
                     "treatment": reranked.treatment_flags,  # type: ignore
                     "k1_topic": reranked.k1_topic,
@@ -190,7 +199,7 @@ def extract_recs(
     embedded = pipeline_state.get("candidate-embedder", None)
     embeddings = {}
     if embedded is not None:
-        assert isinstance(embedded, ArticleSet)
+        assert isinstance(embedded, CandidateSet), f"embedded has unexpected type {type(embedded)} in pipeline {name}"
         assert hasattr(embedded, "embeddings")
 
         for idx, article in enumerate(embedded.articles):
@@ -201,7 +210,6 @@ def extract_recs(
 def generate_profile_recs(
     dataset: str,
     outs: RecOutputs,
-    pipelines: list[str] | None = None,
     n_profiles: int | None = None,
     n_jobs: int = 1,
     topic_thetas: tuple[float, float] | None = None,
@@ -227,23 +235,29 @@ def generate_profile_recs(
         n_profiles = n_profiles * dataset.n_hyperparameters
 
     timer = Stopwatch()
-    with make_progress(logger, "recommend", total=n_profiles) as pb:
+    with item_progress("recommend", total=n_profiles) as pb:
         if n_jobs > 1:
             logger.info("starting evaluation with %d workers", n_jobs)
             with ipp.Cluster(n=n_jobs) as client:
                 dv = client.direct_view()
                 logger.debug("initializing workers")
-                dv.apply_sync(_init_worker, outs, pipelines)
+                dv.apply_sync(_init_worker, outs, WorkerLogConfig.current())
 
                 logger.debug("dispatching jobs")
                 lbv = client.load_balanced_view()
                 if topic_thetas and locality_thetas:
                     request_iter = lbv.imap(
-                        _generate_for_hyperparamter_request, profile_iter, max_outstanding=n_jobs * 5, ordered=False
+                        _generate_for_hyperparamter_request,
+                        profile_iter,
+                        max_outstanding=n_jobs * 5,
+                        ordered=False,
                     )
                 else:
                     request_iter = lbv.imap(
-                        _generate_for_request, profile_iter, max_outstanding=n_jobs * 5, ordered=False
+                        _generate_for_request,
+                        profile_iter,
+                        max_outstanding=n_jobs * 5,
+                        ordered=False,
                     )
 
                 for uid in request_iter:
@@ -254,8 +268,9 @@ def generate_profile_recs(
                 rusage = dv.apply_sync(_finish_worker)
 
         else:
+            logger.info("starting serial evaluation")
             # directly call things in-process
-            _init_worker(outs, pipelines)
+            _init_worker(outs)
 
             for request in profile_iter:
                 if topic_thetas and locality_thetas:

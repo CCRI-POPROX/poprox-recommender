@@ -1,9 +1,9 @@
 import numpy as np
 
-from poprox_concepts.domain import ArticleSet
+from poprox_concepts.domain import CandidateSet
 
 
-def rank_biased_overlap(recs_list_a: ArticleSet, recs_list_b: ArticleSet, p: float = 0.9, k: int = 10) -> float:
+def rank_biased_overlap(recs_list_a: CandidateSet, recs_list_b: CandidateSet, p: float = 0.9, k: int = 10) -> float:
     """
     Computes the RBO metric defined in:
     Webber, William, Alistair Moffat, and Justin Zobel. "A similarity measure for indefinite rankings."

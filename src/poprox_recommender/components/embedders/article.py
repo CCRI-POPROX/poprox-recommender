@@ -5,11 +5,11 @@ from typing import Protocol
 from uuid import UUID
 
 import torch as th
+from lenskit.pipeline import Component
 from safetensors.torch import load_file
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
-from poprox_concepts import ArticleSet
-from poprox_recommender.lkpipeline import Component
+from poprox_concepts import CandidateSet
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.news_encoder import NewsEncoder
 from poprox_recommender.paths import model_file_path
@@ -43,7 +43,7 @@ class NRMSArticleEmbedder(Component):
         checkpoint = load_file(model_path)
         config = ModelConfig()
         self.news_encoder = NewsEncoder(
-            config.pretrained_model,
+            model_file_path(config.pretrained_model),
             config.num_attention_heads,
             config.additive_attn_hidden_dim,
         )
@@ -53,12 +53,12 @@ class NRMSArticleEmbedder(Component):
         plm_path = model_file_path(config.pretrained_model)
         logger.debug("loading tokenizer from %s", plm_path)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/")
+        self.tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/", clean_up_tokenization_spaces=True)
         self.device = device
         self.embedding_cache = {}
 
     @torch_inference
-    def __call__(self, article_set: ArticleSet) -> ArticleSet:
+    def __call__(self, article_set: CandidateSet) -> CandidateSet:
         if not article_set.articles:
             article_set.embeddings = th.zeros((0, self.news_encoder.embedding_size))  # type: ignore
             return article_set
@@ -116,21 +116,21 @@ class NRMSArticleEmbedder(Component):
 
 class EmbeddingCopier(Component):
     @torch_inference
-    def __call__(self, candidate_set: ArticleSet, selected_set: ArticleSet) -> ArticleSet:
+    def __call__(self, candidate_set: CandidateSet, selected_set: CandidateSet) -> CandidateSet:
         """
         Copies article embeddings from a candidate set to a set of selected/recommended articles
 
         Parameters
         ----------
-        candidate_set : ArticleSet
+        candidate_set : CandidateSet
             A set of candidate articles with the `.embeddings` property filled in
             (e.g. with ArticleEmbedder)
-        selected_set : ArticleSet
+        selected_set : CandidateSet
             A set of selected or recommended articles chosen from `candidate_set`
 
         Returns
         -------
-        ArticleSet
+        CandidateSet
             selected_set with `.embeddings` set using the embeddings from `candidate_set`
         """
         candidate_article_ids = [article.article_id for article in candidate_set.articles]

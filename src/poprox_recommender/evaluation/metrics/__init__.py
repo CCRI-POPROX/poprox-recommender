@@ -3,9 +3,11 @@ from typing import Any, NamedTuple
 from uuid import UUID
 
 import pandas as pd
-from lenskit.metrics import topn
+from lenskit.data import ItemList
+from lenskit.metrics import call_metric
+from lenskit.metrics.ranking import NDCG, RecipRank
 
-from poprox_concepts import Article, ArticleSet
+from poprox_concepts import Article, CandidateSet
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 
 __all__ = ["rank_biased_overlap", "ProfileRecs", "measure_profile_recs"]
@@ -26,17 +28,22 @@ class ProfileRecs(NamedTuple):
 def convert_df_to_article_set(rec_df):
     articles = []
     for _, row in rec_df.iterrows():
-        articles.append(Article(article_id=row["item"], headline=""))
-    return ArticleSet(articles=articles)
+        articles.append(Article(article_id=row["item_id"], headline=""))
+    return CandidateSet(articles=articles)
 
 
 def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
     """
     Measure a single user profile's recommendations.  Returns the profile ID and
-    a data frame of evaluation metrics.
+    an ItemList of evaluation metrics.
     """
     profile_id, all_recs, truth = profile
     truth.index = truth.index.astype(str)
+
+    truth = truth.reset_index()
+
+    truth = truth[truth["rating"] > 0]
+    truth = ItemList.from_df(truth)
 
     results = []
 
@@ -44,9 +51,11 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         ["recommender", "theta_topic", "theta_locality"], observed=True
     ):
         final_rec_df = recs[recs["stage"] == "final"]
-        single_rr = topn.recip_rank(final_rec_df, truth[truth["rating"] > 0])
-        single_ndcg5 = topn.ndcg(final_rec_df, truth, k=5)
-        single_ndcg10 = topn.ndcg(final_rec_df, truth, k=10)
+        final_rec = ItemList.from_df(final_rec_df)
+
+        single_rr = call_metric(RecipRank, final_rec, truth)
+        single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
+        single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
 
         ranked_rec_df = recs[recs["stage"] == "ranked"]
         ranked = convert_df_to_article_set(ranked_rec_df)

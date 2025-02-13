@@ -1,10 +1,11 @@
 from uuid import uuid4
 
-from poprox_concepts import Article, ArticleSet, Click, Entity, Mention
+from lenskit.pipeline import Pipeline
+
+from poprox_concepts import Article, CandidateSet, Click, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.samplers import UniformSampler
-from poprox_recommender.lkpipeline import Pipeline
 
 
 def test_select_by_topic_filters_articles():
@@ -48,12 +49,12 @@ def test_select_by_topic_filters_articles():
 
     pipeline = Pipeline()
     i_profile = pipeline.create_input("profile", InterestProfile)
-    i_cand = pipeline.create_input("candidates", ArticleSet)
+    i_cand = pipeline.create_input("candidates", CandidateSet)
     c_filter = pipeline.add_component("topic-filter", topic_filter, candidate=i_cand, interest_profile=i_profile)
-    c_sampler = pipeline.add_component("sampler", sampler, candidate=c_filter, backup=i_cand)
+    c_sampler = pipeline.add_component("sampler", sampler, candidates1=c_filter, candidates2=i_cand)
 
     # If we can, only select articles matching interests
-    result = pipeline.run(c_sampler, candidates=ArticleSet(articles=articles), profile=profile)
+    result = pipeline.run(c_sampler, candidates=CandidateSet(articles=articles), profile=profile)
 
     # there are 2 valid articles that match their preferences (us news & politics)
     assert len(result.articles) == 2
@@ -63,7 +64,7 @@ def test_select_by_topic_filters_articles():
 
     # If we need to, fill out the end of the list with other random articles
     sampler.num_slots = 3
-    result = pipeline.run(c_sampler, candidates=ArticleSet(articles=articles), profile=profile)
+    result = pipeline.run(c_sampler, candidates=CandidateSet(articles=articles), profile=profile)
 
     assert len(result.articles) == 3
 

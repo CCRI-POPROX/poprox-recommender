@@ -2,11 +2,15 @@ import logging
 from collections import defaultdict
 
 import torch as th
+from lenskit.pipeline import Component
 
-from poprox_concepts import Article, ArticleSet, InterestProfile
+from poprox_concepts.domain import Article, CandidateSet, InterestProfile
 from poprox_recommender.components.diversifiers.calibration import compute_kl_divergence
-from poprox_recommender.lkpipeline import Component
-from poprox_recommender.topics import extract_general_topics, extract_locality, normalized_category_count
+from poprox_recommender.topics import (
+    extract_general_topics,
+    extract_locality,
+    normalized_category_count,
+)
 
 LOCALITY_DISTANCE_THRESHOLD = 0.1
 
@@ -26,11 +30,11 @@ class LocalityCalibrator(Component):
 
     def __call__(
         self,
-        candidate_articles: ArticleSet,
+        candidate_articles: CandidateSet,
         interest_profile: InterestProfile,
         theta_topic: float | None,
         theta_locality: float | None,
-    ) -> ArticleSet:
+    ) -> CandidateSet:
         theta_topic = self.theta_topic if theta_topic is None else theta_topic
         theta_locality = self.theta_locality if theta_locality is None else theta_locality
 
@@ -44,28 +48,31 @@ class LocalityCalibrator(Component):
 
         article_scores = article_scores.cpu().detach().numpy()
 
-        article_indices, topic_only_article_indices, final_calibrations, localities_outside_threshold = (
-            self.calibration(
-                article_scores,
-                candidate_articles.articles,
-                normalized_topic_prefs,
-                normalized_locality_prefs,
-                theta_topic,
-                theta_locality,
-                topk=self.num_slots,
-            )
+        (
+            article_indices,
+            topic_only_article_indices,
+            final_calibrations,
+            localities_outside_threshold,
+        ) = self.calibration(
+            article_scores,
+            candidate_articles.articles,
+            normalized_topic_prefs,
+            normalized_locality_prefs,
+            theta_topic,
+            theta_locality,
+            topk=self.num_slots,
         )
 
-        article_set = ArticleSet(
+        selected = CandidateSet(
             articles=[candidate_articles.articles[idx] for idx in article_indices]
         )  # all selected articles
 
-        article_set.treatment_flags = [index not in topic_only_article_indices for index in article_indices]
-        article_set.k1_topic = final_calibrations[0]
-        article_set.k1_locality = final_calibrations[1]
+        selected.treatment_flags = [index not in topic_only_article_indices for index in article_indices]
+        selected.k1_topic = final_calibrations[0]
+        selected.k1_locality = final_calibrations[1]
 
-        article_set.is_inside_locality_threshold = not localities_outside_threshold
-        return article_set
+        selected.is_inside_locality_threshold = not localities_outside_threshold
+        return selected
 
     def add_article_to_categories(self, rec_topics, article):
         rec_topics = rec_topics.copy()
@@ -92,7 +99,14 @@ class LocalityCalibrator(Component):
         return normalized_category_count(rec_localities_with_candidate)
 
     def calibration(
-        self, relevance_scores, articles, topic_preferences, locality_preferences, theta_topic, theta_locality, topk
+        self,
+        relevance_scores,
+        articles,
+        topic_preferences,
+        locality_preferences,
+        theta_topic,
+        theta_locality,
+        topk,
     ) -> list[Article]:
         # MR_i = (1 - theta_topic - theta_local) * reward_i - theta_topic * C_topic - theta_local * C_local
         # R is all candidates (not selected yet)
@@ -166,13 +180,18 @@ class LocalityCalibrator(Component):
             > LOCALITY_DISTANCE_THRESHOLD
         ]
 
-        return recommendations, topic_only_recommendations, final_calibrations, localities_outside_threshold
+        return (
+            recommendations,
+            topic_only_recommendations,
+            final_calibrations,
+            localities_outside_threshold,
+        )
 
-    def compute_local_prefs(self, candidate_articles: ArticleSet):
+    def compute_local_prefs(self, candidate_articles: CandidateSet):
         locality_preferences: dict[str, int] = defaultdict(int)
-        candidate_articles = candidate_articles.articles
+        articles = candidate_articles.articles
 
-        for article in candidate_articles:
+        for article in articles:
             candidate_locality = extract_locality(article) or set()
             for locality in candidate_locality:
                 locality_preferences[locality] += 1

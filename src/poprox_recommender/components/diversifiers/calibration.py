@@ -1,9 +1,9 @@
 from collections import defaultdict
 
 import numpy as np
+from lenskit.pipeline import Component
 
 from poprox_concepts import Article
-from poprox_recommender.lkpipeline import Component
 from poprox_recommender.topics import normalized_category_count
 
 
@@ -16,9 +16,6 @@ class Calibrator(Component):
         # the theta the higher the resulting recommendation will be calibrated.
         self.theta = theta
         self.num_slots = num_slots
-
-    def __call__():
-        pass
 
     def add_article_to_categories(self, rec_categories_with_candidate, article):
         pass
