@@ -1,5 +1,6 @@
 import ast
 import asyncio
+import json
 import logging
 from datetime import datetime, timedelta
 import re
@@ -38,7 +39,7 @@ class ContextGenerator(Component):
         self.dev_mode = dev_mode
         self.previous_context_articles = []
         if self.dev_mode:
-            self.client = AsyncOpenAI(api_key="Insert your key")
+            self.client = AsyncOpenAI(api_key="Insert your key here.")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
     def __call__(
@@ -77,15 +78,6 @@ class ContextGenerator(Component):
 
         return selected
 
-    def parse_preview(self, text):
-        pattern = r"##HEADLINE##:\s*(.*?)\s*##SUB_HEADLINE##:\s*(.*)"
-        match = re.search(pattern, text)
-        if match:
-            return match.group(1), match.group(2)
-        else:
-            logger.error(f"Invalid GPT response: {text}")
-            return "", ""
-
     async def generated_context(
         self,
         article: Article,
@@ -114,8 +106,9 @@ class ContextGenerator(Component):
                     "SUB_HEADLINE": article.subhead,
                 }
 
-        generated_headline, generated_subhead = self.parse_preview(generated_rec)
-
+        generated_dict = json.loads(generated_rec)
+        generated_headline = generated_dict.get("HEADLINE", "")
+        generated_subhead = generated_dict.get("SUB_HEADLINE", "")
         if generated_headline == "" or generated_subhead == "":
             logger.warning("GPT response invald, falling back to original headline...")
             return article.headline, article.subhead
@@ -160,7 +153,7 @@ class ContextGenerator(Component):
 
         target_embedding = embeddings[0].reshape(1, -1)
         clicked_embeddings = embeddings[1:]
-        if clicked_embeddings:
+        if len(clicked_embeddings) == 0:
             similarities = cosine_similarity(target_embedding, clicked_embeddings)[0]
         else:
             return []
@@ -194,7 +187,7 @@ class ContextGenerator(Component):
             "You are provided a [[MAIN_NEWS]] to be recommended and a [[RELATED_NEWS]] that a user read before. "
             "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[RELATED_NEWS]] and "
             "highlight points from [[RELATED_NEWS]] relevant to why the user should also be interested in [[MAIN_NEWS]]. "
-            "Your response should only include a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "
+            'Your response should only include JSON parsable by json.loads() in the format {"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'. '  # "Your response should only include a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "
             "[REWRITTEN_HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
             "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
         )
@@ -214,7 +207,7 @@ class ContextGenerator(Component):
             "You are provided a [[MAIN_NEWS]] to be recommended to a user interested in [[INTERESTED_TOPICS]]."
             "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[INTERESTED_TOPICS]] "
             "and highlight points relevant to why the user should also be interested in [[MAIN_NEWS]]. "
-            "Your response should only include a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "
+            'Your response should only include JSON parsable by json.loads() in the format {"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'. '  # a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "
             "[REWRITTEN_HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
             "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
         )
@@ -242,8 +235,9 @@ class ContextGenerator(Component):
 
         while retries < MAX_RETRIES:
             try:
-                chat_completion = await self.client.chat.completions.create(
+                chat_completion = await self.client.beta.chat.completions.parse(
                     messages=message,
+                    response_format={"type": "json_object"},
                     temperature=temperature,
                     max_tokens=max_tokens,
                     frequency_penalty=frequency_penalty,
