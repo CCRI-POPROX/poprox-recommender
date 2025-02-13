@@ -2,7 +2,8 @@ from collections import defaultdict
 
 import torch as th
 
-from poprox_concepts import ArticleSet, InterestProfile
+from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import RecommendationList
 from poprox_recommender.components.diversifiers.calibration import Calibrator
 from poprox_recommender.topics import extract_general_topics, normalized_category_count
 
@@ -11,7 +12,7 @@ from poprox_recommender.topics import extract_general_topics, normalized_categor
 # to rerank recommendations according to
 # topic calibration
 class TopicCalibrator(Calibrator):
-    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         normalized_topic_prefs = self.compute_topic_dist(interest_profile)
 
         if candidate_articles.scores is not None:
@@ -29,7 +30,7 @@ class TopicCalibrator(Calibrator):
             topk=self.num_slots,
         )
 
-        return ArticleSet(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
+        return RecommendationList(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 
     def compute_topic_dist(self, interest_profile):
         topic_preferences: dict[str, int] = defaultdict(int)

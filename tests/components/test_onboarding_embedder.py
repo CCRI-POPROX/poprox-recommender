@@ -6,29 +6,29 @@ import numpy as np
 import pytest
 import torch as th
 
-from poprox_concepts.domain import AccountInterest, Article, ArticleSet, Click, InterestProfile
+from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSUserEmbedder
-from poprox_recommender.components.embedders.topic_wise_user import TopicUserEmbedder, topic_articles
+from poprox_recommender.components.embedders.topic_wise_user import TOPIC_ARTICLES, UserOnboardingEmbedder
 from poprox_recommender.paths import model_file_path
 
 
 def test_embed_user():
     try:
         plain_nrms_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
-        topic_aware_embedder = TopicUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
+        topic_aware_embedder = UserOnboardingEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
     except FileNotFoundError:
         pytest.xfail("NRMS model not found, so test failure is expected")
 
     interests = [
         AccountInterest(
-            entity_id=topic_article.article_id, entity_name=topic_article.external_id, preference=1, frequency=None
+            entity_id=topic_article.article_id, entity_name=topic_article.external_id, preference=2, frequency=None
         )
-        for topic_article in topic_articles
+        for topic_article in TOPIC_ARTICLES
     ]
 
     article_id = uuid4()
 
-    clicked = ArticleSet(
+    clicked = CandidateSet(
         articles=[
             Article(
                 article_id=article_id,
@@ -52,7 +52,9 @@ def test_embed_user():
 
     enriched_profile = deepcopy(profile)
 
-    enriched_profile = topic_aware_embedder(clicked_articles=clicked, interest_profile=enriched_profile)
+    enriched_profile = topic_aware_embedder(
+        clicked_articles=clicked, candidate_articles=clicked, interest_profile=enriched_profile
+    )
 
     assert len(enriched_profile.click_history) > initial_clicks
     assert len(enriched_profile.click_history) == 15

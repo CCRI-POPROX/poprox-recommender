@@ -4,7 +4,7 @@ import torch as th
 from lenskit.pipeline import Component
 from safetensors.torch import load_file
 
-from poprox_concepts import ArticleSet, Click, InterestProfile
+from poprox_concepts import CandidateSet, Click, InterestProfile
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.user_encoder import UserEncoder
 from poprox_recommender.pytorch.decorators import torch_inference
@@ -23,7 +23,7 @@ class NRMSUserEmbedder(Component):
         self.user_encoder.to(device)
 
     @torch_inference
-    def __call__(self, clicked_articles: ArticleSet, interest_profile: InterestProfile) -> InterestProfile:
+    def __call__(self, clicked_articles: CandidateSet, interest_profile: InterestProfile) -> InterestProfile:
         if len(clicked_articles.articles) == 0:
             interest_profile.embedding = None
         else:
