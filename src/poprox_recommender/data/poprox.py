@@ -81,10 +81,10 @@ class PoproxData(EvalData):
 
             # Create Article and Click objects from dataframe rows
             clicks = []
-            past_articles = []
+            interacted = []
             for article_row in filtered_clicks_df.itertuples():
                 article = self.lookup_clicked_article(article_row.article_id)
-                past_articles.append(article)
+                interacted.append(article)
 
                 clicks.append(
                     Click(
@@ -119,8 +119,8 @@ class PoproxData(EvalData):
                 candidate_articles.append(self.lookup_candidate_article(article_row.article_id))
 
             yield RecommendationRequest(
-                todays_articles=candidate_articles,
-                past_articles=past_articles,
+                candidates=candidate_articles,
+                interacted=interacted,
                 interest_profile=profile,
                 num_recs=TEST_REC_COUNT,
             )

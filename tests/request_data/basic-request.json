@@ -1,5 +1,5 @@
 {
-  "past_articles": {
+  "interacted": {
     "articles": [
       {
         "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d",
@@ -21,7 +21,7 @@
       }
     ]
   },
-  "todays_articles": {
+  "candidates": {
     "articles": [
       {
         "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",

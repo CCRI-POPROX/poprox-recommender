@@ -141,7 +141,7 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
 
 ```json
 {
-  "past_articles": [
+  "interacted": [
     {
       "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d",
       "headline": "headline 1",
@@ -161,7 +161,7 @@ Once the local server is running, you can send requests to `localhost:3000`. A r
       "url": "url 3"
     }
   ],
-  "todays_articles": [
+  "candidates": [
     {
       "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
       "headline": "headline 4",

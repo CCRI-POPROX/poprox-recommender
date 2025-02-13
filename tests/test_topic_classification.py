@@ -22,8 +22,8 @@ def load_test_articles():
     with open(event_path, "r") as j:
         req_body = json.loads(j.read())
 
-        candidate = CandidateSet(articles=[Article.model_validate(attrs) for attrs in req_body["todays_articles"]])
-        past = CandidateSet(articles=[Article.model_validate(attrs) for attrs in req_body["past_articles"]])
+        candidate = CandidateSet(articles=[Article.model_validate(attrs) for attrs in req_body["candidates"]])
+        past = CandidateSet(articles=[Article.model_validate(attrs) for attrs in req_body["interacted"]])
         click_history = [Click.model_validate(attrs) for attrs in req_body["interest_profile"]["click_history"]]
         num_recs = req_body["num_recs"]
 

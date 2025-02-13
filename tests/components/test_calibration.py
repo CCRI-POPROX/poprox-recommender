@@ -25,18 +25,18 @@ def test_request_with_topic_calibrator():
 
     req = RecommendationRequest.model_validate_json(req_f.read_text())
     req.interest_profile.click_topic_counts = user_topic_preference(
-        req.past_articles.articles, req.interest_profile.click_history
+        req.interacted.articles, req.interest_profile.click_history
     )
 
     try:
         base_outputs = select_articles(
-            req.todays_articles,
-            req.past_articles,
+            req.candidates,
+            req.interacted,
             req.interest_profile,
         )
         topic_calibrated_outputs = select_articles(
-            req.todays_articles,
-            req.past_articles,
+            req.candidates,
+            req.interacted,
             req.interest_profile,
             pipeline_params={"pipeline": "topic-cali"},
         )
@@ -68,17 +68,17 @@ def test_request_with_locality_calibrator():
 
     req = RecommendationRequest.model_validate_json(req_f.read_text())
     req.interest_profile.click_locality_counts = user_locality_preference(
-        req.past_articles, req.interest_profile.click_history
+        req.interacted, req.interest_profile.click_history
     )
     try:
         base_outputs = select_articles(
-            CandidateSet(articles=req.todays_articles),
-            CandidateSet(articles=req.past_articles),
+            CandidateSet(articles=req.candidates),
+            CandidateSet(articles=req.interacted),
             req.interest_profile,
         )
         locality_calibrated_outputs = select_articles(
-            CandidateSet(articles=req.todays_articles),
-            CandidateSet(articles=req.past_articles),
+            CandidateSet(articles=req.candidates),
+            CandidateSet(articles=req.interacted),
             req.interest_profile,
             pipeline_params={"pipeline": "locality-cali"},
         )

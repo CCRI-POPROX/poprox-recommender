@@ -1,5 +1,5 @@
 {
-  "todays_articles": [
+  "candidates": [
     {
       "article_id": "3966df9d-07fd-45bd-9417-e5d5b13c28ce",
       "headline": "US job openings fall to 8.1 million, lowest since 2021, but remain at historically high levels",
@@ -1648,7 +1648,7 @@
       ]
     }
   ],
-  "past_articles": [
+  "interacted": [
     {
       "article_id": "50551b08-1f74-4b3f-8183-96ac57b0ed6d",
       "headline": "A foreign armed force to fight gangs makes many in Haiti celebrate, while others worry",
