@@ -117,9 +117,7 @@ poprox-recommender = { path = ".", editable = true }
 
 [feature.test.tasks]
 test = { cmd = "pytest tests", depends-on = ["install-serverless"] }
-test-cov = { cmd = "coverage run -m pytest tests", depends-on = [
-  "install-serverless",
-] }
+test-cov = { cmd = "coverage run -m pytest tests", depends-on = ["install-serverless"] }
 
 # tooling for code validation
 [feature.lint.dependencies]
@@ -145,33 +143,12 @@ libblas = { build = "*mkl*" }
 [environments]
 default = { features = ["data"], solve-group = "main" }
 production = { features = ["production"] }
-pkg = { features = [
-  "pkg",
-  "data",
-  "serverless",
-], no-default-feature = true, solve-group = "main" }
+pkg = { features = ["pkg", "data", "serverless"], no-default-feature = true, solve-group = "main" }
 test = { features = ["test", "data", "serverless"], solve-group = "main" }
 # environment for just getting & processing the data
 data = { features = ["data"], no-default-feature = true, solve-group = "main" }
 lint = { features = ["lint"], solve-group = "main" }
 eval = { features = ["data", "eval"], solve-group = "main" }
 eval-cuda = { features = ["data", "eval", "cuda"], solve-group = "cuda" }
-dev = { features = [
-  "dev",
-  "meta",
-  "test",
-  "lint",
-  "data",
-  "eval",
-  "serverless",
-], solve-group = "main" }
-dev-cuda = { features = [
-  "dev",
-  "meta",
-  "test",
-  "lint",
-  "data",
-  "eval",
-  "serverless",
-  "cuda",
-], solve-group = "cuda" }
+dev = { features = ["dev", "meta", "test", "lint", "data", "eval", "serverless"], solve-group = "main" }
+dev-cuda = { features = ["dev", "meta", "test", "lint", "data", "eval", "serverless", "cuda"], solve-group = "cuda" }
