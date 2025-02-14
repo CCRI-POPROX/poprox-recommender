@@ -1,6 +1,7 @@
 import itertools as it
 import logging
 import multiprocessing as mp
+from typing import Tuple
 from uuid import UUID
 
 import ipyparallel as ipp
@@ -19,10 +20,13 @@ from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.recommenders import recommendation_pipelines
+from poprox_recommender.topics import user_topic_preference
 
 logger = logging.getLogger(__name__)
 
 STAGES = ["final", "ranked", "reranked"]
+
+THETA_RANDOM_SAMPLES = 60
 
 # globals used for workers
 _pipelines: dict[str, Pipeline]
@@ -62,7 +66,16 @@ def _finish_worker():
 
 
 def _generate_for_request(request: RecommendationRequest) -> UUID | None:
+    return _generate_for_hyperparamter_request((request, (None, None)))
+
+
+def _generate_for_hyperparamter_request(
+    request_with_thetas: Tuple[RecommendationRequest, Tuple[float | None, float | None]],
+) -> UUID | None:
     global _emb_seen
+
+    request = request_with_thetas[0]
+    thetas = request_with_thetas[1]
 
     logger.debug("recommending for profile %s", request.interest_profile.profile_id)
     if request.num_recs != TEST_REC_COUNT:
@@ -73,10 +86,18 @@ def _generate_for_request(request: RecommendationRequest) -> UUID | None:
         )
 
     pipe_names = list(_pipelines.keys())
+
+    # Calculate the clicked topic count
+    request.interest_profile.click_topic_counts = user_topic_preference(
+        request.past_articles, request.interest_profile.click_history
+    )
+
     inputs = {
         "candidate": CandidateSet(articles=request.candidates),
         "clicked": CandidateSet(articles=request.interacted),
         "profile": request.interest_profile,
+        "theta_topic": thetas[0],
+        "theta_locality": thetas[1],
     }
 
     for name, pipe in _pipelines.items():
@@ -89,6 +110,8 @@ def _generate_for_request(request: RecommendationRequest) -> UUID | None:
         rec_df, embeddings = extract_recs(name, request, outputs)
         rec_df["recommender"] = pd.Categorical(rec_df["recommender"], categories=pipe_names)
         rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
+        rec_df["theta_topic"] = thetas[0]
+        rec_df["theta_locality"] = thetas[1]
         _worker_out.rec_writer.write_frame(rec_df)
 
         # find any embeddings not yet written
@@ -125,6 +148,10 @@ def extract_recs(
                 "stage": "final",
                 "item_id": [str(a.article_id) for a in recs.articles],
                 "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
+                "treatment": False,
+                "k1_topic": -1,
+                "k1_locality": -1,
+                "is_inside_locality_threshold": None,
             }
         )
     ]
@@ -139,6 +166,10 @@ def extract_recs(
                     "stage": "ranked",
                     "item_id": [str(a.article_id) for a in ranked.articles],
                     "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
+                    "treatment": False,
+                    "k1_topic": -1,
+                    "k1_locality": -1,
+                    "is_inside_locality_threshold": None,
                 }
             )
         )
@@ -155,6 +186,10 @@ def extract_recs(
                     "stage": "reranked",
                     "item_id": [str(a.article_id) for a in reranked.articles],
                     "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
+                    "treatment": reranked.treatment_flags,  # type: ignore
+                    "k1_topic": reranked.k1_topic,
+                    "k1_locality": reranked.k1_locality,
+                    "is_inside_locality_threshold": reranked.is_inside_locality_threshold,
                 }
             )
         )
@@ -172,16 +207,32 @@ def extract_recs(
     return output_df, embeddings
 
 
-def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None, n_jobs: int = 1):
+def generate_profile_recs(
+    dataset: str,
+    outs: RecOutputs,
+    n_profiles: int | None = None,
+    n_jobs: int = 1,
+    topic_thetas: tuple[float, float] | None = None,
+    locality_thetas: tuple[float, float] | None = None,
+):
     logger.info("generating recommendations")
 
-    profile_iter = dataset.iter_profiles()
+    if topic_thetas and locality_thetas:
+        profile_iter = dataset.iter_hyperparameters(
+            topic_thetas, 0.05, locality_thetas, 0.05, random_sample=THETA_RANDOM_SAMPLES
+        )
+    else:
+        profile_iter = dataset.iter_profiles()
+
     if n_profiles is None:
         n_profiles = dataset.n_profiles
         logger.info("recommending for all %d profiles", n_profiles)
     else:
         logger.info("running on subset of %d profiles", n_profiles)
         profile_iter = it.islice(profile_iter, n_profiles)
+
+    if topic_thetas and locality_thetas:
+        n_profiles = n_profiles * dataset.n_hyperparameters
 
     timer = Stopwatch()
     with item_progress("recommend", total=n_profiles) as pb:
@@ -194,7 +245,22 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
 
                 logger.debug("dispatching jobs")
                 lbv = client.load_balanced_view()
-                for uid in lbv.imap(_generate_for_request, profile_iter, max_outstanding=n_jobs * 5, ordered=False):
+                if topic_thetas and locality_thetas:
+                    request_iter = lbv.imap(
+                        _generate_for_hyperparamter_request,
+                        profile_iter,
+                        max_outstanding=n_jobs * 5,
+                        ordered=False,
+                    )
+                else:
+                    request_iter = lbv.imap(
+                        _generate_for_request,
+                        profile_iter,
+                        max_outstanding=n_jobs * 5,
+                        ordered=False,
+                    )
+
+                for uid in request_iter:
                     logger.debug("finished measuring %s", uid)
                     pb.update()
 
@@ -207,7 +273,10 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
             _init_worker(outs)
 
             for request in profile_iter:
-                _generate_for_request(request)
+                if topic_thetas and locality_thetas:
+                    _generate_for_hyperparamter_request(request)
+                else:
+                    _generate_for_request(request)
                 pb.update()
 
             _finish_worker()

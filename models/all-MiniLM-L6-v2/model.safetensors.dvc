@@ -1,0 +1,12 @@
+md5: 0b21c9d5d59ffc10ffe89b82915985df
+frozen: true
+deps:
+- path: model.safetensors
+  repo:
+    url: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/
+    rev_lock: fa97f6e7cb1a59073dff9e6b13e2715cf7475ac9
+outs:
+- md5: 5d228912c417f6abf7732710314ddeed
+  size: 90868376
+  hash: md5
+  path: model.safetensors

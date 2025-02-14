@@ -62,7 +62,10 @@ def profile_eval_results(
         with ipp.Cluster(n=n_procs) as client:
             lb = client.load_balanced_view()
             yield from lb.imap(
-                measure_profile_recs, rec_profiles(eval_data, profile_recs), ordered=False, max_outstanding=n_procs * 10
+                measure_profile_recs,
+                rec_profiles(eval_data, profile_recs),
+                ordered=False,
+                max_outstanding=n_procs * 10,
             )
     else:
         for profile in rec_profiles(eval_data, profile_recs):
@@ -120,7 +123,9 @@ def main():
     logger.info("saving per-profile metrics to %s", profile_out_fn)
     metrics.to_csv(profile_out_fn)
 
-    agg_metrics = metrics.drop(columns=["profile_id", "personalized"]).groupby("recommender").mean()
+    agg_metrics = (
+        metrics.drop(columns=["profile_id", "personalized"]).groupby(["recommender", "theta_topic", "theta_loc"]).mean()
+    )
     # reciprocal rank means to MRR
     agg_metrics = agg_metrics.rename(columns={"RR": "MRR"})
 
