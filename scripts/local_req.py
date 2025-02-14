@@ -23,46 +23,6 @@ if __name__ == "__main__":
         "queryStringParameters": {"pipeline": "nrms-topics-static"},
         "isBase64Encoded": False,
     }
-    # event_candidate = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms-topics-candidate"},
-    #     "isBase64Encoded": False,
-    # }
-    # event_clicked = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms-topics-clicked"},
-    #     "isBase64Encoded": False,
-    # }
-    # event_hybrid = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms-topics-hybrid"},
-    #     "isBase64Encoded": False,
-    # }
-    # event_static_score = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms-topics-static-score"},
-    #     "isBase64Encoded": False,
-    # }
-    # event_candidate_score = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms-topics-candidate-score"},
-    #     "isBase64Encoded": False,
-    # }
-    # event_clicked_score = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms-topics-clicked-score"},
-    #     "isBase64Encoded": False,
-    # }
-    # event_hybrid_score = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms-topics-hybrid-score"},
-    #     "isBase64Encoded": False,
-    # }
-    # event_rrf_static_candidate = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms_rrf_static_candidate"},
-    #     "isBase64Encoded": False,
-    # }
     event_rrf_static_user = {
         "body": raw_json,
         "queryStringParameters": {"pipeline": "nrms_rrf_static_user"},
@@ -74,30 +34,6 @@ if __name__ == "__main__":
 
     response_static = generate_recs(event_static, {})
     response_static = RecommendationResponse.model_validate_json(response_static["body"])
-
-    # response_candidate = generate_recs(event_candidate, {})
-    # response_candidate = RecommendationResponse.model_validate_json(response_candidate["body"])
-
-    # response_clicked = generate_recs(event_clicked, {})
-    # response_clicked = RecommendationResponse.model_validate_json(response_clicked["body"])
-
-    # response_hybrid = generate_recs(event_hybrid, {})
-    # response_hybrid = RecommendationResponse.model_validate_json(response_hybrid["body"])
-
-    # response_static_score = generate_recs(event_static_score, {})
-    # response_static_score = RecommendationResponse.model_validate_json(response_static_score["body"])
-
-    # response_candidate_score = generate_recs(event_candidate_score, {})
-    # response_candidate_score = RecommendationResponse.model_validate_json(response_candidate_score["body"])
-
-    # response_clicked_score = generate_recs(event_clicked_score, {})
-    # response_clicked_score = RecommendationResponse.model_validate_json(response_clicked_score["body"])
-
-    # response_hybrid_score = generate_recs(event_hybrid_score, {})
-    # response_hybrid_score = RecommendationResponse.model_validate_json(response_hybrid_score["body"])
-
-    # response_rrf_static_candidate = generate_recs(event_rrf_static_candidate, {})
-    # response_rrf_static_candidate = RecommendationResponse.model_validate_json(response_rrf_static_candidate["body"])
 
     response_rrf_static_user = generate_recs(event_rrf_static_user, {})
     response_rrf_static_user = RecommendationResponse.model_validate_json(response_rrf_static_user["body"])
@@ -126,67 +62,3 @@ if __name__ == "__main__":
         for idx, article in enumerate(recs):
             article_topics = extract_general_topics(article)
             print(f"{idx + 1}. {article.headline} {article_topics}")
-
-    # for profile_id, recs in response_candidate.recommendations.items():
-    #     print("\n")
-    #     print(f"{event_candidate['queryStringParameters']['pipeline']}")
-
-    #     for idx, article in enumerate(recs):
-    #         article_topics = extract_general_topics(article)
-    #         print(f"{idx + 1}. {article.headline} {article_topics}")
-
-    # for profile_id, recs in response_clicked.recommendations.items():
-    #     print("\n")
-    #     print(f"{event_clicked['queryStringParameters']['pipeline']}")
-
-    #     for idx, article in enumerate(recs):
-    #         article_topics = extract_general_topics(article)
-    #         print(f"{idx + 1}. {article.headline} {article_topics}")
-
-    # for profile_id, recs in response_hybrid.recommendations.items():
-    #     print("\n")
-    #     print(f"{event_hybrid['queryStringParameters']['pipeline']}")
-
-    #     for idx, article in enumerate(recs):
-    #         article_topics = extract_general_topics(article)
-    #         print(f"{idx + 1}. {article.headline} {article_topics}")
-
-    # for profile_id, recs in response_static_score.recommendations.items():
-    #     print("\n")
-    #     print(f"{event_static_score['queryStringParameters']['pipeline']}")
-
-    #     for idx, article in enumerate(recs):
-    #         article_topics = extract_general_topics(article)
-    #         print(f"{idx + 1}. {article.headline} {article_topics}")
-
-    # for profile_id, recs in response_candidate_score.recommendations.items():
-    #     print("\n")
-    #     print(f"{event_candidate_score['queryStringParameters']['pipeline']}")
-
-    #     for idx, article in enumerate(recs):
-    #         article_topics = extract_general_topics(article)
-    #         print(f"{idx + 1}. {article.headline} {article_topics}")
-
-    # for profile_id, recs in response_clicked_score.recommendations.items():
-    #     print("\n")
-    #     print(f"{event_clicked_score['queryStringParameters']['pipeline']}")
-
-    #     for idx, article in enumerate(recs):
-    #         article_topics = extract_general_topics(article)
-    #         print(f"{idx + 1}. {article.headline} {article_topics}")
-
-    # for profile_id, recs in response_hybrid_score.recommendations.items():
-    #     print("\n")
-    #     print(f"{event_hybrid_score['queryStringParameters']['pipeline']}")
-
-    #     for idx, article in enumerate(recs):
-    #         article_topics = extract_general_topics(article)
-    #         print(f"{idx + 1}. {article.headline} {article_topics}")
-
-    # for profile_id, recs in response_rrf_static_candidate.recommendations.items():
-    #     print("\n")
-    #     print(f"{event_rrf_static_candidate['queryStringParameters']['pipeline']}")
-
-    #     for idx, article in enumerate(recs):
-    #         article_topics = extract_general_topics(article)
-    #         print(f"{idx + 1}. {article.headline} {article_topics}")
