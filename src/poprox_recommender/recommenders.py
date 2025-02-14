@@ -259,7 +259,7 @@ def build_locality_pipeline(name, article_embedder, user_embedder, ranker, num_s
 
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
-    o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
+    o_sampled = pipeline.add_component("sampler", sampler, candidates1=o_filtered, candidates2=candidates)
     pipeline.add_component("recommender", fill, recs1=o_context, recs2=o_sampled)
 
     return pipeline
