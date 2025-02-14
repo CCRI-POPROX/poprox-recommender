@@ -206,8 +206,8 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
             combined_click_history = interest_profile.click_history
             embedding_lookup = {**click_lookup}
         else:
-            combined_click_history = interest_profile.click_history + topic_clicks
-            embedding_lookup = {**click_lookup, **topic_lookup}
+            combined_click_history = topic_clicks
+            embedding_lookup = {**topic_lookup}
 
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
 
