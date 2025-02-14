@@ -25,11 +25,11 @@ class MMRDiversifier(Component):
         return RecommendationList(articles=recommended)
 
 
-def compute_similarity_matrix(todays_article_vectors):
-    num_values = len(todays_article_vectors)
+def compute_similarity_matrix(candidate_article_vectors):
+    num_values = len(candidate_article_vectors)
     # M is (n, k), where n = # articles & k = embed. dim.
     # M M^T is (n, n) matrix of pairwise dot products
-    similarity_matrix = todays_article_vectors @ todays_article_vectors.T
+    similarity_matrix = candidate_article_vectors @ candidate_article_vectors.T
     assert_tensor_size(similarity_matrix, num_values, num_values, label="sim-matrix", prefix=False)
     return similarity_matrix
 

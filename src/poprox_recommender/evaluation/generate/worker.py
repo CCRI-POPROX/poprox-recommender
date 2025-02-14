@@ -93,8 +93,8 @@ def _generate_for_hyperparamter_request(
     )
 
     inputs = {
-        "candidate": CandidateSet(articles=request.todays_articles),
-        "clicked": CandidateSet(articles=request.past_articles),
+        "candidate": CandidateSet(articles=request.candidates),
+        "clicked": CandidateSet(articles=request.interacted),
         "profile": request.interest_profile,
         "theta_topic": thetas[0],
         "theta_locality": thetas[1],
