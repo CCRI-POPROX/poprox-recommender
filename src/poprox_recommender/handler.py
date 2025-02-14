@@ -1,4 +1,5 @@
 import base64
+import gzip
 import logging
 import os
 
@@ -17,9 +18,11 @@ def generate_recs(event, context):
 
     body = event.get("body", {})
     is_encoded = event.get("isBase64Encoded", False)
+    is_compressed = event.get("headers", {}).get("Content-Encoding") == "gzip"
     pipeline_params = event.get("queryStringParameters", {})
 
     body = base64.b64decode(body) if is_encoded else body
+    body = gzip.decompress(body) if is_compressed else body
     logger.info(f"Decoded body: {body}")
 
     req = RecommendationRequest.model_validate_json(body)

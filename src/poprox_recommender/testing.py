@@ -5,6 +5,7 @@ This lives in the main package so it can be easily imported from any of the
 tests, regardless of their subdirectories.
 """
 
+import gzip
 import json
 import logging
 import os
@@ -41,7 +42,9 @@ class InProcessTestService:
     Test service that directly runs the request handler in-process.
     """
 
-    def request(self, req: RecommendationRequest | str, pipeline: str) -> RecommendationResponse:
+    def request(
+        self, req: RecommendationRequest | str, pipeline: str, compress: bool = False
+    ) -> RecommendationResponse:
         # defer to here so we don't always import the handler
         from poprox_recommender.handler import generate_recs
 
@@ -53,6 +56,11 @@ class InProcessTestService:
             "queryStringParameters": {"pipeline": pipeline},
             "isBase64Encoded": False,
         }
+
+        if compress:
+            event["body"] = gzip.compress(event["body"].encode("utf-8"))
+            event["headers"] = {"Content-Encoding": "gzip"}
+
         res = generate_recs(event, {})
         return RecommendationResponse.model_validate_json(res["body"])
 
@@ -67,7 +75,9 @@ class DockerTestService:
     def __init__(self, url: str):
         self.url = url
 
-    def request(self, req: RecommendationRequest | str, pipeline: str) -> RecommendationResponse:
+    def request(
+        self, req: RecommendationRequest | str, pipeline: str, compress: bool = False
+    ) -> RecommendationResponse:
         if not isinstance(req, str):
             req = req.model_dump_json()
 
@@ -76,6 +86,11 @@ class DockerTestService:
             "queryStringParameters": {"pipeline": pipeline},
             "isBase64Encoded": False,
         }
+
+        if compress:
+            event["body"] = gzip.compress(event["body"].encode("utf-8"))
+            event["headers"] = {"Content-Encoding": "gzip"}
+
         result = requests.post(self.url, json=event)
         res_data = result.json()
         if result.status_code != 200:
