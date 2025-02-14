@@ -1,13 +1,13 @@
 import torch
 
-from poprox_concepts import ArticleSet, InterestProfile
+from poprox_concepts.domain import CandidateSet, InterestProfile
 from poprox_recommender.components.scorers import ArticleScorer
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
 class TopicalArticleScorer(ArticleScorer):
     @torch_inference
-    def __call__(self, candidate_articles: ArticleSet, interest_profile: InterestProfile) -> ArticleSet:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> CandidateSet:
         candidate_embeddings = candidate_articles.embeddings
         user_embedding = interest_profile.embedding
 
@@ -30,7 +30,7 @@ class TopicalArticleScorer(ArticleScorer):
 
         return candidate_articles
 
-    def compute_topic_scores(self, candidate_articles: ArticleSet, topic_embeddings: dict, topic_weights: dict):
+    def compute_topic_scores(self, candidate_articles: CandidateSet, topic_embeddings: dict, topic_weights: dict):
         scores = torch.zeros(len(candidate_articles.articles), device=candidate_articles.embeddings.device)
 
         topic_name_to_id = {value["topic_name"]: key for key, value in topic_weights.items()}

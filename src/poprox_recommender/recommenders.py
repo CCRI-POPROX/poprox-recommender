@@ -263,6 +263,6 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
         o_rank_2 = pipeline.add_component("reranker2", ranker, candidate_articles=o_scored_2, interest_profile=e_user_2)
 
     # Merge recommendations from each strategy
-    pipeline.add_component("recommender", rrf, candidates1=o_rank_1, candidates2=o_rank_2)
+    pipeline.add_component("recommender", rrf, recs1=o_rank_1, recs2=o_rank_2)
 
     return pipeline
