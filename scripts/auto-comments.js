@@ -18,7 +18,11 @@ async function postDvcStatus({ github, context }) {
         if (c.body.match(/Creator:\s+check-dvc-status/)) {
             await github.graphql(`
                 mutation MinimizeComment {
-                    minimizeComment(input: {subjectId:"${c.node_id}",classifier:OUTDATED}) {}
+                    minimizeComment(input: {subjectId:"${c.node_id}",classifier:OUTDATED}) {
+                        minimizedComment {
+                            id
+                        }
+                    }
                 }
             `);
         }
