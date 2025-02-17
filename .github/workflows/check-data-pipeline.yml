@@ -3,6 +3,9 @@ name: Check Data Pipeline
 on:
   pull_request:
 
+permissions:
+  issues: write
+
 jobs:
   check-status:
     name: "Check data pipeline is up-to-date"
