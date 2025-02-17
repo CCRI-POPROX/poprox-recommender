@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 
-async function postDvcStatus() {
+async function postDvcStatus({ octokit, context }) {
     let body = await fs.readFile("dvc-status.log", { encoding: "utf-8" });
 
     let comments = octokit.rest.issues.listComments({
