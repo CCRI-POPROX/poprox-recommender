@@ -37,7 +37,7 @@ EOF
 
 dvc status --no-updates | tee -a $report_file
 echo -e '```\n' >>$report_file
-echo -e 'Creator: check-dvc-status'
+echo -e 'Creator: check-dvc-status' >>$report_file
 
 # emit GitHub error messages attached to each individual stage
 jq -r 'keys | .[] | sub(":"; " ")' <$status_file | (while read file stage; do
