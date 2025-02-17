@@ -13,7 +13,7 @@ echo "changed=$n_changed" >>"$GITHUB_OUTPUT"
 if [[ $n_changed -eq 0 ]]; then
     echo "::notice::DVC pipeline is up-to-date"
     cat >$report_file <<EOF
-✅ The DVC pipeline is up-to-date.
+### ✅ The DVC pipeline is up-to-date.
 
 Good news! The DVC pipeline outputs are up-to-date with respect to their code and data inputs in this PR.
 
@@ -25,7 +25,7 @@ fi
 # Prepare a report for the out-of-date information.
 echo "::notice::$n_changed stages are out-of-date"
 cat >$report_file <<EOF
-🚨 The DVC pipeline is out-of-date. 🚨
+### 🚨 The DVC pipeline is out-of-date. 🚨
 
 This is not a hard error, but the DVC-controlled outputs in this PR, such as evaluation metrics, are not current with respect to their code and data inputs.
 
