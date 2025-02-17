@@ -8,6 +8,10 @@ from lenskit.metrics import call_metric
 from lenskit.metrics.ranking import NDCG, RecipRank
 
 from poprox_concepts import Article, ArticleSet
+from poprox_recommender.evaluation.metrics.entropy import rank_bias_entropy
+from poprox_recommender.evaluation.metrics.gini import gini
+from poprox_recommender.evaluation.metrics.kcoverage import k_coverage_score
+from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 
 __all__ = ["rank_biased_overlap", "ProfileRecs", "measure_profile_recs"]
@@ -68,8 +72,15 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             single_rbo5 = None
             single_rbo10 = None
 
+        rbe = rank_bias_entropy(final_rec, k=10)
+        gini_index = gini(final_rec)
+        k_coverage = k_coverage_score(ranked, reranked, k=1)
+        lip = least_item_promoted(final_rec, k=10)
+
         logger.debug(
-            "profile %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
+            "profile %s rec %s: "
+            "NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f, RBE=%0.3f,"
+            "Gini=%0.3f, KCoverage=%0.3f, LIP=%0.3f",
             profile_id,
             name,
             single_ndcg5,
@@ -77,6 +88,10 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             single_rr,
             single_rbo5 or -1.0,
             single_rbo10 or -1.0,
+            rbe,
+            gini_index,
+            k_coverage,
+            lip,
         )
 
         results.append(
@@ -92,6 +107,10 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "RR": single_rr,
                 "RBO@5": single_rbo5,
                 "RBO@10": single_rbo10,
+                "rank_based_entropy": rbe,
+                "gini_index": gini_index,
+                "k_coverage": k_coverage,
+                "least_item_promoted": lip,
             }
         )
 
