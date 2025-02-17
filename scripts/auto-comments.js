@@ -2,6 +2,7 @@ const fs = require("fs/promises");
 
 async function postDvcStatus({ octokit, context }) {
     let body = await fs.readFile("dvc-status.log", { encoding: "utf-8" });
+    console.log("posting issue comment");
 
     let comments = octokit.rest.issues.listComments({
         owner: context.repo.owner,
