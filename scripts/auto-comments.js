@@ -9,9 +9,11 @@ async function postDvcStatus({ github, context }) {
         repo: context.repo.repo,
         issue_number: context.issue.number,
     });
-    console.log(comments);
+    if (comments.status != 200) {
+        throw new Error(`HTTP error fetching comments (${comments.status})`);
+    }
     let comment_id = null;
-    for (let c of comments) {
+    for (let c of comments.data) {
         if (c.body.match(/Creator:\s+check-dvc-status/)) {
             comment_id = c.id;
             break;
