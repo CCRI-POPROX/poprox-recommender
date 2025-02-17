@@ -9,6 +9,7 @@ async function postDvcStatus({ github, context }) {
         repo: context.repo.repo,
         issue_number: context.issue.number,
     });
+    console.log(comments);
     let comment_id = null;
     for (let c of comments) {
         if (c.body.match(/Creator:\s+check-dvc-status/)) {
