@@ -40,7 +40,7 @@ jobs:
         with:
           script: |
             const { postDvcStatus } = require('./scripts/auto-comments.js')
-            await postDvcStatus({octokit, context});
+            await postDvcStatus({github, context});
 
   rerun-subset-recs:
     name: "Rerun MIND subset recommendations"
