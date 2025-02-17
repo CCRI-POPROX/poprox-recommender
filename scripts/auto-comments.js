@@ -20,7 +20,7 @@ async function postDvcStatus({ github, context }) {
                 mutation MinimizeComment {
                     minimizeComment(input: {subjectId:"${c.node_id}",classifier:OUTDATED}) {
                         minimizedComment {
-                            id
+                            minimizedReason
                         }
                     }
                 }
