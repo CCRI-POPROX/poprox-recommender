@@ -11,8 +11,8 @@ from uuid import UUID
 
 import pandas as pd
 
-from poprox_concepts import AccountInterest, Article, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, Entity, InterestProfile, Mention
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 
@@ -119,8 +119,8 @@ class PoproxData(EvalData):
                 candidate_articles.append(self.lookup_candidate_article(article_row.article_id))
 
             yield RecommendationRequest(
-                candidates=candidate_articles,
-                interacted=interacted,
+                candidates=CandidateSet(articles=candidate_articles),
+                interacted=CandidateSet(articles=interacted),
                 interest_profile=profile,
                 num_recs=TEST_REC_COUNT,
             )
