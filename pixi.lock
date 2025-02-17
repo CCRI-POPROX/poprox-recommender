@@ -1514,7 +1514,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       linux-aarch64:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-2_gnu.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/adwaita-icon-theme-47.0-unix_0.conda
@@ -1923,7 +1923,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/adwaita-icon-theme-47.0-unix_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.19.0-pyhd8ed1ab_1.conda
@@ -2275,7 +2275,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/win-64/_openmp_mutex-4.5-2_gnu.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.19.0-pyhd8ed1ab_1.conda
@@ -2615,7 +2615,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
   dev:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -3123,7 +3123,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       linux-aarch64:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-2_gnu.tar.bz2
@@ -3622,7 +3622,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/adwaita-icon-theme-47.0-unix_0.conda
@@ -4064,7 +4064,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/win-64/_openmp_mutex-4.5-2_gnu.conda
@@ -4496,7 +4496,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
   dev-cuda:
     channels:
@@ -5039,7 +5039,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       linux-aarch64:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-2_gnu.tar.bz2
@@ -5572,7 +5572,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
   eval:
     channels:
@@ -5992,7 +5992,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       linux-aarch64:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-2_gnu.tar.bz2
@@ -6402,7 +6402,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/adwaita-icon-theme-47.0-unix_0.conda
@@ -6755,7 +6755,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/win-64/_openmp_mutex-4.5-2_gnu.conda
@@ -7096,7 +7096,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
   eval-cuda:
     channels:
@@ -7550,7 +7550,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       linux-aarch64:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-2_gnu.tar.bz2
@@ -7994,7 +7994,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
   lint:
     channels:
@@ -8229,7 +8229,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       linux-aarch64:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-2_gnu.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.6-pyhd8ed1ab_0.conda
@@ -8453,7 +8453,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/aiohttp-3.11.12-py311h4921393_0.conda
@@ -8668,7 +8668,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.6-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/aiohttp-3.11.12-py311h5082efb_0.conda
@@ -8865,7 +8865,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
   pkg:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -10309,7 +10309,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/3c/10/f86bfc1d101f77efe8b5292dea93e292cdcb6c6b91a294c656bb5b6825bd/awslambdaric-2.2.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/23/62/0fe302c6d1be1c777cab0616e6302478251dfbf9055ad426f5d0def75c89/more_itertools-10.6.0-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: https://files.pythonhosted.org/packages/32/ea/564bacc26b676c06a00266a3f25fdfe91a9d9a2532ccea7ce6dd394541bc/scipy-1.15.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e1/33/d3e0779d5c58245e7370c98eb969275af6b7a4a5aec3b97cbf85f09ad328/simplejson-3.20.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       linux-aarch64:
@@ -10528,7 +10528,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/a5/66/315808545f7ab0d7dae6e1747b4c4560ea2dd7c072b6b6dec3be5ba17dd8/awslambdaric-2.2.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/23/62/0fe302c6d1be1c777cab0616e6302478251dfbf9055ad426f5d0def75c89/more_itertools-10.6.0-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: https://files.pythonhosted.org/packages/e0/22/4b4a26fe1cd9ed0bc2b2cb87b17d57e32ab72c346949eaf9288001f8aa8e/scipy-1.15.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
       - pypi: https://files.pythonhosted.org/packages/e1/94/a30a5211a90d67725a3e8fcc1c788189f2ae2ed2b96b63ed15d0b7f5d6bb/simplejson-3.20.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
   test:
@@ -10953,7 +10953,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstandard-0.23.0-py311hbc35293_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.6-ha6fb4c9_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       linux-aarch64:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-2_gnu.tar.bz2
@@ -11367,7 +11367,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstandard-0.23.0-py311hd5293d8_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/zstd-1.5.6-h02f22dd_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/adwaita-icon-theme-47.0-unix_0.conda
@@ -11724,7 +11724,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstandard-0.23.0-py311ha60cc69_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
       win-64:
       - conda: https://conda.anaconda.org/conda-forge/win-64/_openmp_mutex-4.5-2_gnu.conda
@@ -12069,7 +12069,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstandard-0.23.0-py311h53056dc_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.6-h0ea2cb4_0.conda
       - pypi: https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl
-      - pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+      - pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
       - pypi: .
 packages:
 - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
@@ -25683,9 +25683,9 @@ packages:
   - pkg:pypi/plumbum?source=hash-mapping
   size: 96964
   timestamp: 1728136236667
-- pypi: git+https://github.com/ccri-poprox/poprox-concepts?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0
+- pypi: git+https://github.com/ccri-poprox/poprox-concepts#4e24bcf2420fcf23946e6391d2183fd71a650ab1
   name: poprox-concepts
-  version: 0.1.0
+  version: 0.0.1
   requires_dist:
   - pydantic~=2.7.1
   requires_python: '>=3.10'
