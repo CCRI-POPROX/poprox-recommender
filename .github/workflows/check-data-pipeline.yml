@@ -32,7 +32,15 @@ jobs:
 
       - name: Check pipeline status
         run: |
-          exec /bin/bash scripts/check-dvc-status.sh
+          /bin/bash scripts/check-dvc-status.sh
+
+      - name: Comment on PR
+        if: github.event == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { postDvcStatus } = require('./scripts/auto-comments.js')
+            await postDvcStatus();
 
   rerun-subset-recs:
     name: "Rerun MIND subset recommendations"
