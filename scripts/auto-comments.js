@@ -4,7 +4,7 @@ async function postDvcStatus({ github, context }) {
     let body = await fs.readFile("dvc-status.log", { encoding: "utf-8" });
     console.log("posting issue comment");
 
-    let comments = github.rest.issues.listComments({
+    let comments = await github.rest.issues.listComments({
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: context.issue.number,
@@ -17,14 +17,14 @@ async function postDvcStatus({ github, context }) {
         }
     }
     if (comment_id) {
-        github.rest.issues.updateComment({
+        await github.rest.issues.updateComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             comment_id,
             body,
         });
     } else {
-        github.rest.issues.createComment({
+        await github.rest.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: context.issue.number,
