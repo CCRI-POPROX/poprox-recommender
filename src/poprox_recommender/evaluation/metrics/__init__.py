@@ -75,7 +75,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         rbe = rank_bias_entropy(final_rec, k=10)
         gini_index = gini(final_rec)
         k_coverage = k_coverage_score(ranked, reranked, k=1)
-        lip = least_item_promoted(final_rec, k=10)
+        lip = least_item_promoted(ranked, reranked, k=10)
 
         logger.debug(
             "profile %s rec %s: "
