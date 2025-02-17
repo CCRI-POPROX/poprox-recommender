@@ -12,6 +12,12 @@
   "[jsonc]": {
     "editor.formatOnSave": true
   },
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true
+  },
   "[toml]": {
     "editor.formatOnSave": true
   },
