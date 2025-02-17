@@ -13,27 +13,24 @@ async function postDvcStatus({ github, context }) {
         throw new Error(`HTTP error fetching comments (${comments.status})`);
     }
     let comment_id = null;
+    // minimize all previous comments
     for (let c of comments.data) {
         if (c.body.match(/Creator:\s+check-dvc-status/)) {
-            comment_id = c.id;
-            break;
+            await github.graphql(`
+                mutation MinimizeComment {
+                    minimizeComment(input: {subjectId:"${c.node_id}",classifier:OUTDATED}) {}
+                }
+            `);
         }
     }
-    if (comment_id) {
-        await github.rest.issues.updateComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            comment_id,
-            body,
-        });
-    } else {
-        await github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body,
-        });
-    }
+
+    // add a new comment
+    await github.rest.issues.createComment({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: context.issue.number,
+        body,
+    });
 }
 
 module.exports = {
