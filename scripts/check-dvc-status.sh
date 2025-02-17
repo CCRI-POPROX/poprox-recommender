@@ -15,6 +15,8 @@ if [[ $n_changed -eq 0 ]]; then
     cat >$report_file <<EOF
 ✅ The DVC pipeline is up-to-date.
 
+Good news! The DVC pipeline outputs are up-to-date with respect to their code and data inputs in this PR.
+
 Creator: check-dvc-status
 EOF
     exit 0
@@ -25,11 +27,9 @@ echo "::notice::$n_changed stages are out-of-date"
 cat >$report_file <<EOF
 🚨 The DVC pipeline is out-of-date. 🚨
 
-This is not a hard error, but the DVC-controlled outputs in this PR, such as
-evaluation metrics, are not current with respect to their code and data inputs.
+This is not a hard error, but the DVC-controlled outputs in this PR, such as evaluation metrics, are not current with respect to their code and data inputs.
 
-If the MIND eval CI job also fails, then the pipeline is not only out-of-date but
-cannot be rerun to produce current outputs.
+If the MIND eval CI job also fails, then the pipeline is not only out-of-date but cannot be rerun to produce current outputs.
 
 \`\`\`console
 $ dvc status
