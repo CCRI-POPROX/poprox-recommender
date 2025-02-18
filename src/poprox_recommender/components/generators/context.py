@@ -153,7 +153,7 @@ class ContextGenerator(Component):
 
         target_embedding = embeddings[0].reshape(1, -1)
         clicked_embeddings = embeddings[1:]
-        if len(clicked_embeddings) == 0:
+        if len(clicked_embeddings) != 0:
             similarities = cosine_similarity(target_embedding, clicked_embeddings)[0]
         else:
             return []
