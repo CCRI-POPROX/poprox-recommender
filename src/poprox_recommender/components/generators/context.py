@@ -1,7 +1,9 @@
 import ast
 import asyncio
+import json
 import logging
 from datetime import datetime, timedelta
+import re
 
 import numpy as np
 from lenskit.pipeline import Component
@@ -37,7 +39,7 @@ class ContextGenerator(Component):
         self.dev_mode = dev_mode
         self.previous_context_articles = []
         if self.dev_mode:
-            self.client = AsyncOpenAI(api_key="Insert Key Here")
+            self.client = AsyncOpenAI(api_key="Insert your key here.")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
     def __call__(
@@ -104,8 +106,7 @@ class ContextGenerator(Component):
                     "SUB_HEADLINE": article.subhead,
                 }
 
-        generated_dict = ast.literal_eval(generated_rec)
-
+        generated_dict = json.loads(generated_rec)
         generated_headline = generated_dict.get("HEADLINE", "")
         generated_subhead = generated_dict.get("SUB_HEADLINE", "")
         if generated_headline == "" or generated_subhead == "":
@@ -152,7 +153,10 @@ class ContextGenerator(Component):
 
         target_embedding = embeddings[0].reshape(1, -1)
         clicked_embeddings = embeddings[1:]
-        similarities = cosine_similarity(target_embedding, clicked_embeddings)[0]
+        if len(clicked_embeddings) != 0:
+            similarities = cosine_similarity(target_embedding, clicked_embeddings)[0]
+        else:
+            return []
 
         # CHECK threshold [0.2, 0, 0.2]
         for i in range(len(similarities)):
@@ -179,16 +183,13 @@ class ContextGenerator(Component):
 
     async def semantic_narrative(self, main_news, related_news):
         system_prompt = (
-            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in "
-            " a natural and factual tone. You are provided a [[MAIN_NEWS]] to be recommended and a [[RELATED_NEWS]] "
-            "that a user read before. Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting "
-            "it to [[RELATED_NEWS]] and highlight points from [[RELATED_NEWS]] relevant to why the user should also be "
-            "interested in [[MAIN_NEWS]]. Your response should only include a dictionary parsable by "
-            "ast.literal_eval(string_dict) in the form "
-            "{'HEADLINE': '[REWRITTEN HEADLINE], 'SUB_HEADLINE': '[REWRITTEN_SUBHEADLINE]}. "
-            "[REWRITTEN HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
-            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe "
-            "[[MAIN_NEWS]]."
+            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "
+            "You are provided a [[MAIN_NEWS]] to be recommended and a [[RELATED_NEWS]] that a user read before. "
+            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[RELATED_NEWS]] and "
+            "highlight points from [[RELATED_NEWS]] relevant to why the user should also be interested in [[MAIN_NEWS]]. "
+            'Your response should only include JSON parsable by json.loads() in the format {"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'. '  # "Your response should only include a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "
+            "[REWRITTEN_HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
+            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
         )
 
         input_prompt = f"[[MAIN_NEWS]]: {main_news} \n[[RELATED_NEWS]]: {related_news}"
@@ -202,15 +203,13 @@ class ContextGenerator(Component):
         top_keys = [key for key, _ in sorted_items[:NUM_TOPICS]]
 
         system_prompt = (
-            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a "
-            "natural and factual tone. You are provided a [[MAIN_NEWS]] to be recommended to a user interested in "
-            "[[INTERESTED_TOPICS]]. Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it "
-            "to [[INTERESTED_TOPICS]] and highlight points relevant to why the user should also be interested in "
-            "[[MAIN_NEWS]]. Your response should only include a dictionary parsable by ast.literal_eval(string_dict) "
-            "in the form {'HEADLINE': '[REWRITTEN HEADLINE], 'SUB_HEADLINE': '[REWRITTEN_SUBHEADLINE]}. "
-            "[REWRITTEN HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
-            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe "
-            "[[MAIN_NEWS]]."
+            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "
+            "You are provided a [[MAIN_NEWS]] to be recommended to a user interested in [[INTERESTED_TOPICS]]."
+            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[INTERESTED_TOPICS]] "
+            "and highlight points relevant to why the user should also be interested in [[MAIN_NEWS]]. "
+            'Your response should only include JSON parsable by json.loads() in the format {"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'. '  # a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "
+            "[REWRITTEN_HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
+            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
         )
 
         main_news = {"HEADING": main_news.headline, "SUB_HEADING": main_news.subhead}
@@ -236,8 +235,9 @@ class ContextGenerator(Component):
 
         while retries < MAX_RETRIES:
             try:
-                chat_completion = await self.client.chat.completions.create(
+                chat_completion = await self.client.beta.chat.completions.parse(
                     messages=message,
+                    response_format={"type": "json_object"},
                     temperature=temperature,
                     max_tokens=max_tokens,
                     frequency_penalty=frequency_penalty,

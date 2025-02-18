@@ -33,7 +33,7 @@ structlog = ">=24.0"
 threadpoolctl = "~=3.5"
 
 [pypi-dependencies]
-poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git" }
+poprox-concepts = { git = "https://github.com/CCRI-POPROX/poprox-concepts/", rev = "v0.1.0" }
 lenskit = "==2025.0.0a4"
 
 # turn off CUDA on Windows
