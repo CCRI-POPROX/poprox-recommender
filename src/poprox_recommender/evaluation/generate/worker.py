@@ -74,8 +74,8 @@ def _generate_for_request(request: RecommendationRequest) -> UUID | None:
 
     pipe_names = list(_pipelines.keys())
     inputs = {
-        "candidate": CandidateSet(articles=request.candidates),
-        "clicked": CandidateSet(articles=request.interacted),
+        "candidate": request.candidates,
+        "clicked": request.interacted,
         "profile": request.interest_profile,
     }
 
