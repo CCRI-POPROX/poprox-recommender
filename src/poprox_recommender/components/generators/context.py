@@ -2,8 +2,8 @@ import ast
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
 import re
+from datetime import datetime, timedelta
 
 import numpy as np
 from lenskit.pipeline import Component
