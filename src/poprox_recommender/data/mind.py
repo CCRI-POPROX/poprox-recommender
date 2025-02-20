@@ -14,8 +14,8 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 
 import pandas as pd
 
-from poprox_concepts import Article, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.domain import Article, CandidateSet, Click, Entity, InterestProfile, Mention
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 
@@ -103,9 +103,9 @@ class MindData(EvalData):
             cand_pairs: list[str] = row.impressions.split()  # type: ignore
 
             clicks = [Click(article_id=self.news_uuid_for_id(aid)) for aid in clicked_ids]
-            past = []
+            interacted = []
             for aid in clicked_ids:
-                past.append(self.lookup_article(id=aid))
+                interacted.append(self.lookup_article(id=aid))
 
             today = []
             for pair in cand_pairs:
@@ -115,7 +115,10 @@ class MindData(EvalData):
             clicks = [Click(article_id=self.news_uuid_for_id(aid)) for aid in clicked_ids]
             profile = InterestProfile(profile_id=cast(UUID, row.uuid), click_history=clicks, onboarding_topics=[])
             yield RecommendationRequest(
-                todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
+                candidates=CandidateSet(articles=today),
+                interacted=CandidateSet(articles=interacted),
+                interest_profile=profile,
+                num_recs=TEST_REC_COUNT,
             )
 
     def lookup_article(self, *, id: str | None = None, uuid: UUID | None = None):

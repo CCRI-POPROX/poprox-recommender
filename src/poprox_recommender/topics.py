@@ -48,16 +48,16 @@ def extract_locality(article: Article) -> list[str]:
         return ["Neither"]
 
 
-def find_topic(past_articles: list[Article], article_id: UUID):
+def find_topic(interacted: list[Article], article_id: UUID):
     # each article might correspond to multiple topic
-    for article in past_articles:
+    for article in interacted:
         if article.article_id == article_id:
             return extract_general_topics(article)
 
 
-def find_locality(past_articles: list[Article], article_id: UUID):
+def find_locality(interacted: list[Article], article_id: UUID):
     # each article might correspond to multiple locality: U.S., World, or neither
-    for article in past_articles:
+    for article in interacted:
         if article.article_id == article_id:
             return extract_locality(article)
 
@@ -71,27 +71,27 @@ def normalized_category_count(counts: dict[str, int]):
     return normalized_counts
 
 
-def user_topic_preference(past_articles: list[Article], click_history: list[Click]) -> dict[str, int]:
+def user_topic_preference(interacted: list[Article], click_history: list[Click]) -> dict[str, int]:
     """Topic preference only based on click history"""
     clicked_articles = [c.article_id for c in click_history]  # List[UUID]
 
     topic_count_dict = defaultdict(int)
 
     for article_id in clicked_articles:
-        clicked_topics = find_topic(past_articles, article_id) or set()
+        clicked_topics = find_topic(interacted, article_id) or set()
         for topic in clicked_topics:
             topic_count_dict[topic] += 1
 
     return topic_count_dict
 
 
-def user_locality_preference(past_articles: list[Article], click_history: list[Click]) -> dict[str, int]:
+def user_locality_preference(interacted: list[Article], click_history: list[Click]) -> dict[str, int]:
     clicked_articles = [c.article_id for c in click_history]  # List[UUID]
 
     locality_count_dict = defaultdict(int)
 
     for article_id in clicked_articles:
-        clicked_locality = find_locality(past_articles, article_id) or set()
+        clicked_locality = find_locality(interacted, article_id) or set()
         for locality in clicked_locality:
             locality_count_dict[locality] += 1
 
