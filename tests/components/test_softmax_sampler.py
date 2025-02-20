@@ -2,8 +2,9 @@ import logging
 
 from pytest import skip, xfail
 
-from poprox_concepts import ArticleSet
+from poprox_concepts import CandidateSet
 from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.domain import RecommendationList
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.recommenders import PipelineLoadError, select_articles
@@ -21,13 +22,13 @@ def test_request_with_softmax_sampler():
 
     try:
         base_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
         )
         sampled_outputs = select_articles(
-            ArticleSet(articles=req.todays_articles),
-            ArticleSet(articles=req.past_articles),
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
             pipeline_params={"pipeline": "softmax"},
         )

@@ -4,7 +4,7 @@ from typing import Any
 
 from lenskit.pipeline import Pipeline, PipelineState
 
-from poprox_concepts import ArticleSet, InterestProfile
+from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.diversifiers import (
     # LocalityCalibrator,
     MMRDiversifier,
@@ -17,7 +17,7 @@ from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Fill, ReciprocalRankFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers import SoftmaxSampler, UniformSampler
-from poprox_recommender.components.scorers import ArticleScorer
+from poprox_recommender.components.scorers import ArticleScorer, TopicalArticleScorer
 from poprox_recommender.config import default_device
 from poprox_recommender.paths import model_file_path
 
@@ -35,8 +35,8 @@ class PipelineLoadError(Exception):
 
 
 def select_articles(
-    candidate_articles: ArticleSet,
-    clicked_articles: ArticleSet,
+    candidate_articles: CandidateSet,
+    clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
 ) -> PipelineState:
@@ -87,35 +87,17 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
 
     article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
     user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
-    topic_user_embedder_candidate = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="candidates",
-        topic_embedding="avg",
-    )
-    topic_user_embedder_clicked = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="clicked",
-        topic_embedding="avg",
-    )
+
     topic_user_embedder_static = UserOnboardingEmbedder(
         model_file_path("nrms-mind/user_encoder.safetensors"),
         device,
         embedding_source="static",
         topic_embedding="avg",
     )
-    topic_user_embedder_hybrid = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
-        embedding_source="hybrid",
-        topic_embedding="avg",
-    )
 
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
     pfar = PFARDiversifier(num_slots=num_slots)
-    # locality_calibrator = LocalityCalibrator(num_slots=num_slots)
     topic_calibrator = TopicCalibrator(num_slots=num_slots)
     sampler = SoftmaxSampler(num_slots=num_slots, temperature=30.0)
 
@@ -123,22 +105,6 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         "plain-NRMS",
         article_embedder=article_embedder,
         user_embedder=user_embedder,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
-
-    nrms_onboarding_pipe_cadidate = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_candidate,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
-
-    nrms_onboarding_pipe_clicked = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_clicked,
         ranker=topk_ranker,
         num_slots=num_slots,
     )
@@ -151,10 +117,11 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    nrms_onboarding_pipe_hybrid = build_pipeline(
-        "plain-NRMS-with-onboarding-topics",
+    nrms_rrf_static_user = build_RRF_pipeline(
+        "NRMS+RRF",
         article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_hybrid,
+        user_embedder=user_embedder,
+        user_embedder2=topic_user_embedder_static,
         ranker=topk_ranker,
         num_slots=num_slots,
     )
@@ -183,14 +150,6 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    # locality_cali_pipe = build_pipeline(
-    #     "NRMS+Locality+Calibration",
-    #     article_embedder=article_embedder,
-    #     user_embedder=user_embedder,
-    #     ranker=locality_calibrator,
-    #     num_slots=num_slots,
-    # )
-
     softmax_pipe = build_pipeline(
         "NRMS+Softmax",
         article_embedder=article_embedder,
@@ -199,42 +158,23 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots=num_slots,
     )
 
-    nrms_rrf_static_candidate = build_RRF_pipeline(
-        "NRMS+RRF",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_static,
-        user_embedder2=topic_user_embedder_candidate,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
-
-    nrms_rrf_static_clicked = build_RRF_pipeline(
-        "NRMS+RRF",
-        article_embedder=article_embedder,
-        user_embedder=topic_user_embedder_static,
-        user_embedder2=topic_user_embedder_clicked,
-        ranker=topk_ranker,
-        num_slots=num_slots,
-    )
-
     return {
         "nrms": nrms_pipe,
-        "nrms-topics-candidate": nrms_onboarding_pipe_cadidate,
-        "nrms-topics-clicked": nrms_onboarding_pipe_clicked,
-        "nrms-topics-static": nrms_onboarding_pipe_static,
-        "nrms-topics-hybrid": nrms_onboarding_pipe_hybrid,
         "mmr": mmr_pipe,
         "pfar": pfar_pipe,
         "topic-cali": topic_cali_pipe,
-        # "locality-cali": locality_cali_pipe,
         "softmax": softmax_pipe,
-        "nrms_rrf_static_candidate": nrms_rrf_static_candidate,
-        "nrms_rrf_static_clicked": nrms_rrf_static_clicked,
+        "nrms-topics-static": nrms_onboarding_pipe_static,
+        "nrms_rrf_static_user": nrms_rrf_static_user,
     }
 
 
-def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
-    article_scorer = ArticleScorer()
+def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots, scorer_source="ArticleScorer"):
+    if scorer_source == "TopicalArticleScorer":
+        article_scorer = TopicalArticleScorer()
+    else:
+        article_scorer = ArticleScorer()
+
     topic_filter = TopicFilter()
     sampler = UniformSampler(num_slots=num_slots)
     fill = Fill(num_slots=num_slots)
@@ -242,8 +182,8 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
     pipeline = Pipeline(name=name)
 
     # Define pipeline inputs
-    candidates = pipeline.create_input("candidate", ArticleSet)
-    clicked = pipeline.create_input("clicked", ArticleSet)
+    candidates = pipeline.create_input("candidate", CandidateSet)
+    clicked = pipeline.create_input("clicked", CandidateSet)
     profile = pipeline.create_input("profile", InterestProfile)
 
     # Compute embeddings
@@ -267,8 +207,8 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
 
     # Fallback in case not enough articles came from the ranker
     o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
-    o_sampled = pipeline.add_component("sampler", sampler, candidate=o_filtered, backup=candidates)
-    pipeline.add_component("recommender", fill, candidates1=o_rank, candidates2=o_sampled)
+    o_sampled = pipeline.add_component("sampler", sampler, candidates1=o_filtered, candidates2=candidates)
+    pipeline.add_component("recommender", fill, recs1=o_rank, recs2=o_sampled)
 
     return pipeline
 
@@ -281,8 +221,8 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
     pipeline = Pipeline(name=name)
 
     # Define pipeline inputs
-    candidates = pipeline.create_input("candidate", ArticleSet)
-    clicked = pipeline.create_input("clicked", ArticleSet)
+    candidates = pipeline.create_input("candidate", CandidateSet)
+    clicked = pipeline.create_input("clicked", CandidateSet)
     profile = pipeline.create_input("profile", InterestProfile)
 
     # Compute embeddings
@@ -323,6 +263,6 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
         o_rank_2 = pipeline.add_component("reranker2", ranker, candidate_articles=o_scored_2, interest_profile=e_user_2)
 
     # Merge recommendations from each strategy
-    pipeline.add_component("recommender", rrf, candidates1=o_rank_1, candidates2=o_rank_2)
+    pipeline.add_component("recommender", rrf, recs1=o_rank_1, recs2=o_rank_2)
 
     return pipeline
