@@ -34,7 +34,7 @@ jobs:
 
       - name: Fetch model data
         run: |
-          dvc pull -r public -R models tests
+          dvc pull -r public -R models tests data
 
       - name: Run tests
         run: |
