@@ -2,9 +2,6 @@
 FROM public.ecr.aws/lambda/provided:al2023
 ARG LOG_LEVEL=INFO
 
-# install necessary system packages
-RUN dnf -y install git-core
-
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 # Copy the soure code into the image to install it and create the environment

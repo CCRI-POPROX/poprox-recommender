@@ -28,7 +28,7 @@ dependencies = [
   "ipyparallel ~=8.0",
   # this expresses the dep, but since we only install with pixi,
   # it's ok that it can't be resolved.
-  "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts/@v0.1.0",
+  "poprox-concepts @ https://github.com/CCRI-POPROX/poprox-concepts/archive/refs/tags/v0.1.0.zip",
 ]
 
 [project.optional-dependencies]

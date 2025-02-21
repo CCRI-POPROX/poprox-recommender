@@ -2788,10 +2788,14 @@ wheels = [
 [[package]]
 name = "poprox-concepts"
 version = "0.1.0"
-source = { git = "https://github.com/CCRI-POPROX/poprox-concepts/?rev=v0.1.0#3f75e6cd95b56fdf36aedcbe57cf2890c2828dc0" }
+source = { url = "https://github.com/CCRI-POPROX/poprox-concepts/archive/refs/tags/v0.1.0.zip" }
 dependencies = [
     { name = "pydantic" },
 ]
+sdist = { hash = "sha256:5802efb2d99b598f5b607fb77e6fb58fc00deef6709eb1e6541bd71e1eeaf6fc" }
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = "~=2.7.1" }]
 
 [[package]]
 name = "poprox-recommender"
@@ -2885,7 +2889,7 @@ requires-dist = [
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
     { name = "pandas", marker = "extra == 'eval'", specifier = "~=2.0" },
-    { name = "poprox-concepts", git = "https://github.com/CCRI-POPROX/poprox-concepts/?rev=v0.1.0" },
+    { name = "poprox-concepts", url = "https://github.com/CCRI-POPROX/poprox-concepts/archive/refs/tags/v0.1.0.zip" },
     { name = "rich", specifier = "~=13.9" },
     { name = "safetensors", specifier = ">=0.4,<1" },
     { name = "smart-open", specifier = "==7.*" },
