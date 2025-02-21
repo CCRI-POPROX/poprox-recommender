@@ -18,7 +18,7 @@
     "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume",
     "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
   ],
-  "postCreateCommand": "./.devcontainer/setup.sh",
+  "postCreateCommand": ".devcontainer/setup.sh",
   // VS Code settings
   "customizations": {
     "vscode": {
