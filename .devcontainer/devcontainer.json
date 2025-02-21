@@ -13,11 +13,13 @@
   "forwardPorts": [
     3000
   ],
-  // Set up mounts for locally-installed software
-  "mounts": [
-    "source=${localWorkspaceFolderBasename}-venv,target=${containerWorkspaceFolder}/.venv,type=volume",
-    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
-  ],
+  "containerEnv": {
+    "UV_PROJECT_ENVIRONMENT": "/home/vscode/poprox-venv"
+  },
+  "remoteEnv": {
+    "VIRTUAL_ENV": "${containerEnv:UV_PROJECT_ENVIRONMENT}",
+    "PATH": "${containerEnv:UV_PROJECT_ENVIRONMENT}/bin:${containerEnv:PATH}"
+  },
   "postCreateCommand": ".devcontainer/setup.sh",
   // VS Code settings
   "customizations": {
