@@ -55,6 +55,7 @@ jobs:
       - name: Run integration tests
         run: |
           python -m pytest -v tests/integration
+          python -m pytest -v tests/web_service
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000
