@@ -57,7 +57,7 @@ def test_embed_user():
     )
 
     assert len(enriched_profile.click_history) > initial_clicks
-    assert len(enriched_profile.click_history) == 15
+    assert len(enriched_profile.click_history) == len(TOPIC_ARTICLES)
 
     plain_profile = deepcopy(profile)
 
