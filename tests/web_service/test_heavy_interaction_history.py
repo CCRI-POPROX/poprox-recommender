@@ -25,7 +25,6 @@ except Exception as e:
         raise e
 
 
-@mark.docker
 @mark.parametrize("pipeline", PIPELINES)
 def test_heavy_interaction_history(service, mind_data, pipeline):  # noqa: F811
     """
