@@ -6,4 +6,6 @@ RUN curl -L -o /usr/local/bin/pixi -fsSL --compressed "https://github.com/prefix
     && chmod +x /usr/local/bin/pixi \
     && pixi info
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
 RUN echo 'eval "$(pixi completion -s bash)"' >> /home/vscode/.bashrc

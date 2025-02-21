@@ -2,7 +2,7 @@
 set -xeo pipefail
 
 # set up environment dirs
-sudo chown vscode:vscode .pixi node_modules
+sudo chown vscode:vscode .venv .pixi node_modules
 
 # fix git permissions warning
 git config --global --add safe.directory $PWD
