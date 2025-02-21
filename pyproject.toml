@@ -14,8 +14,6 @@ requires-python = ">= 3.11"
 readme = "README.md"
 license = { file = "LICENSE.md" }
 dynamic = ["version"]
-# Dependencies for the POPROX code — keep in sync w/ pixi.toml
-# `dependencies` table.
 dependencies = [
   "lenskit==2025.0.0a4",
   "nltk>=3.8,<4",
@@ -26,14 +24,11 @@ dependencies = [
   "transformers>=4.41,<5",
   "rich ~=13.9",
   "ipyparallel ~=8.0",
-  # this expresses the dep, but since we only install with pixi,
-  # it's ok that it can't be resolved.
+  # we reference the zip file, so install doesn't need git
   "poprox-concepts @ https://github.com/CCRI-POPROX/poprox-concepts/archive/refs/tags/v0.1.0.zip",
 ]
 
 [project.optional-dependencies]
-# keep synchronized with feature.data.dependencies in pixi.toml
-# we want these here so the doc build can work with the eval code
 eval = [
   "docopt >=0.6",
   "pandas ~=2.0",
