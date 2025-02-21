@@ -55,54 +55,40 @@ documented support for that.
 
 ## Working with the Software
 
-We manage software environments for this repository with [pixi][], and model and
-data files with [dvc][]. The `pixi.lock` file provides a locked dependency set
+We manage software environments for this repository with [uv][], and model and
+data files with [dvc][]. The `uv.lock` file provides a locked dependency set
 for reproducibly running the recommender code with all dependencies on Linux and
 macOS (we use the devcontainer for development support on Windows).
 
-[pixi]: https://pixi.sh
+[uv]: https://docs.astral.sh/uv
 [dvc]: https://dvc.org
 
-The devcontainer automatically installs the development Pixi environment; if you
-want to manually install it, you can run:
+The devcontainer automatically installs the development environment; if you want
+to manually install it, you can run:
 
 ```console
-pixi install -e dev
+uv sync --extra cpu
 ```
 
-VS Code will also usually activate this environment by default when opening a
-terminal; you can also directly run code in in the Pixi environment with any of
-the following methods:
+The dev container environment already has the environment active.
 
-1.  Run a defined task, like `test`, with `pixi run`:
+A few useful commands for the terminal:
 
-    ```console
-    $ pixi run -e dev test
-    ```
-
-2.  Run individual commands with `pixi run`, e.g.:
+1.  Run the tests:
 
     ```console
-    $ pixi run -e dev pytest tests
-    ```
-
-3.  Run a Pixi shell, which activates the environment and adds the appropriate
-    Python to your `PATH`:
-
-    ```console
-    $ pixi shell -e dev
+    $ pytest tests
     ```
 
 > [!NOTE]
 >
-> If you have a CUDA-enabled Linux system, you can use the `dev-cuda` and
-> `eval-cuda` environments to use your GPU for POPROX batch inference.
-
-> [!NOTE]
+> If you have a CUDA-enabled Linux system, you can use the `cuda` extra to get
+> CUDA-enabled PyTorch for POPROX batch inference.  To install this, run:
 >
-> `pixi shell` starts a new, *nested* shell with the Pixi environment active. If
-> you type `exit` in this shell, it will exit the nested shell and return you to
-> you original shell session without the environment active.
+> ```console
+> $ uv sync --extra cuda
+> ```
+
 
 ## Data and Model Access
 
@@ -113,128 +99,20 @@ To get the data and models, there are two steps:
 
 ## Local Endpoint Development
 
-Local endpoint development also requires some Node-based tools in addition to the tools above — this install is
-automated with `npm` and `pixi`:
+Local endpoint testing requires building and running the Docker image:
 
 ```console
-pixi run -e dev install-serverless
+$ docker buildx build -t poprox-recommender:test .
+$ docker run -d -p 9000:8080 --name=recommender poprox-recommender:test
 ```
 
-To run the API endpoint locally:
+You can then send a request to the endpoint:
 
 ```console
-pixi run -e dev start-serverless
+$ python scripts/send-request.py -p 9000
 ```
 
-<details>
-<summary>Implementation</sumamry>
-
-Under the hood, those tasks run the following Node commands within the `dev` environment:
-
-```console
-npm ci
-npx serverless offline start --reloadHandler
-```
-</details>
-
-Once the local server is running, you can send requests to `localhost:3000`. A request with this JSON body:
-
-```json
-{
-  "past_articles": [
-    {
-      "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d",
-      "headline": "headline 1",
-      "subhead": "subhead 1",
-      "url": "url 1"
-    },
-    {
-      "article_id": "a0266b75-2873-4a40-9373-4e216e88c2f7",
-      "headline": "headline 2",
-      "subhead": "subhead 2",
-      "url": "url 2"
-    },
-    {
-      "article_id": "d88ee3b6-2b5e-4821-98a8-ffd702f571de",
-      "headline": "headline 3",
-      "subhead": "subhead 3",
-      "url": "url 3"
-    }
-  ],
-  "todays_articles": [
-    {
-      "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
-      "headline": "headline 4",
-      "subhead": "subhead 4",
-      "url": "url 4"
-    },
-    {
-      "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
-      "headline": "headline 5",
-      "subhead": "subhead 5",
-      "url": "url 5"
-    },
-    {
-      "article_id": "2d5a25ba-0963-474a-8da6-5b312c87bb82",
-      "headline": "headline 6",
-      "subhead": "subhead 6",
-      "url": "url 6"
-    }
-  ],
-  "interest_profile": {
-    "profile_id": "28838f05-23f5-4f23-bea2-30b51f67c538",
-    "click_history": [
-      {
-        "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
-      },
-      {
-        "article_id": "a0266b75-2873-4a40-9373-4e216e88c2f7"
-      },
-      {
-        "article_id": "d88ee3b6-2b5e-4821-98a8-ffd702f571de"
-      }
-    ],
-    "onboarding_topics": []
-  },
-  "num_recs": 1
-}
-```
-
-should receive this response:
-
-```json
-{
-    "recommendations": {
-        "28838f05-23f5-4f23-bea2-30b51f67c538": [
-            {
-                "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
-                "headline": "headline 5",
-                "subhead": "subhead 5",
-                "url": "url 5",
-                "preview_image_id": null,
-                "published_at": "1970-01-01T00:00:00Z",
-                "mentions": [],
-                "source": null,
-                "external_id": null,
-                "raw_data": null
-            },
-            ...
-        ]
-    },
-    "recommender": {
-        "name": "plain-NRMS",
-        "version": null,
-        "hash": "bd076520fa51dc70d8f74dfc9c0e0169236478d342b08f35b95399437f012563"
-    }
-}
-```
-
-You can test this by sending a request with curl:
-
-```console
-$ curl -X POST -H "Content-Type: application/json" -d @tests/request_data/basic-request.json localhost:3000
-```
-
+Pass the `-h` option to `send-request.py` to see command-line options.
 
 ## Running the Evaluation
 

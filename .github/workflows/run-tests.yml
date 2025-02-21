@@ -17,14 +17,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install environment
-        uses: prefix-dev/setup-pixi@v0.8.1
+      - name: 🕶️ Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          pixi-version: latest
-          cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-          environments: test
-          activate-environment: true
+          python-version-file: ".python-version"
+
+      - name: 📦 Set up dependencies
+        run: uv sync --no-default-groups --group=test --group=data
 
       - name: Cache model data
         uses: actions/cache@v4
@@ -34,11 +36,11 @@ jobs:
 
       - name: Fetch model data
         run: |
-          dvc pull -r public -R models tests data
+          uv run dvc pull -r public -R models tests data
 
       - name: Run tests
         run: |
-          python -m pytest -v
+          uv run pytest -v tests
 
   nodata-tests:
     name: Run the PyTest tests without model data
@@ -50,18 +52,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install environment
-        uses: prefix-dev/setup-pixi@v0.8.1
+      - name: 🕶️ Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          pixi-version: latest
-          cache: true
-          # just reuse cache from previous run of other test action
-          cache-write: false
-          environments: test
-          activate-environment: true
+          python-version-file: ".python-version"
+
+      - name: 📦 Set up dependencies
+        run: uv sync --no-default-groups --group=test --group=data
 
       - name: Run tests
         run: |
-          python -m pytest -v
+          uv run pytest -v tests
         env:
           POPROX_CI_WITHOUT_DATA: 1

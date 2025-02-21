@@ -15,6 +15,8 @@ jobs:
   test-docker:
     name: Build and test Docker image
     runs-on: ubuntu-latest
+    env:
+      UV_LOCKED: 1
 
     steps:
       - name: Checkout
@@ -22,17 +24,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install environment
-        uses: prefix-dev/setup-pixi@v0.8.1
+      - name: 🕶️ Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          pixi-version: latest
-          cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-          environments: test
-          activate-environment: true
+          python-version-file: ".python-version"
+
+      - name: 📦 Set up dependencies
+        run: uv sync --no-default-groups --group=test --group=data
 
       - name: Show DVC config
-        run: dvc config --list
+        run: uv run dvc config --list
 
       - name: Cache model data
         uses: actions/cache@v4
@@ -42,7 +46,7 @@ jobs:
 
       - name: Fetch model data
         run: |
-          dvc pull -vr public -R models tests
+          uv run dvc pull -vr public -R models tests
 
       - name: Build Docker image
         run: |
@@ -52,10 +56,16 @@ jobs:
         run: |
           docker run -d -p 9000:8080 --name=poprox-recommender poprox-recommender:ci
 
+      - name: Run web service tests
+        run: |
+          uv run pytest -v tests/web_service
+        env:
+          POPROX_TEST_TARGET: docker
+          POPROX_TEST_PORT: 9000
+
       - name: Run integration tests
         run: |
-          python -m pytest -v tests/integration
-          python -m pytest -v tests/web_service
+          uv run pytest -v tests/integration
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000
