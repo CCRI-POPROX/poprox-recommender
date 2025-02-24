@@ -9,7 +9,7 @@ from lenskit.metrics.ranking import NDCG, RecipRank
 
 from poprox_concepts import Article, ArticleSet
 from poprox_recommender.evaluation.metrics.entropy import rank_bias_entropy
-from poprox_recommender.evaluation.metrics.gini import gini
+from poprox_recommender.evaluation.metrics.gini import gini_coeff
 from poprox_recommender.evaluation.metrics.kcoverage import k_coverage_score
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
@@ -73,7 +73,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             single_rbo10 = None
 
         rbe = rank_bias_entropy(final_rec, k=10, d=0.5)
-        gini_index = gini(final_rec)
+        gini = gini_coeff(final_rec)
         k_coverage = k_coverage_score(ranked, reranked, k=1)
         lip = least_item_promoted(ranked, reranked, k=10)
 
@@ -89,7 +89,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             single_rbo5 or -1.0,
             single_rbo10 or -1.0,
             rbe,
-            gini_index,
+            gini,
             k_coverage,
             lip,
         )
@@ -108,7 +108,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "RBO@5": single_rbo5,
                 "RBO@10": single_rbo10,
                 "rank_based_entropy": rbe,
-                "gini_index": gini_index,
+                "gini_index": gini,
                 "k_coverage": k_coverage,
                 "least_item_promoted": lip,
             }
