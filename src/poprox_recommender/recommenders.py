@@ -20,7 +20,7 @@ from poprox_recommender.components.generators.context import ContextGenerator
 from poprox_recommender.components.joiners import Fill
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers import SoftmaxSampler, UniformSampler
-from poprox_recommender.components.scorers import ArticleScorer
+from poprox_recommender.components.scorers import ArticleScorer, TopicalArticleScorer
 from poprox_recommender.config import default_device
 from poprox_recommender.paths import model_file_path
 
@@ -160,8 +160,12 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
     }
 
 
-def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots):
-    article_scorer = ArticleScorer()
+def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots, scorer_source="ArticleScorer"):
+    if scorer_source == "TopicalArticleScorer":
+        article_scorer = TopicalArticleScorer()
+    else:
+        article_scorer = ArticleScorer()
+
     topic_filter = TopicFilter()
     sampler = UniformSampler(num_slots=num_slots)
     fill = Fill(num_slots=num_slots)
