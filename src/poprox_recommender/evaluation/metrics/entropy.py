@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import defaultdict
 
 import numpy as np  # type: ignore
 
@@ -6,19 +6,20 @@ from poprox_concepts.domain import ArticleSet
 from poprox_recommender.topics import extract_general_topics
 
 
-def rank_bias_entropy(final_recs: ArticleSet, k: int):
-    # RBE score (higher = more diverse, lower = less diverse).
+def rank_bias_entropy(final_recs: ArticleSet, k: int, d: float = 0.5):
     top_k_articles = final_recs.articles[:k]
+    weighted_counts = defaultdict(float)
 
-    topic_counter = Counter()
-    for article in top_k_articles:
-        topic_counter.update(extract_general_topics(article))
+    for rank, article in enumerate(top_k_articles):
+        weight = d ** (rank + 1)  # d is the rank-based discount
+        for topic in extract_general_topics(article):
+            weighted_counts[topic] += float(weight)
 
-    total_articles = sum(topic_counter.values())
-    if total_articles == 0:
+    total_weight = sum(weighted_counts.values())
+    if total_weight == 0:
         return 0.0
 
-    topic_probs = {topic: count / total_articles for topic, count in topic_counter.items()}
+    topic_probs = {topic: count / total_weight for topic, count in weighted_counts.items()}
     entropy = -sum(p * np.log2(p) for p in topic_probs.values() if p > 0)
 
     return entropy
