@@ -36,7 +36,7 @@ jobs:
 
       - name: Fetch model data
         run: |
-          uv run dvc pull -r public -R models tests data
+          uv run dvc pull -R models tests data
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
