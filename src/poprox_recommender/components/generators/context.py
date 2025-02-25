@@ -1,8 +1,6 @@
-import ast
 import asyncio
 import json
 import logging
-import re
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -183,13 +181,13 @@ class ContextGenerator(Component):
 
     async def semantic_narrative(self, main_news, related_news):
         system_prompt = (
-            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "
+            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "  # noqa: E501
             "You are provided a [[MAIN_NEWS]] to be recommended and a [[RELATED_NEWS]] that a user read before. "
-            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[RELATED_NEWS]] and "
-            "highlight points from [[RELATED_NEWS]] relevant to why the user should also be interested in [[MAIN_NEWS]]. "
-            'Your response should only include JSON parsable by json.loads() in the format {"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'. '  # "Your response should only include a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "
+            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[RELATED_NEWS]] and "  # noqa: E501
+            "highlight points from [[RELATED_NEWS]] relevant to why the user should also be interested in [[MAIN_NEWS]]. "  # noqa: E501
+            'Your response should only include JSON parsable by json.loads() in the format {"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'. '  # "Your response should only include a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "  # noqa: E501
             "[REWRITTEN_HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
-            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
+            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."  # noqa: E501
         )
 
         input_prompt = f"[[MAIN_NEWS]]: {main_news} \n[[RELATED_NEWS]]: {related_news}"
@@ -203,13 +201,13 @@ class ContextGenerator(Component):
         top_keys = [key for key, _ in sorted_items[:NUM_TOPICS]]
 
         system_prompt = (
-            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "
+            "You are an Associated Press editor tasked to rewrite the [[MAIN_NEWS]] HEADING and SUB_HEADING in a natural and factual tone. "  # noqa: E501
             "You are provided a [[MAIN_NEWS]] to be recommended to a user interested in [[INTERESTED_TOPICS]]."
-            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[INTERESTED_TOPICS]] "
+            "Rewrite the HEADLINE and SUB_HEADLING of [[MAIN_NEWS]] by implicitly connecting it to [[INTERESTED_TOPICS]] "  # noqa: E501
             "and highlight points relevant to why the user should also be interested in [[MAIN_NEWS]]. "
-            'Your response should only include JSON parsable by json.loads() in the format {"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'. '  # a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "
+            'Your response should only include JSON parsable by json.loads() in the format {"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'. '  # a rewritten healdine and subheadling always in the form '##HEADLINE##: [REWRITTEN_HEADLINE] ##SUB_HEADLINE##: [REWRITTEN_SUBHEADLINE]' "  # noqa: E501
             "[REWRITTEN_HEADLINE] should be 15 or less words and [REWRITTEN_SUBHEADLINE] should be a single sentence, "
-            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."
+            "no more than 30 words, and shouldn't end in punctuation. Ensure both are neutral and accurately describe [[MAIN_NEWS]]."  # noqa: E501
         )
 
         main_news = {"HEADING": main_news.headline, "SUB_HEADING": main_news.subhead}
