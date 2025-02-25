@@ -46,7 +46,10 @@ jobs:
 
       - name: Fetch model data
         run: |
-          uv run dvc pull -vr public -R models tests
+          uv run dvc pull -vr public -R models tests data
+        env:
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Build Docker image
         run: |
@@ -62,8 +65,6 @@ jobs:
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000
-          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Run integration tests
         run: |
