@@ -4,7 +4,7 @@ from uuid import uuid4
 import torch as th
 
 from poprox_concepts import Article, CandidateSet, Click, InterestProfile
-from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
+from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
 
@@ -136,25 +136,24 @@ def compute_topic_weights(onboarding_topics, topic_articles):
     return topic_weight
 
 
+class UserOnboardingConfig(NRMSUserEmbedderConfig):
+    embedding_source: str = "static"
+    topic_embedding: str = "nrms"
+    scorer_source: str = "ArticleScorer"
+
+
 class UserOnboardingEmbedder(NRMSUserEmbedder):
+    # ignore type because we are overriding a read-only property
+    config: UserOnboardingConfig  # type: ignore
+
     article_embedder: NRMSArticleEmbedder
     embedded_topic_articles: CandidateSet | None = None
 
-    def __init__(
-        self,
-        *args,
-        embedding_source: str = "static",
-        topic_embedding: str = "nrms",
-        scorer_source: str = "ArticleScorer",
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
+    def __init__(self, config: UserOnboardingConfig | None = None, **kwargs):
+        super().__init__(config, **kwargs)
         self.article_embedder = NRMSArticleEmbedder(
-            model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
+            model_file_path("nrms-mind/news_encoder.safetensors"), device=self.config.device
         )
-        self.embedding_source = embedding_source
-        self.topic_embedding = topic_embedding
-        self.scorer_source = scorer_source
 
     @torch_inference
     def __call__(
@@ -174,17 +173,17 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
         embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
 
-        if self.embedding_source == "static":
+        if self.config.embedding_source == "static":
             topic_embeddings_by_uuid = embeddings_from_definitions
-        elif self.embedding_source == "candidates":
+        elif self.config.embedding_source == "candidates":
             topic_embeddings_by_uuid = {**embeddings_from_definitions, **embeddings_from_candidates}
-        elif self.embedding_source == "clicked":
+        elif self.config.embedding_source == "clicked":
             topic_embeddings_by_uuid = {
                 **embeddings_from_definitions,
                 **embeddings_from_candidates,
                 **embeddings_from_clicked,
             }
-        elif self.embedding_source == "hybrid":
+        elif self.config.embedding_source == "hybrid":
             all_topic_uuids = (
                 set(embeddings_from_definitions) | set(embeddings_from_candidates) | set(embeddings_from_clicked)
             )
@@ -202,7 +201,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         click_lookup = self.build_article_lookup(clicked_articles)
         topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
 
-        if self.scorer_source == "TopicalArticleScorer":
+        if self.config.scorer_source == "TopicalArticleScorer":
             combined_click_history = interest_profile.click_history
             embedding_lookup = {**click_lookup}
         else:
@@ -242,7 +241,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
             relevant_articles = self.find_topical_articles(topic_name, articles.articles)
             article_clicks = [Click(article_id=article.article_id) for article in relevant_articles]
 
-            if self.topic_embedding == "nrms":
+            if self.config.topic_embedding == "nrms":
                 topic_embedding = self.build_user_embedding(article_clicks, embedding_lookup)
             else:
                 topic_embedding = self.average_click_embeddings(article_clicks, embedding_lookup)
@@ -288,15 +287,15 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
                 dim=0,
             )
             .unsqueeze(0)
-            .to(self.device)
+            .to(self.config.device)
         )
 
         return self.user_encoder(clicked_news_vector)
 
     def average_click_embeddings(self, click_history: list[Click], article_embeddings):
-        article_ids = [click.article_id for click in click_history][-self.max_clicks_per_user :]
+        article_ids = [click.article_id for click in click_history][-self.config.max_clicks_per_user :]
 
-        padded_positions = self.max_clicks_per_user - len(article_ids)
+        padded_positions = self.config.max_clicks_per_user - len(article_ids)
         assert padded_positions >= 0
 
         default = article_embeddings["PADDED_NEWS"]
@@ -315,6 +314,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         averaged_click_vector = th.mean(
             stacked,
             dim=0,
-        ).to(self.device)
+        ).to(self.config.device)
 
         return averaged_click_vector

@@ -10,9 +10,6 @@ from poprox_recommender.topics import extract_locality, normalized_category_coun
 # to rerank recommendations according to
 # locality calibration
 class LocalityCalibrator(Calibrator):
-    def __init__(self, theta: float = 0.1, num_slots=10):
-        super().__init__(theta, num_slots)
-
     def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         normalized_locality_prefs = normalized_category_count(interest_profile.click_locality_counts)
 
@@ -27,8 +24,8 @@ class LocalityCalibrator(Calibrator):
             article_scores,
             candidate_articles.articles,
             normalized_locality_prefs,
-            self.theta,
-            topk=self.num_slots,
+            self.config.theta,
+            topk=self.config.num_slots,
         )
         return RecommendationList(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])
 

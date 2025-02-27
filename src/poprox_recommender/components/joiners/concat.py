@@ -4,6 +4,8 @@ from poprox_concepts.domain import RecommendationList
 
 
 class Concatenate(Component):
+    config: None
+
     def __call__(self, recs1: RecommendationList, recs2: RecommendationList) -> RecommendationList:
         """
         Concatenates two sets of candidates, while deduplicating them, keeping the

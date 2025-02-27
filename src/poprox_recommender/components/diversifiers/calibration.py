@@ -2,20 +2,22 @@ from collections import defaultdict
 
 import numpy as np
 from lenskit.pipeline import Component
+from pydantic import BaseModel
 
 from poprox_concepts import Article
 from poprox_recommender.topics import normalized_category_count
+
+
+class CalibratorConfig(BaseModel):
+    theta: float = 0.1
+    num_slots: int = 10
 
 
 # General calibration uses MMR
 # to rerank recommendations according to
 # certain calibration context (e.g. news topic, locality)
 class Calibrator(Component):
-    def __init__(self, theta: float = 0.1, num_slots=10):
-        # Theta term controls the score and calibration tradeoff, the higher
-        # the theta the higher the resulting recommendation will be calibrated.
-        self.theta = theta
-        self.num_slots = num_slots
+    config: CalibratorConfig
 
     def add_article_to_categories(self, rec_categories_with_candidate, article):
         pass
