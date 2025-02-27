@@ -15,7 +15,7 @@ readme = "README.md"
 license = { file = "LICENSE.md" }
 dynamic = ["version"]
 dependencies = [
-  "lenskit==2025.0.0a4",
+  "lenskit==2025.1.1b12",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
   "torch~=2.2",
