@@ -1,12 +1,12 @@
 # pyright: basic
 import logging
+from dataclasses import dataclass
 from os import PathLike
 from typing import Protocol
 from uuid import UUID
 
 import torch as th
 from lenskit.pipeline import Component
-from pydantic import BaseModel
 from safetensors.torch import load_file
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
@@ -21,7 +21,8 @@ logger = logging.getLogger(__name__)
 TITLE_LENGTH_LIMIT = 30
 
 
-class NRMSArticleEmbedderConfig(BaseModel):
+@dataclass
+class NRMSArticleEmbedderConfig:
     model_path: PathLike
     device: str | None
 

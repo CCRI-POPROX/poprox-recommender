@@ -1,8 +1,8 @@
+from dataclasses import dataclass
 from os import PathLike
 
 import torch as th
 from lenskit.pipeline import Component
-from pydantic import BaseModel
 from safetensors.torch import load_file
 
 from poprox_concepts import CandidateSet, Click, InterestProfile
@@ -11,7 +11,8 @@ from poprox_recommender.model.nrms.user_encoder import UserEncoder
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
-class NRMSUserEmbedderConfig(BaseModel):
+@dataclass
+class NRMSUserEmbedderConfig:
     model_path: PathLike
     device: str = "cpu"
     max_clicks_per_user: int = 50
