@@ -1,4 +1,5 @@
 import numpy as np
+from lenskit.pipeline import Component
 from pydantic import BaseModel
 
 from poprox_concepts import CandidateSet
@@ -10,7 +11,7 @@ class SoftmaxConfig(BaseModel):
     temperature: float = 20.0
 
 
-class SoftmaxSampler:
+class SoftmaxSampler(Component):
     config: SoftmaxConfig
 
     def __call__(self, candidate_articles: CandidateSet) -> RecommendationList:

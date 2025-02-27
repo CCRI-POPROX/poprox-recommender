@@ -12,6 +12,8 @@ class FillConfig(BaseModel):
 
 
 class Fill(Component):
+    config: FillConfig
+
     def __call__(
         self, recs1: CandidateSet | RecommendationList, recs2: Lazy[CandidateSet | RecommendationList]
     ) -> RecommendationList:

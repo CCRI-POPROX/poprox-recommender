@@ -85,12 +85,14 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots: The number of items to recommend.
     """
 
-    article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
-    user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
+    article_embedder = NRMSArticleEmbedder(
+        model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
+    )
+    user_embedder = NRMSUserEmbedder(model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device=device)
 
     topic_user_embedder_static = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
+        model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
+        device=device,
         embedding_source="static",
         topic_embedding="avg",
     )

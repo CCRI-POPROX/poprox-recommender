@@ -15,7 +15,7 @@ class UniformSamplerConfig(BaseModel):
 
 
 class UniformSampler(Component):
-    cofnig: UniformSamplerConfig
+    config: UniformSamplerConfig
 
     def __call__(self, candidates1: CandidateSet, candidates2: CandidateSet | None = None) -> RecommendationList:
         articles = {a.article_id: a for a in candidates1.articles}
