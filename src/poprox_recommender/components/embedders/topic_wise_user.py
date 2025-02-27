@@ -152,7 +152,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
     def __init__(self, config: UserOnboardingConfig | None = None, **kwargs):
         super().__init__(config, **kwargs)
         self.article_embedder = NRMSArticleEmbedder(
-            model_file_path("nrms-mind/news_encoder.safetensors"), device=self.config.device
+            model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.config.device
         )
 
     @torch_inference
@@ -189,14 +189,14 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
             )
             topic_embeddings_by_uuid = {}
             for topic_uuid in all_topic_uuids:
-                def_emb = embeddings_from_definitions.get(topic_uuid, th.zeros(768, device=self.device))
-                cand_emb = embeddings_from_candidates.get(topic_uuid, th.zeros(768, device=self.device))
-                clicked_emb = embeddings_from_clicked.get(topic_uuid, th.zeros(768, device=self.device))
+                def_emb = embeddings_from_definitions.get(topic_uuid, th.zeros(768, device=self.config.device))
+                cand_emb = embeddings_from_candidates.get(topic_uuid, th.zeros(768, device=self.config.device))
+                clicked_emb = embeddings_from_clicked.get(topic_uuid, th.zeros(768, device=self.config.device))
 
                 avg_emb = 0.5 * def_emb + 0.5 * cand_emb + 0.0 * clicked_emb
                 topic_embeddings_by_uuid[topic_uuid] = avg_emb
         else:
-            raise ValueError(f"Unknown embedding source: {self.embedding_source}")
+            raise ValueError(f"Unknown embedding source: {self.config.embedding_source}")
 
         click_lookup = self.build_article_lookup(clicked_articles)
         topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
@@ -208,7 +208,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
             combined_click_history = topic_clicks
             embedding_lookup = {**topic_lookup}
 
-        embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
+        embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.config.device)
 
         interest_profile.click_history = combined_click_history
         interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
@@ -237,7 +237,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         for topic_name in TOPIC_DESCRIPTIONS.keys():
             embedding_lookup = self.build_article_lookup(articles)
 
-            embedding_lookup["PADDED_NEWS"] = th.zeros([768], device=self.device)
+            embedding_lookup["PADDED_NEWS"] = th.zeros([768], device=self.config.device)
             relevant_articles = self.find_topical_articles(topic_name, articles.articles)
             article_clicks = [Click(article_id=article.article_id) for article in relevant_articles]
 
@@ -269,15 +269,15 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         return topic_embeddings_by_uuid
 
     def build_user_embedding(self, click_history: list[Click], article_embeddings):
-        article_ids = [click.article_id for click in click_history][-self.max_clicks_per_user :]
+        article_ids = [click.article_id for click in click_history][-self.config.max_clicks_per_user :]
 
-        padded_positions = self.max_clicks_per_user - len(article_ids)
+        padded_positions = self.config.max_clicks_per_user - len(article_ids)
         assert padded_positions >= 0
 
         article_ids = ["PADDED_NEWS"] * padded_positions + article_ids
         default = article_embeddings["PADDED_NEWS"]
         clicked_article_embeddings = [
-            article_embeddings.get(clicked_article, default).squeeze().to(self.device)
+            article_embeddings.get(clicked_article, default).squeeze().to(self.config.device)
             for clicked_article in article_ids
         ]
 
@@ -300,7 +300,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
 
         default = article_embeddings["PADDED_NEWS"]
         clicked_article_embeddings = [
-            article_embeddings.get(clicked_article, default).squeeze().to(self.device)
+            article_embeddings.get(clicked_article, default).squeeze().to(self.config.device)
             for clicked_article in article_ids
         ]
 

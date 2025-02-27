@@ -64,7 +64,7 @@ def test_select_by_topic_filters_articles():
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
-    sampler.num_slots = 3
+    sampler.config.num_slots = 3
     result = pipeline.run(c_sampler, candidates=CandidateSet(articles=articles), profile=profile)
 
     assert len(result.articles) == 3
