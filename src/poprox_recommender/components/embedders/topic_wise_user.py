@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -136,6 +137,7 @@ def compute_topic_weights(onboarding_topics, topic_articles):
     return topic_weight
 
 
+@dataclass
 class UserOnboardingConfig(NRMSUserEmbedderConfig):
     embedding_source: str = "static"
     topic_embedding: str = "nrms"
