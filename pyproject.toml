@@ -15,7 +15,7 @@ readme = "README.md"
 license = { file = "LICENSE.md" }
 dynamic = ["version"]
 dependencies = [
-  "lenskit==2025.0.0a4",
+  "lenskit==2025.1.1rc1",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
   "torch~=2.2",
@@ -30,7 +30,7 @@ dependencies = [
 
 [project.optional-dependencies]
 eval = [
-  "docopt >=0.6",
+  "docopt-ng >=0.9",
   "pandas ~=2.0",
 ]
 deploy = [
@@ -73,7 +73,7 @@ dev = [
 data = [
   "dvc ~=3.51",
   "dvc-s3 >=3",
-  "docopt >=0.6",
+  "docopt-ng >=0.9",
   "pandas ~=2.0",
   "matplotlib ~=3.6",
   "seaborn ~=0.13.2",

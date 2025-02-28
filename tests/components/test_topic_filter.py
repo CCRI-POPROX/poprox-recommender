@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from lenskit.pipeline import Pipeline
+from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts import Article, CandidateSet, Click, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
@@ -47,11 +47,12 @@ def test_select_by_topic_filters_articles():
     topic_filter = TopicFilter()
     sampler = UniformSampler(num_slots=2)
 
-    pipeline = Pipeline()
-    i_profile = pipeline.create_input("profile", InterestProfile)
-    i_cand = pipeline.create_input("candidates", CandidateSet)
-    c_filter = pipeline.add_component("topic-filter", topic_filter, candidate=i_cand, interest_profile=i_profile)
-    c_sampler = pipeline.add_component("sampler", sampler, candidates1=c_filter, candidates2=i_cand)
+    builder = PipelineBuilder()
+    i_profile = builder.create_input("profile", InterestProfile)
+    i_cand = builder.create_input("candidates", CandidateSet)
+    c_filter = builder.add_component("topic-filter", topic_filter, candidate=i_cand, interest_profile=i_profile)
+    c_sampler = builder.add_component("sampler", sampler, candidates1=c_filter, candidates2=i_cand)
+    pipeline = builder.build()
 
     # If we can, only select articles matching interests
     result = pipeline.run(c_sampler, candidates=CandidateSet(articles=articles), profile=profile)
@@ -63,7 +64,7 @@ def test_select_by_topic_filters_articles():
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
-    sampler.num_slots = 3
+    sampler.config.num_slots = 3
     result = pipeline.run(c_sampler, candidates=CandidateSet(articles=articles), profile=profile)
 
     assert len(result.articles) == 3

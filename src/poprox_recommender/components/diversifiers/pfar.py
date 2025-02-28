@@ -2,17 +2,21 @@ import math
 
 import torch as th
 from lenskit.pipeline import Component
+from pydantic import BaseModel
 
 from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.pytorch.decorators import torch_inference
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_category_count
 
 
+class PFARConfig(BaseModel):
+    lambda_: float = 1.0
+    tau: float | None = None
+    num_slots: int = 10
+
+
 class PFARDiversifier(Component):
-    def __init__(self, lambda_: float = 1.0, tau: float | None = None, num_slots: int = 10):
-        self.lambda_ = lambda_
-        self.tau = tau
-        self.num_slots = num_slots
+    config: PFARConfig
 
     @torch_inference
     def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
@@ -36,9 +40,9 @@ class PFARDiversifier(Component):
                 article_scores,
                 candidate_articles.articles,
                 normalized_topic_prefs,
-                self.lambda_,
-                self.tau,
-                topk=self.num_slots,
+                self.config.lambda_,
+                self.config.tau,
+                topk=self.config.num_slots,
             )
 
             articles = [candidate_articles.articles[int(idx)] for idx in article_indices]

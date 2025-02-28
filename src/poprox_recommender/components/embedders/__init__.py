@@ -1,4 +1,4 @@
-from poprox_recommender.components.embedders.article import NRMSArticleEmbedder
-from poprox_recommender.components.embedders.user import NRMSUserEmbedder
+from poprox_recommender.components.embedders.article import NRMSArticleEmbedder, NRMSArticleEmbedderConfig
+from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
 
-__all__ = ["NRMSArticleEmbedder", "NRMSUserEmbedder"]
+__all__ = ["NRMSArticleEmbedder", "NRMSArticleEmbedderConfig", "NRMSUserEmbedder", "NRMSUserEmbedderConfig"]

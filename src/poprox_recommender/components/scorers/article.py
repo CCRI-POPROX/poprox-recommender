@@ -6,6 +6,8 @@ from poprox_recommender.pytorch.decorators import torch_inference
 
 
 class ArticleScorer(Component):
+    config: None
+
     @torch_inference
     def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> CandidateSet:
         candidate_embeddings = candidate_articles.embeddings

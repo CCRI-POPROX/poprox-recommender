@@ -1,15 +1,19 @@
 import torch
 from lenskit.pipeline import Component
+from pydantic import BaseModel
 
 from poprox_concepts.domain import CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.pytorch.datachecks import assert_tensor_size
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
+class MMRConfig(BaseModel):
+    theta: float = 0.8
+    num_slots: int = 10
+
+
 class MMRDiversifier(Component):
-    def __init__(self, theta: float = 0.8, num_slots: int = 10):
-        self.theta = theta
-        self.num_slots = num_slots
+    config: MMRConfig
 
     @torch_inference
     def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
@@ -19,7 +23,9 @@ class MMRDiversifier(Component):
             similarity_matrix = compute_similarity_matrix(candidate_articles.embeddings)
 
             scores = torch.as_tensor(candidate_articles.scores).to(similarity_matrix.device)
-            article_indices = mmr_diversification(scores, similarity_matrix, theta=self.theta, topk=self.num_slots)
+            article_indices = mmr_diversification(
+                scores, similarity_matrix, theta=self.config.theta, topk=self.config.num_slots
+            )
             recommended = [candidate_articles.articles[int(idx)] for idx in article_indices]
 
         return RecommendationList(articles=recommended)

@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from lenskit.pipeline import Pipeline
+from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.components.joiners.rrf import ReciprocalRankFusion
@@ -21,12 +21,13 @@ def test_reciprocal_rank_fusion():
 
     rrf = ReciprocalRankFusion(num_slots=total_slots)
 
-    pipeline = Pipeline(name="rrf")
+    pipeline = PipelineBuilder(name="rrf")
     recs1_input = pipeline.create_input("recs1", RecommendationList)
     recs2_input = pipeline.create_input("recs2", RecommendationList)
 
     pipeline.add_component("rrf", rrf, recs1=recs1_input, recs2=recs2_input)
     pipeline.alias("recommender", "rrf")
+    pipeline = pipeline.build()
 
     outputs = pipeline.run_all(**inputs)
 
@@ -58,12 +59,13 @@ def test_reciprocal_rank_fusion_overlap():
 
     rrf = ReciprocalRankFusion(num_slots=total_slots)
 
-    pipeline = Pipeline(name="rrf")
+    pipeline = PipelineBuilder(name="rrf")
     in_cand1 = pipeline.create_input("recs1", RecommendationList)
     in_cand2 = pipeline.create_input("recs2", RecommendationList)
 
     pipeline.add_component("rrf", rrf, recs1=in_cand1, recs2=in_cand2)
     pipeline.alias("recommender", "rrf")
+    pipeline = pipeline.build()
 
     outputs = pipeline.run_all(**inputs)
 
@@ -86,12 +88,13 @@ def test_reciprocal_rank_fusion_mismatched_lengths():
 
     rrf = ReciprocalRankFusion(num_slots=total_slots)
 
-    pipeline = Pipeline(name="rrf")
+    pipeline = PipelineBuilder(name="rrf")
     in_cand1 = pipeline.create_input("recs1", RecommendationList)
     in_cand2 = pipeline.create_input("recs2", RecommendationList)
 
     pipeline.add_component("rrf", rrf, recs1=in_cand1, recs2=in_cand2)
     pipeline.alias("recommender", "rrf")
+    pipeline = pipeline.build()
 
     outputs = pipeline.run_all(**inputs)
 
@@ -109,12 +112,13 @@ def test_reciprocal_rank_fusion_empty_list():
 
     rrf = ReciprocalRankFusion(num_slots=total_slots)
 
-    pipeline = Pipeline(name="rrf")
+    pipeline = PipelineBuilder(name="rrf")
     in_cand1 = pipeline.create_input("recs1", RecommendationList)
     in_cand2 = pipeline.create_input("recs2", RecommendationList)
 
     pipeline.add_component("rrf", rrf, recs1=in_cand1, recs2=in_cand2)
     pipeline.alias("recommender", "rrf")
+    pipeline = pipeline.build()
 
     outputs = pipeline.run_all(**inputs)
 
