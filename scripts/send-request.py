@@ -27,6 +27,7 @@ import json
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 import requests
 from docopt import docopt
@@ -50,10 +51,17 @@ def main(args):
     req_txt = json.dumps(json.loads(req_txt))
 
     logger.info("sending request")
-    request = {
+
+    request: dict[str, Any] = {
+        "resource": "/",
+        "path": "/",
+        "httpMethod": "POST",
+        "requestContext": {},
+        "headers": {},
         "body": base64.encodebytes(req_txt.encode()).decode("ascii"),
         "isBase64Encoded": True,
     }
+
     if args["--pipeline"]:
         request["queryStringParameters"] = {"pipeline": args["--pipeline"]}
     result = requests.post(url, json=request)

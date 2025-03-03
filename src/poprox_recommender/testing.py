@@ -16,7 +16,7 @@ from collections.abc import Generator
 from datetime import datetime, timedelta
 from signal import SIGINT
 from time import sleep
-from typing import List, Protocol
+from typing import Any, List, Protocol
 from uuid import uuid4
 
 import requests
@@ -53,29 +53,34 @@ class InProcessTestService:
         self, req: RecommendationRequest | str, pipeline: str, compress: bool = False
     ) -> RecommendationResponse:
         # defer to here so we don't always import the handler
-        from poprox_recommender.handler import generate_recs
+        from poprox_recommender.api.main import handler
 
         if not isinstance(req, str):
             req = req.model_dump_json()
 
         req_txt = json.dumps(json.loads(req))
 
-        if compress:
-            event = {
-                "headers": {"Content-Encoding": "gzip", "Content-Type": "application/json"},
-                "queryStringParameters": {"pipeline": pipeline},
-                "body": base64.encodebytes(gzip.compress(req_txt.encode())).decode("ascii"),
-                "isBase64Encoded": True,
-            }
-        else:
-            event = {
-                "headers": {},
-                "queryStringParameters": {"pipeline": pipeline},
-                "body": req_txt,
-                "isBase64Encoded": False,
-            }
+        event: dict[str, Any] = {
+            "resource": "/",
+            "path": "/",
+            "httpMethod": "POST",
+            "requestContext": {},
+            "headers": {},
+            "queryStringParameters": {"pipeline": pipeline},
+            "body": req_txt,
+            "isBase64Encoded": False,
+        }
 
-        res = generate_recs(event, {})
+        if compress:
+            event.update(
+                {
+                    "headers": {"Content-Type": "application/json", "Content-Encoding": "gzip"},
+                    "body": base64.encodebytes(gzip.compress(req_txt.encode())).decode("ascii"),
+                    "isBase64Encoded": True,
+                }
+            )
+
+        res = handler(event, {})
         return RecommendationResponse.model_validate_json(res["body"])
 
 
@@ -97,20 +102,25 @@ class DockerTestService:
 
         req_txt = json.dumps(json.loads(req))
 
+        event: dict[str, Any] = {
+            "resource": "/",
+            "path": "/",
+            "httpMethod": "POST",
+            "requestContext": {},
+            "headers": {},
+            "queryStringParameters": {"pipeline": pipeline},
+            "body": req_txt,
+            "isBase64Encoded": False,
+        }
+
         if compress:
-            event = {
-                "headers": {"Content-Encoding": "gzip", "Content-Type": "application/json"},
-                "queryStringParameters": {"pipeline": pipeline},
-                "body": base64.encodebytes(gzip.compress(req_txt.encode())).decode("ascii"),
-                "isBase64Encoded": True,
-            }
-        else:
-            event = {
-                "headers": {},
-                "queryStringParameters": {"pipeline": pipeline},
-                "body": req_txt,
-                "isBase64Encoded": False,
-            }
+            event.update(
+                {
+                    "headers": {"Content-Type": "application/json", "Content-Encoding": "gzip"},
+                    "body": base64.encodebytes(gzip.compress(req_txt.encode())).decode("ascii"),
+                    "isBase64Encoded": True,
+                }
+            )
 
         result = requests.post(self.url, json=event)
         res_data = result.json()
