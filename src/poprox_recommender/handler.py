@@ -4,6 +4,7 @@ import logging
 import os
 
 import structlog
+from httpx import Headers
 
 from poprox_concepts import CandidateSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
@@ -16,12 +17,12 @@ logger = logging.getLogger(__name__)
 def generate_recs(event, context):
     logger.info(f"Received event: {event}")
 
-    pipeline_params = event.get("queryStringParameters", {})
+    headers = Headers(event.get("headers", {}))
     body = event.get("body", {})
-    headers = event.get("headers", {})
+    query_params = event.get("queryStringParameters", {})
 
+    is_compressed = headers.get("content-encoding") == "gzip"
     is_encoded = event.get("isBase64Encoded", False)
-    is_compressed = headers.get("Content-Encoding") == "gzip"
 
     logger.info(f"Headers: {headers}")
 
@@ -35,8 +36,8 @@ def generate_recs(event, context):
 
     req = RecommendationRequest.model_validate_json(body)
 
-    if pipeline_params:
-        logger.info(f"Using parameters: {pipeline_params}")
+    if query_params:
+        logger.info(f"Using parameters: {query_params}")
     else:
         logger.info("Using default parameters")
 
@@ -69,7 +70,7 @@ def generate_recs(event, context):
         candidate_articles,
         clicked_articles,
         profile,
-        pipeline_params,
+        query_params,
     )
 
     logger.info("Constructing response...")
