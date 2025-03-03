@@ -831,10 +831,13 @@ wheels = [
 ]
 
 [[package]]
-name = "docopt"
-version = "0.6.2"
+name = "docopt-ng"
+version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf578136ef2cc5dfb50baa1761b68c9da1fb1e4eed343c9/docopt-0.6.2.tar.gz", hash = "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491", size = 25901 }
+sdist = { url = "https://files.pythonhosted.org/packages/e4/50/8d6806cf13138127692ae6ff79ddeb4e25eb3b0bcc3c1bd033e7e04531a9/docopt_ng-0.9.0.tar.gz", hash = "sha256:91c6da10b5bb6f2e9e25345829fb8278c78af019f6fc40887ad49b060483b1d7", size = 32264 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/4a/c3b77fc1a24510b08918b43a473410c0168f6e657118807015f1f1edceea/docopt_ng-0.9.0-py3-none-any.whl", hash = "sha256:bfe4c8b03f9fca424c24ee0b4ffa84bf7391cb18c29ce0f6a8227a3b01b81ff9", size = 16689 },
+]
 
 [[package]]
 name = "dpath"
@@ -1363,6 +1366,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/22/37/797d6476f13e5ef6af5fc48a5d641d32b39c37e166ccf40c3714c5854a85/huggingface_hub-0.29.1.tar.gz", hash = "sha256:9524eae42077b8ff4fc459ceb7a514eca1c1232b775276b009709fe2a084f250", size = 389776 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ae/05/75b90de9093de0aadafc868bb2fa7c57651fd8f45384adf39bd77f63980d/huggingface_hub-0.29.1-py3-none-any.whl", hash = "sha256:352f69caf16566c7b6de84b54a822f6238e17ddd8ae3da4f8f2272aea5b198d5", size = 468049 },
+]
+
+[[package]]
+name = "humanize"
+version = "4.12.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5b/8c/4f2f0784d08a383b5de3d3b1d65a6f204cc5dc487621c91c550388d756af/humanize-4.12.1.tar.gz", hash = "sha256:1338ba97415c96556758a6e2f65977ed406dddf4620d4c6db9bbdfd07f0f1232", size = 80827 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/30/5ef5994b090398f9284d2662f56853e5183ae2cb5d8e3db67e4f4cfea407/humanize-4.12.1-py3-none-any.whl", hash = "sha256:86014ca5c52675dffa1d404491952f1f5bf03b07c175a51891a343daebf01fea", size = 127409 },
 ]
 
 [[package]]
@@ -1977,12 +1989,15 @@ wheels = [
 
 [[package]]
 name = "lenskit"
-version = "2025.0.0a4"
+version = "2025.1.1rc1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "click" },
+    { name = "humanize" },
     { name = "more-itertools" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "prettytable" },
     { name = "pyarrow" },
     { name = "pydantic" },
     { name = "pyzmq" },
@@ -1994,10 +2009,11 @@ dependencies = [
     { name = "torch", version = "2.6.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda') or (extra != 'extra-18-poprox-recommender-cpu' and extra != 'extra-18-poprox-recommender-cuda')" },
     { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-18-poprox-recommender-cpu') or (extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda')" },
     { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-18-poprox-recommender-cuda'" },
+    { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/31/b8520bc9c89a9d2f8eaa5bde9bf0ca007c96c60c666f731459991ca6e892/lenskit-2025.0.0a4.tar.gz", hash = "sha256:9d428d80c10cbbfda3090b2de549f520d0c718e655e71536a7956a80b3cb94df", size = 112550 }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/89/edfc16de756dfafd4be2fd94755000b2995976a304fce44ec9b893cca042/lenskit-2025.1.1rc1.tar.gz", hash = "sha256:69650101e7fe001068ce4ece669dac5b6f1352f1678958b1e0e76e4d06bbd873", size = 149266 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/3c/368f894d876d492be27b2784063424abdad23e72617f9c81bc6aa860f307/lenskit-2025.0.0a4-py3-none-any.whl", hash = "sha256:8b8ef0559759405a8b3d6d91125d5f6db2286573d94fc622a5525caaba93936a", size = 166718 },
+    { url = "https://files.pythonhosted.org/packages/ee/c0/872168ba037cfa89c0c38c8ef1ee984d1a599d17064cad6edf9517aaa03f/lenskit-2025.1.1rc1-py3-none-any.whl", hash = "sha256:9cef54e8f9b743e3d2ce29ac2a0ff1e83c4ffae5d8cdc61ca52d3c74d94f00c1", size = 223346 },
 ]
 
 [[package]]
@@ -2828,13 +2844,13 @@ deploy = [
     { name = "awslambdaric" },
 ]
 eval = [
-    { name = "docopt" },
+    { name = "docopt-ng" },
     { name = "pandas" },
 ]
 
 [package.dev-dependencies]
 data = [
-    { name = "docopt" },
+    { name = "docopt-ng" },
     { name = "dvc" },
     { name = "dvc-s3" },
     { name = "jq" },
@@ -2848,7 +2864,7 @@ data = [
 ]
 dev = [
     { name = "coverage" },
-    { name = "docopt" },
+    { name = "docopt-ng" },
     { name = "dvc" },
     { name = "dvc-s3" },
     { name = "hatch" },
@@ -2883,9 +2899,9 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "awslambdaric", marker = "extra == 'deploy'", specifier = "~=2.2" },
-    { name = "docopt", marker = "extra == 'eval'", specifier = ">=0.6" },
+    { name = "docopt-ng", marker = "extra == 'eval'", specifier = ">=0.9" },
     { name = "ipyparallel", specifier = "~=8.0" },
-    { name = "lenskit", specifier = "==2025.0.0a4" },
+    { name = "lenskit", specifier = "==2025.1.1rc1" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
     { name = "pandas", marker = "extra == 'eval'", specifier = "~=2.0" },
@@ -2902,7 +2918,7 @@ provides-extras = ["cpu", "cuda", "deploy", "eval"]
 
 [package.metadata.requires-dev]
 data = [
-    { name = "docopt", specifier = ">=0.6" },
+    { name = "docopt-ng", specifier = ">=0.9" },
     { name = "dvc", specifier = "~=3.51" },
     { name = "dvc-s3", specifier = ">=3" },
     { name = "jq", specifier = "~=1.8" },
@@ -2916,7 +2932,7 @@ data = [
 ]
 dev = [
     { name = "coverage", specifier = ">=6.5" },
-    { name = "docopt", specifier = ">=0.6" },
+    { name = "docopt-ng", specifier = ">=0.9" },
     { name = "dvc", specifier = "~=3.51" },
     { name = "dvc-s3", specifier = ">=3" },
     { name = "hatch", specifier = "~=1.13" },
@@ -2963,6 +2979,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/64/10/97ee2fa54dff1e9da9badbc5e35d0bbaef0776271ea5907eccf64140f72f/pre_commit-3.8.0.tar.gz", hash = "sha256:8bb6494d4a20423842e198980c9ecf9f96607a07ea29549e180eef9ae80fe7af", size = 177815 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/07/92/caae8c86e94681b42c246f0bca35c059a2f0529e5b92619f6aba4cf7e7b6/pre_commit-3.8.0-py2.py3-none-any.whl", hash = "sha256:9a90a53bf82fdd8778d58085faf8d83df56e40dfe18f45b19446e26bf1b3a63f", size = 204643 },
+]
+
+[[package]]
+name = "prettytable"
+version = "3.15.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "wcwidth" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/38/95/78080e58efbdde46cda8d4498737bf9687839ed4a9744b068cc730a073ed/prettytable-3.15.1.tar.gz", hash = "sha256:f0edb38060cb9161b2417939bfd5cd9877da73388fb19d1e8bf7987e8558896e", size = 65907 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8c/37/f687efd8760c183787ff16a61ec9e3515355178271f33fd7c14bf42e338c/prettytable-3.15.1-py3-none-any.whl", hash = "sha256:1bb0da7437e904ec879d2998aded19abc722719aa3d384a7faa44dcbe4aeb2e9", size = 33781 },
 ]
 
 [[package]]
