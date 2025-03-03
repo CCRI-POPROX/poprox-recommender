@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from lenskit.pipeline import Component
 
-from poprox_concepts import ArticleSet
+from poprox_concepts.domain import RecommendationList
 
 
 class ReciprocalRankFusion(Component):
@@ -10,8 +10,8 @@ class ReciprocalRankFusion(Component):
         self.num_slots = num_slots
         self.k = k
 
-    def __call__(self, candidates1: ArticleSet, candidates2: ArticleSet) -> ArticleSet:
-        articles = candidates1.articles
+    def __call__(self, recs1: RecommendationList, recs2: RecommendationList) -> RecommendationList:
+        articles = recs1.articles
         article_scores = defaultdict(float)
         articles_by_id = {}
 
@@ -20,7 +20,7 @@ class ReciprocalRankFusion(Component):
             article_scores[article.article_id] = article_scores[article.article_id] + score
             articles_by_id[article.article_id] = article
 
-        for i, article in enumerate(candidates2.articles, 1):
+        for i, article in enumerate(recs2.articles, 1):
             score = 1 / (i + self.k)
             article_scores[article.article_id] = article_scores[article.article_id] + score
             articles_by_id[article.article_id] = article
@@ -32,4 +32,4 @@ class ReciprocalRankFusion(Component):
             articles_by_id[article_id] for article_id in sorted_article_ids[: self.num_slots]
         ]
 
-        return ArticleSet(articles=reciprocal_rank_fusioned_articles)
+        return RecommendationList(articles=reciprocal_rank_fusioned_articles)

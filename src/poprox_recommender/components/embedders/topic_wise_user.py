@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import torch as th
 
-from poprox_concepts import Article, ArticleSet, Click, InterestProfile
+from poprox_concepts import Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
@@ -114,24 +114,54 @@ def virtual_clicks(onboarding_topics, topic_articles):
     return virtual_clicks
 
 
+def compute_topic_weights(onboarding_topics, topic_articles):
+    topic_weight = {}
+
+    topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
+    topic_preference_count = {}
+    for interest in onboarding_topics:
+        topic_name = interest.entity_name
+        preference = interest.preference or 1
+
+        if topic_name in topic_uuids_by_name:
+            article_id = topic_uuids_by_name[topic_name]
+
+            topic_preference_count[article_id] = (topic_name, preference)
+
+    total_preference = sum(count[1] for count in topic_preference_count.values())
+    topic_weight = {
+        article_id: {"topic_name": name, "weight": preference / total_preference}
+        for article_id, (name, preference) in topic_preference_count.items()
+    }
+    return topic_weight
+
+
 class UserOnboardingEmbedder(NRMSUserEmbedder):
     article_embedder: NRMSArticleEmbedder
-    embedded_topic_articles: ArticleSet | None = None
+    embedded_topic_articles: CandidateSet | None = None
 
-    def __init__(self, *args, embedding_source: str = "static", topic_embedding: str = "nrms", **kwargs):
+    def __init__(
+        self,
+        *args,
+        embedding_source: str = "static",
+        topic_embedding: str = "nrms",
+        scorer_source: str = "ArticleScorer",
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.article_embedder = NRMSArticleEmbedder(
             model_file_path("nrms-mind/news_encoder.safetensors"), device=self.device
         )
         self.embedding_source = embedding_source
         self.topic_embedding = topic_embedding
+        self.scorer_source = scorer_source
 
     @torch_inference
     def __call__(
-        self, candidate_articles: ArticleSet, clicked_articles: ArticleSet, interest_profile: InterestProfile
+        self, candidate_articles: CandidateSet, clicked_articles: CandidateSet, interest_profile: InterestProfile
     ) -> InterestProfile:
         if self.embedded_topic_articles is None:
-            self.embedded_topic_articles = self.article_embedder(ArticleSet(articles=TOPIC_ARTICLES))
+            self.embedded_topic_articles = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
 
         topic_embeddings_by_uuid = {
             article.article_id: embedding
@@ -164,25 +194,36 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
                 cand_emb = embeddings_from_candidates.get(topic_uuid, th.zeros(768, device=self.device))
                 clicked_emb = embeddings_from_clicked.get(topic_uuid, th.zeros(768, device=self.device))
 
-                avg_emb = 0.6 * def_emb + 0.3 * cand_emb + 0.1 * clicked_emb
+                avg_emb = 0.5 * def_emb + 0.5 * cand_emb + 0.0 * clicked_emb
                 topic_embeddings_by_uuid[topic_uuid] = avg_emb
         else:
             raise ValueError(f"Unknown embedding source: {self.embedding_source}")
 
-        combined_click_history = interest_profile.click_history + topic_clicks
-
         click_lookup = self.build_article_lookup(clicked_articles)
         topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
 
-        embedding_lookup = {**click_lookup, **topic_lookup}
+        if self.scorer_source == "TopicalArticleScorer":
+            combined_click_history = interest_profile.click_history
+            embedding_lookup = {**click_lookup}
+        else:
+            combined_click_history = topic_clicks
+            embedding_lookup = {**topic_lookup}
+
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.device)
+
+        interest_profile.click_history = combined_click_history
+        interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
+
+        # adding topic_embeddings separately
+        interest_profile.topic_embeddings = topic_lookup
+        interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
         interest_profile.click_history = combined_click_history
         interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
 
         return interest_profile
 
-    def build_article_lookup(self, article_set: ArticleSet):
+    def build_article_lookup(self, article_set: CandidateSet):
         embedding_lookup = {}
         for article, article_vector in zip(article_set.articles, article_set.embeddings, strict=True):
             if article.article_id not in embedding_lookup:
@@ -190,7 +231,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
 
         return embedding_lookup
 
-    def build_embeddings_from_articles(self, articles: ArticleSet, topic_articles: list[Article]):
+    def build_embeddings_from_articles(self, articles: CandidateSet, topic_articles: list[Article]):
         topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
 
         topic_embeddings_by_uuid = {}
@@ -220,7 +261,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         return topical_articles
 
     def build_embeddings_from_definitions(self):
-        topic_article_set = self.article_embedder(ArticleSet(articles=TOPIC_ARTICLES))
+        topic_article_set = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
 
         topic_embeddings_by_uuid = {
             article.article_id: embedding for article, embedding in zip(TOPIC_ARTICLES, topic_article_set.embeddings)

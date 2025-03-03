@@ -1,14 +1,14 @@
 import base64
+import gzip
 import logging
 import os
-from collections import defaultdict
 
 import structlog
 
-from poprox_concepts import ArticleSet
+from poprox_concepts import CandidateSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
 from poprox_recommender.recommenders import select_articles
-from poprox_recommender.topics import find_topic, user_locality_preference, user_topic_preference
+from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +16,21 @@ logger = logging.getLogger(__name__)
 def generate_recs(event, context):
     logger.info(f"Received event: {event}")
 
-    body = event.get("body", {})
-    is_encoded = event.get("isBase64Encoded", False)
     pipeline_params = event.get("queryStringParameters", {})
+    body = event.get("body", {})
+    headers = event.get("headers", {})
 
+    is_encoded = event.get("isBase64Encoded", False)
+    is_compressed = headers.get("Content-Encoding") == "gzip"
+
+    logger.info(f"Headers: {headers}")
+
+    # base64 encoding is applied to our requests by the AWS stack
+    # and compression is applied in our code, which means that
+    # we have to base64 decode first and decompress second
+    # (contrary to the usual expectation)
     body = base64.b64decode(body) if is_encoded else body
+    body = gzip.decompress(body) if is_compressed else body
     logger.info(f"Decoded body: {body}")
 
     req = RecommendationRequest.model_validate_json(body)
@@ -38,17 +48,8 @@ def generate_recs(event, context):
 
     logger.info(f"Selecting articles from {num_candidates} candidates...")
 
-    # The platform should send an ArticleSet but we'll do it here for now
-    candidate_articles = ArticleSet(articles=req.todays_articles)
-
-    topic_count_dict = defaultdict(int)
-
-    for article_id in [article.article_id for article in candidate_articles.articles]:
-        clicked_topics = find_topic(candidate_articles.articles, article_id) or set()
-        for topic in clicked_topics:
-            topic_count_dict[topic] += 1
-
-    print(f"\n Candidate article topics: {dict(topic_count_dict)}")
+    # The platform should send an CandidateSet but we'll do it here for now
+    candidate_articles = CandidateSet(articles=req.todays_articles)
 
     # Similarly, the platform should provided pre-filtered clicked articles
     # and compute the topic counts but this shim lets us ignore that issue
@@ -56,13 +57,10 @@ def generate_recs(event, context):
     profile = req.interest_profile
     click_history = profile.click_history
 
-    onboarding_topics = {interest.entity_name: interest.preference for interest in profile.onboarding_topics}
-    print(f"\nOnboarding topic selections: {onboarding_topics}")
-
     clicked_articles = list(
         filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
     )
-    clicked_articles = ArticleSet(articles=clicked_articles)
+    clicked_articles = CandidateSet(articles=clicked_articles)
 
     profile.click_topic_counts = user_topic_preference(req.past_articles, profile.click_history)
     profile.click_locality_counts = user_locality_preference(req.past_articles, profile.click_history)

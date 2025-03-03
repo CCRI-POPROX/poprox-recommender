@@ -14,31 +14,78 @@ requires-python = ">= 3.11"
 readme = "README.md"
 license = { file = "LICENSE.md" }
 dynamic = ["version"]
-# Dependencies for the POPROX code — keep in sync w/ pixi.toml
-# `dependencies` table.
 dependencies = [
   "lenskit==2025.0.0a4",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
-  "torch==2.*",
+  "torch~=2.2",
   "smart_open==7.*",
   "safetensors>=0.4,<1",
   "transformers>=4.41,<5",
   "rich ~=13.9",
   "ipyparallel ~=8.0",
-  # this expresses the dep, but since we only install with pixi,
-  # it's ok that it can't be resolved.
-  "poprox-concepts",
+  # we reference the zip file, so install doesn't need git
+  "poprox-concepts @ https://github.com/CCRI-POPROX/poprox-concepts/archive/refs/tags/v0.1.0.zip",
 ]
 
 [project.optional-dependencies]
-# keep synchronized with feature.data.dependencies in pixi.toml
-# we want these here so the doc build can work with the eval code
-eval = ["docopt >=0.6", "pandas ~=2.0", "accelerate >=0.26.0"]
+eval = ["docopt >=0.6", "pandas ~=2.0"]
+deploy = ["awslambdaric ~=2.2"]
+# declare extras for Torch install
+cpu = ["torch~=2.2"]
+cuda = ["torch~=2.2"]
 
 [project.urls]
 Homepage = "https://docs.poprox.ai"
 GitHub = "https://github.com/CCRI-POPROX/poprox-recommender"
+
+## dependencies for various task sets
+[dependency-groups]
+lint = ["pre-commit ~=3.7", "ruff >=0.4", "pyright ~=1.1"]
+test = ["requests >=2.31,<3", "coverage >=6.5", "pytest >=8"]
+dev = [
+  "hatch ~=1.13",
+  "ipython >=8",
+  "notebook >=7.2",
+  "jupytext ~=1.16",
+  "pyarrow-stubs ~=17.11",
+  { include-group = "lint" },
+  { include-group = "test" },
+  { include-group = "data" },
+]
+data = [
+  "dvc ~=3.51",
+  "dvc-s3 >=3",
+  "docopt >=0.6",
+  "pandas ~=2.0",
+  "matplotlib ~=3.6",
+  "seaborn ~=0.13.2",
+  "plotnine ~=0.14.1",
+  "jupytext >=1.16",
+  "scipy ~=1.14.1",
+  "pylatex ~=1.4.2",
+  "jq ~=1.8",
+]
+
+## UV index setup for PyTorch
+[tool.uv]
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu124", extra = "cuda" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
 
 ###### build and environment configurations ######
 # basic hatch config
@@ -75,7 +122,7 @@ known-first-party = ["poprox_*"]
 ban-relative-imports = "all"
 
 [tool.pyright]
-exclude = [".pixi/", "node_modules"]
+exclude = [".venv/", ".pixi/", "node_modules"]
 
 # Component's interface creates a lot of noise with this check
 reportIncompatibleMethodOverride = false
