@@ -1,4 +1,5 @@
 import base64
+import gzip
 import logging
 import os
 
@@ -15,11 +16,21 @@ logger = logging.getLogger(__name__)
 def generate_recs(event, context):
     logger.info(f"Received event: {event}")
 
-    body = event.get("body", {})
-    is_encoded = event.get("isBase64Encoded", False)
     pipeline_params = event.get("queryStringParameters", {})
+    body = event.get("body", {})
+    headers = event.get("headers", {})
 
+    is_encoded = event.get("isBase64Encoded", False)
+    is_compressed = headers.get("Content-Encoding") == "gzip"
+
+    logger.info(f"Headers: {headers}")
+
+    # base64 encoding is applied to our requests by the AWS stack
+    # and compression is applied in our code, which means that
+    # we have to base64 decode first and decompress second
+    # (contrary to the usual expectation)
     body = base64.b64decode(body) if is_encoded else body
+    body = gzip.decompress(body) if is_compressed else body
     logger.info(f"Decoded body: {body}")
 
     req = RecommendationRequest.model_validate_json(body)

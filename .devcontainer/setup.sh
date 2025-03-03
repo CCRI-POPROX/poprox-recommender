@@ -1,12 +1,13 @@
 #!/bin/bash
 set -xeo pipefail
 
-# set up environment dirs
-sudo chown vscode:vscode .pixi node_modules
-
-# get pre-commit wired up and ready
-pre-commit install
-pre-commit install-hooks
+# fix git permissions warning
+git config --global --add safe.directory $PWD
 
 # install the development environment
-pixi install -e dev
+uv venv
+uv sync --extra cpu
+
+# get pre-commit wired up and ready
+uv run pre-commit install
+uv run pre-commit install-hooks

@@ -5,6 +5,8 @@ This lives in the main package so it can be easily imported from any of the
 tests, regardless of their subdirectories.
 """
 
+import base64
+import gzip
 import json
 import logging
 import os
@@ -41,18 +43,32 @@ class InProcessTestService:
     Test service that directly runs the request handler in-process.
     """
 
-    def request(self, req: RecommendationRequest | str, pipeline: str) -> RecommendationResponse:
+    def request(
+        self, req: RecommendationRequest | str, pipeline: str, compress: bool = False
+    ) -> RecommendationResponse:
         # defer to here so we don't always import the handler
         from poprox_recommender.handler import generate_recs
 
         if not isinstance(req, str):
             req = req.model_dump_json()
 
-        event = {
-            "body": req,
-            "queryStringParameters": {"pipeline": pipeline},
-            "isBase64Encoded": False,
-        }
+        req_txt = json.dumps(json.loads(req))
+
+        if compress:
+            event = {
+                "headers": {"Content-Encoding": "gzip", "Content-Type": "application/json"},
+                "queryStringParameters": {"pipeline": pipeline},
+                "body": base64.encodebytes(gzip.compress(req_txt.encode())).decode("ascii"),
+                "isBase64Encoded": True,
+            }
+        else:
+            event = {
+                "headers": {},
+                "queryStringParameters": {"pipeline": pipeline},
+                "body": req_txt,
+                "isBase64Encoded": False,
+            }
+
         res = generate_recs(event, {})
         return RecommendationResponse.model_validate_json(res["body"])
 
@@ -67,15 +83,29 @@ class DockerTestService:
     def __init__(self, url: str):
         self.url = url
 
-    def request(self, req: RecommendationRequest | str, pipeline: str) -> RecommendationResponse:
+    def request(
+        self, req: RecommendationRequest | str, pipeline: str, compress: bool = False
+    ) -> RecommendationResponse:
         if not isinstance(req, str):
             req = req.model_dump_json()
 
-        event = {
-            "body": json.dumps(json.loads(req)),
-            "queryStringParameters": {"pipeline": pipeline},
-            "isBase64Encoded": False,
-        }
+        req_txt = json.dumps(json.loads(req))
+
+        if compress:
+            event = {
+                "headers": {"Content-Encoding": "gzip", "Content-Type": "application/json"},
+                "queryStringParameters": {"pipeline": pipeline},
+                "body": base64.encodebytes(gzip.compress(req_txt.encode())).decode("ascii"),
+                "isBase64Encoded": True,
+            }
+        else:
+            event = {
+                "headers": {},
+                "queryStringParameters": {"pipeline": pipeline},
+                "body": req_txt,
+                "isBase64Encoded": False,
+            }
+
         result = requests.post(self.url, json=event)
         res_data = result.json()
         if result.status_code != 200:
