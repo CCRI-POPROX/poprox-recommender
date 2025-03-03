@@ -47,7 +47,7 @@ def select_articles(
     available_pipelines = recommendation_pipelines(device=default_device())
     pipeline = available_pipelines["nrms"]
 
-    if pipeline_params and "pipeline" in pipeline_params:
+    if pipeline_params and pipeline_params.get("pipeline"):
         pipeline_name = pipeline_params["pipeline"]
         pipeline = available_pipelines[pipeline_name]
 

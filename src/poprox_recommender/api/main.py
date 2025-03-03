@@ -1,44 +1,34 @@
-import base64
-import gzip
 import logging
 import os
+from typing import Annotated, Any
 
 import structlog
+from fastapi import Body, FastAPI
+from mangum import Mangum
 
 from poprox_concepts import CandidateSet
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
+from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.recommenders import select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
 
+app = FastAPI()
+app.router.route_class = GzipRoute
 
-def generate_recs(event, context):
-    logger.info(f"Received event: {event}")
 
-    pipeline_params = event.get("queryStringParameters", {})
-    body = event.get("body", {})
-    headers = event.get("headers", {})
+logger = logging.getLogger(__name__)
 
-    is_encoded = event.get("isBase64Encoded", False)
-    is_compressed = headers.get("Content-Encoding") == "gzip"
 
-    logger.info(f"Headers: {headers}")
-
-    # base64 encoding is applied to our requests by the AWS stack
-    # and compression is applied in our code, which means that
-    # we have to base64 decode first and decompress second
-    # (contrary to the usual expectation)
-    body = base64.b64decode(body) if is_encoded else body
-    body = gzip.decompress(body) if is_compressed else body
+@app.post("/")
+def root(
+    body: Annotated[dict[str, Any], Body()],
+    pipeline: str | None = None,
+):
     logger.info(f"Decoded body: {body}")
 
-    req = RecommendationRequest.model_validate_json(body)
-
-    if pipeline_params:
-        logger.info(f"Using parameters: {pipeline_params}")
-    else:
-        logger.info("Using default parameters")
+    req = RecommendationRequest.model_validate(body)
 
     num_candidates = len(req.todays_articles)
 
@@ -69,19 +59,18 @@ def generate_recs(event, context):
         candidate_articles,
         clicked_articles,
         profile,
-        pipeline_params,
+        {"pipeline": pipeline},
     )
 
-    logger.info("Constructing response...")
     resp_body = RecommendationResponse.model_validate(
         {"recommendations": {profile.profile_id: outputs.default.articles}, "recommender": outputs.meta.model_dump()}
     )
 
-    logger.info("Serializing response...")
-    response = {"statusCode": 200, "body": resp_body.model_dump_json()}
+    logger.info(f"Response body: {resp_body}")
+    return resp_body.model_dump()
 
-    logger.info("Finished.")
-    return response
+
+handler = Mangum(app)
 
 
 if "AWS_LAMBDA_FUNCTION_NAME" in os.environ and not structlog.is_configured():
