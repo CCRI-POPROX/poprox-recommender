@@ -28,8 +28,7 @@ dependencies = [
   "transformers>=4.41,<5",
   "rich ~=13.9",
   "ipyparallel ~=8.0",
-  # we reference the zip file, so install doesn't need git
-  "poprox-concepts @ https://github.com/CCRI-POPROX/poprox-concepts/archive/refs/heads/main.zip",
+  "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
 ]
 
 [project.optional-dependencies]

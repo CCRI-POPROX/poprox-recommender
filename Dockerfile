@@ -1,6 +1,7 @@
 # Use Lambda "Provided" base image for build
 FROM public.ecr.aws/lambda/provided:al2023 AS build
 
+RUN dnf install -y git
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 # Copy the soure code into the image to install it and create the environment
