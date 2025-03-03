@@ -8,6 +8,7 @@ from transformers import Trainer, TrainingArguments
 
 from poprox_recommender.evaluation import evaluate
 from poprox_recommender.paths import project_root
+from poprox_recommender.training.dataset import BaseDataset, ValDataset
 
 logger = logging.getLogger(__name__)
 root = project_root()
@@ -40,8 +41,14 @@ def train(device, load_checkpoint):
     2. Load Data & Create Dataset
     """
     logger.info("Initialize Dataset")
-    train_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
-    eval_dataset = root / "data/MINDlarge_dev/behaviors.tsv"
+    # train_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
+    train_dataset = BaseDataset(
+        args,
+        root / "data/MINDlarge_post_train/behaviors_parsed.tsv",
+        root / "data/MINDlarge_post_train/news_parsed.tsv",
+    )
+    # eval_dataset = root / "data/MINDlarge_dev/behaviors.tsv"
+    eval_dataset = ValDataset(args, root / "data/MINDlarge_dev/behaviors.tsv", root / "data/MINDlarge_dev/news.tsv")
 
     """
     3. Train
