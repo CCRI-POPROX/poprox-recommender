@@ -4,12 +4,14 @@ from typing import Annotated, Any
 
 import structlog
 from fastapi import Body, FastAPI
+from fastapi.responses import Response
 from mangum import Mangum
 
 from poprox_concepts import CandidateSet
-from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
+from poprox_concepts.api.recommendations.v1 import ProtocolModelV1_1, RecommendationRequestV1, RecommendationResponseV1
 from poprox_recommender.api.gzip import GzipRoute
-from poprox_recommender.recommenders import select_articles
+from poprox_recommender.config import default_device
+from poprox_recommender.recommenders import recommendation_pipelines, select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
@@ -21,6 +23,17 @@ app.router.route_class = GzipRoute
 logger = logging.getLogger(__name__)
 
 
+@app.get("/warmup")
+def warmup(response: Response):
+    # Headers set on the response param get included in the response wrapped around return val
+    response.headers["poprox-protocol-version"] = ProtocolModelV1_1().protocol_version.value
+
+    # Load and cache available recommenders
+    available_recommenders = recommendation_pipelines(device=default_device())
+
+    return list(available_recommenders.keys())
+
+
 @app.post("/")
 def root(
     body: Annotated[dict[str, Any], Body()],
@@ -28,7 +41,7 @@ def root(
 ):
     logger.info(f"Decoded body: {body}")
 
-    req = RecommendationRequest.model_validate(body)
+    req = RecommendationRequestV1.model_validate(body)
 
     num_candidates = len(req.todays_articles)
 
@@ -62,7 +75,7 @@ def root(
         {"pipeline": pipeline},
     )
 
-    resp_body = RecommendationResponse.model_validate(
+    resp_body = RecommendationResponseV1.model_validate(
         {"recommendations": {profile.profile_id: outputs.default.articles}, "recommender": outputs.meta.model_dump()}
     )
 
