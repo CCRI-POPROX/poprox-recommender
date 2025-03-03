@@ -22,13 +22,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install environment
-        uses: prefix-dev/setup-pixi@v0.8.1
+      - name: 🕶️ Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          pixi-version: latest
-          cache: false
-          environments: pkg
-          activate-environment: true
+          python-version-file: ".python-version"
+
+      - name: 📦 Set up dependencies
+        run: uv sync --no-default-groups --group=test --group=data
 
       - name: Install Node dependencies
         run: |
