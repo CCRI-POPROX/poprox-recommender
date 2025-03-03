@@ -17,6 +17,27 @@ conflicts = [[
 ]]
 
 [[package]]
+name = "accelerate"
+version = "1.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "huggingface-hub" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "psutil" },
+    { name = "pyyaml" },
+    { name = "safetensors" },
+    { name = "torch", version = "2.6.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-18-poprox-recommender-cpu') or (extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.6.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda') or (extra != 'extra-18-poprox-recommender-cpu' and extra != 'extra-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-18-poprox-recommender-cpu') or (extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-18-poprox-recommender-cuda'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8f/02/24a4c4edb9cf0f1e0bc32bb6829e2138f1cc201442e7a24f0daf93b8a15a/accelerate-1.4.0.tar.gz", hash = "sha256:37d413e1b64cb8681ccd2908ae211cf73e13e6e636a2f598a96eccaa538773a5", size = 348745 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0a/f6/791b9d7eb371a2f385da3b7f1769ced72ead7bf09744637ea2985c83d7ee/accelerate-1.4.0-py3-none-any.whl", hash = "sha256:f6e1e7dfaf9d799a20a1dc45efbf4b1546163eac133faa5acd0d89177c896e55", size = 342129 },
+]
+
+[[package]]
 name = "aiobotocore"
 version = "2.20.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2813,7 +2834,7 @@ dependencies = [
     { name = "torch", version = "2.6.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda') or (extra != 'extra-18-poprox-recommender-cpu' and extra != 'extra-18-poprox-recommender-cuda')" },
     { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-18-poprox-recommender-cpu') or (extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda')" },
     { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-18-poprox-recommender-cuda'" },
-    { name = "transformers" },
+    { name = "transformers", extra = ["torch"] },
 ]
 
 [package.optional-dependencies]
@@ -2896,7 +2917,7 @@ requires-dist = [
     { name = "torch", specifier = "~=2.2" },
     { name = "torch", marker = "extra == 'cpu'", specifier = "~=2.2", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "poprox-recommender", extra = "cpu" } },
     { name = "torch", marker = "extra == 'cuda'", specifier = "~=2.2", index = "https://download.pytorch.org/whl/cu124", conflict = { package = "poprox-recommender", extra = "cuda" } },
-    { name = "transformers", specifier = ">=4.41,<5" },
+    { name = "transformers", extras = ["torch"], specifier = ">=4.41,<5" },
 ]
 provides-extras = ["cpu", "cuda", "deploy", "eval"]
 
@@ -4362,6 +4383,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/79/50/46573150944f46df8ec968eda854023165a84470b42f69f67c7d475dabc5/transformers-4.49.0.tar.gz", hash = "sha256:7e40e640b5b8dc3f48743f5f5adbdce3660c82baafbd3afdfc04143cdbd2089e", size = 8610952 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/20/37/1f29af63e9c30156a3ed6ebc2754077016577c094f31de7b2631e5d379eb/transformers-4.49.0-py3-none-any.whl", hash = "sha256:6b4fded1c5fee04d384b1014495b4235a2b53c87503d7d592423c06128cbbe03", size = 9970275 },
+]
+
+[package.optional-dependencies]
+torch = [
+    { name = "accelerate" },
+    { name = "torch", version = "2.6.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-18-poprox-recommender-cpu') or (extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.6.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda') or (extra != 'extra-18-poprox-recommender-cpu' and extra != 'extra-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-18-poprox-recommender-cpu') or (extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-18-poprox-recommender-cuda'" },
 ]
 
 [[package]]
