@@ -93,8 +93,10 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots: The number of items to recommend.
     """
 
-    article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
-    user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
+    article_embedder = NRMSArticleEmbedder(
+        model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
+    )
+    user_embedder = NRMSUserEmbedder(model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device=device)
     topk_ranker = TopkRanker(num_slots=num_slots)
     mmr = MMRDiversifier(num_slots=num_slots)
     pfar = PFARDiversifier(num_slots=num_slots)
