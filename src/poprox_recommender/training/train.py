@@ -6,6 +6,7 @@ import torch
 from safetensors.torch import load_file
 from transformers import Trainer, TrainingArguments
 
+from poprox_recommender.config import default_device
 from poprox_recommender.evaluation import evaluate
 from poprox_recommender.paths import project_root
 from poprox_recommender.training.dataset import BaseDataset, ValDataset
@@ -55,7 +56,7 @@ def train(device, load_checkpoint):
     """
     logger.info("Training Start")
     training_args = TrainingArguments(
-        output_dir="models/nrms-mind",
+        output_dir="../src/poprox_recommender/models/nrms-mind",
         logging_strategy="steps",
         save_total_limit=5,
         lr_scheduler_type="constant",
@@ -69,7 +70,7 @@ def train(device, load_checkpoint):
         per_device_eval_batch_size=1,
         num_train_epochs=3,
         remove_unused_columns=False,
-        logging_dir="models/nrms-mind",
+        logging_dir="../src/poprox_recommender/models/nrms-mind",
         logging_steps=1,
         report_to=None,
     )
@@ -91,11 +92,9 @@ def train(device, load_checkpoint):
 
 
 if __name__ == "__main__":
-    import os
+    import os  # noqa: F401
 
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = default_device()
 
     """
     The followings need modification based on need
