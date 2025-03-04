@@ -98,6 +98,7 @@ class ContextGenerator(Component):
         if self.dev_mode:
             logger.info("Dev_mode is true, using live OpenAI client...")
             self.client = AsyncOpenAI(api_key="Insert your key here.")
+            logger.info("Successfully instantiated OpenAI client...")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
     def __call__(
@@ -184,6 +185,7 @@ class ContextGenerator(Component):
 [[MAIN_NEWS]]
     HEADLINE: {article.headline}
     SUB_HEADLINE: {article.subhead}
+    BODY_TEXT: {article.body}
 [[INTERESTED_TOPICS]]: {top_topics}
 """  # noqa: E501
 
