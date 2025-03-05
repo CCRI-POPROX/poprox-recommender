@@ -1,8 +1,8 @@
 import argparse
 import importlib
-import logging
 
 import torch
+from lenskit.logging import LoggingConfig, get_logger
 from safetensors.torch import load_file
 from transformers import Trainer, TrainingArguments
 
@@ -11,7 +11,7 @@ from poprox_recommender.evaluation import evaluate
 from poprox_recommender.paths import project_root
 from poprox_recommender.training.dataset import BaseDataset, ValDataset
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 root = project_root()
 
 
@@ -19,6 +19,8 @@ def train(device, load_checkpoint):
     """
     1. Initialize model
     """
+    if not device.startswith("cuda"):
+        logger.warning("training on %s, not CUDA", device)
 
     logger.info("Initialize Model")
     Model = getattr(importlib.import_module("poprox_recommender.model.nrms"), "NRMS")
@@ -106,6 +108,7 @@ if __name__ == "__main__":
     """
     parser = argparse.ArgumentParser(description="processing some parameters")
 
+    parser.add_argument("-v", "--verbose", help="enable verbose logging")
     parser.add_argument("--num_clicked_news_a_user", type=float, default=50)  # length of clicked history
     parser.add_argument("--dataset_attributes", type=str, default="title")
     parser.add_argument("--dropout_probability", type=float, default=0.2)
@@ -123,6 +126,11 @@ if __name__ == "__main__":
     parser.add_argument("--num_words_title", type=float, default=30)
 
     args = parser.parse_args()
+    lc = LoggingConfig()
+    if args.verbose:
+        lc.set_verbose(True)
+    lc.apply()
+
     torch.cuda.empty_cache()
 
     train(device, args.load_checkpoint)
