@@ -1,5 +1,4 @@
 import argparse
-import importlib
 
 import torch
 from lenskit.logging import LoggingConfig, get_logger
@@ -23,7 +22,8 @@ def train(device, load_checkpoint):
         logger.warning("training on %s, not CUDA", device)
 
     logger.info("Initialize Model")
-    Model = getattr(importlib.import_module("poprox_recommender.model.nrms"), "NRMS")
+    from poprox_recommender.model.nrms import NRMS as Model
+
     model = Model(args).to(device)
 
     if load_checkpoint:
