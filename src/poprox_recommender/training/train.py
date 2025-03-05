@@ -24,11 +24,13 @@ def train(device, load_checkpoint):
     logger.info("Initialize Model")
     from poprox_recommender.model.nrms import NRMS as Model
 
-    model = Model(args).to(device)
+    model = Model(args)
 
     if load_checkpoint:
         checkpoint = load_file(args.checkpoint_path)
         model.load_state_dict(checkpoint)
+
+    model = model.to(device)
 
     """
     def print_model_size(model):
