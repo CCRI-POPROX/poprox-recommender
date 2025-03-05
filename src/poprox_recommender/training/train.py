@@ -62,7 +62,7 @@ def train(device, load_checkpoint):
     """
     logger.info("Training Start")
     training_args = TrainingArguments(
-        output_dir="../src/poprox_recommender/models/nrms-mind",
+        output_dir="models/nrms-mind",
         logging_strategy="steps",
         save_total_limit=5,
         lr_scheduler_type="constant",
@@ -76,7 +76,7 @@ def train(device, load_checkpoint):
         per_device_eval_batch_size=1,
         num_train_epochs=3,
         remove_unused_columns=False,
-        logging_dir="../src/poprox_recommender/models/nrms-mind",
+        logging_dir="models/nrms-mind",
         logging_steps=1,
         report_to=None,
     )
