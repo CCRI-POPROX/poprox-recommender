@@ -5,20 +5,13 @@ from lenskit.stats import gini
 from poprox_concepts.domain import CandidateSet
 
 from poprox_recommender.data.mind import MindData  # Import MindData to access lookup_article
+from poprox_recommender.topics import extract_general_topics
 
-mind_data = MindData()
 
-
-def gini_topics(final_recs: CandidateSet) -> float:
+def gini_coeff(final_recs: CandidateSet) -> float:
     topic_counter = Counter()
     for article in final_recs.articles:
-        if article.mentions:
-            mentions = [mention.entity.name for mention in article.mentions]
-        else:
-            article_details = mind_data.lookup_article(uuid=article.article_id)
-            mentions = [mention.entity.name for mention in article_details.mentions]
-
-        topic_counter.update(mentions)
+        topic_counter.update(extract_general_topics(article))
 
     topic_counts = np.array(list(topic_counter.values()))
 

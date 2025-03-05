@@ -5,8 +5,7 @@ from lenskit.metrics import GeometricRankWeight
 from poprox_concepts.domain import CandidateSet
 
 from poprox_recommender.data.mind import MindData  # Import MindData to access lookup_article
-
-mind_data = MindData()
+from poprox_recommender.topics import extract_general_topics
 
 
 def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.85):
