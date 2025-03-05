@@ -11,7 +11,7 @@ from poprox_recommender.evaluation import evaluate
 from poprox_recommender.paths import project_root
 from poprox_recommender.training.dataset import BaseDataset, ValDataset
 
-logger = get_logger(__name__)
+logger = get_logger("poprox_recommender.training.train")
 root = project_root()
 
 
