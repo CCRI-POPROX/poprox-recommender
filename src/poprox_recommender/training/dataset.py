@@ -93,7 +93,7 @@ class ValDataset(Dataset):
             usecols=range(5),
             names=["impression_id", "user", "time", "clicked_news", "impressions"],
         )
-        self.behaviors.clicked_news.fillna(" ", inplace=True)
+        self.behaviors.fillna({"clicked_news": " "}, inplace=True)
         self.behaviors.impressions = self.behaviors.impressions.str.split()
         self.behaviors["clicked"] = self.behaviors.impressions.apply(lambda x: [item.split("-")[1] for item in x])
         self.behaviors["candidate_news"] = self.behaviors.impressions.apply(

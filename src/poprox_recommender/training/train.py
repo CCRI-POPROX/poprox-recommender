@@ -48,8 +48,12 @@ def train(device, load_checkpoint):
         root / "data/MINDlarge_post_train/behaviors_parsed.tsv",
         root / "data/MINDlarge_post_train/news_parsed.tsv",
     )
+    logger.info(f"The size of train_dataset is {len(train_dataset)}.")
     # eval_dataset = root / "data/MINDlarge_dev/behaviors.tsv"
-    eval_dataset = ValDataset(args, root / "data/MINDlarge_dev/behaviors.tsv", root / "data/MINDlarge_dev/news.tsv")
+    eval_dataset = ValDataset(
+        args, root / "data/MINDlarge_dev/behaviors.tsv", root / "data/MINDlarge_post_dev/news_parsed.tsv"
+    )
+    logger.info(f"The size of eval_dataset is {len(eval_dataset)}.")
 
     """
     3. Train
