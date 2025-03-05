@@ -58,14 +58,7 @@ def test_heavy_interaction_history(service, mind_data, pipeline):  # noqa: F811
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     # do we have recommendations?
-    assert response.recommendations
-    # do we have only one user?
-    assert len(response.recommendations) == 1
-    # do we have the correct user?
-    assert req_body.interest_profile.profile_id in response.recommendations
-
-    assert response.recommendations.values()
-    recs = next(iter(response.recommendations.values()))
+    recs = response.recommendations.articles
     assert len(recs) > 0
     # do we have the correct number of recommendations
     assert len(recs) == request_generator.num_recs
