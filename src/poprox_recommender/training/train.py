@@ -6,7 +6,6 @@ from safetensors.torch import load_file
 from transformers import Trainer, TrainingArguments
 
 from poprox_recommender.config import default_device
-from poprox_recommender.evaluation import evaluate
 from poprox_recommender.paths import project_root
 from poprox_recommender.training.dataset import BaseDataset, ValDataset
 
@@ -15,9 +14,7 @@ root = project_root()
 
 
 def train(device, load_checkpoint):
-    """
-    1. Initialize model
-    """
+    # 1. Initialize model
     if not device.startswith("cuda"):
         logger.warning("training on %s, not CUDA", device)
 
@@ -42,9 +39,7 @@ def train(device, load_checkpoint):
         print(f"Total number of parameters in the model: {total_params}")
     """
 
-    """
-    2. Load Data & Create Dataset
-    """
+    # 2. Load and create datasets
     logger.info("Initialize Dataset")
     # train_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
     train_dataset = BaseDataset(
@@ -59,9 +54,7 @@ def train(device, load_checkpoint):
     )
     logger.info(f"The size of eval_dataset is {len(eval_dataset)}.")
 
-    """
-    3. Train
-    """
+    # 3. Train model
     logger.info("Training Start")
     training_args = TrainingArguments(
         output_dir="models/nrms-mind",
@@ -90,13 +83,6 @@ def train(device, load_checkpoint):
         eval_dataset=eval_dataset,
     )
     trainer.train()
-
-    """
-    4. Evaluate model by validation dataset
-    """
-    logger.info("Evaluation")
-    auc, mrr, ndcg5, ndcg10 = evaluate(args, model, device)
-    logger.info(f"evaluation auc={auc}, mrr={mrr}, ndcg5={ndcg5}, ndcg10={ndcg10}")
 
 
 if __name__ == "__main__":
