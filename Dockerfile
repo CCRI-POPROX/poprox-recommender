@@ -30,7 +30,7 @@ COPY --from=build /opt/ /opt/
 RUN /opt/poprox/bin/python3 -m nltk.downloader -d /opt/poprox/nltk_data punkt
 
 # Bake the model data into the image
-COPY --exclude='checkpoint-*' models/ /opt/poprox/models/
+COPY models/ /opt/poprox/models/
 
 # Make sure we can import the recommender
 RUN /opt/poprox/bin/python -m poprox_recommender.handler
