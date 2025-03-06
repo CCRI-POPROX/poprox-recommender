@@ -3,6 +3,7 @@ stages:
     cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val
     deps:
       - src/poprox_recommender/evaluation/generate/
+      - models/nrms-mind/
       - data/MINDlarge_dev.zip
     outs:
       - outputs/mind-val/recommendations
@@ -24,6 +25,7 @@ stages:
     cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small
     deps:
       - src/poprox_recommender/evaluation/generate/
+      - models/nrms-mind/
       - data/MINDsmall_dev.zip
     outs:
       - outputs/mind-small/recommendations
@@ -45,6 +47,7 @@ stages:
     cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000 -o outputs/mind-subset
     deps:
       - src/poprox_recommender/evaluation/generate/
+      - models/nrms-mind/
       - data/MINDsmall_dev.zip
     outs:
       - outputs/mind-subset/recommendations
