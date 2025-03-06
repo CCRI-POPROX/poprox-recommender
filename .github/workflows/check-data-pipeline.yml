@@ -31,11 +31,13 @@ jobs:
           python-version-file: ".python-version"
 
       - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=data
+        run: |
+          uv sync --extra=cpu --no-default-groups --group=data
+          echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
         run: |
-          uv run dvc pull
+          uv run --no-default-groups --group=data dvc pull
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -73,11 +75,13 @@ jobs:
           python-version-file: ".python-version"
 
       - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=data
+        run: |
+          uv sync --extra=cpu --no-default-groups --group=data
+          echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
         run: |
-          uv run dvc pull
+          dvc pull
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
