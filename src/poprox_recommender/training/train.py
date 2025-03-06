@@ -1,8 +1,9 @@
 import argparse
+from os import fspath
 
 import torch
 from lenskit.logging import LoggingConfig, get_logger
-from safetensors.torch import load_file
+from safetensors.torch import load_file, save_file
 from transformers import Trainer, TrainingArguments
 
 from poprox_recommender.config import default_device
@@ -11,6 +12,8 @@ from poprox_recommender.training.dataset import BaseDataset, ValDataset
 
 logger = get_logger("poprox_recommender.training.train")
 root = project_root()
+
+MODEL_DIR = root / "models" / "nrms-mind"
 
 
 def train(device, load_checkpoint):
@@ -57,7 +60,7 @@ def train(device, load_checkpoint):
     # 3. Train model
     logger.info("Training Start")
     training_args = TrainingArguments(
-        output_dir="models/nrms-mind",
+        output_dir=fspath(MODEL_DIR),
         logging_strategy="steps",
         save_total_limit=5,
         lr_scheduler_type="constant",
@@ -71,7 +74,7 @@ def train(device, load_checkpoint):
         per_device_eval_batch_size=1,
         num_train_epochs=3,
         remove_unused_columns=False,
-        logging_dir="models/nrms-mind",
+        logging_dir=fspath(MODEL_DIR),
         logging_steps=1,
         report_to=None,
     )
@@ -83,6 +86,21 @@ def train(device, load_checkpoint):
         eval_dataset=eval_dataset,
     )
     trainer.train()
+
+    # 4. save and extract tensors
+    save_model(model)
+
+
+def save_model(model):
+    """
+    Save a model, both the entire model and extracting the encoders.
+    """
+    logger.info("saving model", file="model.safetensors")
+    save_file(model.state_dict(), MODEL_DIR / "model.safetensors")
+    logger.info("saving news encoder", file="news_encoder.safetensors")
+    save_file(model.news_encoder.state_dict(), MODEL_DIR / "news_encoder.safetensors")
+    logger.info("saving user encoder", file="user_encoder.safetensors")
+    save_file(model.user_encoder.state_dict(), MODEL_DIR / "user_encoder.safetensors")
 
 
 if __name__ == "__main__":
