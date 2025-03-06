@@ -37,7 +37,8 @@ jobs:
 
       - name: Fetch pipeline data
         run: |
-          uv run --no-default-groups --group=data dvc pull
+          dvc config --local cache.type hardlink
+          dvc pull
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -81,6 +82,7 @@ jobs:
 
       - name: Fetch pipeline data
         run: |
+          dvc config --local cache.type hardlink
           dvc pull
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
