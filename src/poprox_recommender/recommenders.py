@@ -2,7 +2,7 @@
 import logging
 from typing import Any
 
-from lenskit.pipeline import Pipeline, PipelineState
+from lenskit.pipeline import Pipeline, PipelineBuilder, PipelineState
 
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.diversifiers import (
@@ -47,7 +47,7 @@ def select_articles(
     available_pipelines = recommendation_pipelines(device=default_device())
     pipeline = available_pipelines["nrms"]
 
-    if pipeline_params and "pipeline" in pipeline_params:
+    if pipeline_params and pipeline_params.get("pipeline"):
         pipeline_name = pipeline_params["pipeline"]
         pipeline = available_pipelines[pipeline_name]
 
@@ -85,12 +85,14 @@ def build_pipelines(num_slots: int, device: str) -> dict[str, Pipeline]:
         num_slots: The number of items to recommend.
     """
 
-    article_embedder = NRMSArticleEmbedder(model_file_path("nrms-mind/news_encoder.safetensors"), device)
-    user_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), device)
+    article_embedder = NRMSArticleEmbedder(
+        model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
+    )
+    user_embedder = NRMSUserEmbedder(model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device=device)
 
     topic_user_embedder_static = UserOnboardingEmbedder(
-        model_file_path("nrms-mind/user_encoder.safetensors"),
-        device,
+        model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
+        device=device,
         embedding_source="static",
         topic_embedding="avg",
     )
@@ -179,17 +181,17 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots, sco
     sampler = UniformSampler(num_slots=num_slots)
     fill = Fill(num_slots=num_slots)
     topk_ranker = TopkRanker(num_slots=num_slots)
-    pipeline = Pipeline(name=name)
+    builder = PipelineBuilder(name=name)
 
     # Define pipeline inputs
-    candidates = pipeline.create_input("candidate", CandidateSet)
-    clicked = pipeline.create_input("clicked", CandidateSet)
-    profile = pipeline.create_input("profile", InterestProfile)
+    candidates = builder.create_input("candidate", CandidateSet)
+    clicked = builder.create_input("clicked", CandidateSet)
+    profile = builder.create_input("profile", InterestProfile)
 
     # Compute embeddings
-    e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
-    e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
-    e_user = pipeline.add_component(
+    e_cand = builder.add_component("candidate-embedder", article_embedder, article_set=candidates)
+    e_click = builder.add_component("history-embedder", article_embedder, article_set=clicked)
+    e_user = builder.add_component(
         "user-embedder",
         user_embedder,
         candidate_articles=candidates,
@@ -198,19 +200,19 @@ def build_pipeline(name, article_embedder, user_embedder, ranker, num_slots, sco
     )
 
     # Score and rank articles with diversification/calibration reranking
-    o_scored = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)
-    o_topk = pipeline.add_component("ranker", topk_ranker, candidate_articles=o_scored, interest_profile=e_user)
+    o_scored = builder.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user)
+    o_topk = builder.add_component("ranker", topk_ranker, candidate_articles=o_scored, interest_profile=e_user)
     if ranker is topk_ranker:
         o_rank = o_topk
     else:
-        o_rank = pipeline.add_component("reranker", ranker, candidate_articles=o_scored, interest_profile=e_user)
+        o_rank = builder.add_component("reranker", ranker, candidate_articles=o_scored, interest_profile=e_user)
 
     # Fallback in case not enough articles came from the ranker
-    o_filtered = pipeline.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
-    o_sampled = pipeline.add_component("sampler", sampler, candidates1=o_filtered, candidates2=candidates)
-    pipeline.add_component("recommender", fill, recs1=o_rank, recs2=o_sampled)
+    o_filtered = builder.add_component("topic-filter", topic_filter, candidate=candidates, interest_profile=profile)
+    o_sampled = builder.add_component("sampler", sampler, candidates1=o_filtered, candidates2=candidates)
+    builder.add_component("recommender", fill, recs1=o_rank, recs2=o_sampled)
 
-    return pipeline
+    return builder.build()
 
 
 def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ranker, num_slots):
@@ -218,19 +220,19 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
     rrf = ReciprocalRankFusion(num_slots=num_slots)
     topk_ranker = TopkRanker(num_slots=num_slots)
 
-    pipeline = Pipeline(name=name)
+    builder = PipelineBuilder(name=name)
 
     # Define pipeline inputs
-    candidates = pipeline.create_input("candidate", CandidateSet)
-    clicked = pipeline.create_input("clicked", CandidateSet)
-    profile = pipeline.create_input("profile", InterestProfile)
+    candidates = builder.create_input("candidate", CandidateSet)
+    clicked = builder.create_input("clicked", CandidateSet)
+    profile = builder.create_input("profile", InterestProfile)
 
     # Compute embeddings
-    e_cand = pipeline.add_component("candidate-embedder", article_embedder, article_set=candidates)
-    e_click = pipeline.add_component("history-embedder", article_embedder, article_set=clicked)
+    e_cand = builder.add_component("candidate-embedder", article_embedder, article_set=candidates)
+    e_click = builder.add_component("history-embedder", article_embedder, article_set=clicked)
 
     # First user embedding strategy
-    e_user_1 = pipeline.add_component(
+    e_user_1 = builder.add_component(
         "user-embedder",
         user_embedder,
         candidate_articles=candidates,
@@ -239,15 +241,15 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
     )
 
     # Score and rank articles with diversification/calibration reranking
-    o_scored_1 = pipeline.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user_1)
-    o_topk_1 = pipeline.add_component("ranker", topk_ranker, candidate_articles=o_scored_1, interest_profile=e_user_1)
+    o_scored_1 = builder.add_component("scorer", article_scorer, candidate_articles=e_cand, interest_profile=e_user_1)
+    o_topk_1 = builder.add_component("ranker", topk_ranker, candidate_articles=o_scored_1, interest_profile=e_user_1)
     if ranker is topk_ranker:
         o_rank_1 = o_topk_1
     else:
-        o_rank_1 = pipeline.add_component("reranker", ranker, candidate_articles=o_scored_1, interest_profile=e_user_1)
+        o_rank_1 = builder.add_component("reranker", ranker, candidate_articles=o_scored_1, interest_profile=e_user_1)
 
     # Second user embedding strategy
-    e_user_2 = pipeline.add_component(
+    e_user_2 = builder.add_component(
         "user-embedder2",
         user_embedder2,
         candidate_articles=candidates,
@@ -255,14 +257,14 @@ def build_RRF_pipeline(name, article_embedder, user_embedder, user_embedder2, ra
         interest_profile=profile,
     )
 
-    o_scored_2 = pipeline.add_component("scorer2", article_scorer, candidate_articles=e_cand, interest_profile=e_user_2)
-    o_topk_2 = pipeline.add_component("ranker2", topk_ranker, candidate_articles=o_scored_2, interest_profile=e_user_2)
+    o_scored_2 = builder.add_component("scorer2", article_scorer, candidate_articles=e_cand, interest_profile=e_user_2)
+    o_topk_2 = builder.add_component("ranker2", topk_ranker, candidate_articles=o_scored_2, interest_profile=e_user_2)
     if ranker is topk_ranker:
         o_rank_2 = o_topk_2
     else:
-        o_rank_2 = pipeline.add_component("reranker2", ranker, candidate_articles=o_scored_2, interest_profile=e_user_2)
+        o_rank_2 = builder.add_component("reranker2", ranker, candidate_articles=o_scored_2, interest_profile=e_user_2)
 
     # Merge recommendations from each strategy
-    pipeline.add_component("recommender", rrf, recs1=o_rank_1, recs2=o_rank_2)
+    builder.add_component("recommender", rrf, recs1=o_rank_1, recs2=o_rank_2)
 
-    return pipeline
+    return builder.build()
