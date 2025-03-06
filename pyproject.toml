@@ -25,7 +25,7 @@ dependencies = [
   "torch~=2.2",
   "smart_open==7.*",
   "safetensors>=0.4,<1",
-  "transformers>=4.41,<5",
+  "transformers[torch]>=4.41,<5",
   "rich ~=13.9",
   "ipyparallel ~=8.0",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
