@@ -26,8 +26,8 @@ class TopicCalibrator(Calibrator):
             article_scores,
             candidate_articles.articles,
             normalized_topic_prefs,
-            self.theta,
-            topk=self.num_slots,
+            self.config.theta,
+            topk=self.config.num_slots,
         )
 
         return RecommendationList(articles=[candidate_articles.articles[int(idx)] for idx in article_indices])

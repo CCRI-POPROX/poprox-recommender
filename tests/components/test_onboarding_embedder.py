@@ -14,8 +14,12 @@ from poprox_recommender.paths import model_file_path
 
 def test_embed_user():
     try:
-        plain_nrms_embedder = NRMSUserEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
-        topic_aware_embedder = UserOnboardingEmbedder(model_file_path("nrms-mind/user_encoder.safetensors"), "cpu")
+        plain_nrms_embedder = NRMSUserEmbedder(
+            model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device="cpu"
+        )
+        topic_aware_embedder = UserOnboardingEmbedder(
+            model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device="cpu"
+        )
     except FileNotFoundError:
         pytest.xfail("NRMS model not found, so test failure is expected")
 
