@@ -5,6 +5,7 @@ stages:
       - ../src/poprox_recommender/training/train.py
       - ../data/MINDlarge_post_train
       - ../data/MINDlarge_post_dev
+      - ../data/MINDlarge_dev
       - ../data/MINDlarge_post_test
     outs:
       - nrms-mind
