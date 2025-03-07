@@ -1,6 +1,7 @@
 # Use Lambda "Provided" base image for build
 FROM public.ecr.aws/lambda/provided:al2023 AS build
 
+RUN dnf install -y git
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 # Copy the soure code into the image to install it and create the environment
@@ -33,7 +34,7 @@ RUN /opt/poprox/bin/python3 -m nltk.downloader -d /opt/poprox/nltk_data punkt
 COPY models/ /opt/poprox/models/
 
 # Make sure we can import the recommender
-RUN /opt/poprox/bin/python -m poprox_recommender.handler
+RUN /opt/poprox/bin/python -m poprox_recommender.api.main
 
 # Copy the bootstrap script
 COPY --chmod=0555 lambda-bootstrap.sh /var/runtime/bootstrap
@@ -43,4 +44,4 @@ ENV TRANSFORMERS_CACHE=/tmp/.transformers
 ENV AWS_LAMBDA_LOG_LEVEL=${LOG_LEVEL}
 
 # Run the bootstrap with our handler by default
-CMD ["poprox_recommender.handler.generate_recs"]
+CMD ["poprox_recommender.api.main.handler"]

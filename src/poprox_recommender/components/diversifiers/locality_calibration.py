@@ -2,10 +2,10 @@ import logging
 from collections import defaultdict
 
 import torch as th
-from lenskit.pipeline import Component
+from pydantic import BaseModel
 
 from poprox_concepts.domain import Article, CandidateSet, InterestProfile
-from poprox_recommender.components.diversifiers.calibration import compute_kl_divergence
+from poprox_recommender.components.diversifiers.calibration import Calibrator, compute_kl_divergence
 from poprox_recommender.topics import (
     extract_general_topics,
     extract_locality,
@@ -18,15 +18,14 @@ LOCALITY_DISTANCE_THRESHOLD = 0.1
 logger = logging.getLogger(__name__)
 
 
-class LocalityCalibrator(Component):
-    def __init__(self, theta_locality: float = 0.55, theta_topic: float = 0.3, num_slots=10):
-        """
-        TODOs: If set different theta_topic and theta_local values for different users,
-        then can save them in interest_profile
-        """
-        self.theta_locality = theta_locality
-        self.theta_topic = theta_topic
-        self.num_slots = num_slots
+class LocalityCalibratorConfig(BaseModel):
+    theta_locality: float = 0.55
+    theta_topic: float = 0.3
+    num_slots: int = 10
+
+
+class LocalityCalibrator(Calibrator):
+    config: LocalityCalibratorConfig
 
     def __call__(
         self,
@@ -35,8 +34,8 @@ class LocalityCalibrator(Component):
         theta_topic: float | None,
         theta_locality: float | None,
     ) -> CandidateSet:
-        theta_topic = self.theta_topic if theta_topic is None else theta_topic
-        theta_locality = self.theta_locality if theta_locality is None else theta_locality
+        theta_topic = self.config.theta_topic if theta_topic is None else theta_topic
+        theta_locality = self.config.theta_locality if theta_locality is None else theta_locality
 
         normalized_topic_prefs = LocalityCalibrator.compute_topic_prefs(interest_profile)
         normalized_locality_prefs = self.compute_local_prefs(candidate_articles)
@@ -60,7 +59,7 @@ class LocalityCalibrator(Component):
             normalized_locality_prefs,
             theta_topic,
             theta_locality,
-            topk=self.num_slots,
+            topk=self.config.num_slots,
         )
 
         selected = CandidateSet(
