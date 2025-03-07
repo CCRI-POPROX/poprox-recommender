@@ -1,8 +1,8 @@
 # Simulates a request to the recommender without requiring Serverless
 import warnings
 
-from poprox_concepts.api.recommendations import RecommendationResponse
-from poprox_recommender.handler import generate_recs
+from poprox_concepts.api.recommendations.v2 import RecommendationRequestV2, RecommendationResponseV2
+from poprox_recommender.api.main import root
 from poprox_recommender.paths import project_root
 from poprox_recommender.topics import extract_general_topics
 
@@ -12,6 +12,7 @@ warnings.filterwarnings("ignore")
 if __name__ == "__main__":
     with open(project_root() / "tests/request_data/onboarding.json", "r") as req_file:
         raw_json = req_file.read()
+        req = RecommendationRequestV2.model_validate_json(raw_json)
 
     event_nrms = {
         "body": raw_json,
@@ -29,36 +30,32 @@ if __name__ == "__main__":
         "isBase64Encoded": False,
     }
 
-    response_nrms = generate_recs(event_nrms, {})
-    response_nrms = RecommendationResponse.model_validate_json(response_nrms["body"])
+    response_nrms = root(req.model_dump(), pipeline="nrms")
+    response_nrms = RecommendationResponseV2.model_validate(response_nrms)
 
-    response_static = generate_recs(event_static, {})
-    response_static = RecommendationResponse.model_validate_json(response_static["body"])
+    response_static = root(req.model_dump(), pipeline="nrms-topics-static")
+    response_static = RecommendationResponseV2.model_validate(response_static)
 
-    response_rrf_static_user = generate_recs(event_rrf_static_user, {})
-    response_rrf_static_user = RecommendationResponse.model_validate_json(response_rrf_static_user["body"])
+    response_rrf_static_user = root(req.model_dump(), pipeline="nrms_rrf_static_user")
+    response_rrf_static_user = RecommendationResponseV2.model_validate(response_rrf_static_user)
 
-    for profile_id, recs in response_nrms.recommendations.items():
-        print("\n")
-        print(f"Recs for {profile_id}:")
-        print(f"{event_nrms['queryStringParameters']['pipeline']}")
+    print("\n")
+    print(f"{event_nrms['queryStringParameters']['pipeline']}")
 
-        for idx, article in enumerate(recs):
-            article_topics = extract_general_topics(article)
-            print(f"{idx + 1}. {article.headline} {article_topics}")
+    for idx, article in enumerate(response_nrms.recommendations.articles):
+        article_topics = extract_general_topics(article)
+        print(f"{idx + 1}. {article.headline} {article_topics}")
 
-    for profile_id, recs in response_static.recommendations.items():
-        print("\n")
-        print(f"{event_static['queryStringParameters']['pipeline']}")
+    print("\n")
+    print(f"{event_static['queryStringParameters']['pipeline']}")
 
-        for idx, article in enumerate(recs):
-            article_topics = extract_general_topics(article)
-            print(f"{idx + 1}. {article.headline} {article_topics}")
+    for idx, article in enumerate(response_static.recommendations.articles):
+        article_topics = extract_general_topics(article)
+        print(f"{idx + 1}. {article.headline} {article_topics}")
 
-    for profile_id, recs in response_rrf_static_user.recommendations.items():
-        print("\n")
-        print(f"{event_rrf_static_user['queryStringParameters']['pipeline']}")
+    print("\n")
+    print(f"{event_rrf_static_user['queryStringParameters']['pipeline']}")
 
-        for idx, article in enumerate(recs):
-            article_topics = extract_general_topics(article)
-            print(f"{idx + 1}. {article.headline} {article_topics}")
+    for idx, article in enumerate(response_rrf_static_user.recommendations.articles):
+        article_topics = extract_general_topics(article)
+        print(f"{idx + 1}. {article.headline} {article_topics}")
