@@ -7,7 +7,7 @@ import logging
 from pytest import xfail
 
 from poprox_concepts import CandidateSet, Click
-from poprox_concepts.api.recommendations.v2 import RecommendationRequestV2
+from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.recommenders import PipelineLoadError, select_articles
@@ -18,13 +18,13 @@ logger = logging.getLogger(__name__)
 def test_direct_basic_request():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
-    req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    req = RecommendationRequest.model_validate_json(req_f.read_text())
 
     logger.info("generating recommendations")
     try:
         outputs = select_articles(
-            req.candidates,
-            req.interacted,
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
         )
     except PipelineLoadError as e:
@@ -40,7 +40,7 @@ def test_direct_basic_request():
 def test_direct_basic_request_without_clicks():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
-    req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    req = RecommendationRequest.model_validate_json(req_f.read_text())
 
     logger.info("generating recommendations")
 
@@ -48,8 +48,8 @@ def test_direct_basic_request_without_clicks():
     profile.click_history = []
     try:
         outputs = select_articles(
-            req.candidates,
-            req.interacted,
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
         )
     except PipelineLoadError as e:

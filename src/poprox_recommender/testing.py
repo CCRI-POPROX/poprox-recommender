@@ -23,8 +23,8 @@ import requests
 from pydantic import ValidationError
 from pytest import fixture
 
-from poprox_concepts import AccountInterest, CandidateSet, Click, InterestProfile
-from poprox_concepts.api.recommendations.v2 import RecommendationRequestV2, RecommendationResponseV2
+from poprox_concepts import AccountInterest, Click, InterestProfile
+from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
 from poprox_recommender.data.mind import MindData
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class TestService(Protocol):
     endpoints.
     """
 
-    def request(self, req: RecommendationRequestV2 | str, pipeline: str) -> RecommendationResponseV2:
+    def request(self, req: RecommendationRequest | str, pipeline: str) -> RecommendationResponse:
         """
         Request recommendations from the recommender.
         """
@@ -50,8 +50,8 @@ class InProcessTestService:
     """
 
     def request(
-        self, req: RecommendationRequestV2 | str, pipeline: str, compress: bool = False
-    ) -> RecommendationResponseV2:
+        self, req: RecommendationRequest | str, pipeline: str, compress: bool = False
+    ) -> RecommendationResponse:
         # defer to here so we don't always import the handler
         from poprox_recommender.api.main import handler
 
@@ -81,7 +81,7 @@ class InProcessTestService:
             )
 
         res = handler(event, {})
-        return RecommendationResponseV2.model_validate_json(res["body"])
+        return RecommendationResponse.model_validate_json(res["body"])
 
 
 class DockerTestService:
@@ -95,8 +95,8 @@ class DockerTestService:
         self.url = url
 
     def request(
-        self, req: RecommendationRequestV2 | str, pipeline: str, compress: bool = False
-    ) -> RecommendationResponseV2:
+        self, req: RecommendationRequest | str, pipeline: str, compress: bool = False
+    ) -> RecommendationResponse:
         if not isinstance(req, str):
             req = req.model_dump_json()
 
@@ -136,7 +136,7 @@ class DockerTestService:
             logger.info("result: %s", json.dumps(res_data, indent=2))
             raise AssertionError("lambda request failed")
 
-        return RecommendationResponseV2.model_validate_json(res_data["body"])
+        return RecommendationResponse.model_validate_json(res_data["body"])
 
 
 def local_service_impl() -> Generator[TestService, None, None]:
@@ -186,7 +186,7 @@ class RequestGenerator:
         self.mind_data = mind_data
         self.profile_id = uuid4()
         self.candidate_articles = list()
-        self.interacted_articles = list()
+        self.past_articles = list()
         self.added_topics = list()
         self.clicks = list()
 
@@ -212,7 +212,7 @@ class RequestGenerator:
             for i in range(num_clicks)
         ]
 
-        self.interacted_articles = [self.mind_data.lookup_article(uuid=click.article_id) for click in self.clicks]
+        self.past_articles = [self.mind_data.lookup_article(uuid=click.article_id) for click in self.clicks]
 
     def add_topics(self, topics: List[str]):
         self.added_topics = [
@@ -232,7 +232,7 @@ class RequestGenerator:
 
         self.candidate_articles = [self.mind_data.lookup_article(id=article_id) for article_id in selected_candidates]
 
-    def get_request(self) -> RecommendationRequestV2:
+    def get_request(self) -> RecommendationRequest:
         interest_profile = InterestProfile(
             profile_id=self.profile_id,
             click_history=self.clicks,
@@ -240,9 +240,9 @@ class RequestGenerator:
         )
 
         try:
-            request = RecommendationRequestV2(
-                candidates=CandidateSet(articles=self.candidate_articles),
-                interacted=CandidateSet(articles=self.interacted_articles),
+            request = RecommendationRequest(
+                past_articles=self.past_articles,
+                todays_articles=self.candidate_articles,
                 interest_profile=interest_profile,
                 num_recs=self.num_recs,
             )

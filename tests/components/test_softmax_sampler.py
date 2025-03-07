@@ -2,7 +2,9 @@ import logging
 
 from pytest import skip, xfail
 
-from poprox_concepts.api.recommendations.v2 import RecommendationRequestV2
+from poprox_concepts import CandidateSet
+from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.domain import RecommendationList
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.recommenders import PipelineLoadError, select_articles
@@ -16,17 +18,17 @@ def test_request_with_softmax_sampler():
     if allow_data_test_failures() and not req_f.exists():
         skip("request file does not exist")
 
-    req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    req = RecommendationRequest.model_validate_json(req_f.read_text())
 
     try:
         base_outputs = select_articles(
-            req.candidates,
-            req.interacted,
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
         )
         sampled_outputs = select_articles(
-            req.candidates,
-            req.interacted,
+            CandidateSet(articles=req.todays_articles),
+            CandidateSet(articles=req.past_articles),
             req.interest_profile,
             pipeline_params={"pipeline": "softmax"},
         )
