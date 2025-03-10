@@ -72,13 +72,14 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             single_rbo5 = None
             single_rbo10 = None
 
-        rbe = rank_bias_entropy(final_rec, k=10, d=0.5)
+        rbe = rank_bias_entropy(ranked, k=10, d=0.5)
         gini = gini_coeff(final_rec)
         k_coverage = k_coverage_score(ranked, reranked, k=1)
         lip = least_item_promoted(ranked, reranked, k=10)
 
         logger.debug(
-            "profile %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
+            "profile %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f",
+            " LIP=%0.3f, KCoverage=%0.3f, RBE=%0.3f, Gini=%0.3f",
             profile_id,
             name,
             single_ndcg5,
