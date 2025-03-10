@@ -10,6 +10,7 @@ class NewsEncoder(torch.nn.Module):
         super(NewsEncoder, self).__init__()
 
         self.plm = AutoModel.from_pretrained(model_path, cache_dir="/tmp/")
+        self.plm.requires_grad_(False)
 
         self.plm_hidden_size = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/").hidden_size
 
