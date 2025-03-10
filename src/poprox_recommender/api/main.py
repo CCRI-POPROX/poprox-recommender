@@ -7,8 +7,7 @@ from fastapi import Body, FastAPI
 from fastapi.responses import Response
 from mangum import Mangum
 
-from poprox_concepts import CandidateSet
-from poprox_concepts.api.recommendations.v1 import ProtocolModelV1_1, RecommendationRequestV1, RecommendationResponseV1
+from poprox_concepts.api.recommendations.v2 import ProtocolModelV2_0, RecommendationRequestV2, RecommendationResponseV2
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
 from poprox_recommender.recommenders import recommendation_pipelines, select_articles
@@ -25,7 +24,7 @@ logger = logging.getLogger(__name__)
 @app.get("/warmup")
 def warmup(response: Response):
     # Headers set on the response param get included in the response wrapped around return val
-    response.headers["poprox-protocol-version"] = ProtocolModelV1_1().protocol_version.value
+    response.headers["poprox-protocol-version"] = ProtocolModelV2_0().protocol_version.value
 
     # Load and cache available recommenders
     available_recommenders = recommendation_pipelines(device=default_device())
@@ -40,9 +39,10 @@ def root(
 ):
     logger.info(f"Decoded body: {body}")
 
-    req = RecommendationRequestV1.model_validate(body)
+    req = RecommendationRequestV2.model_validate(body)
 
-    num_candidates = len(req.todays_articles)
+    candidate_articles = req.candidates.articles
+    num_candidates = len(candidate_articles)
 
     if num_candidates < req.num_recs:
         msg = f"Received insufficient candidates ({num_candidates}) in a request for {req.num_recs} recommendations."
@@ -50,30 +50,17 @@ def root(
 
     logger.info(f"Selecting articles from {num_candidates} candidates...")
 
-    # The platform should send an CandidateSet but we'll do it here for now
-    candidate_articles = CandidateSet(articles=req.todays_articles)
-
-    # Similarly, the platform should provided pre-filtered clicked articles
-    # and compute the topic counts but this shim lets us ignore that issue
-    # in the actual article selection
-
     profile = req.interest_profile
-    click_history = profile.click_history
-
-    clicked_articles = list(
-        filter(lambda a: a.article_id in set([c.article_id for c in click_history]), req.past_articles)
-    )
-    clicked_articles = CandidateSet(articles=clicked_articles)
 
     outputs = select_articles(
-        candidate_articles,
-        clicked_articles,
+        req.candidates,
+        req.interacted,
         profile,
         {"pipeline": pipeline},
     )
 
-    resp_body = RecommendationResponseV1.model_validate(
-        {"recommendations": {profile.profile_id: outputs.default.articles}, "recommender": outputs.meta.model_dump()}
+    resp_body = RecommendationResponseV2.model_validate(
+        {"recommendations": outputs.default, "recommender": outputs.meta.model_dump()}
     )
     # extract properties from the articleset new fields
     # replace the articles with new recommendation object?
