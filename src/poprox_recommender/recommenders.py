@@ -44,7 +44,7 @@ def select_articles(
     Select articles with default recommender configuration.  It returns a
     pipeline state whose ``default`` is the final list of recommendations.
     """
-    available_pipelines = recommendation_pipelines(device=default_device())
+    available_pipelines = load_all_pipelines(device=default_device())
     pipeline = available_pipelines["nrms"]
 
     if pipeline_params and pipeline_params.get("pipeline"):
@@ -61,7 +61,7 @@ def select_articles(
     return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
 
 
-def recommendation_pipelines(device: str | None = None, num_slots: int = 10) -> dict[str, Pipeline]:
+def load_all_pipelines(device: str | None = None, num_slots: int = 10) -> dict[str, Pipeline]:
     global _cached_pipelines
     if device is None:
         device = default_device()

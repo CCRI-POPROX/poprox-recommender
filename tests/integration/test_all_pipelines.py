@@ -9,12 +9,12 @@ from pytest import mark, skip
 
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
-from poprox_recommender.recommenders import recommendation_pipelines
+from poprox_recommender.recommenders import load_all_pipelines
 from poprox_recommender.testing import auto_service as service  # noqa: F401
 
 logger = logging.getLogger(__name__)
 try:
-    PIPELINES = recommendation_pipelines().keys()
+    PIPELINES = load_all_pipelines().keys()
 except Exception as e:
     warnings.warn("failed to load models, did you run `dvc pull`?")
     if allow_data_test_failures():
