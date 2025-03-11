@@ -4,9 +4,8 @@ from typing import Any
 from lenskit.pipeline import PipelineState
 
 from poprox_concepts import CandidateSet, InterestProfile
-from poprox_recommender.config import default_device
 
-from .load import PipelineLoadError, load_all_pipelines
+from .load import PipelineLoadError, get_pipeline, load_all_pipelines
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +26,12 @@ def select_articles(
     Select articles with default recommender configuration.  It returns a
     pipeline state whose ``default`` is the final list of recommendations.
     """
-    available_pipelines = load_all_pipelines(device=default_device())
-    pipeline = available_pipelines["nrms"]
+    if pipeline_params and "pipeline" in pipeline_params:
+        name = pipeline_params["pipeline"]
+    else:
+        name = "nrms"
 
-    if pipeline_params and pipeline_params.get("pipeline"):
-        pipeline_name = pipeline_params["pipeline"]
-        pipeline = available_pipelines[pipeline_name]
+    pipeline = get_pipeline(name)
 
     recs = pipeline.node("recommender")
     topk = pipeline.node("ranker", missing="none")
