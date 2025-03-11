@@ -263,4 +263,10 @@ class RequestGenerator:
 
 @fixture(scope="session")
 def mind_data():
-    yield MindData()
+    try:
+        yield MindData()
+    except FileNotFoundError as e:
+        if allow_data_test_failures():
+            skip("MIND data not available")
+        else:
+            raise e
