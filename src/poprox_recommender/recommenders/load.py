@@ -48,10 +48,7 @@ def get_pipeline_builder(name: str, device: str | None = None, num_slots: int = 
     logger.debug("configuring pipeline", name=norm_name, device=device, num_slots=num_slots)
     # load the module
     mod_name = f"poprox_recommender.recommenders.configurations.{name}"
-    try:
-        pipe_mod = import_module(mod_name)
-    except ImportError:
-        raise PipelineLoadError(f"no pipeline configuration {norm_name}")
+    pipe_mod = import_module(mod_name)
 
     pipe_ver = getattr(mod_name, "VERSION", None)
     if pipe_ver is None:
@@ -68,8 +65,15 @@ def get_pipeline(name: str, device: str | None = None, num_slots: int = 10) -> P
     """
     pipeline = _cached_pipelines.get(name, None)
     if pipeline is None:
-        builder = get_pipeline_builder(name, device, num_slots)
-        pipeline = builder.build(_component_cache)
+        try:
+            builder = get_pipeline_builder(name, device, num_slots)
+            pipeline = builder.build(_component_cache)
+        except ImportError as e:
+            logger.error("error importing pipeline", name=name, device=device, num_slots=num_slots, exc_info=e)
+            raise PipelineLoadError(f"could not import pipeline {name}")
+        except Exception as e:
+            logger.error("failed to load pipeline", name=name, device=device, num_slots=num_slots, exc_info=e)
+            raise PipelineLoadError(f"could not load pipeline {name}")
         _cached_pipelines[name] = pipeline
 
     return pipeline
