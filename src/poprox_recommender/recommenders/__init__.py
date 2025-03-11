@@ -5,12 +5,15 @@ from lenskit.pipeline import PipelineState
 
 from poprox_concepts import CandidateSet, InterestProfile
 
-from .load import PipelineLoadError, get_pipeline, load_all_pipelines
+from .load import PipelineLoadError, discover_pipelines, get_pipeline, get_pipeline_builder, load_all_pipelines
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
     "PipelineLoadError",
+    "get_pipeline_builder",
+    "get_pipeline",
+    "discover_pipelines",
     "load_all_pipelines",
     "select_articles",
 ]
