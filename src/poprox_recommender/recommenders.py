@@ -2,9 +2,14 @@
 import logging
 from typing import Any
 
-from lenskit.pipeline import Pipeline, PipelineBuilder, PipelineState
+from lenskit.pipeline import Pipeline, PipelineBuilder
 
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.api.recommendations.versions import RecommenderInfo
+from poprox_concepts.domain import (  # Only CandidateSet and InterestProfile
+    CandidateSet,  # Updated import
+    InterestProfile,
+    RecommendationList,
+)
 from poprox_recommender.components.diversifiers import (
     # LocalityCalibrator,
     MMRDiversifier,
@@ -12,8 +17,10 @@ from poprox_recommender.components.diversifiers import (
     TopicCalibrator,
 )
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
+from poprox_recommender.components.embedders.caption_embedder import CaptionEmbedder, CaptionEmbedderConfig
 from poprox_recommender.components.embedders.topic_wise_user import UserOnboardingEmbedder
 from poprox_recommender.components.filters import TopicFilter
+from poprox_recommender.components.filters.image_selector import ImageSelector
 from poprox_recommender.components.joiners import Fill, ReciprocalRankFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers import SoftmaxSampler, UniformSampler
@@ -34,22 +41,39 @@ class PipelineLoadError(Exception):
     """
 
 
+# Custom class to mimic PipelineState with writable default and meta
+class RecommendationState:
+    def __init__(self, default: RecommendationList, meta: RecommenderInfo):
+        self.default = default
+        self.meta = meta
+
+
 def select_articles(
     candidate_articles: CandidateSet,
     clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
-) -> PipelineState:
+) -> RecommendationState:  # Changed return type annotation
     """
-    Select articles with default recommender configuration.  It returns a
-    pipeline state whose ``default`` is the final list of recommendations.
+    Select articles with default recommender configuration. It returns a
+    state object whose ``default`` is the final list of recommendations.
+
+    Args:
+        candidate_articles: Set of articles to recommend from.
+        clicked_articles: Set of articles the user has interacted with.
+        interest_profile: User’s interest profile.
+        pipeline_params: Optional dict with pipeline configuration (e.g., "pipeline" name).
+
+    Returns:
+        RecommendationState: Object with .default as RecommendationList and .meta as RecommenderInfo.
     """
     available_pipelines = recommendation_pipelines(device=default_device())
-    pipeline = available_pipelines["nrms"]
 
-    if pipeline_params and pipeline_params.get("pipeline"):
+    pipeline_name = "nrms"  # Default value
+    if pipeline_params and pipeline_params.get("pipeline") is not None:
         pipeline_name = pipeline_params["pipeline"]
-        pipeline = available_pipelines[pipeline_name]
+
+    pipeline = available_pipelines[pipeline_name]
 
     recs = pipeline.node("recommender")
     topk = pipeline.node("ranker", missing="none")
@@ -58,7 +82,45 @@ def select_articles(
     else:
         wanted = (topk, recs)
 
-    return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
+    pipeline_state = pipeline.run_all(
+        *wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile
+    )
+    logger.info(f"Pipeline state: {pipeline_state}")
+
+    recommendations = process_pipeline_state(pipeline_state, pipeline_params)
+
+    # Create and return a RecommendationState object
+    return RecommendationState(
+        default=RecommendationList(articles=recommendations.articles, extras=[]),
+        meta=RecommenderInfo(name=pipeline_name),
+    )
+
+
+def process_pipeline_state(
+    pipeline_state: dict[str, Any],
+    pipeline_params: dict[str, Any] | None = None,
+) -> CandidateSet:
+    recommendations = pipeline_state["recommender"]
+    user_embedding = pipeline_state["user-embedder"].embedding
+    logger.info(f"Recommendations from pipeline: {recommendations.articles}")
+    logger.info(f"User embedding: {user_embedding}")
+
+    recommendations = CandidateSet(articles=recommendations.articles)
+
+    caption_config = CaptionEmbedderConfig(
+        model_path=model_file_path("nrms-mind/news_encoder.safetensors"),
+        device=pipeline_params.get("device", default_device()) if pipeline_params else default_device(),
+    )
+    caption_embedder = CaptionEmbedder(caption_config)
+    image_selector = ImageSelector(caption_embedder)
+
+    for article in recommendations.articles:
+        selected_image = image_selector.select_image(article, user_embedding)
+        article.images = [selected_image] if selected_image else []
+        logger.debug(f"Selected image for {article.article_id}: {selected_image}")
+
+    logger.info(f"Final recommendations: {recommendations.articles}")
+    return recommendations
 
 
 def recommendation_pipelines(device: str | None = None, num_slots: int = 10) -> dict[str, Pipeline]:

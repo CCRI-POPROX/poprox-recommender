@@ -1,0 +1,173 @@
+{
+  "candidates": {
+    "articles": [
+      {
+        "article_id": "7e5e0f12-d563-4a60-b90a-1737839389ff",
+        "headline": "New Policy Sparks Debate",
+        "subhead": "Lawmakers divided on reforms",
+        "url": "http://news.com/policy-debate",
+        "images": [
+          {
+            "image_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+            "url": "http://example.com/images/img2-today.jpg",
+            "caption": "Lawmakers argue during session.",
+            "source": "National News"
+          },
+          {
+            "image_id": "550e8400-e29b-41d4-a716-446655440000",
+            "url": "http://example.com/images/img1-today.jpg",
+            "caption": "Protesters rally outside capitol building.",
+            "source": "National News"
+          },
+          {
+            "image_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "url": "http://example.com/images/img3-today.jpg",
+            "caption": "Chart of public opinion on policy.",
+            "source": "National News"
+          }
+        ]
+      },
+      {
+        "article_id": "2d5a25ba-0963-474a-8da6-5b312c87bb82",
+        "headline": "Tech Giant Unveils New Gadget",
+        "subhead": "Latest innovation hits the market",
+        "url": "http://tech.com/new-gadget",
+        "images": [
+          {
+            "image_id": "9d2e4f8b-6c7d-4e8f-9a0b-234567890abc",
+            "url": "http://example.com/images/img5-today.jpg",
+            "caption": "Close-up of the new gadget.",
+            "source": "Tech Insider"
+          },
+          {
+            "image_id": "8e296a06-7a5a-4d9f-9e6b-1234567890ab",
+            "url": "http://example.com/images/img4-today.jpg",
+            "caption": "Crowd at product launch event.",
+            "source": "Tech Insider"
+          }
+        ]
+      },
+      {
+        "article_id": "8f9c3d4e-5b6a-4f7b-9c8d-1e2f3a4b5c6d",
+        "headline": "Sports Team Wins Championship",
+        "subhead": "Historic victory celebrated",
+        "url": "http://sports.com/championship",
+        "images": [
+          {
+            "image_id": "b2c3d4e5-f678-49ab-9cde-f1234567890a",
+            "url": "http://example.com/images/img7-today.jpg",
+            "caption": "Fans celebrate in the streets.",
+            "source": "Sports Network"
+          },
+          {
+            "image_id": "a1b2c3d4-e5f6-4789-9abc-def123456789",
+            "url": "http://example.com/images/img6-today.jpg",
+            "caption": "Team lifts championship trophy.",
+            "source": "Sports Network"
+          }
+        ]
+      },
+      {
+        "article_id": "4a7b9c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+        "headline": "Breakthrough in Renewable Energy",
+        "subhead": "Solar tech promises cleaner future",
+        "url": "http://science.com/renewable-energy",
+        "images": [
+          {
+            "image_id": "d4e5f6a7-8b9c-0d1e-2f34-567890abcdef",
+            "url": "http://example.com/images/img9-today.jpg",
+            "caption": "Researchers at work in lab.",
+            "source": "Science Weekly"
+          },
+          {
+            "image_id": "c3d4e5f6-7a8b-9c0d-1e2f-34567890abcd",
+            "url": "http://example.com/images/img8-today.jpg",
+            "caption": "Solar panels in a green field.",
+            "source": "Science Weekly"
+          }
+        ]
+      },
+      {
+        "article_id": "5b8c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e",
+        "headline": "Global Markets Rally After Trade Deal",
+        "subhead": "Investors optimistic about economy",
+        "url": "http://finance.com/market-rally",
+        "images": [
+          {
+            "image_id": "f6a7b8c9-d0e1-2f3a-4b5c-678901234567",
+            "url": "http://example.com/images/img11-today.jpg",
+            "caption": "Graph of market gains.",
+            "source": "Finance Times"
+          },
+          {
+            "image_id": "e5f6a7b8-9c0d-1e2f-3a4b-567890123456",
+            "url": "http://example.com/images/img10-today.jpg",
+            "caption": "Stock exchange floor buzzing.",
+            "source": "Finance Times"
+          }
+        ]
+      }
+    ]
+  },
+  "interacted": {
+    "articles": [
+      {
+        "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d",
+        "headline": "Local Elections Heat Up",
+        "subhead": "Candidates face off in heated debate",
+        "url": "http://news.com/elections",
+        "images": [
+          {
+            "image_id": "c3d4e5f6-789a-41bc-9def-1234567890ab",
+            "url": "http://example.com/images/img1-past.jpg",
+            "caption": "Crowd cheers at election rally.",
+            "source": "Local News"
+          },
+          {
+            "image_id": "d4e5f678-9abc-41de-9f12-34567890abcd",
+            "url": "http://example.com/images/img2-past.jpg",
+            "caption": "Candidates shaking hands post-debate.",
+            "source": "Local News"
+          }
+        ]
+      },
+      {
+        "article_id": "a0266b75-2873-4a40-9373-4e216e88c2f7",
+        "headline": "Tech Stocks Surge",
+        "subhead": "Market reacts to new product launches",
+        "url": "http://finance.com/tech-stocks",
+        "images": [
+          {
+            "image_id": "e5f6789a-bcde-41f2-9a34-567890abcdef",
+            "url": "http://example.com/images/img3-past.jpg",
+            "caption": "Stock market chart showing upward trend.",
+            "source": "Finance Daily"
+          }
+        ]
+      },
+      {
+        "article_id": "d88ee3b6-2b5e-4821-98a8-ffd702f571de",
+        "headline": "Sports Roundup: Weekend Highlights",
+        "subhead": "Key moments from the games",
+        "url": "http://sports.com/roundup",
+        "images": []
+      }
+    ]
+  },
+  "interest_profile": {
+    "profile_id": "28838f05-23f5-4f23-bea2-30b51f67c538",
+    "click_history": [
+      {
+        "article_id": "e7605f12-a37a-4326-bf3c-3f9b72d0738d"
+      },
+      {
+        "article_id": "a0266b75-2873-4a40-9373-4e216e88c2f7"
+      },
+      {
+        "article_id": "d88ee3b6-2b5e-4821-98a8-ffd702f571de"
+      }
+    ],
+    "onboarding_topics": []
+  },
+  "num_recs": 5
+}
