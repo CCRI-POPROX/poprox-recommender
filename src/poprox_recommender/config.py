@@ -60,7 +60,7 @@ def available_cpu_parallelism(max: int | None = None) -> int:
 def allow_data_test_failures(what: Literal["models", "mind"] = "models") -> bool:
     "Whether to allow tests to fail because the DVC-managed data is missing."
     if "CI" in os.environ:
-        if "PORPOX_CI_WITHOUT_MODELS" in os.environ:
+        if "POPROX_CI_WITHOUT_MODELS" in os.environ:
             return True
         elif what == "mind" and "POPROX_CI_WITHOUT_MIND" in os.environ:
             return True
