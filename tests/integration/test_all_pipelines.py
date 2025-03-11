@@ -5,7 +5,7 @@ Test the POPROX endpoint running under Serverless Offline.
 import logging
 import warnings
 
-from pytest import mark, skip
+from pytest import mark, skip, xfail
 
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
@@ -19,7 +19,13 @@ logger = logging.getLogger(__name__)
 def test_basic_request(service, pipeline):  # noqa: F811
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "request_body.json"
-    req_body = req_f.read_text()
+    try:
+        req_body = req_f.read_text()
+    except FileNotFoundError as e:
+        if allow_data_test_failures():
+            xfail("data not pulled")
+        else:
+            raise e
 
     logger.info("sending request")
     response = service.request(req_body, pipeline)
