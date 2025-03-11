@@ -34,3 +34,4 @@ def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.85):
     entropy = -sum(p * np.log2(p) for p in topic_probs.values() if p > 0)
 
     return entropy
+    return entropy

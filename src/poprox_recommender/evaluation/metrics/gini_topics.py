@@ -26,3 +26,4 @@ def gini_topics(final_recs: CandidateSet) -> float:
         return 0.0
 
     return gini(topic_counts)
+    return gini(topic_counts)
