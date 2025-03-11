@@ -266,7 +266,7 @@ def mind_data():
     try:
         yield MindData()
     except FileNotFoundError as e:
-        if allow_data_test_failures():
+        if allow_data_test_failures("mind"):
             skip("MIND data not available")
         else:
             raise e

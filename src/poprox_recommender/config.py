@@ -3,6 +3,7 @@ Access to configuration settings for the POPROX recommender pipeline.
 """
 
 import os
+from typing import Literal
 
 
 def default_device() -> str:
@@ -56,9 +57,14 @@ def available_cpu_parallelism(max: int | None = None) -> int:
     return n_cpus
 
 
-def allow_data_test_failures() -> bool:
+def allow_data_test_failures(what: Literal["models", "mind"] = "models") -> bool:
     "Whether to allow tests to fail because the DVC-managed data is missing."
     if "CI" in os.environ:
-        return "POPROX_CI_WITHOUT_DATA" in os.environ
+        if "PORPOX_CI_WITHOUT_MODELS" in os.environ:
+            return True
+        elif what == "mind" and "POPROX_CI_WITHOUT_MIND" in os.environ:
+            return True
+        else:
+            return False
 
     return True
