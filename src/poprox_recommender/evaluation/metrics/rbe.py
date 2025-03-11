@@ -3,7 +3,9 @@ from collections import defaultdict
 import numpy as np
 
 from poprox_concepts.domain import CandidateSet
-from poprox_recommender.topics import extract_general_topics
+from poprox_recommender.data.mind import MindData  # Import MindData to access lookup_article
+
+mind_data = MindData()
 
 
 def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.5):
@@ -12,7 +14,10 @@ def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.5):
 
     for rank, article in enumerate(top_k_articles):
         weight = d ** (rank + 1)  # d is the rank-based discount
-        for topic in extract_general_topics(article):
+        article_details = mind_data.lookup_article(uuid=article.article_id)
+        mentions = [mention.entity.name for mention in article_details.mentions]
+
+        for topic in mentions:
             weighted_counts[topic] += float(weight)
 
     total_weight = sum(weighted_counts.values())
