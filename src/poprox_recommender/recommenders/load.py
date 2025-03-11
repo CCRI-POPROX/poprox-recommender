@@ -47,7 +47,7 @@ def get_pipeline_builder(name: str, device: str | None = None, num_slots: int = 
     norm_name = name.replace("-", "_")
     logger.debug("configuring pipeline", name=norm_name, device=device, num_slots=num_slots)
     # load the module
-    mod_name = f"poprox_recommender.recommenders.configurations.{name}"
+    mod_name = f"poprox_recommender.recommenders.configurations.{norm_name}"
     pipe_mod = import_module(mod_name)
 
     pipe_ver = getattr(mod_name, "VERSION", None)
