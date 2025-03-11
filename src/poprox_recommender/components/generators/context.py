@@ -107,10 +107,12 @@ class ContextGenerator(Component):
         selected: CandidateSet,
         interest_profile: InterestProfile,
     ) -> RecommendationList:
+        extras = []
         if self.dev_mode:
             # selected = self.generate_newsletter(clicked, selected, interest_profile)
-            recs = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
-        return recs
+            selected, extras = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
+        logger.error(f"Final extras: {extras}")
+        return RecommendationList(articles=selected.articles, extras=extras)
 
     async def generate_newsletter(
         self,
@@ -128,15 +130,13 @@ class ContextGenerator(Component):
 
         treated_articles = []
         tasks = []
-        extras = []
+        extras = [{} for _ in range(len(selected.articles))]
 
         for i in range(len(selected.articles)):
             article = selected.articles[i]
-            extra_logging = {}
             if selected.treatment_flags[i]:
-                task = self.generate_treatment_preview(article, clicked, self.time_decay, top_topics, extra_logging)
+                task = self.generate_treatment_preview(article, clicked, self.time_decay, top_topics, extras[i])
                 tasks.append((article, task))
-            extras.append(extra_logging)
 
         results = await asyncio.gather(*(task[1] for task in tasks), return_exceptions=True)
 
@@ -149,16 +149,16 @@ class ContextGenerator(Component):
 
         await self.diversify_treatment_previews(treated_articles)
 
-        return RecommendationList(articles=selected.articles, extras=extras)
+        return selected, extras
 
     async def generate_treatment_preview(
         self, article: Article, clicked_articles: CandidateSet, time_decay: bool, top_topics: list, extra_logging: dict
     ):
         related_article = self.related_context(article, clicked_articles, time_decay, extra_logging)
         # Used for testing event-level narrative...
-        # if str(article.article_id) == "0697957b-71f6-48af-bac9-6c0033a58366":
-        #     logger.info(f"Manually overriding to event-level narrative for '{article.headline[0:30]}'")
-        #     related_article = clicked_articles.articles[0]
+        if str(article.article_id) == "0697957b-71f6-48af-bac9-6c0033a58366":
+            logger.info(f"Manually overriding to event-level narrative for '{article.headline[0:30]}'")
+            related_article = clicked_articles.articles[0]
 
         if related_article is not None:
             # high similarity, use the top-1 article to rewrite the rec
@@ -178,6 +178,7 @@ class ContextGenerator(Component):
             )
             logger.info(f"Using prompt: {article_prompt}")
             extra_logging["prompt_level"] = "event"
+            extra_logging["context_article"] = str(related_article.article_id)
             rec_headline, rec_subheadline = await self.async_gpt_generate(event_system_prompt, article_prompt)
         else:
             if top_topics:
@@ -236,7 +237,6 @@ class ContextGenerator(Component):
             for article in clicked_articles
             if article.published_at >= time0 and article not in self.previous_context_articles
         ]
-
         candidate_indices = self.related_indices(
             selected_subhead, selected_date, clicked_articles, time_decay, extra_logging
         )
@@ -244,7 +244,6 @@ class ContextGenerator(Component):
             return None
 
         self.previous_context_articles.append(clicked_articles[candidate_indices[0]])
-        extra_logging["context_article"] = clicked_articles[candidate_indices[0]].article_id
         return clicked_articles[candidate_indices[0]]
 
     def related_indices(
@@ -271,8 +270,8 @@ class ContextGenerator(Component):
             if val < SEMANTIC_THRESHOLD:
                 similarities[i] = 0
 
-        extra_logging["similarity"] = np.sort(similarities)[-1]
-
+        extra_logging["similarity"] = float(np.sort(similarities)[-1])
+        logger.error(f"Inside related_indices pos 2: {extra_logging}")
         if np.sort(similarities)[-1] < SEMANTIC_THRESHOLD:
             return []
 
