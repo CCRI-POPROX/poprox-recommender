@@ -11,7 +11,9 @@ from poprox_recommender.topics import extract_general_topics
 def gini_coeff(final_recs: CandidateSet) -> float:
     topic_counter = Counter()
     for article in final_recs.articles:
-        topic_counter.update(extract_general_topics(article))
+        article_details = mind_data.lookup_article(uuid=article.article_id)
+        mentions = [mention.entity.name for mention in article_details.mentions]
+        topic_counter.update(mentions)
 
     topic_counts = np.array(list(topic_counter.values()))
 
