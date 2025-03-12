@@ -2140,8 +2140,8 @@ wheels = [
 
 [[package]]
 name = "lenskit"
-version = "2025.1.2.dev28+g4e50da72"
-source = { git = "https://github.com/lenskit/lkpy.git#4e50da723e511609c33d5ed084996c7409ce3c94" }
+version = "2025.1.2.dev31+g1c2fca07"
+source = { git = "https://github.com/lenskit/lkpy.git#1c2fca0752d7bc864453ce33ea4bb3e003f731cc" }
 dependencies = [
     { name = "click" },
     { name = "humanize" },
