@@ -10,7 +10,7 @@ from mangum import Mangum
 from poprox_concepts.api.recommendations.v2 import ProtocolModelV2_0, RecommendationRequestV2, RecommendationResponseV2
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
-from poprox_recommender.recommenders import recommendation_pipelines, select_articles
+from poprox_recommender.recommenders import load_all_pipelines, select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ def warmup(response: Response):
     response.headers["poprox-protocol-version"] = ProtocolModelV2_0().protocol_version.value
 
     # Load and cache available recommenders
-    available_recommenders = recommendation_pipelines(device=default_device())
+    available_recommenders = load_all_pipelines(device=default_device())
 
     return list(available_recommenders.keys())
 

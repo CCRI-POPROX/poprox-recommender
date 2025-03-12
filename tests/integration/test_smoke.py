@@ -18,7 +18,13 @@ logger = logging.getLogger(__name__)
 def test_direct_basic_request():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
-    req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    try:
+        req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    except FileNotFoundError as e:
+        if allow_data_test_failures():
+            xfail("data not pulled")
+        else:
+            raise e
 
     logger.info("generating recommendations")
     try:
@@ -40,7 +46,13 @@ def test_direct_basic_request():
 def test_direct_basic_request_without_clicks():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
-    req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    try:
+        req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    except FileNotFoundError as e:
+        if allow_data_test_failures():
+            xfail("data not pulled")
+        else:
+            raise e
 
     logger.info("generating recommendations")
 

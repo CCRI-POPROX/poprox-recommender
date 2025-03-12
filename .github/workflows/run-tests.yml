@@ -44,6 +44,8 @@ jobs:
       - name: Run tests
         run: |
           uv run pytest -v tests
+        env:
+          POPROX_CI_WITHOUT_MIND: 1
 
   nodata-tests:
     name: Run the PyTest tests without model data
@@ -70,4 +72,4 @@ jobs:
         run: |
           uv run pytest -v tests
         env:
-          POPROX_CI_WITHOUT_DATA: 1
+          POPROX_CI_WITHOUT_MODELS: 1
