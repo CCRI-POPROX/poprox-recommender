@@ -2140,8 +2140,8 @@ wheels = [
 
 [[package]]
 name = "lenskit"
-version = "2025.1.2.dev31+g1c2fca07"
-source = { git = "https://github.com/lenskit/lkpy.git#1c2fca0752d7bc864453ce33ea4bb3e003f731cc" }
+version = "2025.2.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "humanize" },
@@ -2161,6 +2161,10 @@ dependencies = [
     { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'extra-18-poprox-recommender-cpu') or (extra == 'extra-18-poprox-recommender-cpu' and extra == 'extra-18-poprox-recommender-cuda')" },
     { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-18-poprox-recommender-cuda'" },
     { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/95/e1/c6c349e49b3beab074ac97db9df4b4cffb72c933233854d68547287f6e36/lenskit-2025.2.0.tar.gz", hash = "sha256:246acc10b2c07c6a33f65e5eaf9db749caa52e76a952d0eaf7c5d4c56ffc9009", size = 151361 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3c/34/b8febecadcc98145cc5560425c9a409925f0b2f94531c91d59baf2b16e79/lenskit-2025.2.0-py3-none-any.whl", hash = "sha256:3ceb516479ec9a9914df06883aace78e354e65ef19801b8ee9fcfa3ca3fc8b58", size = 227180 },
 ]
 
 [[package]]
@@ -3062,7 +3066,7 @@ requires-dist = [
     { name = "fastapi", extras = ["all"], specifier = "~=0.115.11" },
     { name = "httpx", specifier = "~=0.28.1" },
     { name = "ipyparallel", specifier = "~=8.0" },
-    { name = "lenskit", git = "https://github.com/lenskit/lkpy.git" },
+    { name = "lenskit", specifier = "~=2025.2" },
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
