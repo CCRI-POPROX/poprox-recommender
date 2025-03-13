@@ -4,7 +4,7 @@ from lenskit.pipeline import Pipeline, PipelineBuilder
 
 from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.components.filters import TopicFilter
-from poprox_recommender.components.joiners import Concatenate, Fill, Interleave
+from poprox_recommender.components.joiners import Concatenate, FillCandidates, FillRecs, Interleave
 from poprox_recommender.components.samplers import UniformSampler
 
 
@@ -73,22 +73,23 @@ def test_interleave_two_recs_lists():
 def test_fill_out_one_recs_list_from_another():
     sampled_slots = 7
 
-    joiner = Fill(num_slots=total_slots, deduplicate=False)
+    backup = RecommendationList(articles=inputs["candidate"].articles[: total_slots - sampled_slots])
+
+    joiner = FillRecs(num_slots=total_slots, deduplicate=False)
 
     builder = init_builder(sampled_slots)
-    builder.add_component("joiner", joiner, recs1=builder.node("sampler"), recs2=builder.node("candidate"))
+    builder.create_input("backup", RecommendationList)
+    builder.add_component("joiner", joiner, recs1=builder.node("sampler"), recs2=backup)
     builder.alias("recommender", "joiner")
     pipeline = builder.build()
 
-    outputs = pipeline.run_all(**inputs)
+    outputs = pipeline.run_all(**{**inputs, **{"backup": backup}})
 
     assert len(outputs["sampler"].articles) == sampled_slots
     assert len(outputs["recommender"].articles) == total_slots
 
     assert outputs["recommender"].articles[:sampled_slots] == outputs["sampler"].articles
-    assert (
-        outputs["recommender"].articles[sampled_slots:] == inputs["candidate"].articles[: total_slots - sampled_slots]
-    )
+    assert outputs["recommender"].articles[sampled_slots:] == backup.articles
 
 
 def test_fill_removes_duplicates():
@@ -99,7 +100,7 @@ def test_fill_removes_duplicates():
         "profile": InterestProfile(click_history=[], onboarding_topics=[]),
     }
 
-    fill = Fill(num_slots=total_slots)
+    fill = FillRecs(num_slots=total_slots)
 
     builder = PipelineBuilder(name="duplicate_concat")
     recs_input = builder.create_input("recs", RecommendationList)

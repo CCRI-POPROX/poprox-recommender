@@ -20,6 +20,7 @@ class Interleave(Component):
             for article in pair:
                 if article is not None:
                     articles.append(article)
-                    extras.append(recs_extras[article])
+                    extra = recs_extras[article.article_id] or {}
+                    extras.append(extra)
 
         return RecommendationList(articles=articles, extras=extras)

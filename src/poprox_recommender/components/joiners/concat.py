@@ -25,4 +25,4 @@ class Concatenate(Component):
         articles = {article.article_id: article for article in reverse_articles}
         extras = {article.article_id: extra for article, extra in zip_longest(reverse_articles, reverse_extras)}
 
-        return RecommendationList(articles=list(reversed(articles.values()), extras=list(reversed(extras.values()))))
+        return RecommendationList(articles=list(reversed(articles.values())), extras=list(reversed(extras.values())))
