@@ -3,6 +3,7 @@ Functions and logic for loading recommender pipeline configurations.
 """
 
 # pyright: basic
+import os
 from importlib import import_module
 from importlib.metadata import version
 from pathlib import Path
@@ -11,6 +12,8 @@ from lenskit.pipeline import Pipeline, PipelineBuilder, PipelineCache
 from structlog.stdlib import get_logger
 
 from poprox_recommender.config import default_device
+
+from .configurations import DEFAULT_PIPELINE
 
 logger = get_logger(__name__)
 
@@ -36,10 +39,30 @@ def discover_pipelines() -> list[str]:
     return names
 
 
+def default_pipeline() -> str:
+    """
+    Get the configured default pipeline.
+
+    This uses the :envvar:`POPROX_DEFAULT_PIPELINE` environment variable, if it
+    is set; otherwise, it returns
+    :attr:`poprox_recommender.recommenders.configurations.DEFAULT_PIPELINE`.
+    """
+    pipe = os.environ.get("POPROX_DEFAULT_PIPELINE")
+
+    # if env var is missing *or* is empty, use built-in default.
+    if pipe is None or not pipe.strip():
+        pipe = DEFAULT_PIPELINE
+
+    return pipe
+
+
 def get_pipeline_builder(name: str, device: str | None = None, num_slots: int = 10) -> PipelineBuilder:
     """
     Get a pipeline builder by name.
     """
+    if name is None:
+        raise ValueError("must specify pipeline name")
+
     if device is None:
         device = default_device()
 
