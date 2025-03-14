@@ -5,8 +5,14 @@ from lenskit.pipeline import PipelineState
 
 from poprox_concepts import CandidateSet, InterestProfile
 
-from .configurations import DEFAULT_PIPELINE
-from .load import PipelineLoadError, discover_pipelines, get_pipeline, get_pipeline_builder, load_all_pipelines
+from .load import (
+    PipelineLoadError,
+    default_pipeline,
+    discover_pipelines,
+    get_pipeline,
+    get_pipeline_builder,
+    load_all_pipelines,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +41,7 @@ def select_articles(
         name = pipeline_params["pipeline"]
 
     if name is None:
-        name = DEFAULT_PIPELINE
+        name = default_pipeline()
 
     pipeline = get_pipeline(name)
 
