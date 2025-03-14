@@ -8,7 +8,7 @@ from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUse
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedderConfig
 from poprox_recommender.components.filters.topic import TopicFilter
-from poprox_recommender.components.joiners.fill import Fill
+from poprox_recommender.components.joiners.fill import FillRecs
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers.uniform import UniformSampler
 from poprox_recommender.components.scorers.article import ArticleScorer
@@ -56,4 +56,4 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
 
     # Combine primary ranker and fallback
-    builder.add_component("recommender", Fill, {"num_slots": num_slots}, recs1=n_reranker, recs2=n_sampler)
+    builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=n_reranker, recs2=n_sampler)
