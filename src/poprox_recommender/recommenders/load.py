@@ -40,6 +40,9 @@ def get_pipeline_builder(name: str, device: str | None = None, num_slots: int = 
     """
     Get a pipeline builder by name.
     """
+    if name is None:
+        raise ValueError("must specify pipeline name")
+
     if device is None:
         device = default_device()
 
