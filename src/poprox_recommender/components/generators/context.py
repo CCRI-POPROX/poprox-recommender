@@ -126,7 +126,7 @@ class ContextGenerator(Component):
             topic_distribution.pop("U.S. news", None)
             topic_distribution.pop("World news", None)
             sorted_topics = sorted(topic_distribution.items(), key=lambda item: item[1], reverse=True)
-            top_topics = [key for key, _ in sorted_topics[:NUM_TOPICS]]
+            top_topics = [(key, count) for key, count in sorted_topics[:NUM_TOPICS]]
 
         treated_articles = []
         tasks = []
@@ -174,7 +174,6 @@ class ContextGenerator(Component):
             )
             logger.info(f"Using prompt: {article_prompt}")
             extra_logging["prompt_level"] = "event"
-            extra_logging["context_article"] = str(related_article.article_id)
             rec_headline, rec_subheadline = await self.async_gpt_generate(event_system_prompt, article_prompt)
         else:
             if top_topics:
@@ -183,17 +182,21 @@ class ContextGenerator(Component):
     HEADLINE: {article.headline}
     SUB_HEADLINE: {article.subhead}
     BODY_TEXT: {article.body}
-[[INTERESTED_TOPICS]]: {top_topics}
+[[INTERESTED_TOPICS]]: {[top_count_pair[0] for top_count_pair in top_topics]}
 """  # noqa: E501
 
                 logger.info(f"Generating topic-level narrative for related article: {article.headline[:30]}")
                 logger.info(f"Using prompt: {article_prompt}")
                 extra_logging["prompt_level"] = "topic"
+                extra_logging["top_topics"] = [
+                    [top_count_pair[0], float(top_count_pair[1])] for top_count_pair in top_topics
+                ]
                 rec_headline, rec_subheadline = await self.async_gpt_generate(topic_system_prompt, article_prompt)
             else:
                 logger.warning(
                     f"No topic_distribution for generating high-level narrative for {article.headline[:30]}. Falling back to original preview..."  # noqa: E501
                 )
+                extra_logging["prompt_level"] = "none"
                 rec_headline, rec_subheadline = article.headline, article.subhead
         return rec_headline, rec_subheadline
 
@@ -266,9 +269,11 @@ class ContextGenerator(Component):
             if val < SEMANTIC_THRESHOLD:
                 similarities[i] = 0
 
-        extra_logging["similarity"] = float(np.sort(similarities)[-1])
-        logger.error(f"Inside related_indices pos 2: {extra_logging}")
-        if np.sort(similarities)[-1] < SEMANTIC_THRESHOLD:
+        most_sim_article_ind = np.argmax(similarities)
+        highest_sim = float(similarities[most_sim_article_ind])
+        extra_logging["similarity"] = highest_sim
+        extra_logging["context_article"] = str(clicked_articles[most_sim_article_ind].article_id)
+        if highest_sim < SEMANTIC_THRESHOLD:
             return []
 
         elif time_decay:
