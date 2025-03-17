@@ -26,17 +26,18 @@ jobs:
 
       - name: 🕶️ Install uv
         uses: astral-sh/setup-uv@v5
-
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version-file: ".python-version"
+          python-version: "3.12"
 
       - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=test --group=data
+        run: uv sync --no-default-groups --group=test --group=data --extra=cpu
 
       - name: Show DVC config
-        run: uv run dvc config --list
+        run: dvc config --list
+
+      - name: 🛠️ Configure data retrieval
+        run: |
+          dvc config --local cache.type hardlink
 
       - name: Cache model data
         uses: actions/cache@v4
@@ -46,8 +47,14 @@ jobs:
 
       - name: Fetch model data
         run: |
-          uv run dvc config --local cache.type hardlink
-          uv run dvc pull -R models tests data
+          dvc config --local cache.type hardlink
+          dvc pull -r public -R models tests
+
+      - name: Fetch test data
+        run: |
+          if ! dvc pull data/MINDsmall_dev.zip; then
+            echo '::warning::Private repository not available, some tests will be skipped'
+          fi
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -70,7 +77,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          uv run pytest -v tests/integration
+          uv run --no-sync pytest -v tests/integration
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000
