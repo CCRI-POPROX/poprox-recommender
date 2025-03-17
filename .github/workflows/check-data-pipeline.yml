@@ -1,7 +1,9 @@
 name: Check Data Pipeline
 
 on:
-  pull_request:
+  # temporarily disable the data pipeline checks, they are super expensive
+  # pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
