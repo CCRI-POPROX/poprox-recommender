@@ -107,10 +107,12 @@ class ContextGenerator(Component):
         selected: CandidateSet,
         interest_profile: InterestProfile,
     ) -> RecommendationList:
+        extras = []
         if self.dev_mode:
             # selected = self.generate_newsletter(clicked, selected, interest_profile)
-            recs = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
-        return recs
+            selected, extras = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
+        logger.error(f"Final extras: {extras}")
+        return RecommendationList(articles=selected.articles, extras=extras)
 
     async def generate_newsletter(
         self,
@@ -124,15 +126,16 @@ class ContextGenerator(Component):
             topic_distribution.pop("U.S. news", None)
             topic_distribution.pop("World news", None)
             sorted_topics = sorted(topic_distribution.items(), key=lambda item: item[1], reverse=True)
-            top_topics = [key for key, _ in sorted_topics[:NUM_TOPICS]]
+            top_topics = [(key, count) for key, count in sorted_topics[:NUM_TOPICS]]
 
         treated_articles = []
         tasks = []
+        extras = [{} for _ in range(len(selected.articles))]
 
         for i in range(len(selected.articles)):
             article = selected.articles[i]
             if selected.treatment_flags[i]:
-                task = self.generate_treatment_preview(article, clicked, self.time_decay, top_topics)
+                task = self.generate_treatment_preview(article, clicked, self.time_decay, top_topics, extras[i])
                 tasks.append((article, task))
 
         results = await asyncio.gather(*(task[1] for task in tasks), return_exceptions=True)
@@ -146,20 +149,12 @@ class ContextGenerator(Component):
 
         await self.diversify_treatment_previews(treated_articles)
 
-        return RecommendationList(articles=selected.articles)
+        return selected, extras
 
     async def generate_treatment_preview(
-        self,
-        article: Article,
-        clicked_articles: CandidateSet,
-        time_decay: bool,
-        top_topics: list,
+        self, article: Article, clicked_articles: CandidateSet, time_decay: bool, top_topics: list, extra_logging: dict
     ):
-        related_article = self.related_context(article, clicked_articles, time_decay)
-        # Used for testing event-level narrative...
-        # if str(article.article_id) == "0697957b-71f6-48af-bac9-6c0033a58366":
-        #     logger.info(f"Manually overriding to event-level narrative for '{article.headline[0:30]}'")
-        #     related_article = clicked_articles.articles[0]
+        related_article = self.related_context(article, clicked_articles, time_decay, extra_logging)
 
         if related_article is not None:
             # high similarity, use the top-1 article to rewrite the rec
@@ -178,6 +173,7 @@ class ContextGenerator(Component):
                 f"Generating event-level narrative for '{article.headline[:30]}' from related article '{related_article.headline[:15]}'"  # noqa: E501
             )
             logger.info(f"Using prompt: {article_prompt}")
+            extra_logging["prompt_level"] = "event"
             rec_headline, rec_subheadline = await self.async_gpt_generate(event_system_prompt, article_prompt)
         else:
             if top_topics:
@@ -186,16 +182,21 @@ class ContextGenerator(Component):
     HEADLINE: {article.headline}
     SUB_HEADLINE: {article.subhead}
     BODY_TEXT: {article.body}
-[[INTERESTED_TOPICS]]: {top_topics}
+[[INTERESTED_TOPICS]]: {[top_count_pair[0] for top_count_pair in top_topics]}
 """  # noqa: E501
 
                 logger.info(f"Generating topic-level narrative for related article: {article.headline[:30]}")
                 logger.info(f"Using prompt: {article_prompt}")
+                extra_logging["prompt_level"] = "topic"
+                extra_logging["top_topics"] = [
+                    [top_count_pair[0], float(top_count_pair[1])] for top_count_pair in top_topics
+                ]
                 rec_headline, rec_subheadline = await self.async_gpt_generate(topic_system_prompt, article_prompt)
             else:
                 logger.warning(
                     f"No topic_distribution for generating high-level narrative for {article.headline[:30]}. Falling back to original preview..."  # noqa: E501
                 )
+                extra_logging["prompt_level"] = "none"
                 rec_headline, rec_subheadline = article.headline, article.subhead
         return rec_headline, rec_subheadline
 
@@ -223,12 +224,7 @@ class ContextGenerator(Component):
 
         return articles
 
-    def related_context(
-        self,
-        article: Article,
-        clicked: CandidateSet,
-        time_decay: bool,
-    ):
+    def related_context(self, article: Article, clicked: CandidateSet, time_decay: bool, extra_logging: dict):
         selected_subhead = article.subhead
         selected_date = article.published_at
 
@@ -240,13 +236,13 @@ class ContextGenerator(Component):
             for article in clicked_articles
             if article.published_at >= time0 and article not in self.previous_context_articles
         ]
-
-        candidate_indices = self.related_indices(selected_subhead, selected_date, clicked_articles, time_decay)
+        candidate_indices = self.related_indices(
+            selected_subhead, selected_date, clicked_articles, time_decay, extra_logging
+        )
         if len(candidate_indices) == 0:
             return None
 
         self.previous_context_articles.append(clicked_articles[candidate_indices[0]])
-
         return clicked_articles[candidate_indices[0]]
 
     def related_indices(
@@ -255,6 +251,7 @@ class ContextGenerator(Component):
         selected_date: datetime,
         clicked_articles: list,
         time_decay: bool,
+        extra_logging: dict,
     ):
         all_subheads = [selected_subhead] + [article.subhead for article in clicked_articles]
         embeddings = self.model.encode(all_subheads)
@@ -272,7 +269,11 @@ class ContextGenerator(Component):
             if val < SEMANTIC_THRESHOLD:
                 similarities[i] = 0
 
-        if np.sort(similarities)[-1] < SEMANTIC_THRESHOLD:
+        most_sim_article_ind = np.argmax(similarities)
+        highest_sim = float(similarities[most_sim_article_ind])
+        extra_logging["similarity"] = highest_sim
+        extra_logging["context_article"] = str(clicked_articles[most_sim_article_ind].article_id)
+        if highest_sim < SEMANTIC_THRESHOLD:
             return []
 
         elif time_decay:
