@@ -40,6 +40,7 @@ public() {
     if [[ $repo == public ]]; then
         echo "uploading public files:"
         ls -d "$@"
+        echo + dvc push -r $repo -R "$@"
         if [[ $upload == yes ]]; then
             dvc push -r $repo -R "$@"
         fi
@@ -50,6 +51,7 @@ shared() {
     if [[ $repo == public || $repo == shared ]]; then
         echo "uploading shared files:"
         ls -d "$@"
+        echo + dvc push -r $repo -R "$@"
         if [[ $upload == yes ]]; then
             dvc push -r $repo -R "$@"
         fi
