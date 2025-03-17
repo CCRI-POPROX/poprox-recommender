@@ -109,8 +109,8 @@ class ContextGenerator(Component):
     ) -> RecommendationList:
         if self.dev_mode:
             # selected = self.generate_newsletter(clicked, selected, interest_profile)
-            selected = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
-        return selected
+            recs = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
+        return recs
 
     async def generate_newsletter(
         self,
@@ -146,7 +146,7 @@ class ContextGenerator(Component):
 
         await self.diversify_treatment_previews(treated_articles)
 
-        return selected
+        return RecommendationList(articles=selected.articles)
 
     async def generate_treatment_preview(
         self,
