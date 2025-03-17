@@ -25,6 +25,10 @@ jobs:
       - name: 📦 Set up dependencies
         run: uv sync --no-default-groups --group=test --group=data
 
+      - name: 🛠️ Configure data retrieval
+        run: |
+          dvc config --local cache.type hardlink
+
       - name: Cache model data
         uses: actions/cache@v4
         with:
@@ -33,7 +37,6 @@ jobs:
 
       - name: Fetch model data
         run: |
-          dvc config --local cache.type hardlink
           dvc pull -r public -R models tests
 
       - name: Fetch test data

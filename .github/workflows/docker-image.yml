@@ -35,6 +35,10 @@ jobs:
       - name: Show DVC config
         run: dvc config --list
 
+      - name: 🛠️ Configure data retrieval
+        run: |
+          dvc config --local cache.type hardlink
+
       - name: Cache model data
         uses: actions/cache@v4
         with:
