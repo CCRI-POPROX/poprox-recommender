@@ -109,8 +109,8 @@ class ContextGenerator(Component):
     ) -> RecommendationList:
         if self.dev_mode:
             # selected = self.generate_newsletter(clicked, selected, interest_profile)
-            selected = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
-        return selected
+            recs = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
+        return recs
 
     async def generate_newsletter(
         self,
@@ -121,8 +121,8 @@ class ContextGenerator(Component):
         topic_distribution = LocalityCalibrator.compute_topic_prefs(interest_profile)
         top_topics = []
         if topic_distribution:
-            del topic_distribution["U.S. news"]
-            del topic_distribution["World news"]
+            topic_distribution.pop("U.S. news", None)
+            topic_distribution.pop("World news", None)
             sorted_topics = sorted(topic_distribution.items(), key=lambda item: item[1], reverse=True)
             top_topics = [key for key, _ in sorted_topics[:NUM_TOPICS]]
 
@@ -146,7 +146,7 @@ class ContextGenerator(Component):
 
         await self.diversify_treatment_previews(treated_articles)
 
-        return selected
+        return RecommendationList(articles=selected.articles)
 
     async def generate_treatment_preview(
         self,

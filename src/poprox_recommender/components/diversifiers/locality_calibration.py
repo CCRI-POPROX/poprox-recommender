@@ -4,7 +4,12 @@ from collections import defaultdict
 import torch as th
 from pydantic import BaseModel
 
-from poprox_concepts.domain import Article, CandidateSet, InterestProfile
+from poprox_concepts.domain import (
+    Article,
+    CandidateSet,
+    InterestProfile,
+    RecommendationList,
+)
 from poprox_recommender.components.diversifiers.calibration import Calibrator, compute_kl_divergence
 from poprox_recommender.topics import (
     extract_general_topics,
@@ -33,7 +38,7 @@ class LocalityCalibrator(Calibrator):
         interest_profile: InterestProfile,
         theta_topic: float | None,
         theta_locality: float | None,
-    ) -> CandidateSet:
+    ) -> RecommendationList:
         theta_topic = self.config.theta_topic if theta_topic is None else theta_topic
         theta_locality = self.config.theta_locality if theta_locality is None else theta_locality
 
