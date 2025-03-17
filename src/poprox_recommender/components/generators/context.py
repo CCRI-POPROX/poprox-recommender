@@ -155,10 +155,6 @@ class ContextGenerator(Component):
         self, article: Article, clicked_articles: CandidateSet, time_decay: bool, top_topics: list, extra_logging: dict
     ):
         related_article = self.related_context(article, clicked_articles, time_decay, extra_logging)
-        # Used for testing event-level narrative...
-        if str(article.article_id) == "0697957b-71f6-48af-bac9-6c0033a58366":
-            logger.info(f"Manually overriding to event-level narrative for '{article.headline[0:30]}'")
-            related_article = clicked_articles.articles[0]
 
         if related_article is not None:
             # high similarity, use the top-1 article to rewrite the rec
