@@ -4,5 +4,5 @@
 
 # there are 2 sharing commands: 'public' and 'shared'
 public models/*-mind
-public outputs/mind-*
-public tests/request_data
+public -R outputs/mind-*
+public -R tests/request_data
