@@ -19,7 +19,7 @@ from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
-from poprox_recommender.recommenders import recommendation_pipelines
+from poprox_recommender.recommenders import load_all_pipelines
 from poprox_recommender.topics import user_topic_preference
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ def _init_worker(outs: RecOutputs, logging: WorkerLogConfig | None = None):
 
     _worker_out.open(proc.pid)
 
-    _pipelines = recommendation_pipelines(device=default_device())
+    _pipelines = load_all_pipelines(device=default_device())
 
 
 def _finish_worker():

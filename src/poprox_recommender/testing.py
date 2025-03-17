@@ -21,11 +21,13 @@ from uuid import uuid4
 
 import requests
 from pydantic import ValidationError
-from pytest import fixture
+from pytest import fixture, skip
 
 from poprox_concepts import AccountInterest, CandidateSet, Click, InterestProfile
 from poprox_concepts.api.recommendations.v2 import RecommendationRequestV2, RecommendationResponseV2
+from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.data.mind import MindData
+from poprox_recommender.recommenders.load import PipelineLoadError
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +82,15 @@ class InProcessTestService:
                 }
             )
 
-        res = handler(event, {})
+        try:
+            res = handler(event, {})
+        except PipelineLoadError as e:
+            logger.error("error loading pipeline %s", pipeline, exc_info=e)
+            if allow_data_test_failures():
+                skip("recommendation pipelines unavailable", allow_module_level=True)
+            else:
+                raise e
+
         return RecommendationResponseV2.model_validate_json(res["body"])
 
 
@@ -253,4 +263,10 @@ class RequestGenerator:
 
 @fixture(scope="session")
 def mind_data():
-    yield MindData()
+    try:
+        yield MindData()
+    except FileNotFoundError as e:
+        if allow_data_test_failures("mind"):
+            skip("MIND data not available")
+        else:
+            raise e

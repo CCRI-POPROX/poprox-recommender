@@ -1,3 +1,5 @@
+from itertools import zip_longest
+
 from lenskit.pipeline import Component
 
 from poprox_concepts.domain import RecommendationList
@@ -18,6 +20,9 @@ class Concatenate(Component):
         in reverse order. Reversing them one more time returns them to the original order.
         """
         reverse_articles = reversed(recs1.articles + recs2.articles)
-        articles = {article.article_id: article for article in reverse_articles}
+        reverse_extras = reversed(recs1.extras + recs2.extras)
 
-        return RecommendationList(articles=list(reversed(articles.values())))
+        articles = {article.article_id: article for article in reverse_articles}
+        extras = {article.article_id: extra for article, extra in zip_longest(reverse_articles, reverse_extras)}
+
+        return RecommendationList(articles=list(reversed(articles.values())), extras=list(reversed(extras.values())))

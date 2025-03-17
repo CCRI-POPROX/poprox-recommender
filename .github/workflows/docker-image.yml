@@ -66,6 +66,7 @@ jobs:
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000
+          POPROX_CI_WITHOUT_MIND: 1
 
       - name: Run integration tests
         run: |
