@@ -37,23 +37,22 @@ fi
 
 # define our commands for sharing
 public() {
-    if [[ $repo == public ]]; then
-        echo "uploading public files:"
-        ls -d "$@"
-        echo + dvc push -r $repo -R "$@"
-        if [[ $upload == yes ]]; then
-            dvc push -r $repo -R "$@"
-        fi
+    # upload public files to all repos
+    echo "uploading public files:"
+    ls -d "$@"
+    echo + dvc push -r $repo -R "$@"
+    if [[ $upload == yes ]]; then
+        dvc push -r $repo "$@"
     fi
 }
 
 shared() {
-    if [[ $repo == public || $repo == shared ]]; then
+    if [[ $repo == shared ]]; then
         echo "uploading shared files:"
         ls -d "$@"
         echo + dvc push -r $repo -R "$@"
         if [[ $upload == yes ]]; then
-            dvc push -r $repo -R "$@"
+            dvc push -r $repo "$@"
         fi
     fi
 }
