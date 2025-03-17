@@ -159,15 +159,15 @@ class ContextGenerator(Component):
         if related_article is not None:
             # high similarity, use the top-1 article to rewrite the rec
             article_prompt = f"""
-                [[MAIN_NEWS]]
-                    HEADLINE: {article.headline}
-                    SUB_HEADLINE: {article.subhead}
-                    BODY_TEXT: {article.body}
-                [[RELATED_NEWS]]
-                    HEADLINE: {related_article.headline}
-                    SUB_HEADLINE: {related_article.subhead}
-                    BODY_TEXT: {related_article.body}
-            """  # noqa: E501
+[[MAIN_NEWS]]
+    HEADLINE: {article.headline}
+    SUB_HEADLINE: {article.subhead}
+    BODY_TEXT: {article.body}
+[[RELATED_NEWS]]
+    HEADLINE: {related_article.headline}
+    SUB_HEADLINE: {related_article.subhead}
+    BODY_TEXT: {related_article.body}
+"""  # noqa: E501
 
             logger.info(
                 f"Generating event-level narrative for '{article.headline[:30]}' from related article '{related_article.headline[:15]}'"  # noqa: E501
@@ -179,12 +179,12 @@ class ContextGenerator(Component):
         else:
             if top_topics:
                 article_prompt = f"""
-                    [[MAIN_NEWS]]
-                        HEADLINE: {article.headline}
-                        SUB_HEADLINE: {article.subhead}
-                        BODY_TEXT: {article.body}
-                    [[INTERESTED_TOPICS]]: {top_topics}
-                """  # noqa: E501
+[[MAIN_NEWS]]
+    HEADLINE: {article.headline}
+    SUB_HEADLINE: {article.subhead}
+    BODY_TEXT: {article.body}
+[[INTERESTED_TOPICS]]: {top_topics}
+"""  # noqa: E501
 
                 logger.info(f"Generating topic-level narrative for related article: {article.headline[:30]}")
                 logger.info(f"Using prompt: {article_prompt}")
