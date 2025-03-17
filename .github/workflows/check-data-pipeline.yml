@@ -34,7 +34,7 @@ jobs:
 
       - name: 📦 Set up dependencies
         run: |
-          uv sync --extra=cpu --no-default-groups --group=data
+          uv sync --extra=cpu --no-default-groups --group=data  --extra=cpu
           echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
@@ -79,7 +79,7 @@ jobs:
 
       - name: 📦 Set up dependencies
         run: |
-          uv sync --extra=cpu --no-default-groups --group=data
+          uv sync --extra=cpu --no-default-groups --group=data --extra=cpu
           echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data

@@ -30,7 +30,7 @@ jobs:
           python-version: "3.12"
 
       - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=test --group=data
+        run: uv sync --no-default-groups --group=test --group=data --extra=cpu
 
       - name: Show DVC config
         run: dvc config --list
