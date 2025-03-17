@@ -36,7 +36,14 @@ jobs:
 
       - name: Fetch model data
         run: |
-          uv run dvc pull -R models tests data
+          uv run dvc config --local cache.type hardlink
+          uv run dvc pull -r public -R models tests
+
+      - name: Fetch test data
+        run: |
+          if ! uv run dvc pull data/MINDsmall_dev.zip; then
+            echo '::warning::Private repository not available, some tests will be skipped'
+          fi
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
