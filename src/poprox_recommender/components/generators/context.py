@@ -188,9 +188,9 @@ class ContextGenerator(Component):
                 logger.info(f"Generating topic-level narrative for related article: {article.headline[:30]}")
                 logger.info(f"Using prompt: {article_prompt}")
                 extra_logging["prompt_level"] = "topic"
-                extra_logging["top_topics"] = [
-                    [top_count_pair[0], float(top_count_pair[1])] for top_count_pair in top_topics
-                ]
+                for ind, top_count_pair in enumerate(top_topics):
+                    extra_logging["top_{}_topic".format(ind)] = top_count_pair[0]
+                    extra_logging["top_{}_topic_ratio".format(ind)] = float(top_count_pair[1])
                 rec_headline, rec_subheadline = await self.async_gpt_generate(topic_system_prompt, article_prompt)
             else:
                 logger.warning(
