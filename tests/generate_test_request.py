@@ -33,27 +33,22 @@ def get_single_request() -> str:
             if req.interest_profile.profile_id == account_id:
                 request_body = RecommendationRequestV2.model_dump_json(
                     req,
-                    exclude={
-                        "candidates": excluded_fields,
-                        "interacted": excluded_fields,
-                    },
+                    exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},
                 )
     else:
         random_index = random.randint(0, len(requests) - 1)
         request_body = RecommendationRequestV2.model_dump_json(
             requests[random_index],
-            exclude={
-                "candidates": excluded_fields,
-                "interacted": excluded_fields,
-            },
+            exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},
         )
+
     if options["--output_file"]:
         with open(options["--output_file"], "w") as file:
-            json.dump(request_body, file)
+            file.write(request_body)
     else:
         request_data_path = project_root() / "tests" / "request_data" / "request_body_1.json"
         with open(request_data_path, "w") as file:
-            json.dump(request_body, file)
+            file.write(request_body)
 
 
 if __name__ == "__main__":
