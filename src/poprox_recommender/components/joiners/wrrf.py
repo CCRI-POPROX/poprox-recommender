@@ -1,5 +1,4 @@
 from collections import defaultdict
-from itertools import zip_longest
 from typing import List, Optional
 
 from lenskit.pipeline import Component
