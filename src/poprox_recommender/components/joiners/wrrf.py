@@ -20,9 +20,10 @@ class WeightedReciprocalRankFusion(Component):
 
     def __call__(
         self,
+        *,
         recs1: RecommendationList,
         recs2: RecommendationList,
-        *additional_recs: Optional[RecommendationList],
+        additional_recs: Optional[List[RecommendationList]] = None,
         weights: Optional[dict] = None,
     ) -> RecommendationList:
         """
@@ -31,14 +32,16 @@ class WeightedReciprocalRankFusion(Component):
         Args:
             recs1: First recommendation list (required)
             recs2: Second recommendation list (required)
-            *additional_recs: Optional additional recommendation lists
+            additional_recs: Optional list of additional recommendation lists
             weights: Optional dictionary of weights for each list (e.g., {"recs1": 1.5, "recs2": 1.0})
 
         Returns:
             RecommendationList: Fused recommendation list
         """
         # Combine all recommendation lists into a single list
-        all_recs = [recs1, recs2] + [rec for rec in additional_recs if rec is not None]
+        all_recs = [recs1, recs2]
+        if additional_recs:
+            all_recs.extend([rec for rec in additional_recs if rec is not None])
 
         # Use default weights if none provided, otherwise use provided weights
         if weights is None:
