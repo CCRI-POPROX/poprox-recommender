@@ -7,7 +7,7 @@ Usage:
 
 Options:
     --account_id ID      Specific user account id to process request data
-    --min_click_num NUM      Get a random user with at least min_click_num clicks
+    --min_click_num NUM  Get a random user with at least min_click_num clicks
     --output_file OUTPUT Path to the output file
 """
 
@@ -40,7 +40,6 @@ def get_single_request() -> str:
     elif options["--min_click_num"]:
         min_click = options["--min_click_num"]
         for req in requests:
-            print(len(req.interest_profile.click_history))
             if req.interest_profile.click_history and len(req.interest_profile.click_history) >= int(min_click):
                 request_body = RecommendationRequestV2.model_dump_json(
                     req,
