@@ -24,6 +24,15 @@ class NewsAdditiveAttention(nn.Module):
         )
         self.attention.apply(init_weights)
 
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
-        attention_weight = self.attention(input)
-        return input * attention_weight
+    def forward(
+        self, input: torch.Tensor, padding_mask: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        attn_input = input
+
+        if padding_mask is not None:
+            mask_values = torch.nan_to_num(-torch.inf * padding_mask)
+            attn_input = input * mask_values.unsqueeze(dim=2).expand(input.shape)
+
+        attention_weights = self.attention(attn_input)
+
+        return input * attention_weights, attention_weights

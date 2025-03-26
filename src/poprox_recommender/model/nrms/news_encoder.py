@@ -9,22 +9,21 @@ class NewsEncoder(torch.nn.Module):
     def __init__(self, model_path, num_attention_heads, additive_attn_hidden_dim):
         super(NewsEncoder, self).__init__()
 
+        self.plm_config = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/")
         self.plm = AutoModel.from_pretrained(model_path, cache_dir="/tmp/")
         self.plm.requires_grad_(False)
 
-        self.plm_hidden_size = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/").hidden_size
-
         self.multihead_attention = nn.MultiheadAttention(
-            embed_dim=self.plm_hidden_size,
+            embed_dim=self.plm_config.hidden_size,
             num_heads=num_attention_heads,
             batch_first=True,
         )
 
-        self.additive_attention = NewsAdditiveAttention(self.plm_hidden_size, additive_attn_hidden_dim)
+        self.additive_attention = NewsAdditiveAttention(self.plm_config.hidden_size, additive_attn_hidden_dim)
 
     @property
     def embedding_size(self) -> int:
-        return self.plm_hidden_size
+        return self.plm_config.hidden_size
 
     def forward(self, news_input: torch.Tensor) -> torch.Tensor:
         # batch_size, num_words_title, word_embedding_dim
