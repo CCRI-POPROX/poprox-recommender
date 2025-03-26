@@ -3,12 +3,13 @@ With exported dataset, this script can help generate test request body for recom
 The data export dataset needs to be placed in side poprox-recommender/data/POPROX folder, with timestamp removed
 
 Usage:
-    generate_test_request.py [--account_id ID] [--min_click_num NUM] [--output_file OUTPUT]
+    generate_test_request.py [--account_id ID] [--min_click_num NUM] [--with_topics True] [--output_file OUTPUT]
 
 Options:
-    --account_id ID      Specific user account id to process request data
-    --min_click_num NUM  Get a random user with at least min_click_num clicks
-    --output_file OUTPUT Path to the output file
+    --account_id ID         Specific user account id to process request data
+    --min_click_num NUM     Get a random user with at least min_click_num clicks
+    --with_topics True      If True, indicating filter out users with a list of onboarding topics
+    --output_file OUTPUT    Path to the output file
 """
 
 import json
@@ -27,9 +28,13 @@ def get_single_request() -> str:
     requests = list(eval_data.iter_profiles())
     excluded_fields = {"__all__": {"raw_data": True, "images": {"__all__": {"raw_data"}}}}
 
+    account_id = options["--account_id"]
+    min_click = options["--min_click_num"]
+    with_topics = options["--with_topics"]
+    output = options["--output_file"]
+
     request_body = ""
-    if options["--account_id"]:
-        account_id = options["--account_id"]
+    if account_id:
         for req in requests:
             if req.interest_profile.profile_id == account_id:
                 request_body = RecommendationRequestV2.model_dump_json(
@@ -37,10 +42,34 @@ def get_single_request() -> str:
                     exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},
                 )
                 break
-    elif options["--min_click_num"]:
-        min_click = options["--min_click_num"]
+    elif min_click:
+        if with_topics:
+            for req in requests:
+                if len(req.interest_profile.click_history) >= int(min_click) and req.interest_profile.onboarding_topics:
+                    request_body = RecommendationRequestV2.model_dump_json(
+                        req,
+                        exclude={
+                            "candidates": excluded_fields,
+                            "interacted": excluded_fields,
+                            "protocol_version": True,
+                        },
+                    )
+                    break
+        else:
+            for req in requests:
+                if len(req.interest_profile.click_history) >= int(min_click):
+                    request_body = RecommendationRequestV2.model_dump_json(
+                        req,
+                        exclude={
+                            "candidates": excluded_fields,
+                            "interacted": excluded_fields,
+                            "protocol_version": True,
+                        },
+                    )
+                    break
+    elif with_topics:
         for req in requests:
-            if req.interest_profile.click_history and len(req.interest_profile.click_history) >= int(min_click):
+            if req.interest_profile.onboarding_topics:
                 request_body = RecommendationRequestV2.model_dump_json(
                     req,
                     exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},
@@ -53,8 +82,11 @@ def get_single_request() -> str:
             exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},
         )
 
-    if options["--output_file"]:
-        with open(options["--output_file"], "w") as file:
+    if request_body:
+        print("Found qualified test request!")
+
+    if output:
+        with open(output, "w") as file:
             file.write(request_body)
     else:
         request_data_path = project_root() / "tests" / "request_data" / "request_body_1.json"
