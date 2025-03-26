@@ -5,6 +5,7 @@ Support for loading POPROX data for evaluation.
 # pyright: basic
 from __future__ import annotations
 
+import json
 import logging
 from typing import Generator
 from uuid import UUID
@@ -12,7 +13,8 @@ from uuid import UUID
 import pandas as pd
 
 from poprox_concepts import AccountInterest, Article, Click, Entity, InterestProfile, Mention
-from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.api.recommendations import RecommendationRequestV2
+from poprox_concepts.domain import CandidateSet
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 
@@ -65,7 +67,7 @@ class PoproxData(EvalData):
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
-    def iter_profiles(self) -> Generator[RecommendationRequest]:
+    def iter_profiles(self) -> Generator[RecommendationRequestV2]:
         newsletter_ids = self.newsletters_df["newsletter_id"].unique()
 
         for newsletter_id in newsletter_ids:
@@ -84,15 +86,16 @@ class PoproxData(EvalData):
             past_articles = []
             for article_row in filtered_clicks_df.itertuples():
                 article = self.lookup_clicked_article(article_row.article_id)
-                past_articles.append(article)
+                if article:
+                    past_articles.append(article)
 
-                clicks.append(
-                    Click(
-                        article_id=article_row.article_id,
-                        newsletter_id=article_row.newsletter_id,
-                        timestamp=article_row.timestamp,
+                    clicks.append(
+                        Click(
+                            article_id=article_row.article_id,
+                            newsletter_id=article_row.newsletter_id,
+                            timestamp=article_row.timestamp,
+                        )
                     )
-                )
 
             interests = self.interests_df.loc[self.interests_df["account_id"] == profile_id]
             topics = []
@@ -118,9 +121,9 @@ class PoproxData(EvalData):
             ].itertuples():
                 candidate_articles.append(self.lookup_candidate_article(article_row.article_id))
 
-            yield RecommendationRequest(
-                todays_articles=candidate_articles,
-                past_articles=past_articles,
+            yield RecommendationRequestV2(
+                candidates=CandidateSet(articles=candidate_articles),
+                interacted=CandidateSet(articles=past_articles),
                 interest_profile=profile,
                 num_recs=TEST_REC_COUNT,
             )
@@ -131,9 +134,13 @@ class PoproxData(EvalData):
         return self.convert_row_to_article(article_row, mention_rows)
 
     def lookup_clicked_article(self, article_id: UUID):
-        article_row = self.clicked_articles_df.loc[str(article_id)]
-        mention_rows = self.clicked_mentions_df[self.clicked_mentions_df["article_id"] == article_row.article_id]
-        return self.convert_row_to_article(article_row, mention_rows)
+        try:
+            article_row = self.clicked_articles_df.loc[str(article_id)]
+            mention_rows = self.clicked_mentions_df[self.clicked_mentions_df["article_id"] == article_row.article_id]
+            return self.convert_row_to_article(article_row, mention_rows)
+        except Exception as _:
+            print(f"Did not find the clicked article with id {str(article_id)}")
+            return None
 
     def convert_row_to_article(self, article_row, mention_rows):
         mentions = [
@@ -142,7 +149,7 @@ class PoproxData(EvalData):
                 article_id=row.article_id,
                 source=row.source,
                 relevance=row.relevance,
-                entity=Entity(**row.entity),
+                entity=Entity(**json.loads(row.entity)) if row.entity else None,
             )
             for row in mention_rows.itertuples()
         ]
@@ -155,7 +162,7 @@ class PoproxData(EvalData):
             mentions=mentions,
             source="AP",
             external_id="",
-            raw_data=article_row.raw_data,
+            raw_data=json.loads(article_row.raw_data) if article_row.raw_data else None,
         )
 
 
