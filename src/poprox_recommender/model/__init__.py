@@ -18,16 +18,16 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ModelConfig:
-    num_epochs: float = 10
+    num_epochs: int = 10
 
-    num_clicked_news_a_user: float = 50
+    num_clicked_news_a_user: int = 50
     word_freq_threshold: float = 1
     dropout_probability: float = 0.2
-    word_embedding_dim: float = 300
-    category_embedding_dim: float = 100
-    query_vector_dim: float = 200
-    additive_attn_hidden_dim: float = 200
-    num_attention_heads: float = 16
+    word_embedding_dim: int = 300
+    category_embedding_dim: int = 100
+    query_vector_dim: int = 200
+    additive_attn_hidden_dim: int = 200
+    num_attention_heads: int = 16
     hidden_size: int = 768
 
     pretrained_model = LANG_MODEL_NAME
