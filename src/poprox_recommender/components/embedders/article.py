@@ -96,7 +96,10 @@ class NRMSArticleEmbedder(Component):
             # Step 4: embed the uncached articles
             uc_embeddings = self.news_encoder(uc_title_tokens)
             assert_tensor_size(
-                uc_embeddings, len(uncached), self.news_encoder.plm_hidden_size, label="uncached article embeddings"
+                uc_embeddings,
+                len(uncached),
+                self.news_encoder.plm_config.hidden_size,
+                label="uncached article embeddings",
             )
 
             # Step 5: store embeddings to cache & result
@@ -111,7 +114,10 @@ class NRMSArticleEmbedder(Component):
         embed_single_tensors = [cached[article.article_id] for article in article_set.articles]  # type: ignore
         embed_tensor = th.stack(embed_single_tensors)  # type: ignore
         assert_tensor_size(
-            embed_tensor, len(article_set.articles), self.news_encoder.plm_hidden_size, label="final article embeddings"
+            embed_tensor,
+            len(article_set.articles),
+            self.news_encoder.plm_config.hidden_size,
+            label="final article embeddings",
         )
 
         # Step 7: put the embedding tensor on the output
