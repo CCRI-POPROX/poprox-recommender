@@ -45,7 +45,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
         embedding_source="static",
-        topic_embedding="avg",
+        topic_embedding="nrms",
     )
     e_user2 = builder.add_component(
         "user-embedder2",
