@@ -1,21 +1,29 @@
 import torch as th
+from pytest import xfail
 from safetensors.torch import load_file
 
+from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms import NewsEncoder
 from poprox_recommender.paths import model_file_path
 
 
 def test_masking():
-    # Load the news encoder weights
-    checkpoint = load_file(model_file_path("nrms-mind/news_encoder.safetensors"))
-    model_cfg = ModelConfig()
-    news_encoder = NewsEncoder(
-        model_file_path("distilbert-base-uncased/"),
-        model_cfg.num_attention_heads,
-        model_cfg.additive_attn_hidden_dim,
-    )
-    news_encoder.load_state_dict(checkpoint)
+    # Load the news encoder weights if model files are present
+    try:
+        checkpoint = load_file(model_file_path("nrms-mind/news_encoder.safetensors"))
+        model_cfg = ModelConfig()
+        news_encoder = NewsEncoder(
+            model_file_path("distilbert-base-uncased/"),
+            model_cfg.num_attention_heads,
+            model_cfg.additive_attn_hidden_dim,
+        )
+        news_encoder.load_state_dict(checkpoint)
+    except FileNotFoundError as e:
+        if allow_data_test_failures():
+            xfail("data not pulled")
+        else:
+            raise e
 
     # Set up test data
     num_words = 25
