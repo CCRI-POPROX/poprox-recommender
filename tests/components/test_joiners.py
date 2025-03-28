@@ -1,24 +1,24 @@
 from uuid import uuid4
 
-from lenskit.pipeline import Pipeline
+from lenskit.pipeline import Pipeline, PipelineBuilder
 
 from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
 from poprox_recommender.components.filters import TopicFilter
-from poprox_recommender.components.joiners import Concatenate, Fill, Interleave
+from poprox_recommender.components.joiners import Concatenate, FillCandidates, FillRecs, Interleave
 from poprox_recommender.components.samplers import UniformSampler
 
 
-def build_pipeline(total_slots):
+def init_builder(total_slots):
     topic_filter = TopicFilter()
     sampler = UniformSampler(num_slots=total_slots)
 
-    pipeline = Pipeline(name="random_concat")
-    in_cand = pipeline.create_input("candidate", CandidateSet)
-    in_prof = pipeline.create_input("profile", InterestProfile)
-    tf = pipeline.add_component("topic-filter", topic_filter, candidate=in_cand, interest_profile=in_prof)
-    pipeline.add_component("sampler", sampler, candidates1=tf, candidates2=in_cand)
+    builder = PipelineBuilder(name="random_concat")
+    in_cand = builder.create_input("candidate", CandidateSet)
+    in_prof = builder.create_input("profile", InterestProfile)
+    tf = builder.add_component("topic-filter", topic_filter, candidate=in_cand, interest_profile=in_prof)
+    builder.add_component("sampler", sampler, candidates1=tf, candidates2=in_cand)
 
-    return pipeline
+    return builder
 
 
 total_slots = 10
@@ -34,12 +34,13 @@ def test_concat_two_recs_lists():
     sampler2 = UniformSampler(num_slots=int(total_slots / 2))
     concat = Concatenate()
 
-    pipeline = build_pipeline(int(total_slots / 2))
-    s2 = pipeline.add_component(
-        "sampler2", sampler2, candidates1=pipeline.node("topic-filter"), candidates2=pipeline.node("candidate")
+    builder = init_builder(int(total_slots / 2))
+    s2 = builder.add_component(
+        "sampler2", sampler2, candidates1=builder.node("topic-filter"), candidates2=builder.node("candidate")
     )
-    pipeline.add_component("joiner", concat, recs1=pipeline.node("sampler"), recs2=s2)
-    pipeline.alias("recommender", "joiner")
+    builder.add_component("joiner", concat, recs1=builder.node("sampler"), recs2=s2)
+    builder.alias("recommender", "joiner")
+    pipeline = builder.build()
 
     outputs = pipeline.run_all(**inputs)
 
@@ -52,12 +53,13 @@ def test_interleave_two_recs_lists():
     sampler2 = UniformSampler(num_slots=int(total_slots / 2))
     joiner = Interleave()
 
-    pipeline = build_pipeline(int(total_slots / 2))
-    s2 = pipeline.add_component(
-        "sampler2", sampler2, candidates1=pipeline.node("topic-filter"), candidates2=pipeline.node("candidate")
+    builder = init_builder(int(total_slots / 2))
+    s2 = builder.add_component(
+        "sampler2", sampler2, candidates1=builder.node("topic-filter"), candidates2=builder.node("candidate")
     )
-    pipeline.add_component("joiner", joiner, recs1=pipeline.node("sampler"), recs2=s2)
-    pipeline.alias("recommender", "joiner")
+    builder.add_component("joiner", joiner, recs1=builder.node("sampler"), recs2=s2)
+    builder.alias("recommender", "joiner")
+    pipeline = builder.build()
 
     outputs = pipeline.run_all(**inputs)
 
@@ -71,21 +73,23 @@ def test_interleave_two_recs_lists():
 def test_fill_out_one_recs_list_from_another():
     sampled_slots = 7
 
-    joiner = Fill(num_slots=total_slots, deduplicate=False)
+    backup = RecommendationList(articles=inputs["candidate"].articles[: total_slots - sampled_slots])
 
-    pipeline = build_pipeline(sampled_slots)
-    pipeline.add_component("joiner", joiner, recs1=pipeline.node("sampler"), recs2=pipeline.node("candidate"))
-    pipeline.alias("recommender", "joiner")
+    joiner = FillRecs(num_slots=total_slots, deduplicate=False)
 
-    outputs = pipeline.run_all(**inputs)
+    builder = init_builder(sampled_slots)
+    builder.create_input("backup", RecommendationList)
+    builder.add_component("joiner", joiner, recs1=builder.node("sampler"), recs2=backup)
+    builder.alias("recommender", "joiner")
+    pipeline = builder.build()
+
+    outputs = pipeline.run_all(**{**inputs, **{"backup": backup}})
 
     assert len(outputs["sampler"].articles) == sampled_slots
     assert len(outputs["recommender"].articles) == total_slots
 
     assert outputs["recommender"].articles[:sampled_slots] == outputs["sampler"].articles
-    assert (
-        outputs["recommender"].articles[sampled_slots:] == inputs["candidate"].articles[: total_slots - sampled_slots]
-    )
+    assert outputs["recommender"].articles[sampled_slots:] == backup.articles
 
 
 def test_fill_removes_duplicates():
@@ -96,13 +100,14 @@ def test_fill_removes_duplicates():
         "profile": InterestProfile(click_history=[], onboarding_topics=[]),
     }
 
-    fill = Fill(num_slots=total_slots)
+    fill = FillRecs(num_slots=total_slots)
 
-    pipeline = Pipeline(name="duplicate_concat")
-    recs_input = pipeline.create_input("recs", RecommendationList)
+    builder = PipelineBuilder(name="duplicate_concat")
+    recs_input = builder.create_input("recs", RecommendationList)
 
-    pipeline.add_component("fill", fill, recs1=recs_input, recs2=recs_input)
-    pipeline.alias("recommender", "fill")
+    builder.add_component("fill", fill, recs1=recs_input, recs2=recs_input)
+    builder.alias("recommender", "fill")
+    pipeline = builder.build()
 
     outputs = pipeline.run_all(**inputs)
 

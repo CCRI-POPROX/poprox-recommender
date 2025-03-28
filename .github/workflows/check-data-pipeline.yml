@@ -1,13 +1,22 @@
 name: Check Data Pipeline
 
 on:
-  pull_request:
+  # temporarily disable the data pipeline checks, they are super expensive
+  # pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   check-status:
     name: "Check data pipeline is up-to-date"
     runs-on: ubuntu-latest
     environment: data-fetch
+    env:
+      UV_LOCKED: 1
 
     steps:
       - name: Checkout
@@ -15,16 +24,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install environment
-        uses: prefix-dev/setup-pixi@v0.8.1
+      - name: 🕶️ Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          pixi-version: latest
-          cache: false
-          environments: data
-          activate-environment: true
+          python-version-file: ".python-version"
+
+      - name: 📦 Set up dependencies
+        run: |
+          uv sync --extra=cpu --no-default-groups --group=data  --extra=cpu
+          echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
         run: |
+          dvc config --local cache.type hardlink
           dvc pull
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
@@ -32,7 +47,15 @@ jobs:
 
       - name: Check pipeline status
         run: |
-          exec /bin/bash scripts/check-dvc-status.sh
+          uv run /bin/bash scripts/check-dvc-status.sh
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { postDvcStatus } = require('./scripts/auto-comments.js')
+            await postDvcStatus({github, context});
 
   rerun-subset-recs:
     name: "Rerun MIND subset recommendations"
@@ -46,16 +69,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install environment
-        uses: prefix-dev/setup-pixi@v0.8.1
+      - name: 🕶️ Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
         with:
-          pixi-version: latest
-          cache: true
-          environments: eval
-          activate-environment: true
+          python-version-file: ".python-version"
+
+      - name: 📦 Set up dependencies
+        run: |
+          uv sync --extra=cpu --no-default-groups --group=data --extra=cpu
+          echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
         run: |
+          dvc config --local cache.type hardlink
           dvc pull
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
@@ -63,7 +92,7 @@ jobs:
 
       - name: Re-run MIND subset outputs
         run: |
-          dvc repro -f measure-mind-subset
+          uv run dvc repro -f measure-mind-subset
         env:
           # POPROX_REC_DEVICE: mps
           POPROX_CPU_COUNT: 1

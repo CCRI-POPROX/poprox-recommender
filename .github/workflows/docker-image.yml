@@ -15,6 +15,8 @@ jobs:
   test-docker:
     name: Build and test Docker image
     runs-on: ubuntu-latest
+    env:
+      UV_LOCKED: 1
 
     steps:
       - name: Checkout
@@ -22,17 +24,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install environment
-        uses: prefix-dev/setup-pixi@v0.8.1
+      - name: 🕶️ Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          pixi-version: latest
-          cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
-          environments: test
-          activate-environment: true
+          python-version: "3.12"
+
+      - name: 📦 Set up dependencies
+        run: uv sync --no-default-groups --group=test --group=data --extra=cpu
 
       - name: Show DVC config
         run: dvc config --list
+
+      - name: 🛠️ Configure data retrieval
+        run: |
+          dvc config --local cache.type hardlink
 
       - name: Cache model data
         uses: actions/cache@v4
@@ -42,7 +47,17 @@ jobs:
 
       - name: Fetch model data
         run: |
-          dvc pull -vr public -R models tests
+          dvc config --local cache.type hardlink
+          dvc pull -r public -R models tests
+
+      - name: Fetch test data
+        run: |
+          if ! dvc pull data/MINDsmall_dev.zip; then
+            echo '::warning::Private repository not available, some tests will be skipped'
+          fi
+        env:
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Build Docker image
         run: |
@@ -52,9 +67,17 @@ jobs:
         run: |
           docker run -d -p 9000:8080 --name=poprox-recommender poprox-recommender:ci
 
+      - name: Run web service tests
+        run: |
+          uv run pytest -v tests/web_service
+        env:
+          POPROX_TEST_TARGET: docker
+          POPROX_TEST_PORT: 9000
+          POPROX_CI_WITHOUT_MIND: 1
+
       - name: Run integration tests
         run: |
-          python -m pytest -v tests/integration
+          uv run --no-sync pytest -v tests/integration
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000

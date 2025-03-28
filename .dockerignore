@@ -2,6 +2,7 @@ data/
 dist/
 outputs/
 models/news-category-classifier-distilbert/
+models/**/checkpoint-*
 .pixi/
 .dvc/
 .git/

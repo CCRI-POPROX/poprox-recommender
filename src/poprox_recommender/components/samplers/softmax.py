@@ -1,13 +1,18 @@
 import numpy as np
+from lenskit.pipeline import Component
+from pydantic import BaseModel
 
 from poprox_concepts import CandidateSet
 from poprox_concepts.domain import RecommendationList
 
 
-class SoftmaxSampler:
-    def __init__(self, num_slots, temperature=20.0):
-        self.num_slots = num_slots
-        self.temperature = temperature
+class SoftmaxConfig(BaseModel):
+    num_slots: int
+    temperature: float = 20.0
+
+
+class SoftmaxSampler(Component):
+    config: SoftmaxConfig
 
     def __call__(self, candidate_articles: CandidateSet) -> RecommendationList:
         if candidate_articles.scores is None:
@@ -26,7 +31,7 @@ class SoftmaxSampler:
 
         # The weights for the sampling distribution are the softmax of the scores
         # Scores are squashed into the range [0,1] to make tuning the temperature easier
-        weights = np.exp(self.temperature * scores) / np.sum(scores)
+        weights = np.exp(self.config.temperature * scores) / np.sum(scores)
 
         # This is the core of the exponential sampling trick, which creates a
         # set of values that depend on both the predicted scores and random
@@ -39,7 +44,7 @@ class SoftmaxSampler:
 
         # This is just bookkeeping to produce the final ordered list of recs
         sorted_indices = np.argsort(exponentials)
-        sampled = [candidate_articles.articles[idx] for idx in sorted_indices[: self.num_slots]]
+        sampled = [candidate_articles.articles[idx] for idx in sorted_indices[: self.config.num_slots]]
 
         return RecommendationList(articles=sampled)
 
