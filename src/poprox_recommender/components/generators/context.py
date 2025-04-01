@@ -90,7 +90,7 @@ refine_system_prompt = (
 
 
 class ContextGenerator(Component):
-    def __init__(self, text_generation=False, time_decay=True, dev_mode="true"):
+    def __init__(self, text_generation=False, time_decay=True, dev_mode=False):
         self.text_generation = text_generation
         self.time_decay = time_decay
         self.dev_mode = dev_mode
@@ -111,7 +111,6 @@ class ContextGenerator(Component):
         if self.dev_mode:
             # selected = self.generate_newsletter(clicked, selected, interest_profile)
             selected, extras = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
-        logger.error(f"Final extras: {extras}")
         return RecommendationList(articles=selected.articles, extras=extras)
 
     async def generate_newsletter(

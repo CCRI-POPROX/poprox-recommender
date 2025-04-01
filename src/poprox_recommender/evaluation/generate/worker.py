@@ -95,12 +95,12 @@ def _generate_for_hyperparamter_request(
 
     # Calculate the clicked topic count
     request.interest_profile.click_topic_counts = user_topic_preference(
-        request.past_articles, request.interest_profile.click_history
+        request.interacted.articles, request.interest_profile.click_history
     )
 
     inputs = {
-        "candidate": CandidateSet(articles=request.todays_articles),
-        "clicked": CandidateSet(articles=request.past_articles),
+        "candidate": request.candidates,
+        "clicked": request.interacted,
         "profile": request.interest_profile,
         "theta_topic": thetas[0],
         "theta_locality": thetas[1],
