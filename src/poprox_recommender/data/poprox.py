@@ -159,6 +159,7 @@ class PoproxData(EvalData):
             article_id=article_row.article_id,
             headline=article_row.headline,
             subhead=article_row.subhead,
+            body=article_row.body,
             published_at=article_row.published_at,
             mentions=mentions,
             source="AP",
