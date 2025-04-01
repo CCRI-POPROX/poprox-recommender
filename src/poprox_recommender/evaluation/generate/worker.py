@@ -14,10 +14,11 @@ from lenskit.pipeline import Pipeline
 from lenskit.pipeline.state import PipelineState
 from lenskit.util import Stopwatch
 
-from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.api.recommendations import RecommendationRequestV2
 from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
-from poprox_recommender.data.mind import TEST_REC_COUNT
+from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.recommenders import load_all_pipelines
 from poprox_recommender.topics import user_topic_preference
@@ -35,7 +36,7 @@ _worker_log: WorkerContext | None = None
 _emb_seen: set[UUID]
 
 
-def _init_worker(outs: RecOutputs, logging: WorkerLogConfig | None = None):
+def _init_worker(outs: RecOutputs, logging: WorkerLogConfig | None = None, pipelines: list[str] | None = None):
     global _worker_out, _emb_seen, _pipelines, _worker_log
     proc = mp.current_process()
     _worker_out = outs
@@ -47,6 +48,10 @@ def _init_worker(outs: RecOutputs, logging: WorkerLogConfig | None = None):
     _worker_out.open(proc.pid)
 
     _pipelines = load_all_pipelines(device=default_device())
+    if pipelines:
+        logger.warning(f"Subsetting {_pipelines} to {pipelines}...")
+        # _pipelines = {k: v for k, v in _pipelines.items() if k in pipelines}
+        _pipelines = {name: _pipelines[name] for name in pipelines}
 
 
 def _finish_worker():
@@ -65,12 +70,12 @@ def _finish_worker():
         return None
 
 
-def _generate_for_request(request: RecommendationRequest) -> UUID | None:
+def _generate_for_request(request: RecommendationRequestV2) -> UUID | None:
     return _generate_for_hyperparamter_request((request, (None, None)))
 
 
 def _generate_for_hyperparamter_request(
-    request_with_thetas: Tuple[RecommendationRequest, Tuple[float | None, float | None]],
+    request_with_thetas: Tuple[RecommendationRequestV2, Tuple[float | None, float | None]],
 ) -> UUID | None:
     global _emb_seen
 
@@ -86,6 +91,7 @@ def _generate_for_hyperparamter_request(
         )
 
     pipe_names = list(_pipelines.keys())
+    logger.warning(f"Generating hyperparameter request for {pipe_names}...")
 
     # Calculate the clicked topic count
     request.interest_profile.click_topic_counts = user_topic_preference(
@@ -130,7 +136,7 @@ def _generate_for_hyperparamter_request(
 
 def extract_recs(
     name: str,
-    request: RecommendationRequest,
+    request: RecommendationRequestV2,
     pipeline_state: PipelineState,
 ) -> tuple[pd.DataFrame, dict[UUID, np.ndarray]]:
     # recommendations {account id (uuid): LIST[Article]}
@@ -175,9 +181,7 @@ def extract_recs(
         )
     reranked = pipeline_state.get("reranker", None)
     if reranked is not None:
-        assert isinstance(
-            reranked, RecommendationList
-        ), f"reranked has unexpected type {type(reranked)} in pipeline {name}"
+        assert isinstance(reranked, CandidateSet), f"reranked has unexpected type {type(reranked)} in pipeline {name}"
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -208,14 +212,15 @@ def extract_recs(
 
 
 def generate_profile_recs(
-    dataset: str,
+    dataset: PoproxData | MindData,
     outs: RecOutputs,
     n_profiles: int | None = None,
     n_jobs: int = 1,
     topic_thetas: tuple[float, float] | None = None,
     locality_thetas: tuple[float, float] | None = None,
+    pipelines: list[str] | None = None,
 ):
-    logger.info("generating recommendations")
+    logger.info(f"generating recommendations for pipelines {pipelines}")
 
     if topic_thetas and locality_thetas:
         profile_iter = dataset.iter_hyperparameters(
@@ -241,7 +246,7 @@ def generate_profile_recs(
             with ipp.Cluster(n=n_jobs) as client:
                 dv = client.direct_view()
                 logger.debug("initializing workers")
-                dv.apply_sync(_init_worker, outs, WorkerLogConfig.current())
+                dv.apply_sync(_init_worker, outs, WorkerLogConfig.current(), pipelines)
 
                 logger.debug("dispatching jobs")
                 lbv = client.load_balanced_view()
@@ -268,9 +273,9 @@ def generate_profile_recs(
                 rusage = dv.apply_sync(_finish_worker)
 
         else:
-            logger.info("starting serial evaluation")
+            logger.info(f"starting serial evaluation for pipelines: {pipelines}")
             # directly call things in-process
-            _init_worker(outs)
+            _init_worker(outs, pipelines=pipelines)
 
             for request in profile_iter:
                 if topic_thetas and locality_thetas:

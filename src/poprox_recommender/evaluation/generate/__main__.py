@@ -111,7 +111,9 @@ def generate_main():
             pipelines = [pipelines]
         logger.info("generating pipelines: %s", pipelines)
 
-    worker_usage = generate_profile_recs(dataset, outputs, n_profiles, n_jobs, topic_thetas, locality_thetas)
+    worker_usage = generate_profile_recs(
+        dataset, outputs, n_profiles, n_jobs, topic_thetas, locality_thetas, pipelines=pipelines
+    )
 
     logger.info("de-duplicating embeddings")
     emb_df = pd.read_parquet(outputs.emb_temp_dir)
