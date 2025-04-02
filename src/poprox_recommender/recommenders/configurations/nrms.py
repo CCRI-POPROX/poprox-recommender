@@ -4,7 +4,6 @@ from lenskit.pipeline import PipelineBuilder
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
-from poprox_recommender.components.embedders.caption_embedder import CaptionEmbedder, CaptionEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedderConfig
 from poprox_recommender.components.filters.image_selector import ImageSelector
 from poprox_recommender.components.filters.topic import TopicFilter
@@ -45,18 +44,6 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     n_scorer = builder.add_component("scorer", ArticleScorer, candidate_articles=e_candidates, interest_profile=e_user)
     n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
 
-    # Image selection
-    caption_embedder = CaptionEmbedder(
-        CaptionEmbedderConfig(model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device)
-    )
-    image_selector = ImageSelector(caption_embedder)
-    o_with_images = builder.add_component(
-        "image-selector",
-        image_selector,
-        recommendations=n_ranker,
-        interest_profile=e_user,
-    )
-
     # Fallback: sample from user topic interests
     n_topic_filter = builder.add_component(
         "topic-filter", TopicFilter, candidate=i_candidates, interest_profile=i_profile
@@ -64,4 +51,13 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
 
     # Combine primary ranker and fallback
-    builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=o_with_images, recs2=n_sampler)
+    n_fill = builder.add_component("fill", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
+
+    # Image selection
+    image_selector = ImageSelector(model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device)
+    builder.add_component(
+        "recommender",
+        image_selector,
+        recommendations=n_fill,
+        interest_profile=e_user,
+    )
