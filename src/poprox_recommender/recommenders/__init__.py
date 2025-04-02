@@ -1,9 +1,10 @@
+# recommenders/__init__.py
 import logging
 from typing import Any
 
 from lenskit.pipeline import PipelineState
 
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import CandidateSet, InterestProfile
 
 from .load import (
     PipelineLoadError,
@@ -33,23 +34,30 @@ def select_articles(
     pipeline_params: dict[str, Any] | None = None,
 ) -> PipelineState:
     """
-    Select articles with default recommender configuration.  It returns a
-    pipeline state whose ``default`` is the final list of recommendations.
+    Select articles with default recommender configuration. It returns a
+    pipeline state whose "image-selector" key contains the final list of recommendations
+    with selected images.
     """
     name = None
     if pipeline_params and "pipeline" in pipeline_params:
         name = pipeline_params["pipeline"]
-
     if name is None:
         name = default_pipeline()
 
     pipeline = get_pipeline(name)
 
     recs = pipeline.node("recommender")
+    image_selector = pipeline.node("image-selector")
     topk = pipeline.node("ranker", missing="none")
-    if topk is None:
-        wanted = (recs,)
-    else:
-        wanted = (topk, recs)
 
-    return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
+    if topk is None:
+        wanted = (image_selector, recs)
+    else:
+        wanted = (image_selector, topk, recs)
+
+    pipeline_state = pipeline.run_all(
+        *wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile
+    )
+    logger.info(f"Pipeline state: {pipeline_state}")
+
+    return pipeline_state
