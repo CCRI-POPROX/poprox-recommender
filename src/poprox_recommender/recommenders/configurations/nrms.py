@@ -1,11 +1,11 @@
-# configurations/nrms.py
+# pyright: basic
+
 from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedderConfig
-from poprox_recommender.components.filters.image_selector import ImageSelector
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.fill import FillRecs
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -51,13 +51,4 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
 
     # Combine primary ranker and fallback
-    n_fill = builder.add_component("fill", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
-
-    # Image selection
-    image_selector = ImageSelector(model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device)
-    builder.add_component(
-        "recommender",
-        image_selector,
-        recommendations=n_fill,
-        interest_profile=e_user,
-    )
+    builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
