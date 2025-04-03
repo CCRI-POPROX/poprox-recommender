@@ -68,7 +68,8 @@ class LocalityCalibrator(Calibrator):
         )
 
         selected = CandidateSet(
-            articles=[candidate_articles.articles[idx] for idx in article_indices]
+            articles=[candidate_articles.articles[idx] for idx in article_indices],
+            embeddings=[candidate_articles.embeddings[idx] for idx in article_indices],
         )  # all selected articles
 
         selected.treatment_flags = [index not in topic_only_article_indices for index in article_indices]
