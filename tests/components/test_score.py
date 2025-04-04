@@ -1,17 +1,5 @@
-from uuid import uuid4
-
-from lenskit.pipeline import PipelineBuilder
-
-from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
+from poprox_concepts.domain import Article, CandidateSet
 from poprox_recommender.components.joiners.score import ScoreConfig, ScoreFusion
-
-# def test_trail():
-#     article=[]
-#     n_scorer=CandidateSet(articles=article)
-#     n_scorer2=CandidateSet(articles=article)
-#     fusion=ScoreFusion()
-#     output=fusion(candidates1=n_scorer, candidates2=n_scorer2)
-#     assert output is not None
 
 
 def test_generic():
@@ -27,11 +15,6 @@ def test_generic():
 
     assert len(output.articles) == 1
     assert output.scores == [0.2]
-
-    ##TODO
-    # no article-> same list
-    # some articles match and some don't
-    # none match
 
 
 def test_epmty_articleset():
