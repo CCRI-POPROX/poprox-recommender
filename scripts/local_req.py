@@ -19,9 +19,9 @@ if __name__ == "__main__":
         "queryStringParameters": {"pipeline": "nrms"},
         "isBase64Encoded": False,
     }
-    event_static = {
+    event_score = {
         "body": raw_json,
-        "queryStringParameters": {"pipeline": "nrms-topics-static"},
+        "queryStringParameters": {"pipeline": "nrms-topic-scores"},
         "isBase64Encoded": False,
     }
     event_rrf_static_user = {
@@ -33,8 +33,8 @@ if __name__ == "__main__":
     response_nrms = root(req.model_dump(), pipeline="nrms")
     response_nrms = RecommendationResponseV2.model_validate(response_nrms)
 
-    response_static = root(req.model_dump(), pipeline="nrms-topics-static")
-    response_static = RecommendationResponseV2.model_validate(response_static)
+    response_score = root(req.model_dump(), pipeline="nrms-topic-scores")
+    response_score = RecommendationResponseV2.model_validate(response_score)
 
     response_rrf_static_user = root(req.model_dump(), pipeline="nrms_rrf_static_user")
     response_rrf_static_user = RecommendationResponseV2.model_validate(response_rrf_static_user)
@@ -47,9 +47,9 @@ if __name__ == "__main__":
         print(f"{idx + 1}. {article.headline} {article_topics}")
 
     print("\n")
-    print(f"{event_static['queryStringParameters']['pipeline']}")
+    print(f"{event_score['queryStringParameters']['pipeline']}")
 
-    for idx, article in enumerate(response_static.recommendations.articles):
+    for idx, article in enumerate(response_score.recommendations.articles):
         article_topics = extract_general_topics(article)
         print(f"{idx + 1}. {article.headline} {article_topics}")
 
