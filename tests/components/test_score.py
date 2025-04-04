@@ -1,5 +1,5 @@
 from poprox_concepts.domain import Article, CandidateSet
-from poprox_recommender.components.joiners.score import ScoreConfig, ScoreFusion
+from poprox_recommender.components.joiners.score import ScoreFusion, ScoreFusionConfig
 
 
 def test_generic():
@@ -119,7 +119,7 @@ def test_overlapped_articleset_avg():
     n_scorer = CandidateSet(articles=article_list_1, scores=score_list_1)
     n_scorer2 = CandidateSet(articles=article_list_2, scores=score_list_2)
 
-    config = ScoreConfig(combiner="avg")
+    config = ScoreFusionConfig(combiner="avg")
     fusion = ScoreFusion(config)
 
     output_1 = fusion(candidates1=n_scorer, candidates2=n_scorer2)
