@@ -64,7 +64,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         reranked = convert_df_to_article_set(reranked_rec_df)
 
         # Locality tuning metrcis
-        if name == "locality-cali":
+        if name == "locality_cali":
             # newsletter metrics
             k1_topic = reranked_rec_df["k1_topic"].iloc[0]
             k1_loc = reranked_rec_df["k1_locality"].iloc[0]

@@ -118,16 +118,16 @@ def generate_user_recs(data: EvalData, pipe_names: list[str] | None = None, n_us
     logger.info("generating recommendations")
     user_recs = []
 
-    user_iter = data.iter_profiles()
+    user_iter = list(data.iter_profiles())
     if n_users is None:
-        n_users = data.n_profiles
+        n_users = data.n_users
         logger.info("recommending for all %d users", n_users)
     else:
         logger.info("running on subset of %d users", n_users)
         user_iter = it.islice(user_iter, n_users)
 
     timer = Stopwatch()
-    with make_progress(logger, "recommend", total=n_users) as pb:
+    with make_progress(logger, "recommend", total=data.n_profiles * 4) as pb:
         for request in user_iter:  # one by one
             logger.debug("recommending for user %s", request.interest_profile.profile_id)
             if request.num_recs != TEST_REC_COUNT:
@@ -137,8 +137,8 @@ def generate_user_recs(data: EvalData, pipe_names: list[str] | None = None, n_us
                     request.num_recs,
                 )
             inputs = {
-                "candidate": ArticleSet(articles=request.todays_articles),
-                "clicked": ArticleSet(articles=request.past_articles),
+                "candidate": ArticleSet(articles=request.candidates),
+                "clicked": ArticleSet(articles=request.interacted),
                 "profile": request.interest_profile,
             }
             for name, pipe in pipelines.items():
@@ -180,13 +180,6 @@ if __name__ == "__main__":
         eval_data = MindData(options["--mind-data"])
 
     user_recs = generate_user_recs(eval_data, pipelines, n_users)
-
-    # mind_data = options["--mind-data"]
-    # data_path = options["--data_path"]
-    # if mind_data is not None:
-    #     user_recs = generate_user_recs(MindData(mind_data), pipelines, n_users)
-    # elif data_path is not None:
-    #     user_recs = generate_user_recs(PoproxData(data_path), pipelines, n_users)
 
     all_recs = pd.concat(user_recs, ignore_index=True)
     out_fn = options["--output"]

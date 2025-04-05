@@ -154,10 +154,10 @@ def extract_recs(
                 "stage": "final",
                 "item_id": [str(a.article_id) for a in recs.articles],
                 "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
-                "treatment": False,
-                "k1_topic": -1,
-                "k1_locality": -1,
-                "is_inside_locality_threshold": None,
+                "treatment": 0.0,
+                "k1_topic": -1.0,
+                "k1_locality": -1.0,
+                "is_inside_locality_threshold": False,
             }
         )
     ]
@@ -172,10 +172,10 @@ def extract_recs(
                     "stage": "ranked",
                     "item_id": [str(a.article_id) for a in ranked.articles],
                     "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
-                    "treatment": False,
-                    "k1_topic": -1,
-                    "k1_locality": -1,
-                    "is_inside_locality_threshold": None,
+                    "treatment": 0.0,
+                    "k1_topic": -1.0,
+                    "k1_locality": -1.0,
+                    "is_inside_locality_threshold": False,
                 }
             )
         )
@@ -197,6 +197,9 @@ def extract_recs(
                 }
             )
         )
+    generator = pipeline_state.get("generator", None)
+    if generator is not None:
+        assert isinstance(generator, RecommendationList)
     output_df = pd.concat(rec_lists, ignore_index=True)
 
     # get the embeddings
