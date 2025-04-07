@@ -43,12 +43,21 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .dvc/cache
-          key: docker-dvc-cache-${{ hashFiles('models/**.dvc', 'tests/**.dvc') }}
+          key: docker-dvc-cache-${{ hashFiles('models/**.dvc', 'models/dvc.lock', 'tests/**.dvc') }}
 
       - name: Fetch model data
         run: |
           dvc config --local cache.type hardlink
-          dvc pull -r public -R models tests
+          if ! dvc pull -r public -R models tests; then
+            if [[ -n "$AWS_ACCESS_KEY_ID" ]]; then
+              dvc pull -R models tests
+            else
+              echo '::error::Public data not available and private access not configured'
+            fi
+          fi
+        env:
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Fetch test data
         run: |
