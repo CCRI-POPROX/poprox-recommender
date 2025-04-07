@@ -20,8 +20,8 @@ stages:
       nfiles: 1
     - path: ../data/MINDlarge_post_train
       hash: md5
-      md5: 6b312ce0fa94e51252cc4b659b351d10.dir
-      size: 1163364294
+      md5: c281af3201131e648d0eaa8e65779289.dir
+      size: 1163366885
       nfiles: 3
     - path: ../src/poprox_recommender/training/train.py
       hash: md5
@@ -30,6 +30,6 @@ stages:
     outs:
     - path: nrms-mind
       hash: md5
-      md5: 99c1d4b8c051bd207ca0929a87c26754.dir
-      size: 1571629281
+      md5: 576f34878bda93989cc044866c0aa08b.dir
+      size: 1569109847
       nfiles: 21
