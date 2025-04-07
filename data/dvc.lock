@@ -100,6 +100,6 @@ stages:
       nfiles: 1
     - path: MINDlarge_post_train
       hash: md5
-      md5: 6b312ce0fa94e51252cc4b659b351d10.dir
-      size: 1163364294
+      md5: c281af3201131e648d0eaa8e65779289.dir
+      size: 1163366885
       nfiles: 3
