@@ -52,7 +52,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         topic_pref_values=[2, 3, 4, 5],
     )
     e_user_positive = builder.add_component(
-        "user-embedder2",
+        "pos-topic-embedder",
         UserOnboardingEmbedder,
         ue_config2,
         candidate_articles=e_candidates,
@@ -69,7 +69,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         topic_pref_values=[1],
     )
     e_user_negative = builder.add_component(
-        "user-embedder3",
+        "neg-topic-embedder",
         UserOnboardingEmbedder,
         ue_config3,
         candidate_articles=e_candidates,
