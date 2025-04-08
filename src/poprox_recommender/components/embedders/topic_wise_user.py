@@ -239,7 +239,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
             combined_click_history = interest_profile.click_history
             embedding_lookup = {**click_lookup}
         else:
-            # print("Articlescorer")
             combined_click_history = topic_clicks
             embedding_lookup = {**topic_lookup}
 
@@ -254,7 +253,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
 
         interest_profile.click_history = combined_click_history
         interest_profile.embedding = th.nan_to_num(self.build_user_embedding(combined_click_history, embedding_lookup))
-        print(f"embedding:{interest_profile.embedding}")
+
         return interest_profile
 
     def build_article_lookup(self, article_set: CandidateSet):
