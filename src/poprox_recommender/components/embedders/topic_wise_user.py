@@ -129,7 +129,7 @@ def virtual_pn_clicks(onboarding_topics, topic_articles, topic_values):
         preference = interest.preference or -1
 
         if preference in topic_values:
-            abs_pref = abs(preference - 2) + 1
+            abs_pref = abs(preference - 3) + 1
             if topic_name in topic_uuids_by_name:
                 article_id = topic_uuids_by_name[topic_name]
                 virtual_clicks.extend([Click(article_id=article_id)] * abs_pref)
