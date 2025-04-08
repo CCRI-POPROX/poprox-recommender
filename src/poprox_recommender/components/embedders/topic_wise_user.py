@@ -253,7 +253,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
         interest_profile.click_history = combined_click_history
-        interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
+        interest_profile.embedding = th.nan_to_num(self.build_user_embedding(combined_click_history, embedding_lookup))
         print(f"embedding:{interest_profile.embedding}")
         return interest_profile
 

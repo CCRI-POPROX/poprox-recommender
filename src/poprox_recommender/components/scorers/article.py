@@ -13,7 +13,7 @@ class ArticleScorer(Component):
     @torch_inference
     def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> CandidateSet:
         candidate_embeddings = candidate_articles.embeddings
-        user_embedding = interest_profile.embedding
+        user_embedding = torch.nan_to_num(interest_profile.embedding)
 
         scored_articles = copy(candidate_articles)
         if user_embedding is not None:
