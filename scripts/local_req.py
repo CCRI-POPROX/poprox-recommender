@@ -39,12 +39,12 @@ if __name__ == "__main__":
     response_rrf_static_user = root(req.model_dump(), pipeline="nrms_rrf_static_user")
     response_rrf_static_user = RecommendationResponseV2.model_validate(response_rrf_static_user)
 
-    print("\n")
-    print(f"{event_nrms['queryStringParameters']['pipeline']}")
+    # print("\n")
+    # print(f"{event_nrms['queryStringParameters']['pipeline']}")
 
-    for idx, article in enumerate(response_nrms.recommendations.articles):
-        article_topics = extract_general_topics(article)
-        print(f"{idx + 1}. {article.headline} {article_topics}")
+    # for idx, article in enumerate(response_nrms.recommendations.articles):
+    #     article_topics = extract_general_topics(article)
+    #     print(f"{idx + 1}. {article.headline} {article_topics}")
 
     print("\n")
     print(f"{event_score['queryStringParameters']['pipeline']}")
@@ -53,9 +53,9 @@ if __name__ == "__main__":
         article_topics = extract_general_topics(article)
         print(f"{idx + 1}. {article.headline} {article_topics}")
 
-    print("\n")
-    print(f"{event_rrf_static_user['queryStringParameters']['pipeline']}")
+    # print("\n")
+    # print(f"{event_rrf_static_user['queryStringParameters']['pipeline']}")
 
-    for idx, article in enumerate(response_rrf_static_user.recommendations.articles):
-        article_topics = extract_general_topics(article)
-        print(f"{idx + 1}. {article.headline} {article_topics}")
+    # for idx, article in enumerate(response_rrf_static_user.recommendations.articles):
+    #     article_topics = extract_general_topics(article)
+    #     print(f"{idx + 1}. {article.headline} {article_topics}")
