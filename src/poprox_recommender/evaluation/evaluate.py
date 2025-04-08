@@ -106,13 +106,11 @@ def main():
     logger.info("loaded recommendations for %d profiles", n_profiles)
 
     logger.info("measuring recommendations")
-
-    n_procs = available_cpu_parallelism(4)
     records = []
     with (
         item_progress("evaluate", total=n_profiles) as pb,
     ):
-        for profile_rows in profile_eval_results(eval_data, recs_df, n_procs):
+        for profile_rows in profile_eval_results(eval_data, recs_df, n_jobs):
             records += profile_rows
             pb.update()
 
