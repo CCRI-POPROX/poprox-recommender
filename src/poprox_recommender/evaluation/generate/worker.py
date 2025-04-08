@@ -155,7 +155,8 @@ def extract_recs(
                 "item_id": [str(a.article_id) for a in recs.articles],
                 "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
                 "treatment": 0.0,
-                "prompt_level_ratio": 0,  # event-level / treatment number (1 = best, 0 = worst aka all topic-level)
+                "total_prompts": 0.0,
+                "prompt_level_ratio": 0.0,
                 "k1_topic": -1.0,
                 "k1_locality": -1.0,
                 "is_inside_locality_threshold": False,
@@ -174,7 +175,8 @@ def extract_recs(
                     "item_id": [str(a.article_id) for a in ranked.articles],
                     "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
                     "treatment": 0.0,
-                    "prompt_level_ratio": 0,  # event-level / treatment number (1 = best, 0 = worst aka all topic-level)
+                    "total_prompts": 0.0,
+                    "prompt_level_ratio": 0.0,
                     "k1_topic": -1.0,
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
@@ -193,7 +195,8 @@ def extract_recs(
                     "item_id": [str(a.article_id) for a in reranked.articles],
                     "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
                     "treatment": reranked.treatment_flags,  # type: ignore
-                    "prompt_level_ratio": 0,  # event-level / treatment number (1 = best, 0 = worst aka all topic-level)
+                    "total_prompts": 0.0,
+                    "prompt_level_ratio": 0.0,
                     "k1_topic": reranked.k1_topic,
                     "k1_locality": reranked.k1_locality,
                     "is_inside_locality_threshold": reranked.is_inside_locality_threshold,
@@ -207,10 +210,11 @@ def extract_recs(
         num_event_level_prompts = 0.0
         num_topic_level_prompts = 0.0
         for news_extra in generator.extras:
-            if news_extra["prompt_level"] == "event":
+            if news_extra.get("prompt_level") == "event":
                 num_event_level_prompts += 1
-            elif news_extra["prompt_level"] == "topic":
+            elif news_extra.get("prompt_level") == "topic":
                 num_topic_level_prompts += 1
+        total_prompts = num_event_level_prompts + num_topic_level_prompts
         rec_lists.append(
             pd.DataFrame(
                 {
@@ -220,10 +224,11 @@ def extract_recs(
                     "item_id": [str(a.article_id) for a in generator.articles],
                     "rank": np.arange(len(generator.articles), dtype=np.int16) + 1,
                     "treatment": 0.0,
-                    "prompt_level_ratio": num_event_level_prompts
-                    / (
-                        num_event_level_prompts + num_topic_level_prompts
-                    ),  # event-level / treatment number ( 1 = best, 0 = worst aka all topic-level)
+                    "total_prompts": total_prompts,
+                    "prompt_level_ratio": 0.0
+                    if total_prompts == 0
+                    else num_event_level_prompts
+                    / total_prompts,  # event-level / treatment number ( 1 = best, 0 = worst aka all topic-level)
                     "k1_topic": -1.0,
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
