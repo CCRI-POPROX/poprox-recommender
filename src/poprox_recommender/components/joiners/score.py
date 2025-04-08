@@ -6,12 +6,12 @@ from pydantic import BaseModel
 from poprox_concepts.domain import CandidateSet
 
 
-class ScoreConfig(BaseModel):
+class ScoreFusionConfig(BaseModel):
     combiner: str = "sum"
 
 
 class ScoreFusion(Component):
-    config: ScoreConfig
+    config: ScoreFusionConfig
 
     def __call__(self, candidates1: CandidateSet, candidates2: CandidateSet) -> CandidateSet:
         combined_score = defaultdict(float)

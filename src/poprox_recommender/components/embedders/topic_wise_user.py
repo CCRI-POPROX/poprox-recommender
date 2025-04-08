@@ -101,6 +101,9 @@ TOPIC_ARTICLES = [
 ]
 
 
+##TODO:
+
+
 def virtual_clicks(onboarding_topics, topic_articles):
     topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
     virtual_clicks = []
