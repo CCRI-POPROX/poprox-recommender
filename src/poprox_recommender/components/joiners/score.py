@@ -25,7 +25,6 @@ class ScoreFusion(Component):
         for article, score in zip(candidates2.articles, candidates2.scores):
             article_id = article.article_id
             if self.config.combiner == "sub":
-                # print("Me TOO")
                 combined_score[article_id] -= score
             else:
                 combined_score[article_id] += score
@@ -42,10 +41,5 @@ class ScoreFusion(Component):
         for key, score in combined_score.items():
             merged_articles.append(combined_article[key])
             merged_scores.append(score / denominator)
-
-        print(self.config.combiner)
-        print(candidates1.scores)
-        print(candidates2.scores)
-        print(merged_scores)
 
         return CandidateSet(articles=merged_articles, scores=merged_scores)
