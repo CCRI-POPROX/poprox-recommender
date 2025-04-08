@@ -25,7 +25,7 @@ from poprox_recommender.topics import user_topic_preference
 
 logger = logging.getLogger(__name__)
 
-STAGES = ["final", "ranked", "reranked"]
+STAGES = ["final", "ranked", "reranked", "generator"]
 
 THETA_RANDOM_SAMPLES = 60
 
