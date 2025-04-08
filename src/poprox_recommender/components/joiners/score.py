@@ -1,9 +1,12 @@
+import logging
 from collections import defaultdict
 
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
 from poprox_concepts.domain import CandidateSet
+
+logger = logging.getLogger(__name__)
 
 
 class ScoreFusionConfig(BaseModel):
@@ -39,4 +42,5 @@ class ScoreFusion(Component):
             merged_articles.append(combined_article[key])
             merged_scores.append(score / denominator)
 
+        logger.info(f"Fused {denominator} candidate sets...")
         return CandidateSet(articles=merged_articles, scores=merged_scores)

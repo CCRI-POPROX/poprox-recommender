@@ -63,19 +63,23 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         reranked_rec_df = recs[recs["stage"] == "reranked"]
         reranked = convert_df_to_article_set(reranked_rec_df)
 
+        generator_rec_df = recs[recs["stage"] == "generator"]
+        generator = convert_df_to_article_set(generator_rec_df)
+
         # Locality tuning metrcis
         if name == "locality_cali":
             # newsletter metrics
             k1_topic = reranked_rec_df["k1_topic"].iloc[0]
             k1_loc = reranked_rec_df["k1_locality"].iloc[0]
             is_inside_locality_threshold = reranked_rec_df["is_inside_locality_threshold"].iloc[0]
-
+            event_level_prompt_ratio = generator["prompt_level_ratio"].iloc[0]
             # individual rec metrics
             num_treatment = reranked_rec_df["treatment"].sum()
         else:
             k1_topic = None
             k1_loc = None
             is_inside_locality_threshold = None
+            event_level_prompt_ratio = None
             num_treatment = None
 
         if ranked and reranked:
@@ -113,6 +117,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "RBO@10": single_rbo10,
                 "KL_TOPIC": k1_topic,
                 "KL_LOC": k1_loc,
+                "event_level_prompt_ratio": event_level_prompt_ratio,
                 "inside_loc_threshold": is_inside_locality_threshold,
                 "num_treatment": num_treatment,
             }

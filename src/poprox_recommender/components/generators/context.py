@@ -210,14 +210,14 @@ refine_system_prompt = (
 
 
 class ContextGenerator(Component):
-    def __init__(self, text_generation=False, time_decay=True, dev_mode=True):
+    def __init__(self, text_generation=False, time_decay=True, dev_mode=False):
         self.text_generation = text_generation
         self.time_decay = time_decay
         self.dev_mode = dev_mode
         self.previous_context_articles = []
         if self.dev_mode:
             logger.info("Dev_mode is true, using live OpenAI client...")
-            self.client = AsyncOpenAI(api_key="<<<<Your Prompt HERE>>>>")
+            self.client = AsyncOpenAI(api_key="<<YOUR KEY!>>")
             logger.info("Successfully instantiated OpenAI client...")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 

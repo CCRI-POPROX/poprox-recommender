@@ -11,8 +11,8 @@ def find_balanced_pairs(csv_path, output_path=None):
         "NDCG@10": 1,  # Higher is better
         "KL_TOPIC": -1,  # Lower is better
         "KL_LOC": -1,  # Lower is better
-        "inside_loc_threshold": 1,  # Higher is better
-        "num_treatment": 1,  # Higher is better
+        # "inside_loc_threshold": 1,  # Higher is better
+        # "num_treatment": 1,  # Higher is better
     }
 
     # Normalize all metrics to [0,1] range
@@ -27,11 +27,11 @@ def find_balanced_pairs(csv_path, output_path=None):
 
     # Create a combined score (can adjust weights here)
     weights = {
-        "NDCG@10_norm": 0.3,
-        "KL_TOPIC_norm": 0.2,
-        "KL_LOC_norm": 0.2,
-        "inside_loc_threshold_norm": 0.15,
-        "num_treatment_norm": 0.15,
+        "NDCG@10_norm": 0.4,
+        "KL_TOPIC_norm": 0.3,
+        "KL_LOC_norm": 0.3,
+        # "inside_loc_threshold_norm": 0.15,
+        # "num_treatment_norm": 0.15,
     }
 
     df["combined_score"] = sum(df[col] * weight for col, weight in weights.items())
