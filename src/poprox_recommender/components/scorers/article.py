@@ -1,3 +1,5 @@
+from copy import copy
+
 import torch
 from lenskit.pipeline import Component
 
@@ -13,10 +15,11 @@ class ArticleScorer(Component):
         candidate_embeddings = candidate_articles.embeddings
         user_embedding = interest_profile.embedding
 
+        scored_articles = copy(candidate_articles)
         if user_embedding is not None:
             pred = torch.matmul(candidate_embeddings, user_embedding.t()).squeeze()
-            candidate_articles.scores = pred.cpu().detach().numpy()
+            scored_articles.scores = pred.cpu().detach().numpy()
         else:
-            candidate_articles.scores = None
+            scored_articles.scores = None
 
-        return candidate_articles
+        return scored_articles
