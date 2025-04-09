@@ -38,6 +38,13 @@ _emb_seen: set[UUID]
 
 def _init_worker(outs: RecOutputs, logging: WorkerLogConfig | None = None, pipelines: list[str] | None = None):
     global _worker_out, _emb_seen, _pipelines, _worker_log
+    try:
+        import asyncio
+
+        asyncio.get_event_loop().close()
+    except Exception:
+        pass
+
     proc = mp.current_process()
     _worker_out = outs
     _emb_seen = set()
@@ -249,6 +256,22 @@ def extract_recs(
     return output_df, embeddings
 
 
+def create_cluster(n_jobs):
+    """Create cluster with proper cleanup handling"""
+    # Cleanup any existing clusters first
+    try:
+        ipp.Client().close()
+    except Exception:
+        pass
+
+    cluster = ipp.Cluster(
+        n=n_jobs,
+        reuse_engines=False,  # Fresh engines each time
+    )
+    cluster.start_cluster_sync()
+    return cluster
+
+
 def generate_profile_recs(
     dataset: PoproxData | MindData,
     outs: RecOutputs,
@@ -281,34 +304,38 @@ def generate_profile_recs(
     with item_progress("recommend", total=n_profiles) as pb:
         if n_jobs > 1:
             logger.info("starting evaluation with %d workers", n_jobs)
-            with ipp.Cluster(n=n_jobs) as client:
-                dv = client.direct_view()
-                logger.debug("initializing workers")
-                dv.apply_sync(_init_worker, outs, WorkerLogConfig.current(), pipelines)
+            try:
+                with create_cluster(n_jobs) as client:
+                    dv = client.direct_view()
+                    logger.debug("initializing workers")
+                    dv.apply_sync(_init_worker, outs, WorkerLogConfig.current(), pipelines)
 
-                logger.debug("dispatching jobs")
-                lbv = client.load_balanced_view()
-                if topic_thetas and locality_thetas:
-                    request_iter = lbv.imap(
-                        _generate_for_hyperparamter_request,
-                        profile_iter,
-                        max_outstanding=n_jobs * 5,
-                        ordered=False,
-                    )
-                else:
-                    request_iter = lbv.imap(
-                        _generate_for_request,
-                        profile_iter,
-                        max_outstanding=n_jobs * 5,
-                        ordered=False,
-                    )
+                    logger.debug("dispatching jobs")
+                    lbv = client.load_balanced_view()
+                    if topic_thetas and locality_thetas:
+                        request_iter = lbv.imap(
+                            _generate_for_hyperparamter_request,
+                            profile_iter,
+                            max_outstanding=n_jobs * 5,
+                            ordered=False,
+                        )
+                    else:
+                        request_iter = lbv.imap(
+                            _generate_for_request,
+                            profile_iter,
+                            max_outstanding=n_jobs * 5,
+                            ordered=False,
+                        )
 
-                for uid in request_iter:
-                    logger.debug("finished measuring %s", uid)
-                    pb.update()
+                    for uid in request_iter:
+                        logger.debug("finished measuring %s", uid)
+                        pb.update()
 
-                logger.info("generation finished, closing outputs")
-                rusage = dv.apply_sync(_finish_worker)
+                    logger.info("generation finished, closing outputs")
+                    rusage = dv.apply_sync(_finish_worker)
+            finally:
+                # Ensure cleanup
+                ipp.Client().purge_everything()
 
         else:
             logger.info(f"starting serial evaluation for pipelines: {pipelines}")
