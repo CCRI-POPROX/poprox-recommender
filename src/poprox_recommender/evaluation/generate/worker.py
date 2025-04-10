@@ -25,7 +25,7 @@ from poprox_recommender.topics import user_topic_preference
 
 logger = logging.getLogger(__name__)
 
-STAGES = ["final", "ranked", "reranked"]
+STAGES = ["final", "ranked", "reranked", "generator"]
 
 THETA_RANDOM_SAMPLES = 60
 
@@ -38,6 +38,13 @@ _emb_seen: set[UUID]
 
 def _init_worker(outs: RecOutputs, logging: WorkerLogConfig | None = None, pipelines: list[str] | None = None):
     global _worker_out, _emb_seen, _pipelines, _worker_log
+    try:
+        import asyncio
+
+        asyncio.get_event_loop().close()
+    except Exception:
+        pass
+
     proc = mp.current_process()
     _worker_out = outs
     _emb_seen = set()
@@ -155,6 +162,8 @@ def extract_recs(
                 "item_id": [str(a.article_id) for a in recs.articles],
                 "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
                 "treatment": 0.0,
+                "total_prompts": 0.0,
+                "prompt_level_ratio": 0.0,
                 "k1_topic": -1.0,
                 "k1_locality": -1.0,
                 "is_inside_locality_threshold": False,
@@ -173,6 +182,8 @@ def extract_recs(
                     "item_id": [str(a.article_id) for a in ranked.articles],
                     "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
                     "treatment": 0.0,
+                    "total_prompts": 0.0,
+                    "prompt_level_ratio": 0.0,
                     "k1_topic": -1.0,
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
@@ -191,6 +202,8 @@ def extract_recs(
                     "item_id": [str(a.article_id) for a in reranked.articles],
                     "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
                     "treatment": reranked.treatment_flags,  # type: ignore
+                    "total_prompts": 0.0,
+                    "prompt_level_ratio": 0.0,
                     "k1_topic": reranked.k1_topic,
                     "k1_locality": reranked.k1_locality,
                     "is_inside_locality_threshold": reranked.is_inside_locality_threshold,
@@ -200,6 +213,35 @@ def extract_recs(
     generator = pipeline_state.get("generator", None)
     if generator is not None:
         assert isinstance(generator, RecommendationList)
+
+        num_event_level_prompts = 0.0
+        num_topic_level_prompts = 0.0
+        for news_extra in generator.extras:
+            if news_extra.get("prompt_level") == "event":
+                num_event_level_prompts += 1
+            elif news_extra.get("prompt_level") == "topic":
+                num_topic_level_prompts += 1
+        total_prompts = num_event_level_prompts + num_topic_level_prompts
+        rec_lists.append(
+            pd.DataFrame(
+                {
+                    "recommender": name,
+                    "profile_id": str(profile),
+                    "stage": "generator",
+                    "item_id": [str(a.article_id) for a in generator.articles],
+                    "rank": np.arange(len(generator.articles), dtype=np.int16) + 1,
+                    "treatment": 0.0,
+                    "total_prompts": total_prompts,
+                    "prompt_level_ratio": 0.0
+                    if total_prompts == 0
+                    else num_event_level_prompts
+                    / total_prompts,  # event-level / treatment number ( 1 = best, 0 = worst aka all topic-level)
+                    "k1_topic": -1.0,
+                    "k1_locality": -1.0,
+                    "is_inside_locality_threshold": False,
+                }
+            )
+        )
     output_df = pd.concat(rec_lists, ignore_index=True)
 
     # get the embeddings
@@ -212,6 +254,22 @@ def extract_recs(
         for idx, article in enumerate(embedded.articles):
             embeddings[article.article_id] = embedded.embeddings[idx].cpu().numpy()  # type: ignore
     return output_df, embeddings
+
+
+def create_cluster(n_jobs):
+    """Create cluster with proper cleanup handling"""
+    # Cleanup any existing clusters first
+    try:
+        ipp.Client().close()
+    except Exception:
+        pass
+
+    cluster = ipp.Cluster(
+        n=n_jobs,
+        reuse_engines=False,  # Fresh engines each time
+    )
+    cluster.start_cluster_sync()
+    return cluster
 
 
 def generate_profile_recs(
@@ -246,34 +304,38 @@ def generate_profile_recs(
     with item_progress("recommend", total=n_profiles) as pb:
         if n_jobs > 1:
             logger.info("starting evaluation with %d workers", n_jobs)
-            with ipp.Cluster(n=n_jobs) as client:
-                dv = client.direct_view()
-                logger.debug("initializing workers")
-                dv.apply_sync(_init_worker, outs, WorkerLogConfig.current(), pipelines)
+            try:
+                with create_cluster(n_jobs) as client:
+                    dv = client.direct_view()
+                    logger.debug("initializing workers")
+                    dv.apply_sync(_init_worker, outs, WorkerLogConfig.current(), pipelines)
 
-                logger.debug("dispatching jobs")
-                lbv = client.load_balanced_view()
-                if topic_thetas and locality_thetas:
-                    request_iter = lbv.imap(
-                        _generate_for_hyperparamter_request,
-                        profile_iter,
-                        max_outstanding=n_jobs * 5,
-                        ordered=False,
-                    )
-                else:
-                    request_iter = lbv.imap(
-                        _generate_for_request,
-                        profile_iter,
-                        max_outstanding=n_jobs * 5,
-                        ordered=False,
-                    )
+                    logger.debug("dispatching jobs")
+                    lbv = client.load_balanced_view()
+                    if topic_thetas and locality_thetas:
+                        request_iter = lbv.imap(
+                            _generate_for_hyperparamter_request,
+                            profile_iter,
+                            max_outstanding=n_jobs * 5,
+                            ordered=False,
+                        )
+                    else:
+                        request_iter = lbv.imap(
+                            _generate_for_request,
+                            profile_iter,
+                            max_outstanding=n_jobs * 5,
+                            ordered=False,
+                        )
 
-                for uid in request_iter:
-                    logger.debug("finished measuring %s", uid)
-                    pb.update()
+                    for uid in request_iter:
+                        logger.debug("finished measuring %s", uid)
+                        pb.update()
 
-                logger.info("generation finished, closing outputs")
-                rusage = dv.apply_sync(_finish_worker)
+                    logger.info("generation finished, closing outputs")
+                    rusage = dv.apply_sync(_finish_worker)
+            finally:
+                # Ensure cleanup
+                ipp.Client().purge_everything()
 
         else:
             logger.info(f"starting serial evaluation for pipelines: {pipelines}")

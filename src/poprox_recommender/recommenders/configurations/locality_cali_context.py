@@ -11,10 +11,12 @@ from poprox_recommender.components.embedders import (
     NRMSUserEmbedder,
 )
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
+from poprox_recommender.components.embedders.topic_wise_user import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.embedders.user import NRMSUserEmbedderConfig
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.generators.context import ContextGenerator
 from poprox_recommender.components.joiners.fill import FillRecs
+from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers.uniform import UniformSampler
 from poprox_recommender.components.scorers import ArticleScorer
@@ -51,20 +53,44 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         clicked_articles=e_clicked,
         interest_profile=i_profile,
     )
+    # Embed the user (topics)
+    ue_config2 = UserOnboardingConfig(
+        model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
+        device=device,
+        embedding_source="static",
+        topic_embedding="nrms",
+    )
+    e_user2 = builder.add_component(
+        "user-embedder2",
+        UserOnboardingEmbedder,
+        ue_config2,
+        candidate_articles=e_candidates,
+        clicked_articles=e_clicked,
+        interest_profile=i_profile,
+    )
 
-    # Score and rank articles
+    # Score and rank articles# Score and rank articles (history)
     n_scorer = builder.add_component("scorer", ArticleScorer, candidate_articles=e_candidates, interest_profile=e_user)
-    _n_topk = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
+
+    # Score and rank articles (topics)
+    n_scorer2 = builder.add_component(
+        "scorer2", ArticleScorer, candidate_articles=builder.node("candidate-embedder"), interest_profile=e_user2
+    )
+    # Combine click and topic scoring
+    fusion = builder.add_component(
+        "fusion", ScoreFusion, {"combiner": "avg"}, candidates1=n_scorer, candidates2=n_scorer2
+    )
+
+    _n_topk = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)
     n_reranker = builder.add_component(
         "reranker",
         LocalityCalibrator,
         {"num_slots": num_slots},
-        candidate_articles=n_scorer,
+        candidate_articles=fusion,
         interest_profile=e_user,
         theta_topic=theta_topic,
         theta_locality=theta_locality,
     )
-
     n_context = builder.add_component(
         "generator",
         ContextGenerator,

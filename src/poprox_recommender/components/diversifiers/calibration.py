@@ -70,7 +70,7 @@ def compute_kl_divergence(interacted_distr, reco_distr, kl_div=0.0, alpha=0.01):
     for category, score in interacted_distr.items():
         reco_score = reco_distr.get(category, 0.0)
         reco_score = (1 - alpha) * reco_score + alpha * score
-        if reco_score != 0.0:
+        if reco_score > 0:
             kl_div += score * np.log2(score / reco_score)
 
     return kl_div
