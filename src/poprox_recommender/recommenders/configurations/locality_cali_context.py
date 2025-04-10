@@ -12,6 +12,7 @@ from poprox_recommender.components.embedders import (
 )
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedderConfig
+from poprox_recommender.components.generators.context import ContextGenerator
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.scorers import ArticleScorer
 from poprox_recommender.paths import model_file_path
@@ -51,7 +52,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     # Score and rank articles
     n_scorer = builder.add_component("scorer", ArticleScorer, candidate_articles=e_candidates, interest_profile=e_user)
     _n_topk = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
-    builder.add_component(
+    n_reranker = builder.add_component(
         "reranker",
         LocalityCalibrator,
         {"num_slots": num_slots},
@@ -59,4 +60,13 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         interest_profile=e_user,
         theta_topic=theta_topic,
         theta_locality=theta_locality,
+    )
+
+    builder.add_component(
+        "generator",
+        ContextGenerator,
+        {},
+        clicked=e_clicked,
+        selected=n_reranker,
+        interest_profile=i_profile,
     )
