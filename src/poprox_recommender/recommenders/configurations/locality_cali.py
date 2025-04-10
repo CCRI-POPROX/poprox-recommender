@@ -85,7 +85,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         "reranker",
         LocalityCalibrator,
         {"num_slots": num_slots},
-        candidate_articles=n_scorer,
+        candidate_articles=fusion,
         interest_profile=e_user,
         theta_topic=theta_topic,
         theta_locality=theta_locality,
