@@ -46,7 +46,9 @@ class FillCandidates(Component):
 class FillRecs(Component):
     config: FillConfig
 
-    def __call__(self, recs1: RecommendationList, recs2: Lazy[RecommendationList]) -> RecommendationList:
+    def __call__(self, recs1: RecommendationList | CandidateSet, recs2: Lazy[RecommendationList]) -> RecommendationList:
+        if isinstance(recs1, CandidateSet):
+            recs1 = RecommendationList(articles=recs1.articles)
         articles = recs1.articles
         extras = recs1.extras
 
