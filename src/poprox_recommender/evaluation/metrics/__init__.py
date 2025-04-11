@@ -66,8 +66,9 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         generator_rec_df = recs[recs["stage"] == "generator"]
 
         # Locality tuning metrcis
-        if name == "locality_cali":
-            # newsletter metrics
+        if str(name).startswith("locality_cali"):
+            # newsletter metrics (grab first because they are the same between articles)
+            logger.error(reranked_rec_df.head())
             k1_topic = reranked_rec_df["k1_topic"].iloc[0]
             k1_loc = reranked_rec_df["k1_locality"].iloc[0]
             is_inside_locality_threshold = reranked_rec_df["is_inside_locality_threshold"].iloc[0]
@@ -80,6 +81,9 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             is_inside_locality_threshold = None
             event_level_prompt_ratio = None
             num_treatment = None
+
+        if name == "locality_cali_context":
+            pass
 
         if ranked and reranked:
             single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)

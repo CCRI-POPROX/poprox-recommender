@@ -7,6 +7,7 @@ from typing import Counter
 import numpy as np
 from lenskit.pipeline import Component
 from openai import AsyncOpenAI
+from rouge_score import rouge_scorer
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -210,14 +211,14 @@ refine_system_prompt = (
 
 
 class ContextGenerator(Component):
-    def __init__(self, text_generation=False, time_decay=True, dev_mode=False):
+    def __init__(self, text_generation=False, time_decay=True, is_gpt_live=True):
         self.text_generation = text_generation
         self.time_decay = time_decay
-        self.dev_mode = dev_mode
+        self.is_gpt_live = is_gpt_live
         self.previous_context_articles = []
-        if self.dev_mode:
-            logger.info("Dev_mode is true, using live OpenAI client...")
-            self.client = AsyncOpenAI(api_key="<<YOUR KEY!>>")
+        if self.is_gpt_live:
+            logger.info("is_gpt_live is true, using live OpenAI client...")
+            self.client = AsyncOpenAI(api_key="<<Your api key>>")
             logger.info("Successfully instantiated OpenAI client...")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
@@ -251,6 +252,7 @@ class ContextGenerator(Component):
             top_topics = [(key, count) for key, count in sorted_topics[:NUM_TOPICS]]
 
         treated_articles = []
+        treated_extras = []
         tasks = []
         extras = [{} for _ in range(len(selected.articles))]
         related_articles = []
@@ -275,18 +277,29 @@ class ContextGenerator(Component):
                     extras[i],
                     # article, clicked, self.time_decay, top_topics,  extras[i]
                 )
-                tasks.append((article, task))
+                tasks.append((article, extras[i], task))
 
-        results = await asyncio.gather(*(task[1] for task in tasks), return_exceptions=True)
+        results = await asyncio.gather(*(task[2] for task in tasks), return_exceptions=True)
 
-        for (article, _), result in zip(tasks, results):
+        for (article, extra, _), result in zip(tasks, results):
             if isinstance(result, Exception):
                 logger.error(f"Error generating context for article: {result}")
             else:
+                # set baseline rougel score of original headline + subhead and body
+                rougel = self.offline_metric_calculation(article.headline, article.subhead, article.body)
+                extra["rougel_precision_difference"] = rougel.precision
+                extra["rougel_recall_difference"] = rougel.recall
                 article.headline, article.subhead = result  # type: ignore
                 treated_articles.append(article)
+                treated_extras.append(extra)
 
         await self.diversify_treatment_previews(treated_articles)
+
+        for article, extra in zip(treated_articles, treated_extras):
+            # Subtract rougel score of rewritten headline + subhead and body from baseline
+            rougel = self.offline_metric_calculation(article.headline, article.subhead, article.body)
+            extra["rougel_precision_difference"] = extra["rougel_precision_difference"] - rougel.precision
+            extra["rougel_recall_difference"] = extra["rougel_recall_difference"] - rougel.recall
 
         return selected, extras
 
@@ -323,7 +336,7 @@ class ContextGenerator(Component):
                 f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
             )
             extra_logging["prompt_level"] = "event"
-            if self.dev_mode:
+            if self.is_gpt_live:
                 rec_headline, rec_subheadline = await self.async_gpt_generate(
                     event_system_prompt.format(headline_length, subhead_length),
                     article_prompt,
@@ -351,7 +364,7 @@ class ContextGenerator(Component):
                 for ind, top_count_pair in enumerate(top_topics):
                     extra_logging["top_{}_topic".format(ind)] = top_count_pair[0]
                     extra_logging["top_{}_topic_ratio".format(ind)] = float(top_count_pair[1])
-                if self.dev_mode:
+                if self.is_gpt_live:
                     rec_headline, rec_subheadline = await self.async_gpt_generate(
                         topic_system_prompt.format(headline_length, subhead_length),
                         article_prompt,
@@ -381,7 +394,7 @@ class ContextGenerator(Component):
             input_prompt.append(article_prompt)
 
         try:
-            if self.dev_mode:
+            if self.is_gpt_live:
                 rewritten_previews = await self.async_gpt_diversify(
                     refine_system_prompt, input_prompt, len(input_prompt)
                 )
@@ -396,6 +409,17 @@ class ContextGenerator(Component):
             articles[i].subhead = rewritten_preview["SUB_HEADLINE"]
 
         return articles
+
+    def offline_metric_calculation(self, headline, subhead, body):
+        logger.info(f"Calculating metrics for Aticle: '{headline[:30]}'")
+        # RougeL
+        r_scorer = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=True)
+        article_preview = f"{headline} {subhead}"
+        rouge_score = r_scorer.score(article_preview, body)["rougeL"]
+        logger.info(f"    RougeL: precision ({rouge_score.precision}), recall ({rouge_score.recall})")
+        # TODO add nli_model metric and return
+
+        return rouge_score
 
     def related_context(
         self,

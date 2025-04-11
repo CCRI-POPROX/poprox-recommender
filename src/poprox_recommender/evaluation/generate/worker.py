@@ -167,6 +167,12 @@ def extract_recs(
                 "k1_topic": -1.0,
                 "k1_locality": -1.0,
                 "is_inside_locality_threshold": False,
+                "event_rougel_precision_sum": 0.0,
+                "event_rougel_recall_sum": 0.0,
+                "n_event_prompts": 0.0,
+                "topic_rougel_precision_sum": 0.0,
+                "topic_rougel_recall_sum": 0.0,
+                "n_topic_prompts": 0.0,
             }
         )
     ]
@@ -187,6 +193,12 @@ def extract_recs(
                     "k1_topic": -1.0,
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
+                    "event_rougel_precision_sum": 0.0,
+                    "event_rougel_recall_sum": 0.0,
+                    "n_event_prompts": 0.0,
+                    "topic_rougel_precision_sum": 0.0,
+                    "topic_rougel_recall_sum": 0.0,
+                    "n_topic_prompts": 0.0,
                 }
             )
         )
@@ -207,6 +219,12 @@ def extract_recs(
                     "k1_topic": reranked.k1_topic,
                     "k1_locality": reranked.k1_locality,
                     "is_inside_locality_threshold": reranked.is_inside_locality_threshold,
+                    "event_rougel_precision_sum": 0.0,
+                    "event_rougel_recall_sum": 0.0,
+                    "n_event_prompts": 0.0,
+                    "topic_rougel_precision_sum": 0.0,
+                    "topic_rougel_recall_sum": 0.0,
+                    "n_topic_prompts": 0.0,
                 }
             )
         )
@@ -216,11 +234,19 @@ def extract_recs(
 
         num_event_level_prompts = 0.0
         num_topic_level_prompts = 0.0
+        event_rougel_precision_sum = 0.0
+        event_rougel_recall_sum = 0.0
+        topic_rougel_precision_sum = 0.0
+        topic_rougel_recall_sum = 0.0
         for news_extra in generator.extras:
             if news_extra.get("prompt_level") == "event":
                 num_event_level_prompts += 1
+                event_rougel_precision_sum += news_extra.get("rougel_precision_difference")
+                event_rougel_recall_sum += news_extra.get("rougel_recall_difference")
             elif news_extra.get("prompt_level") == "topic":
                 num_topic_level_prompts += 1
+                topic_rougel_precision_sum += news_extra.get("rougel_precision_difference")
+                topic_rougel_recall_sum += news_extra.get("rougel_recall_difference")
         total_prompts = num_event_level_prompts + num_topic_level_prompts
         rec_lists.append(
             pd.DataFrame(
@@ -239,6 +265,12 @@ def extract_recs(
                     "k1_topic": -1.0,
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
+                    "event_rougel_precision_sum": event_rougel_precision_sum,
+                    "event_rougel_recall_sum": event_rougel_recall_sum,
+                    "n_event_prompts": num_event_level_prompts,
+                    "topic_rougel_precision_sum": topic_rougel_precision_sum,
+                    "topic_rougel_recall_sum": topic_rougel_recall_sum,
+                    "n_topic_prompts": num_topic_level_prompts,
                 }
             )
         )
