@@ -7,6 +7,7 @@ from typing import Counter
 import numpy as np
 from lenskit.pipeline import Component
 from openai import AsyncOpenAI
+from pydantic import BaseModel
 from rouge_score import rouge_scorer
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -24,7 +25,6 @@ from poprox_recommender.paths import model_file_path
 
 MAX_RETRIES = 3
 DELAY = 2
-SEMANTIC_THRESHOLD = 0.5
 BASELINE_THETA_TOPIC = 0.3
 NUM_TOPICS = 3
 DAYS = 14
@@ -210,15 +210,21 @@ refine_system_prompt = (
 )
 
 
+class ContextGeneratorConfig(BaseModel):
+    similarity_threshold: float = 0.5
+
+
 class ContextGenerator(Component):
-    def __init__(self, text_generation=False, time_decay=True, is_gpt_live=True):
-        self.text_generation = text_generation
+    config: ContextGeneratorConfig
+
+    def __init__(self, time_decay=True, is_gpt_live=True):
         self.time_decay = time_decay
         self.is_gpt_live = is_gpt_live
         self.previous_context_articles = []
+
         if self.is_gpt_live:
             logger.info("is_gpt_live is true, using live OpenAI client...")
-            self.client = AsyncOpenAI(api_key="<<Your api key>>")
+            self.client = AsyncOpenAI(api_key="<<YOUR KEY>>")
             logger.info("Successfully instantiated OpenAI client...")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
@@ -227,13 +233,20 @@ class ContextGenerator(Component):
         clicked: CandidateSet,
         selected: CandidateSet,
         interest_profile: InterestProfile,
+        similarity_threshold: float | None,
     ) -> RecommendationList:
+        similarity_threshold = (
+            self.config.similarity_threshold if similarity_threshold is None else similarity_threshold
+        )
+
         logger.error(f"clicked embeddings {len(clicked.embeddings)}")
         logger.error(f"selected embeddings {len(selected.embeddings)}")
         # logger.error(f"Selected object fields: {', '.join(vars(selected).keys())}")
         extras = []
         # selected = self.generate_newsletter(clicked, selected, interest_profile)
-        selected, extras = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
+        selected, extras = asyncio.run(
+            self.generate_newsletter(clicked, selected, interest_profile, similarity_threshold)
+        )
         logger.error(f"Final extras: {extras}")
         return RecommendationList(articles=selected.articles, extras=extras)
 
@@ -242,6 +255,7 @@ class ContextGenerator(Component):
         clicked: CandidateSet,
         selected: CandidateSet,
         interest_profile: InterestProfile,
+        similarity_threshold: float,
     ):
         topic_distribution = LocalityCalibrator.compute_topic_prefs(interest_profile)
         top_topics = []
@@ -262,7 +276,9 @@ class ContextGenerator(Component):
             article = selected.articles[i]
             if selected.treatment_flags[i]:
                 related_articles.append(
-                    self.related_context(article, article_embedding, clicked, self.time_decay, extras[i])
+                    self.related_context(
+                        article, article_embedding, clicked, self.time_decay, similarity_threshold, extras[i]
+                    )
                 )
             else:
                 related_articles.append(None)
@@ -286,6 +302,10 @@ class ContextGenerator(Component):
                 logger.error(f"Error generating context for article: {result}")
             else:
                 # set baseline rougel score of original headline + subhead and body
+                logger.info(f"calculating rougel for baseline: {article.headline} {article.subhead} {article.body}")
+                if article.body is None:
+                    logger.error("STOP")
+                    raise Exception("Break.")
                 rougel = self.offline_metric_calculation(article.headline, article.subhead, article.body)
                 extra["rougel_precision_difference"] = rougel.precision
                 extra["rougel_recall_difference"] = rougel.recall
@@ -293,7 +313,7 @@ class ContextGenerator(Component):
                 treated_articles.append(article)
                 treated_extras.append(extra)
 
-        await self.diversify_treatment_previews(treated_articles)
+        treated_articles = await self.diversify_treatment_previews(treated_articles)
 
         for article, extra in zip(treated_articles, treated_extras):
             # Subtract rougel score of rewritten headline + subhead and body from baseline
@@ -427,6 +447,7 @@ class ContextGenerator(Component):
         article_embedding: list,
         clicked_set: CandidateSet,
         time_decay: bool,
+        similarity_threshold: float,
         extra_logging: dict,
     ):
         # selected_subhead = article.subhead
@@ -453,6 +474,7 @@ class ContextGenerator(Component):
             clicked_articles,
             filtered_clicked_embeddings,
             time_decay,
+            similarity_threshold,
             extra_logging,
         )
         if len(candidate_indices) == 0:
@@ -469,6 +491,7 @@ class ContextGenerator(Component):
         clicked_articles: list,
         clicked_article_embeddings,
         time_decay: bool,
+        similarity_threshold: float,
         extra_logging: dict,
     ):
         # all_subheads = [selected_subhead] + [article.subhead for article in clicked_articles]
@@ -485,12 +508,12 @@ class ContextGenerator(Component):
         # CHECK threshold [0.2, 0, 0.2]
         for i in range(len(similarities)):
             val = similarities[i]
-            if val < SEMANTIC_THRESHOLD:
+            if val < similarity_threshold:
                 similarities[i] = 0
 
         most_sim_article_ind = np.argmax(similarities)
         highest_sim = float(similarities[most_sim_article_ind])
-        if highest_sim < SEMANTIC_THRESHOLD:
+        if highest_sim < similarity_threshold:
             extra_logging["similarity"] = float(similarities[most_sim_article_ind])
             extra_logging["context_article"] = str(clicked_articles[most_sim_article_ind].article_id)
             return []

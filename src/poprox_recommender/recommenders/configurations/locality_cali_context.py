@@ -34,6 +34,9 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     theta_topic = builder.create_input("theta_topic", float, None)
     theta_locality = builder.create_input("theta_locality", float, None)
 
+    # context-generator specific inputs
+    similarity_threshold = builder.create_input("similarity_threshold", float, None)
+
     # Embed candidate and clicked articles
     ae_config = NRMSArticleEmbedderConfig(
         model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
@@ -98,6 +101,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         clicked=e_clicked,
         selected=n_reranker,
         interest_profile=i_profile,
+        similarity_threshold=similarity_threshold,
     )
 
     # Fallback: sample from user topic interests

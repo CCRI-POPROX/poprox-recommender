@@ -84,7 +84,7 @@ class PoproxData(EvalData):
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
-    def iter_hyperparameters(
+    def iter_hyperparameters_theta(
         self,
         topic_thetas: Tuple[float, float],
         topic_theta_incr: float,
@@ -134,6 +134,41 @@ class PoproxData(EvalData):
 
         for profile_with_theta in extended_iter:
             yield profile_with_theta
+
+    def iter_hyperparameters_theshold(
+        self,
+        similarity_thresholds: Tuple[float, float],
+        similarity_threshold_incr: float,
+    ) -> Generator[Tuple[RecommendationRequestV2, float], None, None]:
+        """
+        A wrapper around iter_profiles that extends its results with combinations of similarity thresholds.
+
+        Args:
+            similarity_thresholds (Tuple[float, float]): Start and end values (inclusive) for threshold range.
+            similarity_threshold_incr (float): Increment for similarity threshold range.
+
+        Yields:
+            Tuple[RecommendationRequest, Tuple[float, float]]: A recommendation request paired with theta values.
+        """
+        # Generate lists of threshold values
+        threshold_combinations = np.arange(
+            similarity_thresholds[0], similarity_thresholds[1] + 0.01, similarity_threshold_incr
+        )
+
+        logger.info(
+            f"Generated {len(threshold_combinations)} similarity threshold combinations: {threshold_combinations}"  # noqa: E501
+        )
+
+        self.num_hyperparameters = len(threshold_combinations)
+
+        # Extend iter_profiles to iterate over each profile with each theta combination
+        profile_iter = self.iter_profiles()
+        extended_iter = chain.from_iterable(
+            ((profile, threshold) for threshold in threshold_combinations) for profile in profile_iter
+        )
+
+        for profile_with_threshold in extended_iter:
+            yield profile_with_threshold
 
     def iter_profiles(
         self,

@@ -29,6 +29,8 @@ Options:
             test all theta values in TUPLE in the form (start, end)
     --locality_thetas=TUPLE
             test all theta values in TUPLE in the form (start, end)
+    --similarity_thresholds=TUPLE
+            test all threshold values in TUPLE in the form (start, end)
     --pipelines=<pipelines>...
             list of pipeline names (separated by spaces)
 """
@@ -94,9 +96,16 @@ def generate_main():
     # Ok if None
     topic_thetas = options["--topic_thetas"]
     locality_thetas = options["--locality_thetas"]
+    similarity_thresholds = options["--similarity_thresholds"]
 
     topic_thetas = ast.literal_eval(topic_thetas) if topic_thetas else None
     locality_thetas = ast.literal_eval(locality_thetas) if locality_thetas else None
+    similarity_thresholds = ast.literal_eval(similarity_thresholds) if similarity_thresholds else None
+
+    if (topic_thetas or locality_thetas) and similarity_thresholds:
+        raise ValueError(
+            "You cannot set 'similarity_thresholds' when 'topic_thetas' or 'locality_thetas' is provided. "
+        )
 
     # subset pipelines
     if options["--poprox-data"]:
@@ -112,7 +121,7 @@ def generate_main():
         logger.info("generating pipelines: %s", pipelines)
 
     worker_usage = generate_profile_recs(
-        dataset, outputs, n_profiles, n_jobs, topic_thetas, locality_thetas, pipelines=pipelines
+        dataset, outputs, n_profiles, n_jobs, topic_thetas, locality_thetas, similarity_thresholds, pipelines=pipelines
     )
 
     logger.info("de-duplicating embeddings")

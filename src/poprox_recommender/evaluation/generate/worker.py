@@ -17,7 +17,7 @@ from lenskit.util import Stopwatch
 from poprox_concepts.api.recommendations import RecommendationRequestV2
 from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
-from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.recommenders import load_all_pipelines
@@ -79,6 +79,64 @@ def _finish_worker():
 
 def _generate_for_request(request: RecommendationRequestV2) -> UUID | None:
     return _generate_for_hyperparamter_request((request, (None, None)))
+
+
+def _generate_for_hyperparamter_request_threshold(
+    request_with_threshold: Tuple[RecommendationRequestV2, float | None],
+) -> UUID | None:
+    global _emb_seen
+
+    request = request_with_threshold[0]
+    threshold = request_with_threshold[1]
+
+    logger.debug("recommending for profile %s", request.interest_profile.profile_id)
+    if request.num_recs != TEST_REC_COUNT:
+        logger.warning(
+            "request for %s had unexpected recommendation count %d",
+            request.interest_profile.profile_id,
+            request.num_recs,
+        )
+
+    pipe_names = list(_pipelines.keys())
+    logger.warning(f"Generating hyperparameter request for {pipe_names}...")
+
+    # Calculate the clicked topic count
+    request.interest_profile.click_topic_counts = user_topic_preference(
+        request.interacted.articles, request.interest_profile.click_history
+    )
+
+    inputs = {
+        "candidate": request.candidates,
+        "clicked": request.interacted,
+        "profile": request.interest_profile,
+        "similarity_threshold": threshold,
+    }
+
+    for name, pipe in _pipelines.items():
+        try:
+            outputs = pipe.run_all(**inputs)
+        except Exception as e:
+            logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
+            raise e
+
+        rec_df, embeddings = extract_recs(name, request, outputs)
+        rec_df["recommender"] = pd.Categorical(rec_df["recommender"], categories=pipe_names)
+        rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
+        rec_df["similarity_threshold"] = threshold
+        _worker_out.rec_writer.write_frame(rec_df)
+
+        # find any embeddings not yet written
+        emb_rows = [
+            {"article_id": str(aid), "embedding": emb} for (aid, emb) in embeddings.items() if aid not in _emb_seen
+        ]
+        _emb_seen |= embeddings.keys()
+        if emb_rows:
+            # directly use pyarrow to avoid DF overhead, small but easy to avoid here
+            emb_tbl = pa.Table.from_pylist(emb_rows)
+            _worker_out.emb_writer.write_frame(emb_tbl)
+
+    # just return the ID to indicate success
+    return request.interest_profile.profile_id
 
 
 def _generate_for_hyperparamter_request(
@@ -305,20 +363,23 @@ def create_cluster(n_jobs):
 
 
 def generate_profile_recs(
-    dataset: PoproxData | MindData,
+    dataset: PoproxData,
     outs: RecOutputs,
     n_profiles: int | None = None,
     n_jobs: int = 1,
     topic_thetas: tuple[float, float] | None = None,
     locality_thetas: tuple[float, float] | None = None,
+    similarity_thresholds: tuple[float, float] | None = None,
     pipelines: list[str] | None = None,
 ):
     logger.info(f"generating recommendations for pipelines {pipelines}")
 
     if topic_thetas and locality_thetas:
-        profile_iter = dataset.iter_hyperparameters(
+        profile_iter = dataset.iter_hyperparameters_theta(
             topic_thetas, 0.05, locality_thetas, 0.05, random_sample=THETA_RANDOM_SAMPLES
         )
+    elif similarity_thresholds:
+        profile_iter = dataset.iter_hyperparameters_theshold(similarity_thresholds, 0.05)
     else:
         profile_iter = dataset.iter_profiles()
 
@@ -351,6 +412,13 @@ def generate_profile_recs(
                             max_outstanding=n_jobs * 5,
                             ordered=False,
                         )
+                    elif similarity_thresholds:
+                        request_iter = lbv.imap(
+                            _generate_for_hyperparamter_request_threshold,
+                            profile_iter,
+                            max_outstanding=n_jobs * 5,
+                            ordered=False,
+                        )
                     else:
                         request_iter = lbv.imap(
                             _generate_for_request,
@@ -377,6 +445,8 @@ def generate_profile_recs(
             for request in profile_iter:
                 if topic_thetas and locality_thetas:
                     _generate_for_hyperparamter_request(request)
+                elif similarity_thresholds:
+                    _generate_for_hyperparamter_request_threshold(request)
                 else:
                     _generate_for_request(request)
                 pb.update()
