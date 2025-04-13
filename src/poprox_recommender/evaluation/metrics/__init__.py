@@ -66,7 +66,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         generator_rec_df = recs[recs["stage"] == "generator"]
 
         # Locality tuning metrcis
-        if name == "locality_cali":
+        if name == "locality_cali_context":
             # newsletter metrics
             k1_topic = reranked_rec_df["k1_topic"].iloc[0]
             k1_loc = reranked_rec_df["k1_locality"].iloc[0]
