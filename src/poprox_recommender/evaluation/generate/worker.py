@@ -16,6 +16,8 @@ from lenskit.util import Stopwatch
 
 from poprox_concepts.api.recommendations import RecommendationRequestV2
 from poprox_concepts.domain import CandidateSet, RecommendationList
+from poprox_recommender.components.diversifiers.locality_calibration import LocalityCalibratorConfig
+from poprox_recommender.components.generators.context import ContextGeneratorConfig
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.data.poprox import PoproxData
@@ -123,6 +125,8 @@ def _generate_for_hyperparamter_request_threshold(
         rec_df["recommender"] = pd.Categorical(rec_df["recommender"], categories=pipe_names)
         rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
         rec_df["similarity_threshold"] = threshold
+        rec_df["theta_topic"] = LocalityCalibratorConfig().theta_topic
+        rec_df["theta_locality"] = LocalityCalibratorConfig().theta_locality
         _worker_out.rec_writer.write_frame(rec_df)
 
         # find any embeddings not yet written
@@ -181,6 +185,7 @@ def _generate_for_hyperparamter_request(
         rec_df, embeddings = extract_recs(name, request, outputs)
         rec_df["recommender"] = pd.Categorical(rec_df["recommender"], categories=pipe_names)
         rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
+        rec_df["similarity_threshold"] = ContextGeneratorConfig().similarity_threshold
         rec_df["theta_topic"] = thetas[0]
         rec_df["theta_locality"] = thetas[1]
         _worker_out.rec_writer.write_frame(rec_df)
@@ -225,12 +230,9 @@ def extract_recs(
                 "k1_topic": -1.0,
                 "k1_locality": -1.0,
                 "is_inside_locality_threshold": False,
-                "event_rougel_precision_sum": 0.0,
-                "event_rougel_recall_sum": 0.0,
-                "n_event_prompts": 0.0,
-                "topic_rougel_precision_sum": 0.0,
-                "topic_rougel_recall_sum": 0.0,
-                "n_topic_prompts": 0.0,
+                "prompt_level": None,
+                "rougel_precision_diff": 0.0,
+                "rougel_recall_diff": 0.0,
             }
         )
     ]
@@ -251,12 +253,9 @@ def extract_recs(
                     "k1_topic": -1.0,
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
-                    "event_rougel_precision_sum": 0.0,
-                    "event_rougel_recall_sum": 0.0,
-                    "n_event_prompts": 0.0,
-                    "topic_rougel_precision_sum": 0.0,
-                    "topic_rougel_recall_sum": 0.0,
-                    "n_topic_prompts": 0.0,
+                    "prompt_level": None,
+                    "rougel_precision_diff": 0.0,
+                    "rougel_recall_diff": 0.0,
                 }
             )
         )
@@ -277,12 +276,9 @@ def extract_recs(
                     "k1_topic": reranked.k1_topic,
                     "k1_locality": reranked.k1_locality,
                     "is_inside_locality_threshold": reranked.is_inside_locality_threshold,
-                    "event_rougel_precision_sum": 0.0,
-                    "event_rougel_recall_sum": 0.0,
-                    "n_event_prompts": 0.0,
-                    "topic_rougel_precision_sum": 0.0,
-                    "topic_rougel_recall_sum": 0.0,
-                    "n_topic_prompts": 0.0,
+                    "prompt_level": None,
+                    "rougel_precision_diff": 0.0,
+                    "rougel_recall_diff": 0.0,
                 }
             )
         )
@@ -292,19 +288,11 @@ def extract_recs(
 
         num_event_level_prompts = 0.0
         num_topic_level_prompts = 0.0
-        event_rougel_precision_sum = 0.0
-        event_rougel_recall_sum = 0.0
-        topic_rougel_precision_sum = 0.0
-        topic_rougel_recall_sum = 0.0
         for news_extra in generator.extras:
             if news_extra.get("prompt_level") == "event":
                 num_event_level_prompts += 1
-                event_rougel_precision_sum += news_extra.get("rougel_precision_difference")
-                event_rougel_recall_sum += news_extra.get("rougel_recall_difference")
             elif news_extra.get("prompt_level") == "topic":
                 num_topic_level_prompts += 1
-                topic_rougel_precision_sum += news_extra.get("rougel_precision_difference")
-                topic_rougel_recall_sum += news_extra.get("rougel_recall_difference")
         total_prompts = num_event_level_prompts + num_topic_level_prompts
         rec_lists.append(
             pd.DataFrame(
@@ -323,12 +311,11 @@ def extract_recs(
                     "k1_topic": -1.0,
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
-                    "event_rougel_precision_sum": event_rougel_precision_sum,
-                    "event_rougel_recall_sum": event_rougel_recall_sum,
-                    "n_event_prompts": num_event_level_prompts,
-                    "topic_rougel_precision_sum": topic_rougel_precision_sum,
-                    "topic_rougel_recall_sum": topic_rougel_recall_sum,
-                    "n_topic_prompts": num_topic_level_prompts,
+                    "prompt_level": [extra.get("prompt_level", None) for extra in generator.extras],
+                    "rougel_precision_diff": [
+                        extra.get("rougel_precision_difference", None) for extra in generator.extras
+                    ],
+                    "rougel_recall_diff": [extra.get("rougel_recall_difference", None) for extra in generator.extras],
                 }
             )
         )

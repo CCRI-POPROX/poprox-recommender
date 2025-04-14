@@ -121,10 +121,36 @@ def main():
     logger.info("saving per-profile metrics to %s", profile_out_fn)
     metrics.to_csv(profile_out_fn)
 
-    agg_metrics = (
-        metrics.drop(columns=["profile_id", "personalized"]).groupby(["recommender", "theta_topic", "theta_loc"]).mean()
-    )
-    # reciprocal rank means to MRR
+    base_metrics = metrics.drop(columns=["profile_id", "personalized"])
+
+    agg_main = base_metrics.groupby(["recommender", "theta_topic", "theta_loc", "similarity_threshold"]).mean()
+
+    event_filtered = base_metrics[base_metrics["prompt_level"] == "event"]
+    agg_event = event_filtered.groupby(["recommender", "theta_topic", "theta_loc", "similarity_threshold"])[
+        ["rougel_precision_diff", "rougel_recall_diff"]
+    ].mean()
+    agg_event.columns = ["rougel_precision_diff_event", "rougel_recall_diff_event"]
+
+    topic_filtered = base_metrics[base_metrics["prompt_level"] == "topic"]
+    agg_topic = topic_filtered.groupby(["recommender", "theta_topic", "theta_loc", "similarity_threshold"])[
+        ["rougel_precision_diff", "rougel_recall_diff"]
+    ].mean()
+    agg_topic.columns = ["rougel_precision_diff_topic", "rougel_recall_diff_topic"]
+
+    agg_metrics = agg_main.drop(
+        columns=[
+            "rougel_precision_diff",
+            "rougel_recall_diff",
+        ],
+        errors="ignore",
+    ).join([agg_event, agg_topic], how="left")
+
+    # agg_metrics = (
+    #     metrics.drop(columns=["profile_id", "personalized"])
+    #     .groupby(["recommender", "theta_topic", "theta_loc", "similarity_threshold"])
+    #     .mean()
+    # )
+    # # reciprocal rank means to MRR
     agg_metrics = agg_metrics.rename(columns={"RR": "MRR"})
 
     logger.info("aggregate metrics:\n%s", agg_metrics)

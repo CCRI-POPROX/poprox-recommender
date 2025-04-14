@@ -178,7 +178,7 @@ class ContextGenerator(Component):
 
         if self.is_gpt_live:
             logger.info("is_gpt_live is true, using live OpenAI client...")
-            self.client = AsyncOpenAI(api_key="<<Your key>>")
+            self.client = AsyncOpenAI(api_key="<your key>")
             logger.info("Successfully instantiated OpenAI client...")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
@@ -224,22 +224,24 @@ class ContextGenerator(Component):
         tasks = []
         extras = [{} for _ in range(len(selected.articles))]
         related_articles = []
+        previously_used_article_ids = []
 
         for i in range(len(selected.embeddings)):
             article_embedding = selected.embeddings[i]
             article = selected.articles[i]
             if selected.treatment_flags[i]:
-                related_articles.append(
-                    self.related_context(
-                        article,
-                        article_embedding,
-                        clicked,
-                        self.time_decay,
-                        similarity_threshold,
-                        related_articles,
-                        extras[i],
-                    )
+                related_article = self.related_context(
+                    article,
+                    article_embedding,
+                    clicked,
+                    self.time_decay,
+                    similarity_threshold,
+                    previously_used_article_ids,
+                    extras[i],
                 )
+                related_articles.append(related_article)
+                if related_article is not None:
+                    previously_used_article_ids.append(related_article.article_id)
             else:
                 related_articles.append(None)
 
@@ -408,7 +410,7 @@ class ContextGenerator(Component):
         similarity_threshold: float,
         related_articles: list,
         extra_logging: dict,
-    ):
+    ) -> Article:
         # selected_subhead = article.subhead
         selected_date = article.published_at
 
@@ -439,7 +441,6 @@ class ContextGenerator(Component):
         if len(candidate_indices) == 0:
             return None
 
-        self.previous_context_articles.append(clicked_articles[candidate_indices[0]].article_id)
         return clicked_articles[candidate_indices[0]]
 
     def related_indices(
@@ -500,7 +501,7 @@ class ContextGenerator(Component):
         weight = 1 / np.log(1 + time_distance) if time_distance > 0 else 1  # Avoid log(1) when x = 0
         return weight
 
-    def rewritten_previews_feedback(self, rewritten_previews, expected_output_n):
+    def rewritten_previews_feedback(self, rewritten_previews, expected_output_n, fallback_on_fail=False):
         if not isinstance(rewritten_previews, dict) and "REWRITTEN_NEWS_PREVIEWS" not in rewritten_previews:
             logger.warning("GPT response invald and doesn't contain a list of previews. Retrying...")
             feedback = (
@@ -542,7 +543,8 @@ class ContextGenerator(Component):
             headline_words = item["HEADLINE"].split()
             capitalized_words = sum(1 for word in headline_words if word[0].isupper())
 
-            if not capilization_feedback and capitalized_words > len(headline_words) / 2:
+            # only give feedback on capitalization if this is the first time getting feedback
+            if not fallback_on_fail and not capilization_feedback and capitalized_words > len(headline_words) / 2:
                 feedback_add = (
                     "Your response includes many capitalized letters. "
                     "Ensure only proper nouns and appropriate words are capitalized in the HEADLINE."
@@ -556,7 +558,8 @@ class ContextGenerator(Component):
                 topic_usage_counter[topic] += topic_count
 
         overused_topics = [topic for topic, count in topic_usage_counter.items() if count > 2]
-        if overused_topics:
+        # only give feedback on overused topics if this is the first time getting feedback
+        if not fallback_on_fail and overused_topics:
             feedback_add = (
                 "Your response overuses certain topic names. "
                 f"The following words appear more than twice: {', '.join(overused_topics)}. "
@@ -569,7 +572,7 @@ class ContextGenerator(Component):
         else:
             return False
 
-    def rewritten_preview_feedback(self, rewritten_preview):
+    def rewritten_preview_feedback(self, rewritten_preview, fallback_on_fail=False):
         if not isinstance(rewritten_preview, dict) and (
             "HEADLINE" not in rewritten_preview or "SUB_HEADLINE" not in rewritten_preview
         ):
@@ -585,7 +588,7 @@ class ContextGenerator(Component):
         headline_words = rewritten_preview["HEADLINE"].split()
         capitalized_words = sum(1 for word in headline_words if word[0].isupper())
 
-        if capitalized_words > len(headline_words) / 2:
+        if not fallback_on_fail and capitalized_words > len(headline_words) / 2:
             feedback = "Ensure only proper nouns and appropriate words are capitalized in the HEADLINE."
             return feedback
 
@@ -639,7 +642,7 @@ class ContextGenerator(Component):
             logger.info(f"GPT reprompt response: {chat_completion.choices[0].message.content}")
             rewritten_preview = json.loads(chat_completion.choices[0].message.content)
 
-            feedback = self.rewritten_preview_feedback(rewritten_preview)
+            feedback = self.rewritten_preview_feedback(rewritten_preview, fallback_on_fail=True)
             if feedback:
                 raise ValueError(f"GPT response still invalid. Failing from feedback '{feedback}'")
 
@@ -695,7 +698,7 @@ class ContextGenerator(Component):
             logger.info(f"GPT reprompt response: {chat_completion.choices[0].message.content}")
             rewritten_previews = json.loads(chat_completion.choices[0].message.content)
 
-            feedback = self.rewritten_previews_feedback(rewritten_previews, expected_output_n)
+            feedback = self.rewritten_previews_feedback(rewritten_previews, expected_output_n, fallback_on_fail=True)
             if feedback:
                 raise ValueError(f"GPT response still invalid. Failing from feedback '{feedback}'")
 
