@@ -107,28 +107,6 @@ peculiar behaviors, or bizarre phenomena.",
 }
 
 
-event_system_prompt_old = (
-    "You are an Associated Press editor tasked to rewrite a news preview in a factual tone. "
-    "You are provided with [[MAIN_NEWS]] and [[RELATED_NEWS]] each with a HEADLINE, SUB_HEADLINE, and BODY. "
-    "The [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE should be rewritten using the following rules. "
-    "Rules: "
-    "1. ***Explicitly*** integrate ideas or implications from the [[RELATED_NEWS]] HEADLINE, SUB_HEADLINE, "
-    "and BODY to rewrite the [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE. The connection should be meaningful, "
-    "not just mentioned in passing. "
-    "2. Reframe an element of the [[MAIN_NEWS]] BODY in the [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE to emphasize a "
-    "natural progression, contrast, or deeper context between the [[MAIN_NEWS]] BODY the [[RELATED_NEWS]] BODY. "
-    "Highlight how the [[MAIN_NEWS]] BODY builds on, challenges, or expands reader's prior understanding. "
-    "3. Avoid minimal rewording of the original [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE—introduce a fresh angle that "
-    "makes the connection to [[RELATED_NEWS]] feel insightful and engaging. "
-    "4. The rewritten article should have a HEADLINE and SUB_HEADLINE. "
-    "5. The rewritten SUB_HEADLINE should NOT end in punctuation. "
-    "6. The rewrriten HEADLINE should be approximately the same length as the [[MAIN_NEWS]] HEADLINE. "
-    "7. The rewrriten SUB_HEADLINE should be approximately the same length as the [[MAIN_NEWS]] SUB_HEADLINE. "
-    "8. Ensure the rewritten article is neutral and accurately describes the [[MAIN_NEWS]] BODY. "
-    "9. Your response should only include JSON parseable by json.loads() in the form "
-    '\'{"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'.'
-)
-
 event_system_prompt = (
     "You are an Associated Press editor tasked to rewrite a news preview in a factual tone. "
     "You are provided with [[MAIN_NEWS]] with a BODY and past [[RELATED_NEWS]] with a HEADLINE, SUB_HEADLINE, "
@@ -142,35 +120,12 @@ event_system_prompt = (
     "natural progression, contrast, or deeper context between the [[MAIN_NEWS]] BODY the [[RELATED_NEWS]] BODY. "
     "Highlight how the [[MAIN_NEWS]] BODY builds on, challenges, or expands reader's prior understanding.\n"
     "3. The [[MAIN_NEWS]] SUB_HEADLINE should NOT end in punctuation.\n"
-    "4. Only proper nouns should be capitalized in the [[MAIN_NEWS]] HEADLINE.\n"
+    "4. ***Only proper nouns should be capitalized in the [[MAIN_NEWS]] HEADLINE.***\n"
     "5. The [[MAIN_NEWS]] HEADLINE should be approximately {} words long.\n"
     "6. The [[MAIN_NEWS]] SUB_HEADLINE should be approximately {} words long.\n"
     "7. The [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE should be neutral and accurately describe the [[MAIN_NEWS]] BODY.\n"
     "8. Your response should only include JSON parseable by json.loads() in the form "
     '\'{{"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}}\'.'
-)
-
-topic_system_prompt_old = (
-    "You are an Associated Press editor tasked to rewrite a news preview in a factual tone. "
-    "You are provided with a list of a user's broad [[INTERESTED_TOPICS]] and [[MAIN_NEWS]] with a "
-    "HEADLINE, SUB_HEADLINE, and BODY. "
-    "The [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE should be rewritten using the following rules. "
-    "Rules: "
-    "1. ***Explicitly*** integrate one or more of the user's prior reading habbits from [[INTERESTED_TOPICS]] to "
-    "rewrite the [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE in a way that naturally reshapes the focus."
-    "2. Reframe an element of the [[MAIN_NEWS]] BODY in the [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE to emphasize an "
-    "angle or passage that directly appeals to the user's [[INTERESTED_TOPICS]] to make this news particularly "
-    "relevant. Highlight an unexpected connection or unique insight between [[MAIN_NEWS]] BODY and "
-    "the user's broad [[INTERESTED_TOPICS]]. "
-    "3. Avoid minimal rewording of the original [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE—introduce a fresh angle on the "
-    "[[MAIN_NEWS]] BODY that makes the connection to [[INTERESTED_TOPICS]] feel insightful and engaging. "
-    "4. The rewritten article should have a HEADLINE and SUB_HEADLINE. "
-    "5. The rewritten SUB_HEADLINE should NOT end in punctuation. "
-    "6. The rewrriten HEADLINE should be approximately the same length as the [[MAIN_NEWS]] HEADLINE. "
-    "7. The rewrriten SUB_HEADLINE should be approximately the same length as the [[MAIN_NEWS]] SUB_HEADLINE. "
-    "8. Ensure the rewritten article is neutral and accurately describes the [[MAIN_NEWS]] BODY. "
-    "9. Your response should only include JSON parseable by json.loads() in the form "
-    '\'{"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'.'
 )
 
 topic_system_prompt = (
@@ -187,7 +142,7 @@ topic_system_prompt = (
     "relevant. Highlight an unexpected connection or unique insight between [[MAIN_NEWS]] BODY and "
     "the user's broad [[INTERESTED_TOPICS]].\n"
     "3. The [[MAIN_NEWS]] SUB_HEADLINE should NOT end in punctuation.\n"
-    "4. Only proper nouns should be capitalized in the [[MAIN_NEWS]] HEADLINE.\n"
+    "4. ***Only proper nouns should be capitalized in the [[MAIN_NEWS]] HEADLINE.***\n"
     "5. The [[MAIN_NEWS]] HEADLINE should be approximately {} words long.\n"
     "6. The [[MAIN_NEWS]] SUB_HEADLINE should be approximately {} words long.\n"
     "7. The [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE should be neutral and accurately describe the [[MAIN_NEWS]] BODY.\n"
@@ -220,11 +175,10 @@ class ContextGenerator(Component):
     def __init__(self, time_decay=True, is_gpt_live=True):
         self.time_decay = time_decay
         self.is_gpt_live = is_gpt_live
-        self.previous_context_articles = []
 
         if self.is_gpt_live:
             logger.info("is_gpt_live is true, using live OpenAI client...")
-            self.client = AsyncOpenAI(api_key="<<YOUR KEY>>")
+            self.client = AsyncOpenAI(api_key="<<Your key>>")
             logger.info("Successfully instantiated OpenAI client...")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
@@ -277,7 +231,13 @@ class ContextGenerator(Component):
             if selected.treatment_flags[i]:
                 related_articles.append(
                     self.related_context(
-                        article, article_embedding, clicked, self.time_decay, similarity_threshold, extras[i]
+                        article,
+                        article_embedding,
+                        clicked,
+                        self.time_decay,
+                        similarity_threshold,
+                        related_articles,
+                        extras[i],
                     )
                 )
             else:
@@ -286,6 +246,11 @@ class ContextGenerator(Component):
         for i in range(len(selected.articles)):
             article = selected.articles[i]
             if selected.treatment_flags[i]:
+                # set baseline rougel score of original headline + subhead and body
+                rougel = self.offline_metric_calculation(article.headline, article.subhead, article.body)
+                extras[i]["rougel_precision_difference"] = rougel.precision
+                extras[i]["rougel_recall_difference"] = rougel.recall
+
                 task = self.generate_treatment_preview(
                     article,
                     top_topics,
@@ -301,19 +266,12 @@ class ContextGenerator(Component):
             if isinstance(result, Exception):
                 logger.error(f"Error generating context for article: {result}")
             else:
-                # set baseline rougel score of original headline + subhead and body
-                logger.info(f"calculating rougel for baseline: {article.headline} {article.subhead} {article.body}")
-                if article.body is None:
-                    logger.error("STOP")
-                    raise Exception("Break.")
-                rougel = self.offline_metric_calculation(article.headline, article.subhead, article.body)
-                extra["rougel_precision_difference"] = rougel.precision
-                extra["rougel_recall_difference"] = rougel.recall
                 article.headline, article.subhead = result  # type: ignore
                 treated_articles.append(article)
                 treated_extras.append(extra)
 
-        treated_articles = await self.diversify_treatment_previews(treated_articles)
+        if treated_articles:
+            treated_articles = await self.diversify_treatment_previews(treated_articles)
 
         for article, extra in zip(treated_articles, treated_extras):
             # Subtract rougel score of rewritten headline + subhead and body from baseline
@@ -352,9 +310,9 @@ class ContextGenerator(Component):
             logger.info(
                 f"Generating event-level narrative for '{article.headline[:30]}' from related article '{related_article.headline[:30]}'"  # noqa: E501
             )
-            logger.info(
-                f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
-            )
+            # logger.info(
+            #     f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
+            # )
             extra_logging["prompt_level"] = "event"
             if self.is_gpt_live:
                 rec_headline, rec_subheadline = await self.async_gpt_generate(
@@ -377,9 +335,9 @@ class ContextGenerator(Component):
                 # SUB_HEADLINE: {article.subhead}
 
                 logger.info(f"Generating topic-level narrative for related article: {article.headline[:30]}")
-                logger.info(
-                    f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
-                )
+                # logger.info(
+                #     f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
+                # )
                 extra_logging["prompt_level"] = "topic"
                 for ind, top_count_pair in enumerate(top_topics):
                     extra_logging["top_{}_topic".format(ind)] = top_count_pair[0]
@@ -431,7 +389,7 @@ class ContextGenerator(Component):
         return articles
 
     def offline_metric_calculation(self, headline, subhead, body):
-        logger.info(f"Calculating metrics for Aticle: '{headline[:30]}'")
+        logger.info(f"Calculating metrics for Article: '{headline[:30]}'")
         # RougeL
         r_scorer = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=True)
         article_preview = f"{headline} {subhead}"
@@ -448,6 +406,7 @@ class ContextGenerator(Component):
         clicked_set: CandidateSet,
         time_decay: bool,
         similarity_threshold: float,
+        related_articles: list,
         extra_logging: dict,
     ):
         # selected_subhead = article.subhead
@@ -456,16 +415,16 @@ class ContextGenerator(Component):
         clicked_articles = clicked_set.articles
         time0 = selected_date - timedelta(days=DAYS)
 
-        logger.info(f"Previously used article ids: {self.previous_context_articles}")
+        logger.info(f"Previously used article ids: {related_articles}")
         clicked_articles = [
             article
             for article in clicked_articles
-            if article.published_at >= time0 and article.article_id not in self.previous_context_articles
+            if article.published_at >= time0 and article.article_id not in related_articles
         ]
         filtered_clicked_embeddings = [
             embedding
             for article, embedding in zip(clicked_articles, clicked_set.embeddings)
-            if article.published_at >= time0 and article.article_id not in self.previous_context_articles
+            if article.published_at >= time0 and article.article_id not in related_articles
         ]
         candidate_indices = self.related_indices(
             # selected_subhead, selected_date, clicked_articles, time_decay, extra_logging
