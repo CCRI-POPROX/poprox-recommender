@@ -185,6 +185,9 @@ class PoproxData(EvalData):
             profile_clicks_df = self.clicks_df.loc[self.clicks_df["profile_id"] == profile_id]
             # TODO: Change `timestamp` to `created_at` in the export
             filtered_clicks_df = profile_clicks_df[profile_clicks_df["timestamp"] < newsletter_created_at]
+            if len(filtered_clicks_df) == 0:
+                logger.warning(f"No clicks for profile {profile_id} before newsletter {newsletter_id}")
+                continue
 
             # Create Article and Click objects from dataframe rows
             clicks = []

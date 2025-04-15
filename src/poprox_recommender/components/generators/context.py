@@ -178,7 +178,7 @@ class ContextGenerator(Component):
 
         if self.is_gpt_live:
             logger.info("is_gpt_live is true, using live OpenAI client...")
-            self.client = AsyncOpenAI(api_key="<your key>")
+            self.client = AsyncOpenAI(api_key="<<Your key>>")
             logger.info("Successfully instantiated OpenAI client...")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
@@ -248,10 +248,8 @@ class ContextGenerator(Component):
         for i in range(len(selected.articles)):
             article = selected.articles[i]
             if selected.treatment_flags[i]:
-                # set baseline rougel score of original headline + subhead and body
-                rougel = self.offline_metric_calculation(article.headline, article.subhead, article.body)
-                extras[i]["rougel_precision_difference"] = rougel.precision
-                extras[i]["rougel_recall_difference"] = rougel.recall
+                extras[i]["original_headline"] = article.headline
+                extras[i]["original_subhead"] = article.subhead
 
                 task = self.generate_treatment_preview(
                     article,
@@ -277,9 +275,12 @@ class ContextGenerator(Component):
 
         for article, extra in zip(treated_articles, treated_extras):
             # Subtract rougel score of rewritten headline + subhead and body from baseline
-            rougel = self.offline_metric_calculation(article.headline, article.subhead, article.body)
-            extra["rougel_precision_difference"] = extra["rougel_precision_difference"] - rougel.precision
-            extra["rougel_recall_difference"] = extra["rougel_recall_difference"] - rougel.recall
+            rouge1, rouge2, rougeL = self.offline_metric_calculation(
+                extra["original_headline"], extra["original_subhead"], article.headline, article.subhead
+            )
+            extra["rouge1"] = rouge1
+            extra["rouge2"] = rouge2
+            extra["rougeL"] = rougeL
 
         return selected, extras
 
@@ -390,16 +391,20 @@ class ContextGenerator(Component):
 
         return articles
 
-    def offline_metric_calculation(self, headline, subhead, body):
+    def offline_metric_calculation(self, headline, subhead, gen_headline, gen_subhead):
         logger.info(f"Calculating metrics for Article: '{headline[:30]}'")
         # RougeL
-        r_scorer = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=True)
+        r_scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], use_stemmer=True)
         article_preview = f"{headline} {subhead}"
-        rouge_score = r_scorer.score(article_preview, body)["rougeL"]
-        logger.info(f"    RougeL: precision ({rouge_score.precision}), recall ({rouge_score.recall})")
+        gen_article_preview = f"{gen_headline} {gen_subhead}"
+        score = r_scorer.score(article_preview, gen_article_preview)  # ["rougeL"]
+        rouge1 = score["rouge1"].fmeasure
+        rouge2 = score["rouge2"].fmeasure
+        rougeL = score["rougeL"].fmeasure
+        logger.info(f"    Rouge1 {rouge1}, Rouge2: {rouge2}, RougeL: {rougeL}")
         # TODO add nli_model metric and return
 
-        return rouge_score
+        return rouge1, rouge2, rougeL
 
     def related_context(
         self,
@@ -547,7 +552,7 @@ class ContextGenerator(Component):
             if not fallback_on_fail and not capilization_feedback and capitalized_words > len(headline_words) / 2:
                 feedback_add = (
                     "Your response includes many capitalized letters. "
-                    "Ensure only proper nouns and appropriate words are capitalized in the HEADLINE."
+                    "Ensure only proper nouns, acronymns, and appropriate words are capitalized in the HEADLINE."
                 )
                 feedback = feedback + "\n" + feedback_add
                 capilization_feedback = True
@@ -589,7 +594,7 @@ class ContextGenerator(Component):
         capitalized_words = sum(1 for word in headline_words if word[0].isupper())
 
         if not fallback_on_fail and capitalized_words > len(headline_words) / 2:
-            feedback = "Ensure only proper nouns and appropriate words are capitalized in the HEADLINE."
+            feedback = "Ensure only proper nouns, acronymns, and appropriate words are capitalized in the HEADLINE."
             return feedback
 
         return False

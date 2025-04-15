@@ -47,8 +47,8 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
 
     results = []
 
-    for (name, theta_topic, theta_loc), recs in all_recs.groupby(
-        ["recommender", "theta_topic", "theta_locality"], observed=True
+    for (name, theta_topic, theta_loc, similarity_threshold), recs in all_recs.groupby(
+        ["recommender", "theta_topic", "theta_locality", "similarity_threshold"], observed=True
     ):
         final_rec_df = recs[recs["stage"] == "final"]
         final_rec = ItemList.from_df(final_rec_df)
@@ -72,7 +72,6 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             k1_topic = reranked_rec_df["k1_topic"].iloc[0]
             k1_loc = reranked_rec_df["k1_locality"].iloc[0]
             is_inside_locality_threshold = reranked_rec_df["is_inside_locality_threshold"].iloc[0]
-            event_level_prompt_ratio = generator_rec_df["prompt_level_ratio"].iloc[0]
             # individual rec metrics
             num_treatment = reranked_rec_df["treatment"].sum()
         else:
@@ -83,7 +82,17 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             num_treatment = None
 
         if name == "locality_cali_context":
-            pass
+            event_level_prompt_ratio = generator_rec_df["prompt_level_ratio"].iloc[0]
+            rouge1 = generator_rec_df["rouge1"].iloc[0]
+            rouge2 = generator_rec_df["rouge2"].iloc[0]
+            rougeL = generator_rec_df["rougeL"].iloc[0]
+            prompt_level = generator_rec_df["prompt_level"].iloc[0]
+        else:
+            event_level_prompt_ratio = None
+            rouge1 = None
+            rouge2 = None
+            rougeL = None
+            prompt_level = None
 
         if ranked and reranked:
             single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
@@ -109,6 +118,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "recommender": name,
                 "theta_topic": theta_topic,
                 "theta_loc": theta_loc,
+                "similarity_threshold": similarity_threshold,
                 # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
                 # whole function should be revised for generality when we want to support
                 # other pipelines.
@@ -123,6 +133,10 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "event_level_prompt_ratio": event_level_prompt_ratio,
                 "inside_loc_threshold": is_inside_locality_threshold,
                 "num_treatment": num_treatment,
+                "rouge1": rouge1,
+                "rouge2": rouge2,
+                "rougeL": rougeL,
+                "prompt_level": prompt_level,
             }
         )
 

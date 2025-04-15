@@ -230,9 +230,10 @@ def extract_recs(
                 "k1_topic": -1.0,
                 "k1_locality": -1.0,
                 "is_inside_locality_threshold": False,
-                "prompt_level": None,
-                "rougel_precision_diff": 0.0,
-                "rougel_recall_diff": 0.0,
+                "prompt_level": "NA",
+                "rouge1": 0.0,
+                "rouge2": 0.0,
+                "rougeL": 0.0,
             }
         )
     ]
@@ -253,9 +254,10 @@ def extract_recs(
                     "k1_topic": -1.0,
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
-                    "prompt_level": None,
-                    "rougel_precision_diff": 0.0,
-                    "rougel_recall_diff": 0.0,
+                    "prompt_level": "NA",
+                    "rouge1": 0.0,
+                    "rouge2": 0.0,
+                    "rougeL": 0.0,
                 }
             )
         )
@@ -276,9 +278,10 @@ def extract_recs(
                     "k1_topic": reranked.k1_topic,
                     "k1_locality": reranked.k1_locality,
                     "is_inside_locality_threshold": reranked.is_inside_locality_threshold,
-                    "prompt_level": None,
-                    "rougel_precision_diff": 0.0,
-                    "rougel_recall_diff": 0.0,
+                    "prompt_level": "NA",
+                    "rouge1": 0.0,
+                    "rouge2": 0.0,
+                    "rougeL": 0.0,
                 }
             )
         )
@@ -312,10 +315,9 @@ def extract_recs(
                     "k1_locality": -1.0,
                     "is_inside_locality_threshold": False,
                     "prompt_level": [extra.get("prompt_level", None) for extra in generator.extras],
-                    "rougel_precision_diff": [
-                        extra.get("rougel_precision_difference", None) for extra in generator.extras
-                    ],
-                    "rougel_recall_diff": [extra.get("rougel_recall_difference", None) for extra in generator.extras],
+                    "rouge1": [extra.get("rouge1", None) for extra in generator.extras],
+                    "rouge2": [extra.get("rouge2", None) for extra in generator.extras],
+                    "rougeL": [extra.get("rougeL", None) for extra in generator.extras],
                 }
             )
         )
