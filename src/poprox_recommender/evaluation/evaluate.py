@@ -59,7 +59,7 @@ def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Ite
     profiles = rec_profiles(eval_data, profile_recs)
     if pc.processes > 1:
         logger.info("starting parallel measurement with %d workers", pc.processes)
-        init_cluster()
+        init_cluster(global_logging=True)
 
         # use the batch backpressure mechanism
         # https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html

@@ -107,21 +107,26 @@ stages:
       hash: md5
       md5: e3bac5485be8fc7a9934e85e3b78615f
       size: 30948560
+    - path: models/nrms-mind/
+      hash: md5
+      md5: 99c1d4b8c051bd207ca0929a87c26754.dir
+      size: 1571629281
+      nfiles: 21
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
-      md5: 2aec6b075f317382b8158b18c3069e2b.dir
-      size: 12883
+      md5: bf814492ee4f63681cbe2dfebae15dfb.dir
+      size: 13179
       nfiles: 4
     outs:
     - path: outputs/mind-subset/embeddings.parquet
       hash: md5
-      md5: a33d02a779c4eedf97cf76d4ce0c044a
-      size: 5129216
+      md5: dc6415570be8ad663aa8151ef9933258
+      size: 5154705
     - path: outputs/mind-subset/recommendations
       hash: md5
-      md5: 881faafc491ec37586c96590eec498b1.dir
-      size: 264023
-      nfiles: 8
+      md5: 6105d99143f80b271dbec2ac54885f6c.dir
+      size: 231882
+      nfiles: 4
   measure-mind-subset:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset
     deps:
