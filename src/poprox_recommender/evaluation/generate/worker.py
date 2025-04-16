@@ -104,8 +104,10 @@ def dynamic_remote(actor):
     pc = get_parallel_config()
     if torch.cuda.is_available():
         _cuda_props = torch.cuda.get_device_properties()
-        # let's take a wild guess that 16 MP units are enough per worker
-        # so a 80-MP A40 will request 0.25 GPUs per worker
+        # Let's take a wild guess that 20 MP units are enough per worker, so a
+        # 80-MP A40 can theoretically run 4 workers.  Even though we limit
+        # parallelism through an actor pool, if we do not request GPUs, Ray will
+        # keep us from accessing them.
         remote = ray.remote(
             num_cpus=pc.backend_threads,
             num_gpus=20 / _cuda_props.multi_processor_count,
