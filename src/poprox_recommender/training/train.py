@@ -44,14 +44,12 @@ def train(device, load_checkpoint):
 
     # 2. Load and create datasets
     logger.info("Initialize Dataset")
-    # train_dataset = root / "data/MINDlarge_post_train/behaviors_parsed.tsv"
     train_dataset = BaseDataset(
         args,
         root / "data/MINDlarge_post_train/behaviors_parsed.tsv",
         root / "data/MINDlarge_post_train/news_parsed.tsv",
     )
     logger.info(f"The size of train_dataset is {len(train_dataset)}.")
-    # eval_dataset = root / "data/MINDlarge_dev/behaviors.tsv"
     eval_dataset = ValDataset(
         args, root / "data/MINDlarge_dev/behaviors.tsv", root / "data/MINDlarge_post_dev/news_parsed.tsv"
     )
@@ -85,7 +83,46 @@ def train(device, load_checkpoint):
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
     )
+
+    """check for NaN"""
+    torch.autograd.set_detect_anomaly(True)
+
+    original_forward = model.forward
+
+    def patched_forward(*args, **kwargs):
+        # check inputs for NaNs
+        for i, arg in enumerate(args):
+            if isinstance(arg, torch.Tensor) and torch.isnan(arg).any():
+                print(f"NaN in input arg[{i}]")
+        for k, v in kwargs.items():
+            if isinstance(v, torch.Tensor) and torch.isnan(v).any():
+                print(f"NaN in input kwarg '{k}'")
+        # run original forward pass
+        out = original_forward(*args, **kwargs)
+
+        # check outputs for NaNs
+        def check_nan(tensor, name):
+            if torch.isnan(tensor).any():
+                print(f"NaN in {name}: {tensor}")
+
+        if isinstance(out, dict):
+            for key, val in out.items():
+                if isinstance(val, torch.Tensor):
+                    check_nan(val, f"out[{key}]")
+        elif isinstance(out, torch.Tensor):
+            check_nan(out, "output_tensor")
+        else:
+            print("Output Type:", type(out))
+        return out
+
+    model.forward = patched_forward
+
     trainer.train()
+
+    # check gradients for NaNs after training
+    for name, param in model.named_parameters():
+        if param.grad is not None and torch.isnan(param.grad).any():
+            print(f"NaN in gradient: {name}")
 
     # 4. save and extract tensors
     save_model(model)
@@ -118,7 +155,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_clicked_news_a_user", type=float, default=50)  # length of clicked history
     parser.add_argument("--dataset_attributes", type=str, default="title")
     parser.add_argument("--dropout_probability", type=float, default=0.2)
-    parser.add_argument("--num_attention_heads", type=float, default=16)  # for newsencoder
+    parser.add_argument("--num_attention_heads", type=int, default=16)  # for newsencoder
     parser.add_argument("--additive_attn_hidden_dim", type=int, default=200)  # for newsencoder
     parser.add_argument("--hidden_size", type=int, default=768)
     parser.add_argument("--evaluate_batch_size", type=int, default=16)

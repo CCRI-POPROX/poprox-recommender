@@ -35,18 +35,49 @@ class NRMS(torch.nn.Module):
         candidate_news = candidate_news.permute(1, 0, 2)
         clicked_news = clicked_news.permute(1, 0, 2)
 
-        candidate_news_vector = torch.stack([self.news_encoder(x) for x in candidate_news], dim=1)
+        candidate_news_vector = []
+        for i, x in enumerate(candidate_news):
+            vec = self.news_encoder(x)
+            if torch.isnan(vec).any():
+                print(f"NaN in candidate_news_vector[{i}]")
+            candidate_news_vector.append(vec)
+        candidate_news_vector = torch.stack(candidate_news_vector, dim=1)
 
-        # batch_size, num_clicked_news_a_user, word_embedding_dim
-        clicked_news_vector = torch.stack([self.news_encoder(x) for x in clicked_news], dim=1)
+        clicked_news_vector = []
+        for i, x in enumerate(clicked_news):
+            vec = self.news_encoder(x)
+            if torch.isnan(vec).any():
+                print(f"NaN in clicked_news_vector[{i}]")
+            clicked_news_vector.append(vec)
+        clicked_news_vector = torch.stack(clicked_news_vector, dim=1)
 
-        # batch_size, word_embedding_dim
+        if torch.isnan(clicked_news_vector).any():
+            print("NaNs found in clicked_news_vector before user encoder")
+
         user_vector = self.user_encoder(clicked_news_vector)
-        # batch_size, 1 + K
+
+        if torch.isnan(user_vector).any():
+            print("NaNs found in user_vector")
+
+        # candidate_news_vector = torch.stack([self.news_encoder(x) for x in candidate_news], dim=1)
+
+        # # batch_size, num_clicked_news_a_user, word_embedding_dim
+        # clicked_news_vector = torch.stack([self.news_encoder(x) for x in clicked_news], dim=1)
+
+        # # batch_size, word_embedding_dim
+        # user_vector = self.user_encoder(clicked_news_vector)
+        # # batch_size, 1 + K
         click_probability = self.click_predictor(candidate_news_vector, user_vector)
 
+        if torch.isnan(click_probability).any():
+            print("NaNs in click_probability beofre loss computation")
+
+        loss = self.loss_fn(click_probability, clicked)
+        if torch.isnan(loss):
+            print("NaNs in loss")
+
         if mode == "train":
-            return {"click_prob": click_probability, "loss": self.loss_fn(click_probability, clicked)}
+            return {"click_prob": click_probability, "loss": loss}
 
         return click_probability
 

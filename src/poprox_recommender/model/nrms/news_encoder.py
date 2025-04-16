@@ -31,13 +31,19 @@ class NewsEncoder(torch.nn.Module):
 
         # [batch_size, seq_len] -> [batch_size, seq_len, hidden_size]
         token_embeddings = self.plm(news_tokens, attention_mask=nonzero.int()).last_hidden_state
+        print("NaNs in token_embeddings:", torch.isnan(token_embeddings).any())
 
         # [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size]
         multihead_attn_output, _ = self.multihead_attention(
             token_embeddings, token_embeddings, token_embeddings, key_padding_mask=padding_mask
         )
+        print("NaNs in multihead_attn_output:", torch.isnan(multihead_attn_output).any())
 
         # [batch_size, seq_len, hidden_size] -> [batch_size, hidden_size]
         news_vectors, _, _ = self.additive_attention(multihead_attn_output, padding_mask=padding_mask)
+        print("NaNs in news_vectors:", torch.isnan(news_vectors).any())
+
+        print("NaNs in news_tokens:", torch.isnan(news_tokens).any())
+        print("news_tokens unique values:", news_tokens.unique())
 
         return news_vectors
