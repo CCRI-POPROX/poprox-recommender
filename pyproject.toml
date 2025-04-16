@@ -32,7 +32,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-eval = ["docopt-ng >=0.9", "pandas ~=2.0"]
 deploy = ["awslambdaric ~=2.2"]
 # declare extras for Torch install
 cpu = ["torch~=2.2"]
@@ -46,6 +45,11 @@ GitHub = "https://github.com/CCRI-POPROX/poprox-recommender"
 [dependency-groups]
 lint = ["pre-commit ~=3.7", "ruff >=0.4", "pyright ~=1.1"]
 test = ["requests >=2.31,<3", "coverage >=6.5", "pytest >=8"]
+eval = [
+  "docopt-ng >=0.9",
+  "pandas ~=2.0",
+  "ray ~=2.44",
+]
 dev = [
   "hatch ~=1.13",
   "ipython >=8",
@@ -55,6 +59,7 @@ dev = [
   { include-group = "lint" },
   { include-group = "test" },
   { include-group = "data" },
+  { include-group = "eval" },
 ]
 data = [
   "dvc ~=3.51",
