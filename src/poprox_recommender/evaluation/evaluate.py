@@ -14,30 +14,30 @@ Options:
             read MIND test data DATA [default: MINDsmall_dev]
     -P DATA, --poprox-data=DATA
             read POPROX test data DATA
-    -j N, --jobs=N
-            use N parallel jobs
     <name>              the name of the evaluation to measure
 """
 
 # pyright: basic
 import logging
 import os
+from itertools import batched
 from typing import Any, Iterator
 from uuid import UUID
 
-import ipyparallel as ipp
 import pandas as pd
+import ray
 from docopt import docopt
 from lenskit.logging import LoggingConfig, item_progress
+from lenskit.parallel import get_parallel_config
+from lenskit.parallel.ray import init_cluster
 
-from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
-from poprox_recommender.evaluation.metrics import ProfileRecs, measure_profile_recs
+from poprox_recommender.evaluation.metrics import ProfileRecs, measure_batch, measure_profile_recs
 from poprox_recommender.paths import project_root
 
-logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
+logger = logging.getLogger(__name__)
 
 
 def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[ProfileRecs]:
@@ -54,16 +54,31 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[Pr
             yield ProfileRecs(profile_id, recs.copy(), truth)
 
 
-def profile_eval_results(
-    eval_data: EvalData, profile_recs: pd.DataFrame, n_procs: int
-) -> Iterator[list[dict[str, Any]]]:
-    if n_procs > 1:
-        logger.info("starting parallel measurement with %d workers", n_procs)
-        with ipp.Cluster(n=n_procs) as client:
-            lb = client.load_balanced_view()
-            yield from lb.imap(
-                measure_profile_recs, rec_profiles(eval_data, profile_recs), ordered=False, max_outstanding=n_procs * 10
-            )
+def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[list[dict[str, Any]]]:
+    pc = get_parallel_config()
+    profiles = rec_profiles(eval_data, profile_recs)
+    if pc.processes > 1:
+        logger.info("starting parallel measurement with %d workers", pc.processes)
+        init_cluster()
+
+        # use the batch backpressure mechanism
+        # https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html
+        result_refs = []
+        for batch in batched(profiles, 100):
+            if len(result_refs) > pc.processes:
+                # wait for a result, and return it
+                ready_refs, result_refs = ray.wait(result_refs, num_returns=1)
+                for rr in ready_refs:
+                    yield from ray.get(rr)
+
+            result_refs.append(measure_batch.remote(batch))
+
+        # yield remaining items
+        while result_refs:
+            ready_refs, result_refs = ray.wait(result_refs, num_returns=1)
+            for rr in ready_refs:
+                yield from ray.get(rr)
+
     else:
         for profile in rec_profiles(eval_data, profile_recs):
             yield measure_profile_recs(profile)
@@ -85,15 +100,6 @@ def main():
     else:
         eval_data = MindData(options["--mind-data"])
 
-    n_jobs = options["--jobs"]
-    if n_jobs is not None:
-        n_jobs = int(n_jobs)
-        if n_jobs <= 0:
-            logger.warning("--jobs must be positive, using single job")
-            n_jobs = 1
-    else:
-        n_jobs = available_cpu_parallelism(4)
-
     eval_name = options["<name>"]
     logger.info("measuring evaluation %s", eval_name)
     recs_fn = project_root() / "outputs" / eval_name / "recommendations"
@@ -104,12 +110,11 @@ def main():
 
     logger.info("measuring recommendations")
 
-    n_procs = available_cpu_parallelism(4)
     records = []
     with (
         item_progress("evaluate", total=n_profiles) as pb,
     ):
-        for profile_rows in profile_eval_results(eval_data, recs_df, n_procs):
+        for profile_rows in profile_eval_results(eval_data, recs_df):
             records += profile_rows
             pb.update()
 
