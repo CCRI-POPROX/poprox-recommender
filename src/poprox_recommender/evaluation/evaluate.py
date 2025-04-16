@@ -53,7 +53,7 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame, subset_truth=T
         assert truth is not None
         if subset_truth and len(truth) > 0:
             yield ProfileRecs(profile_id, recs.copy(), truth)
-        else:
+        elif not subset_truth:
             yield ProfileRecs(profile_id, recs.copy(), truth)
 
 
