@@ -21,10 +21,8 @@ Options:
 
 import logging
 import os
-import shutil
 from pathlib import Path
 
-import pandas as pd
 from docopt import docopt
 from lenskit.logging import LoggingConfig
 
@@ -63,15 +61,6 @@ def generate_main():
         dataset = MindData(options["--mind-data"])
 
     worker_usage = generate_profile_recs(dataset, outputs, n_profiles)
-
-    logger.info("de-duplicating embeddings")
-    emb_df = pd.read_parquet(outputs.emb_temp_dir)
-    n = len(emb_df)
-    emb_df = emb_df.drop_duplicates(subset="article_id")
-    logger.info("keeping %d of %d total embeddings", len(emb_df), n)
-    emb_df.to_parquet(out_path / "embeddings.parquet", compression="zstd")
-    logger.debug("removing temporary embedding files")
-    shutil.rmtree(outputs.emb_temp_dir)
 
     try:
         import resource

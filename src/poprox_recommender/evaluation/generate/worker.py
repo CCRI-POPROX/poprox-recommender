@@ -4,7 +4,6 @@ from uuid import UUID
 
 import numpy as np
 import pandas as pd
-import pyarrow as pa
 import ray
 import torch
 from lenskit.logging import get_logger, item_progress
@@ -18,7 +17,7 @@ from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
-from poprox_recommender.evaluation.generate.outputs import RecOutputs
+from poprox_recommender.evaluation.generate.outputs import EmbeddingWriter, RecOutputs
 from poprox_recommender.recommenders import load_all_pipelines
 
 logger = get_logger(__name__)
@@ -35,13 +34,15 @@ class RecGenerator:
     pipelines: dict[str, Pipeline]
     worker_out: RecOutputs
     emb_seen: set[UUID]
+    emb_writer: EmbeddingWriter
 
-    def __init__(self, outs: RecOutputs):
+    def __init__(self, outs: RecOutputs, emb_writer: EmbeddingWriter):
         proc = mp.current_process()
         self.pipelines = load_all_pipelines(device=default_device())
         self.worker_out = outs
         self.worker_out.open(proc.pid)
         self.emb_seen = set()
+        self.emb_writer = emb_writer
 
     def generate(self, request: RecommendationRequest) -> UUID | None:
         log = logger.bind(profile_id=str(request.interest_profile.profile_id))
@@ -72,17 +73,15 @@ class RecGenerator:
             rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
             self.worker_out.rec_writer.write_frame(rec_df)
 
-            # find any embeddings not yet written
-            emb_rows = [
-                {"article_id": str(aid), "embedding": emb}
-                for (aid, emb) in embeddings.items()
-                if aid not in self.emb_seen
-            ]
+            # find any embeddings we haven't yet written (reduces overhead)
+            # the writer will also deduplicate between workers.
+            emb_to_write = {aid: emb for (aid, emb) in embeddings.items() if aid not in self.emb_seen}
+            # call remote if we have an actor
+            if hasattr(self.emb_writer.write_embeddings, "remote"):
+                ray.get(self.emb_writer.write_embeddings.remote(emb_to_write))
+            else:
+                self.emb_writer.write_embeddings(emb_to_write)
             self.emb_seen |= embeddings.keys()
-            if emb_rows:
-                # directly use pyarrow to avoid DF overhead, small but easy to avoid here
-                emb_tbl = pa.Table.from_pylist(emb_rows)
-                self.worker_out.emb_writer.write_frame(emb_tbl)
 
         # just return the ID to indicate success
         return request.interest_profile.profile_id
@@ -206,8 +205,10 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
             logger.info("starting evaluation with %d workers", pc.processes)
             init_cluster(global_logging=True)
 
+            emb_out = ray.remote(EmbeddingWriter).remote(outs)
+
             gen_actor = dynamic_remote(RecGenerator)
-            actors = [gen_actor.remote(outs) for _i in range(pc.processes)]
+            actors = [gen_actor.remote(outs, emb_out) for _i in range(pc.processes)]
             pool = ray.util.ActorPool(actors)
             batches = it.batched(profile_iter, BATCH_SIZE)
 
@@ -216,17 +217,20 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
 
             logger.info("closing actors")
             rusage = [ray.get(actor.finish.remote()) for actor in actors]
+            ray.get(emb_out.close.remote())
 
         else:
             logger.info("starting serial evaluation")
             # directly call things in-process
-            gen = RecGenerator(outs)
+            emb_out = EmbeddingWriter(outs)
+            gen = RecGenerator(outs, emb_out)
 
             for request in profile_iter:
                 gen.generate(request)
                 pb.update()
 
             gen.finish()
+            emb_out.close()
             rusage = None
 
     timer.stop()
