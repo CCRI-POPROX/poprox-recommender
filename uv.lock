@@ -1457,28 +1457,6 @@ wheels = [
 ]
 
 [[package]]
-name = "ipyparallel"
-version = "8.8.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "decorator" },
-    { name = "entrypoints" },
-    { name = "ipykernel" },
-    { name = "ipython" },
-    { name = "jupyter-client" },
-    { name = "psutil" },
-    { name = "python-dateutil" },
-    { name = "pyzmq" },
-    { name = "tornado" },
-    { name = "tqdm" },
-    { name = "traitlets" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/60/63/b6ebb112f1605fdfcda33e8ab8a54ce3ca494ba20718c8397520fc556be1/ipyparallel-8.8.0.tar.gz", hash = "sha256:2404d59f86a3aaa3bd27bf6b57df777bff5c1363c1c6e60403759d16ed42dc7b", size = 6800541 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5b/11/0dc00c1f8452a9ee4daa5f19baf767e5ed1d79d552dd8d5d43afddfc82e1/ipyparallel-8.8.0-py3-none-any.whl", hash = "sha256:d2db60fd8baea09e02e7a13a761e1798868c0a717e3e2fa8fb52ffc037cccd35", size = 293061 },
-]
-
-[[package]]
 name = "ipython"
 version = "9.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2788,7 +2766,6 @@ source = { editable = "." }
 dependencies = [
     { name = "fastapi", extra = ["all"] },
     { name = "httpx" },
-    { name = "ipyparallel" },
     { name = "lenskit" },
     { name = "mangum" },
     { name = "nltk" },
@@ -2876,7 +2853,6 @@ requires-dist = [
     { name = "awslambdaric", marker = "extra == 'deploy'", specifier = "~=2.2" },
     { name = "fastapi", extras = ["all"], specifier = "~=0.115.11" },
     { name = "httpx", specifier = "~=0.28.1" },
-    { name = "ipyparallel", specifier = "~=8.0" },
     { name = "lenskit", git = "https://github.com/lenskit/lkpy.git?rev=v2025.3.0a1" },
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
