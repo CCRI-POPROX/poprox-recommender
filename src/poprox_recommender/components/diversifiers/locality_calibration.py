@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 
 class LocalityCalibratorConfig(BaseModel):
-    theta_locality: float = 0.55
-    theta_topic: float = 0.3
+    theta_locality: float = 0.5
+    theta_topic: float = 0.45
     num_slots: int = 10
 
 

@@ -16,6 +16,7 @@ Options:
             read POPROX test data DATA
     -j N, --jobs=N
             use N parallel jobs
+    -a --measure_all    evaluate all profiles including those with no clicks
     <name>              the name of the evaluation to measure
 """
 
@@ -40,7 +41,7 @@ from poprox_recommender.paths import project_root
 logger = logging.getLogger("poprox_recommender.evaluation.evaluate")
 
 
-def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[ProfileRecs]:
+def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame, subset_truth=True) -> Iterator[ProfileRecs]:
     """
     Iterate over rec profiles, yielding each recommendation list with its truth and
     whether the profile is personalized.  This supports parallel computation of the
@@ -50,12 +51,14 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[Pr
         profile_id = UUID(str(profile_id))
         truth = eval_data.profile_truth(profile_id)
         assert truth is not None
-        if len(truth) > 0:
+        if subset_truth and len(truth) > 0:
+            yield ProfileRecs(profile_id, recs.copy(), truth)
+        elif not subset_truth:
             yield ProfileRecs(profile_id, recs.copy(), truth)
 
 
 def profile_eval_results(
-    eval_data: EvalData, profile_recs: pd.DataFrame, n_procs: int
+    eval_data: EvalData, profile_recs: pd.DataFrame, n_procs: int, subset_truth: bool = True
 ) -> Iterator[list[dict[str, Any]]]:
     if n_procs > 1:
         logger.info("starting parallel measurement with %d workers", n_procs)
@@ -63,12 +66,12 @@ def profile_eval_results(
             lb = client.load_balanced_view()
             yield from lb.imap(
                 measure_profile_recs,
-                rec_profiles(eval_data, profile_recs),
+                rec_profiles(eval_data, profile_recs, subset_truth),
                 ordered=False,
                 max_outstanding=n_procs * 10,
             )
     else:
-        for profile in rec_profiles(eval_data, profile_recs):
+        for profile in rec_profiles(eval_data, profile_recs, subset_truth):
             yield measure_profile_recs(profile)
 
 
@@ -77,6 +80,10 @@ def main():
     log_cfg = LoggingConfig()
     if options["--verbose"] or os.environ.get("RUNNER_DEBUG", 0):
         log_cfg.set_verbose(True)
+    if options["--measure_all"]:
+        subset_truth = False
+    else:
+        subset_truth = True
     if options["--log-file"]:
         log_cfg.set_log_file(options["--log-file"])
     log_cfg.apply()
@@ -110,21 +117,52 @@ def main():
     with (
         item_progress("evaluate", total=n_profiles) as pb,
     ):
-        for profile_rows in profile_eval_results(eval_data, recs_df, n_jobs):
+        for profile_rows in profile_eval_results(eval_data, recs_df, n_jobs, subset_truth):
             records += profile_rows
             pb.update()
 
     metrics = pd.DataFrame.from_records(records)
     logger.info("measured recs for %d profiles", metrics["profile_id"].nunique())
 
-    profile_out_fn = project_root() / "outputs" / eval_name / "profile-metrics.csv.gz"
+    profile_out_fn = project_root() / "outputs" / eval_name / "profile-metrics.csv"
     logger.info("saving per-profile metrics to %s", profile_out_fn)
     metrics.to_csv(profile_out_fn)
 
-    agg_metrics = (
-        metrics.drop(columns=["profile_id", "personalized"]).groupby(["recommender", "theta_topic", "theta_loc"]).mean()
+    base_metrics = metrics.drop(columns=["profile_id", "personalized"])
+
+    agg_main = (
+        base_metrics.drop(columns=["prompt_level"], inplace=False)
+        .groupby(["recommender", "theta_topic", "theta_loc", "similarity_threshold"])
+        .mean()
     )
-    # reciprocal rank means to MRR
+
+    event_filtered = base_metrics[base_metrics["prompt_level"] == "event"]
+    agg_event = (
+        event_filtered.drop(columns=["prompt_level"], inplace=False)
+        .groupby(["recommender", "theta_topic", "theta_loc", "similarity_threshold"])[["rouge1", "rouge2", "rougeL"]]
+        .mean()
+    )
+    agg_event.columns = ["rouge1_event", "rouge2_event", "rougeL_event"]
+
+    topic_filtered = base_metrics[base_metrics["prompt_level"] == "topic"]
+    agg_topic = (
+        topic_filtered.drop(columns=["prompt_level"], inplace=False)
+        .groupby(["recommender", "theta_topic", "theta_loc", "similarity_threshold"])[["rouge1", "rouge2", "rougeL"]]
+        .mean()
+    )
+    agg_topic.columns = ["rouge1_topic", "rouge2_topic", "rougeL_topic"]
+
+    agg_metrics = agg_main.drop(
+        columns=["rouge1", "rouge2", "rougeL"],
+        errors="ignore",
+    ).join([agg_event, agg_topic], how="left")
+
+    # agg_metrics = (
+    #     metrics.drop(columns=["profile_id", "personalized"])
+    #     .groupby(["recommender", "theta_topic", "theta_loc", "similarity_threshold"])
+    #     .mean()
+    # )
+    # # reciprocal rank means to MRR
     agg_metrics = agg_metrics.rename(columns={"RR": "MRR"})
 
     logger.info("aggregate metrics:\n%s", agg_metrics)

@@ -47,8 +47,8 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
 
     results = []
 
-    for (name, theta_topic, theta_loc), recs in all_recs.groupby(
-        ["recommender", "theta_topic", "theta_locality"], observed=True
+    for (name, theta_topic, theta_loc, similarity_threshold), recs in all_recs.groupby(
+        ["recommender", "theta_topic", "theta_locality", "similarity_threshold"], observed=True
     ):
         final_rec_df = recs[recs["stage"] == "final"]
         final_rec = ItemList.from_df(final_rec_df)
@@ -66,12 +66,16 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         generator_rec_df = recs[recs["stage"] == "generator"]
 
         # Locality tuning metrcis
-        if name == "locality_cali_context":
-            # newsletter metrics
-            k1_topic = reranked_rec_df["k1_topic"].iloc[0]
-            k1_loc = reranked_rec_df["k1_locality"].iloc[0]
-            is_inside_locality_threshold = reranked_rec_df["is_inside_locality_threshold"].iloc[0]
-            event_level_prompt_ratio = generator_rec_df["prompt_level_ratio"].iloc[0]
+        if str(name).startswith("locality_cali"):
+            # newsletter metrics (grab first because they are the same between articles)
+            # logger.error(reranked_rec_df.head())
+            k1_topic = reranked_rec_df["k1_topic"].iloc[0] if not reranked_rec_df["k1_topic"].empty else None
+            k1_loc = reranked_rec_df["k1_locality"].iloc[0] if not reranked_rec_df["k1_locality"].empty else None
+            is_inside_locality_threshold = (
+                reranked_rec_df["is_inside_locality_threshold"].iloc[0]
+                if not reranked_rec_df["is_inside_locality_threshold"].empty
+                else None
+            )
             # individual rec metrics
             num_treatment = reranked_rec_df["treatment"].sum()
         else:
@@ -80,6 +84,25 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             is_inside_locality_threshold = None
             event_level_prompt_ratio = None
             num_treatment = None
+
+        if name == "locality_cali_context":
+            event_level_prompt_ratio = (
+                generator_rec_df["prompt_level_ratio"].iloc[0]
+                if not generator_rec_df["prompt_level_ratio"].empty
+                else None
+            )
+            rouge1 = generator_rec_df["rouge1"].iloc[0] if not generator_rec_df["rouge1"].empty else None
+            rouge2 = generator_rec_df["rouge2"].iloc[0] if not generator_rec_df["rouge2"].empty else None
+            rougeL = generator_rec_df["rougeL"].iloc[0] if not generator_rec_df["rougeL"].empty else None
+            prompt_level = (
+                generator_rec_df["prompt_level"].iloc[0] if not generator_rec_df["prompt_level"].empty else None
+            )
+        else:
+            event_level_prompt_ratio = None
+            rouge1 = None
+            rouge2 = None
+            rougeL = None
+            prompt_level = None
 
         if ranked and reranked:
             single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
@@ -105,6 +128,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "recommender": name,
                 "theta_topic": theta_topic,
                 "theta_loc": theta_loc,
+                "similarity_threshold": similarity_threshold,
                 # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
                 # whole function should be revised for generality when we want to support
                 # other pipelines.
@@ -119,6 +143,10 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "event_level_prompt_ratio": event_level_prompt_ratio,
                 "inside_loc_threshold": is_inside_locality_threshold,
                 "num_treatment": num_treatment,
+                "rouge1": rouge1,
+                "rouge2": rouge2,
+                "rougeL": rougeL,
+                "prompt_level": prompt_level,
             }
         )
 

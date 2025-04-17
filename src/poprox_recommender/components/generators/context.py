@@ -7,6 +7,8 @@ from typing import Counter
 import numpy as np
 from lenskit.pipeline import Component
 from openai import AsyncOpenAI
+from pydantic import BaseModel
+from rouge_score import rouge_scorer
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -23,7 +25,6 @@ from poprox_recommender.paths import model_file_path
 
 MAX_RETRIES = 3
 DELAY = 2
-SEMANTIC_THRESHOLD = 0.5
 BASELINE_THETA_TOPIC = 0.3
 NUM_TOPICS = 3
 DAYS = 14
@@ -106,28 +107,6 @@ peculiar behaviors, or bizarre phenomena.",
 }
 
 
-event_system_prompt_old = (
-    "You are an Associated Press editor tasked to rewrite a news preview in a factual tone. "
-    "You are provided with [[MAIN_NEWS]] and [[RELATED_NEWS]] each with a HEADLINE, SUB_HEADLINE, and BODY. "
-    "The [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE should be rewritten using the following rules. "
-    "Rules: "
-    "1. ***Explicitly*** integrate ideas or implications from the [[RELATED_NEWS]] HEADLINE, SUB_HEADLINE, "
-    "and BODY to rewrite the [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE. The connection should be meaningful, "
-    "not just mentioned in passing. "
-    "2. Reframe an element of the [[MAIN_NEWS]] BODY in the [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE to emphasize a "
-    "natural progression, contrast, or deeper context between the [[MAIN_NEWS]] BODY the [[RELATED_NEWS]] BODY. "
-    "Highlight how the [[MAIN_NEWS]] BODY builds on, challenges, or expands reader's prior understanding. "
-    "3. Avoid minimal rewording of the original [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE—introduce a fresh angle that "
-    "makes the connection to [[RELATED_NEWS]] feel insightful and engaging. "
-    "4. The rewritten article should have a HEADLINE and SUB_HEADLINE. "
-    "5. The rewritten SUB_HEADLINE should NOT end in punctuation. "
-    "6. The rewrriten HEADLINE should be approximately the same length as the [[MAIN_NEWS]] HEADLINE. "
-    "7. The rewrriten SUB_HEADLINE should be approximately the same length as the [[MAIN_NEWS]] SUB_HEADLINE. "
-    "8. Ensure the rewritten article is neutral and accurately describes the [[MAIN_NEWS]] BODY. "
-    "9. Your response should only include JSON parseable by json.loads() in the form "
-    '\'{"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'.'
-)
-
 event_system_prompt = (
     "You are an Associated Press editor tasked to rewrite a news preview in a factual tone. "
     "You are provided with [[MAIN_NEWS]] with a BODY and past [[RELATED_NEWS]] with a HEADLINE, SUB_HEADLINE, "
@@ -141,35 +120,12 @@ event_system_prompt = (
     "natural progression, contrast, or deeper context between the [[MAIN_NEWS]] BODY the [[RELATED_NEWS]] BODY. "
     "Highlight how the [[MAIN_NEWS]] BODY builds on, challenges, or expands reader's prior understanding.\n"
     "3. The [[MAIN_NEWS]] SUB_HEADLINE should NOT end in punctuation.\n"
-    "4. Only proper nouns should be capitalized in the [[MAIN_NEWS]] HEADLINE.\n"
+    "4. ***Only proper nouns should be capitalized in the [[MAIN_NEWS]] HEADLINE.***\n"
     "5. The [[MAIN_NEWS]] HEADLINE should be approximately {} words long.\n"
     "6. The [[MAIN_NEWS]] SUB_HEADLINE should be approximately {} words long.\n"
     "7. The [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE should be neutral and accurately describe the [[MAIN_NEWS]] BODY.\n"
     "8. Your response should only include JSON parseable by json.loads() in the form "
     '\'{{"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}}\'.'
-)
-
-topic_system_prompt_old = (
-    "You are an Associated Press editor tasked to rewrite a news preview in a factual tone. "
-    "You are provided with a list of a user's broad [[INTERESTED_TOPICS]] and [[MAIN_NEWS]] with a "
-    "HEADLINE, SUB_HEADLINE, and BODY. "
-    "The [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE should be rewritten using the following rules. "
-    "Rules: "
-    "1. ***Explicitly*** integrate one or more of the user's prior reading habbits from [[INTERESTED_TOPICS]] to "
-    "rewrite the [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE in a way that naturally reshapes the focus."
-    "2. Reframe an element of the [[MAIN_NEWS]] BODY in the [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE to emphasize an "
-    "angle or passage that directly appeals to the user's [[INTERESTED_TOPICS]] to make this news particularly "
-    "relevant. Highlight an unexpected connection or unique insight between [[MAIN_NEWS]] BODY and "
-    "the user's broad [[INTERESTED_TOPICS]]. "
-    "3. Avoid minimal rewording of the original [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE—introduce a fresh angle on the "
-    "[[MAIN_NEWS]] BODY that makes the connection to [[INTERESTED_TOPICS]] feel insightful and engaging. "
-    "4. The rewritten article should have a HEADLINE and SUB_HEADLINE. "
-    "5. The rewritten SUB_HEADLINE should NOT end in punctuation. "
-    "6. The rewrriten HEADLINE should be approximately the same length as the [[MAIN_NEWS]] HEADLINE. "
-    "7. The rewrriten SUB_HEADLINE should be approximately the same length as the [[MAIN_NEWS]] SUB_HEADLINE. "
-    "8. Ensure the rewritten article is neutral and accurately describes the [[MAIN_NEWS]] BODY. "
-    "9. Your response should only include JSON parseable by json.loads() in the form "
-    '\'{"HEADLINE": "[REWRITTEN_HEADLINE]", "SUB_HEADLINE": "[REWRITTEN_SUBHEADLINE]"}\'.'
 )
 
 topic_system_prompt = (
@@ -186,7 +142,7 @@ topic_system_prompt = (
     "relevant. Highlight an unexpected connection or unique insight between [[MAIN_NEWS]] BODY and "
     "the user's broad [[INTERESTED_TOPICS]].\n"
     "3. The [[MAIN_NEWS]] SUB_HEADLINE should NOT end in punctuation.\n"
-    "4. Only proper nouns should be capitalized in the [[MAIN_NEWS]] HEADLINE.\n"
+    "4. ***Only proper nouns should be capitalized in the [[MAIN_NEWS]] HEADLINE.***\n"
     "5. The [[MAIN_NEWS]] HEADLINE should be approximately {} words long.\n"
     "6. The [[MAIN_NEWS]] SUB_HEADLINE should be approximately {} words long.\n"
     "7. The [[MAIN_NEWS]] HEADLINE and SUB_HEADLINE should be neutral and accurately describe the [[MAIN_NEWS]] BODY.\n"
@@ -209,15 +165,20 @@ refine_system_prompt = (
 )
 
 
+class ContextGeneratorConfig(BaseModel):
+    similarity_threshold: float = 0.3
+
+
 class ContextGenerator(Component):
-    def __init__(self, text_generation=False, time_decay=True, dev_mode=False):
-        self.text_generation = text_generation
+    config: ContextGeneratorConfig
+
+    def __init__(self, time_decay=True, is_gpt_live=True):
         self.time_decay = time_decay
-        self.dev_mode = dev_mode
-        self.previous_context_articles = []
-        if self.dev_mode:
-            logger.info("Dev_mode is true, using live OpenAI client...")
-            self.client = AsyncOpenAI(api_key="<<YOUR KEY!>>")
+        self.is_gpt_live = is_gpt_live
+
+        if self.is_gpt_live:
+            logger.info("is_gpt_live is true, using live OpenAI client...")
+            self.client = AsyncOpenAI(api_key="<<Your key>>")
             logger.info("Successfully instantiated OpenAI client...")
         self.model = SentenceTransformer(str(model_file_path("all-MiniLM-L6-v2")))
 
@@ -226,13 +187,18 @@ class ContextGenerator(Component):
         clicked: CandidateSet,
         selected: CandidateSet,
         interest_profile: InterestProfile,
+        similarity_threshold: float | None,
     ) -> RecommendationList:
+        similarity_threshold = 0.3 if similarity_threshold is None else similarity_threshold
+
         logger.error(f"clicked embeddings {len(clicked.embeddings)}")
         logger.error(f"selected embeddings {len(selected.embeddings)}")
         # logger.error(f"Selected object fields: {', '.join(vars(selected).keys())}")
         extras = []
         # selected = self.generate_newsletter(clicked, selected, interest_profile)
-        selected, extras = asyncio.run(self.generate_newsletter(clicked, selected, interest_profile))
+        selected, extras = asyncio.run(
+            self.generate_newsletter(clicked, selected, interest_profile, similarity_threshold)
+        )
         logger.error(f"Final extras: {extras}")
         return RecommendationList(articles=selected.articles, extras=extras)
 
@@ -241,6 +207,7 @@ class ContextGenerator(Component):
         clicked: CandidateSet,
         selected: CandidateSet,
         interest_profile: InterestProfile,
+        similarity_threshold: float,
     ):
         topic_distribution = LocalityCalibrator.compute_topic_prefs(interest_profile)
         top_topics = []
@@ -251,23 +218,37 @@ class ContextGenerator(Component):
             top_topics = [(key, count) for key, count in sorted_topics[:NUM_TOPICS]]
 
         treated_articles = []
+        treated_extras = []
         tasks = []
         extras = [{} for _ in range(len(selected.articles))]
         related_articles = []
+        previously_used_article_ids = []
 
         for i in range(len(selected.embeddings)):
             article_embedding = selected.embeddings[i]
             article = selected.articles[i]
             if selected.treatment_flags[i]:
-                related_articles.append(
-                    self.related_context(article, article_embedding, clicked, self.time_decay, extras[i])
+                related_article = self.related_context(
+                    article,
+                    article_embedding,
+                    clicked,
+                    self.time_decay,
+                    similarity_threshold,
+                    previously_used_article_ids,
+                    extras[i],
                 )
+                related_articles.append(related_article)
+                if related_article is not None:
+                    previously_used_article_ids.append(related_article.article_id)
             else:
                 related_articles.append(None)
 
         for i in range(len(selected.articles)):
             article = selected.articles[i]
             if selected.treatment_flags[i]:
+                extras[i]["original_headline"] = article.headline
+                extras[i]["original_subhead"] = article.subhead
+
                 task = self.generate_treatment_preview(
                     article,
                     top_topics,
@@ -275,18 +256,29 @@ class ContextGenerator(Component):
                     extras[i],
                     # article, clicked, self.time_decay, top_topics,  extras[i]
                 )
-                tasks.append((article, task))
+                tasks.append((article, extras[i], task))
 
-        results = await asyncio.gather(*(task[1] for task in tasks), return_exceptions=True)
+        results = await asyncio.gather(*(task[2] for task in tasks), return_exceptions=True)
 
-        for (article, _), result in zip(tasks, results):
+        for (article, extra, _), result in zip(tasks, results):
             if isinstance(result, Exception):
                 logger.error(f"Error generating context for article: {result}")
             else:
                 article.headline, article.subhead = result  # type: ignore
                 treated_articles.append(article)
+                treated_extras.append(extra)
 
-        await self.diversify_treatment_previews(treated_articles)
+        if treated_articles:
+            treated_articles = await self.diversify_treatment_previews(treated_articles)
+
+        for article, extra in zip(treated_articles, treated_extras):
+            # Subtract rougel score of rewritten headline + subhead and body from baseline
+            rouge1, rouge2, rougeL = self.offline_metric_calculation(
+                extra["original_headline"], extra["original_subhead"], article.headline, article.subhead
+            )
+            extra["rouge1"] = rouge1
+            extra["rouge2"] = rouge2
+            extra["rougeL"] = rougeL
 
         return selected, extras
 
@@ -319,11 +311,11 @@ class ContextGenerator(Component):
             logger.info(
                 f"Generating event-level narrative for '{article.headline[:30]}' from related article '{related_article.headline[:30]}'"  # noqa: E501
             )
-            logger.info(
-                f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
-            )
+            # logger.info(
+            #     f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
+            # )
             extra_logging["prompt_level"] = "event"
-            if self.dev_mode:
+            if self.is_gpt_live:
                 rec_headline, rec_subheadline = await self.async_gpt_generate(
                     event_system_prompt.format(headline_length, subhead_length),
                     article_prompt,
@@ -344,14 +336,14 @@ class ContextGenerator(Component):
                 # SUB_HEADLINE: {article.subhead}
 
                 logger.info(f"Generating topic-level narrative for related article: {article.headline[:30]}")
-                logger.info(
-                    f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
-                )
+                # logger.info(
+                #     f"Using prompt: {topic_system_prompt.format(headline_length, subhead_length)}\n\n{article_prompt}"
+                # )
                 extra_logging["prompt_level"] = "topic"
                 for ind, top_count_pair in enumerate(top_topics):
                     extra_logging["top_{}_topic".format(ind)] = top_count_pair[0]
                     extra_logging["top_{}_topic_ratio".format(ind)] = float(top_count_pair[1])
-                if self.dev_mode:
+                if self.is_gpt_live:
                     rec_headline, rec_subheadline = await self.async_gpt_generate(
                         topic_system_prompt.format(headline_length, subhead_length),
                         article_prompt,
@@ -381,7 +373,7 @@ class ContextGenerator(Component):
             input_prompt.append(article_prompt)
 
         try:
-            if self.dev_mode:
+            if self.is_gpt_live:
                 rewritten_previews = await self.async_gpt_diversify(
                     refine_system_prompt, input_prompt, len(input_prompt)
                 )
@@ -397,30 +389,47 @@ class ContextGenerator(Component):
 
         return articles
 
+    def offline_metric_calculation(self, headline, subhead, gen_headline, gen_subhead):
+        logger.info(f"Calculating metrics for Article: '{headline[:30]}'")
+        # RougeL
+        r_scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], use_stemmer=True)
+        article_preview = f"{headline} {subhead}"
+        gen_article_preview = f"{gen_headline} {gen_subhead}"
+        score = r_scorer.score(article_preview, gen_article_preview)  # ["rougeL"]
+        rouge1 = score["rouge1"].fmeasure
+        rouge2 = score["rouge2"].fmeasure
+        rougeL = score["rougeL"].fmeasure
+        logger.info(f"    Rouge1 {rouge1}, Rouge2: {rouge2}, RougeL: {rougeL}")
+        # TODO add nli_model metric and return
+
+        return rouge1, rouge2, rougeL
+
     def related_context(
         self,
         article: Article,
         article_embedding: list,
         clicked_set: CandidateSet,
         time_decay: bool,
+        similarity_threshold: float,
+        related_articles: list,
         extra_logging: dict,
-    ):
+    ) -> Article:
         # selected_subhead = article.subhead
         selected_date = article.published_at
 
         clicked_articles = clicked_set.articles
         time0 = selected_date - timedelta(days=DAYS)
 
-        logger.info(f"Previously used article ids: {self.previous_context_articles}")
+        logger.info(f"Previously used article ids: {related_articles}")
         clicked_articles = [
             article
             for article in clicked_articles
-            if article.published_at >= time0 and article.article_id not in self.previous_context_articles
+            if article.published_at >= time0 and article.article_id not in related_articles
         ]
         filtered_clicked_embeddings = [
             embedding
             for article, embedding in zip(clicked_articles, clicked_set.embeddings)
-            if article.published_at >= time0 and article.article_id not in self.previous_context_articles
+            if article.published_at >= time0 and article.article_id not in related_articles
         ]
         candidate_indices = self.related_indices(
             # selected_subhead, selected_date, clicked_articles, time_decay, extra_logging
@@ -429,12 +438,12 @@ class ContextGenerator(Component):
             clicked_articles,
             filtered_clicked_embeddings,
             time_decay,
+            similarity_threshold,
             extra_logging,
         )
         if len(candidate_indices) == 0:
             return None
 
-        self.previous_context_articles.append(clicked_articles[candidate_indices[0]].article_id)
         return clicked_articles[candidate_indices[0]]
 
     def related_indices(
@@ -445,6 +454,7 @@ class ContextGenerator(Component):
         clicked_articles: list,
         clicked_article_embeddings,
         time_decay: bool,
+        similarity_threshold: float,
         extra_logging: dict,
     ):
         # all_subheads = [selected_subhead] + [article.subhead for article in clicked_articles]
@@ -461,12 +471,12 @@ class ContextGenerator(Component):
         # CHECK threshold [0.2, 0, 0.2]
         for i in range(len(similarities)):
             val = similarities[i]
-            if val < SEMANTIC_THRESHOLD:
+            if val < similarity_threshold:
                 similarities[i] = 0
 
         most_sim_article_ind = np.argmax(similarities)
         highest_sim = float(similarities[most_sim_article_ind])
-        if highest_sim < SEMANTIC_THRESHOLD:
+        if highest_sim < similarity_threshold:
             extra_logging["similarity"] = float(similarities[most_sim_article_ind])
             extra_logging["context_article"] = str(clicked_articles[most_sim_article_ind].article_id)
             return []
@@ -494,7 +504,7 @@ class ContextGenerator(Component):
         weight = 1 / np.log(1 + time_distance) if time_distance > 0 else 1  # Avoid log(1) when x = 0
         return weight
 
-    def rewritten_previews_feedback(self, rewritten_previews, expected_output_n):
+    def rewritten_previews_feedback(self, rewritten_previews, expected_output_n, fallback_on_fail=False):
         if not isinstance(rewritten_previews, dict) and "REWRITTEN_NEWS_PREVIEWS" not in rewritten_previews:
             logger.warning("GPT response invald and doesn't contain a list of previews. Retrying...")
             feedback = (
@@ -536,10 +546,11 @@ class ContextGenerator(Component):
             headline_words = item["HEADLINE"].split()
             capitalized_words = sum(1 for word in headline_words if word[0].isupper())
 
-            if not capilization_feedback and capitalized_words > len(headline_words) / 2:
+            # only give feedback on capitalization if this is the first time getting feedback
+            if not fallback_on_fail and not capilization_feedback and capitalized_words > len(headline_words) / 2:
                 feedback_add = (
                     "Your response includes many capitalized letters. "
-                    "Ensure only proper nouns and appropriate words are capitalized in the HEADLINE."
+                    "Ensure only proper nouns, acronymns, and appropriate words are capitalized in the HEADLINE."
                 )
                 feedback = feedback + "\n" + feedback_add
                 capilization_feedback = True
@@ -550,7 +561,8 @@ class ContextGenerator(Component):
                 topic_usage_counter[topic] += topic_count
 
         overused_topics = [topic for topic, count in topic_usage_counter.items() if count > 2]
-        if overused_topics:
+        # only give feedback on overused topics if this is the first time getting feedback
+        if not fallback_on_fail and overused_topics:
             feedback_add = (
                 "Your response overuses certain topic names. "
                 f"The following words appear more than twice: {', '.join(overused_topics)}. "
@@ -563,7 +575,7 @@ class ContextGenerator(Component):
         else:
             return False
 
-    def rewritten_preview_feedback(self, rewritten_preview):
+    def rewritten_preview_feedback(self, rewritten_preview, fallback_on_fail=False):
         if not isinstance(rewritten_preview, dict) and (
             "HEADLINE" not in rewritten_preview or "SUB_HEADLINE" not in rewritten_preview
         ):
@@ -579,8 +591,8 @@ class ContextGenerator(Component):
         headline_words = rewritten_preview["HEADLINE"].split()
         capitalized_words = sum(1 for word in headline_words if word[0].isupper())
 
-        if capitalized_words > len(headline_words) / 2:
-            feedback = "Ensure only proper nouns and appropriate words are capitalized in the HEADLINE."
+        if not fallback_on_fail and capitalized_words > len(headline_words) / 2:
+            feedback = "Ensure only proper nouns, acronymns, and appropriate words are capitalized in the HEADLINE."
             return feedback
 
         return False
@@ -633,7 +645,7 @@ class ContextGenerator(Component):
             logger.info(f"GPT reprompt response: {chat_completion.choices[0].message.content}")
             rewritten_preview = json.loads(chat_completion.choices[0].message.content)
 
-            feedback = self.rewritten_preview_feedback(rewritten_preview)
+            feedback = self.rewritten_preview_feedback(rewritten_preview, fallback_on_fail=True)
             if feedback:
                 raise ValueError(f"GPT response still invalid. Failing from feedback '{feedback}'")
 
@@ -689,7 +701,7 @@ class ContextGenerator(Component):
             logger.info(f"GPT reprompt response: {chat_completion.choices[0].message.content}")
             rewritten_previews = json.loads(chat_completion.choices[0].message.content)
 
-            feedback = self.rewritten_previews_feedback(rewritten_previews, expected_output_n)
+            feedback = self.rewritten_previews_feedback(rewritten_previews, expected_output_n, fallback_on_fail=True)
             if feedback:
                 raise ValueError(f"GPT response still invalid. Failing from feedback '{feedback}'")
 

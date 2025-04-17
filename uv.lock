@@ -17,6 +17,15 @@ conflicts = [[
 ]]
 
 [[package]]
+name = "absl-py"
+version = "2.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/f0/e6342091061ed3a46aadc116b13edd7bb5249c3ab1b3ef07f24b0c248fc3/absl_py-2.2.2.tar.gz", hash = "sha256:bf25b2c2eed013ca456918c453d687eab4e8309fba81ee2f4c1a6aa2494175eb", size = 119982 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f6/d4/349f7f4bd5ea92dab34f5bb0fe31775ef6c311427a14d5a5b31ecb442341/absl_py-2.2.2-py3-none-any.whl", hash = "sha256:e5797bc6abe45f64fd95dc06394ca3f2bedf3b5d895e9da691c9ee3397d70092", size = 135565 },
+]
+
+[[package]]
 name = "accelerate"
 version = "1.5.2"
 source = { registry = "https://pypi.org/simple" }
@@ -3053,6 +3062,7 @@ dependencies = [
     { name = "openai" },
     { name = "poprox-concepts" },
     { name = "rich" },
+    { name = "rouge-score" },
     { name = "safetensors" },
     { name = "scikit-learn" },
     { name = "sentence-transformers" },
@@ -3144,6 +3154,7 @@ requires-dist = [
     { name = "pandas", marker = "extra == 'eval'", specifier = "~=2.0" },
     { name = "poprox-concepts", git = "https://github.com/CCRI-POPROX/poprox-concepts.git" },
     { name = "rich", specifier = "~=13.9" },
+    { name = "rouge-score", specifier = "==0.1.2" },
     { name = "safetensors", specifier = ">=0.4,<1" },
     { name = "scikit-learn", specifier = "==1.5.2" },
     { name = "sentence-transformers", specifier = "==3.2.1" },
@@ -3907,6 +3918,18 @@ sdist = { url = "https://files.pythonhosted.org/packages/5b/8a/71cfbf6bf6257ea78
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7e/1b/1c2f43af46456050b27810a7a013af8a7e12bc545a0cdc00eb0df55eb769/rich_toolkit-0.13.2-py3-none-any.whl", hash = "sha256:f3f6c583e5283298a2f7dbd3c65aca18b7f818ad96174113ab5bec0b0e35ed61", size = 13566 },
 ]
+
+[[package]]
+name = "rouge-score"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "absl-py" },
+    { name = "nltk" },
+    { name = "numpy" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/c5/9136736c37022a6ad27fea38f3111eb8f02fe75d067f9a985cc358653102/rouge_score-0.1.2.tar.gz", hash = "sha256:c7d4da2683e68c9abf0135ef915d63a46643666f848e558a1b9f7ead17ff0f04", size = 17400 }
 
 [[package]]
 name = "rpds-py"
