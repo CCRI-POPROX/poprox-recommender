@@ -68,10 +68,14 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         # Locality tuning metrcis
         if str(name).startswith("locality_cali"):
             # newsletter metrics (grab first because they are the same between articles)
-            logger.error(reranked_rec_df.head())
-            k1_topic = reranked_rec_df["k1_topic"].iloc[0]
-            k1_loc = reranked_rec_df["k1_locality"].iloc[0]
-            is_inside_locality_threshold = reranked_rec_df["is_inside_locality_threshold"].iloc[0]
+            # logger.error(reranked_rec_df.head())
+            k1_topic = reranked_rec_df["k1_topic"].iloc[0] if not reranked_rec_df["k1_topic"].empty else None
+            k1_loc = reranked_rec_df["k1_locality"].iloc[0] if not reranked_rec_df["k1_locality"].empty else None
+            is_inside_locality_threshold = (
+                reranked_rec_df["is_inside_locality_threshold"].iloc[0]
+                if not reranked_rec_df["is_inside_locality_threshold"].empty
+                else None
+            )
             # individual rec metrics
             num_treatment = reranked_rec_df["treatment"].sum()
         else:
@@ -82,11 +86,17 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             num_treatment = None
 
         if name == "locality_cali_context":
-            event_level_prompt_ratio = generator_rec_df["prompt_level_ratio"].iloc[0]
-            rouge1 = generator_rec_df["rouge1"].iloc[0]
-            rouge2 = generator_rec_df["rouge2"].iloc[0]
-            rougeL = generator_rec_df["rougeL"].iloc[0]
-            prompt_level = generator_rec_df["prompt_level"].iloc[0]
+            event_level_prompt_ratio = (
+                generator_rec_df["prompt_level_ratio"].iloc[0]
+                if not generator_rec_df["prompt_level_ratio"].empty
+                else None
+            )
+            rouge1 = generator_rec_df["rouge1"].iloc[0] if not generator_rec_df["rouge1"].empty else None
+            rouge2 = generator_rec_df["rouge2"].iloc[0] if not generator_rec_df["rouge2"].empty else None
+            rougeL = generator_rec_df["rougeL"].iloc[0] if not generator_rec_df["rougeL"].empty else None
+            prompt_level = (
+                generator_rec_df["prompt_level"].iloc[0] if not generator_rec_df["prompt_level"].empty else None
+            )
         else:
             event_level_prompt_ratio = None
             rouge1 = None
