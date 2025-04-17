@@ -1,9 +1,12 @@
 import logging
+import os
+from importlib.metadata import version
 from typing import Any
 
 from lenskit.pipeline import PipelineState
 
 from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import RecommendationList, RecommenderInfo
 
 from .load import (
     PipelineLoadError,
@@ -52,4 +55,31 @@ def select_articles(
     else:
         wanted = (topk, recs)
 
-    return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
+    outputs = pipeline.run_all(
+        *wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile
+    )
+
+    # Check if we're using the LLM pipeline and fix the output structure if needed
+    if name == "llm-rank-rewrite" and isinstance(outputs[recs], RecommendationList):
+        # If the output is a RecommendationList without proper metadata wrapping, fix it
+        if not hasattr(outputs, "default") or not hasattr(outputs, "meta"):
+            # Extract metadata from the pipeline if available
+            meta = None
+            for node in pipeline.nodes():
+                if node.metadata and isinstance(node.metadata, RecommenderInfo):
+                    meta = node.metadata
+                    break
+
+            # If we couldn't find metadata in the pipeline, create default metadata
+            if meta is None:
+                try:
+                    git_sha = os.environ.get("GIT_SHA", version("poprox-recommender"))
+                except Exception:
+                    git_sha = "unknown"
+                meta = RecommenderInfo(name="llm-rank-rewrite", version=git_sha)
+
+            # Store the recommendations and metadata in the expected locations
+            outputs.default = outputs[recs]
+            outputs.meta = meta
+
+    return outputs

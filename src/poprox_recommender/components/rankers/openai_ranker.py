@@ -4,7 +4,7 @@ import openai
 from lenskit.pipeline import Component
 from pydantic import BaseModel, Field
 
-from poprox_concepts import CandidateSet
+from poprox_concepts import CandidateSet, InterestProfile
 from poprox_concepts.domain import RecommendationList
 
 
@@ -29,16 +29,22 @@ class RankedIndices(BaseModel):
 class LLMRanker(Component):
     config: LLMRankerConfig
 
-    def __call__(self, candidate_articles: CandidateSet, interest_profile: dict) -> RecommendationList:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         # configure OpenAI key
         openai.api_key = self.config.openai_api_key
+        # build concise profile for prompt
+        clean_profile = {
+            "topics": [t.entity_name for t in interest_profile.onboarding_topics],
+            "click_topic_counts": getattr(interest_profile, "click_topic_counts", {}),
+            "click_locality_counts": getattr(interest_profile, "click_locality_counts", {}),
+        }
         # summarize candidates for the prompt
         items = []
         for i, art in enumerate(candidate_articles.articles):
             content = getattr(art, "summary", None) or getattr(art, "text", None) or ""
             items.append(f"{i}: {art.title} - {content}")
         prompt = (
-            f"Given the user interest profile: {interest_profile}, select the top "
+            f"Given the user interest profile: {clean_profile}, select the top "
             f"{self.config.num_slots} articles by relevance. "
             "Respond with a JSON object with field 'indices' containing a list of the chosen article indices. "
             "Here are the candidate articles:\n" + "\n".join(items)
