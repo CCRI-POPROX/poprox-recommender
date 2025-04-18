@@ -15,22 +15,30 @@ class UserEncoder(torch.nn.Module):
         )
         self.additive_attention = AdditiveAttention(hidden_size, 200)
 
-    def forward(self, news_vectors):
+    def forward(self, article_vectors):
         """
         Args:
             news_vectors: batch_size, num_clicked_news_a_user, word_embedding_dim
         Returns:
             (shape) batch_size, word_embedding_dim
         """
-        nonzero = news_vectors.sum(dim=2).bool()
-        padding_mask = ~nonzero
+        nonzero_inputs = article_vectors.sum(dim=2).bool()
+
+        # Multi-head attention needs at least one position to be unmasked
+        # or it returns NaNs, so unmask the first position even if it's padding
+        mha_padding_mask = ~nonzero_inputs
+        mha_padding_mask[:, 0] = False
 
         # [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size]
         multihead_attn_output, _ = self.multihead_attention(
-            news_vectors, news_vectors, news_vectors, key_padding_mask=padding_mask
+            article_vectors, article_vectors, article_vectors, key_padding_mask=mha_padding_mask
         )
 
+        # Additive attention can handle all positions being masked and will zero
+        # the weights of the non-zero vectors coming from MHA in masked positions
+        add_padding_mask = ~nonzero_inputs
+
         # [batch_size, seq_len, hidden_size] -> [batch_size, hidden_size]
-        user_vectors, _, _ = self.additive_attention(multihead_attn_output, padding_mask=padding_mask)
+        user_vectors, _, _ = self.additive_attention(multihead_attn_output, padding_mask=add_padding_mask)
 
         return user_vectors

@@ -25,25 +25,27 @@ class NewsEncoder(torch.nn.Module):
     def embedding_size(self) -> int:
         return self.plm_config.hidden_size
 
-    def forward(self, news_tokens: torch.Tensor) -> torch.Tensor:
-        nonzero = news_tokens.bool()
-        padding_mask = ~nonzero
+    def forward(self, article_tokens: torch.Tensor) -> torch.Tensor:
+        nonzero_inputs = article_tokens.bool()
 
         # [batch_size, seq_len] -> [batch_size, seq_len, hidden_size]
-        token_embeddings = self.plm(news_tokens, attention_mask=nonzero.int()).last_hidden_state
-        print("NaNs in token_embeddings:", torch.isnan(token_embeddings).any())
+        token_embeddings = self.plm(article_tokens, attention_mask=nonzero_inputs.int()).last_hidden_state
+
+        # Multi-head attention needs at least one position to be unmasked
+        # or it returns NaNs, so unmask the first position even if it's padding
+        mha_padding_mask = ~nonzero_inputs
+        mha_padding_mask[:, 0] = False
 
         # [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size]
         multihead_attn_output, _ = self.multihead_attention(
-            token_embeddings, token_embeddings, token_embeddings, key_padding_mask=padding_mask
+            token_embeddings, token_embeddings, token_embeddings, key_padding_mask=mha_padding_mask
         )
-        print("NaNs in multihead_attn_output:", torch.isnan(multihead_attn_output).any())
+
+        # Additive attention can handle all positions being masked and will zero
+        # the weights of the non-zero vectors coming from MHA in masked positions
+        add_padding_mask = ~nonzero_inputs
 
         # [batch_size, seq_len, hidden_size] -> [batch_size, hidden_size]
-        news_vectors, _, _ = self.additive_attention(multihead_attn_output, padding_mask=padding_mask)
-        print("NaNs in news_vectors:", torch.isnan(news_vectors).any())
+        article_vectors, _, _ = self.additive_attention(multihead_attn_output, padding_mask=add_padding_mask)
 
-        print("NaNs in news_tokens:", torch.isnan(news_tokens).any())
-        print("news_tokens unique values:", news_tokens.unique())
-
-        return news_vectors
+        return article_vectors
