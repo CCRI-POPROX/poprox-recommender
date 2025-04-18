@@ -89,40 +89,40 @@ def train(device, load_checkpoint):
 
     original_forward = model.forward
 
+    def check_nan(tensor, name):
+        if torch.isnan(tensor).any():
+            raise ValueError(f"NaN in {name}: {tensor}")
+
     def patched_forward(*args, **kwargs):
         # check inputs for NaNs
-        for i, arg in enumerate(args):
-            if isinstance(arg, torch.Tensor) and torch.isnan(arg).any():
-                print(f"NaN in input arg[{i}]")
-        for k, v in kwargs.items():
-            if isinstance(v, torch.Tensor) and torch.isnan(v).any():
-                print(f"NaN in input kwarg '{k}'")
+        for arg_name, arg_value in enumerate(args):
+            if isinstance(arg_value, torch.Tensor):
+                check_nan(arg_value, f"input arg[{arg_name}]")
+        for kwarg_name, kwarg_value in kwargs.items():
+            if isinstance(kwarg_value, torch.Tensor):
+                check_nan(kwarg_value, f"input arg[{kwarg_name}]")
+
         # run original forward pass
-        out = original_forward(*args, **kwargs)
+        output = original_forward(*args, **kwargs)
 
         # check outputs for NaNs
-        def check_nan(tensor, name):
-            if torch.isnan(tensor).any():
-                print(f"NaN in {name}: {tensor}")
+        if isinstance(output, dict):
+            for output_name, output_value in output.items():
+                if isinstance(output_value, torch.Tensor):
+                    check_nan(output_value, f"output[{output_name}]")
+        elif isinstance(output, torch.Tensor):
+            check_nan(output, "output")
 
-        if isinstance(out, dict):
-            for key, val in out.items():
-                if isinstance(val, torch.Tensor):
-                    check_nan(val, f"out[{key}]")
-        elif isinstance(out, torch.Tensor):
-            check_nan(out, "output_tensor")
-        else:
-            print("Output Type:", type(out))
-        return out
+        return output
 
     model.forward = patched_forward
 
     trainer.train()
 
     # check gradients for NaNs after training
-    for name, param in model.named_parameters():
-        if param.grad is not None and torch.isnan(param.grad).any():
-            print(f"NaN in gradient: {name}")
+    for param_name, param_value in model.named_parameters():
+        if param_value.grad is not None:
+            check_nan(param_value.grad, f"gradient[{param_name}]")
 
     # 4. save and extract tensors
     save_model(model)
