@@ -25,9 +25,10 @@ class UserEncoder(torch.nn.Module):
         nonzero_inputs = article_vectors.sum(dim=2).bool()
 
         # Multi-head attention needs at least one position to be unmasked
-        # or it returns NaNs, so unmask the first position even if it's padding
+        # or it returns NaNs, so unmask the last position even if it's padding
+        # (Note: article interaction histories are padded on the left)
         mha_padding_mask = ~nonzero_inputs
-        mha_padding_mask[:, 0] = False
+        mha_padding_mask[:, -1] = False
 
         # [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size]
         multihead_attn_output, _ = self.multihead_attention(

@@ -33,6 +33,7 @@ class NewsEncoder(torch.nn.Module):
 
         # Multi-head attention needs at least one position to be unmasked
         # or it returns NaNs, so unmask the first position even if it's padding
+        # (Note: article headline tokens are padded on the right)
         mha_padding_mask = ~nonzero_inputs
         mha_padding_mask[:, 0] = False
 
