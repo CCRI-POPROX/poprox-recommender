@@ -2715,6 +2715,20 @@ wheels = [
 ]
 
 [[package]]
+name = "openai"
+version = "0.28.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "requests" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/49/fe/c21d95cc120928b0f5b44d8c522e48df122be3f1f9d61dfb7bf3d597c95d/openai-0.28.1.tar.gz", hash = "sha256:4be1dad329a65b4ce1a660fe6d5431b438f429b5855c883435f0f7fcb6d2dcc8", size = 61939 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/9f/385c25502f437686e4aa715969e5eaf5c2cb5e5ffa7c5cdd52f3c6ae967a/openai-0.28.1-py3-none-any.whl", hash = "sha256:d18690f9e3d31eedb66b57b88c2165d760b24ea0a01f150dd3f068155088ce68", size = 76950 },
+]
+
+[[package]]
 name = "ordered-set"
 version = "4.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2983,6 +2997,7 @@ dependencies = [
     { name = "mangum" },
     { name = "nltk" },
     { name = "numpy" },
+    { name = "openai" },
     { name = "poprox-concepts" },
     { name = "rich" },
     { name = "safetensors" },
@@ -3070,6 +3085,7 @@ requires-dist = [
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
+    { name = "openai", specifier = ">=0.27.0,<1" },
     { name = "pandas", marker = "extra == 'eval'", specifier = "~=2.0" },
     { name = "poprox-concepts", git = "https://github.com/CCRI-POPROX/poprox-concepts.git" },
     { name = "rich", specifier = "~=13.9" },
