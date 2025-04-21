@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 from typing import Generator
 from uuid import UUID
 
@@ -106,7 +107,7 @@ class PoproxData(EvalData):
                         entity_id=interest.entity_id,
                         entity_name=interest.entity_name,
                         preference=interest.preference,
-                        frequency=interest.frequency,
+                        frequency=interest.frequency if not math.isnan(interest.frequency) else -1,
                     )
                 )
 
@@ -158,6 +159,7 @@ class PoproxData(EvalData):
             article_id=article_row.article_id,
             headline=article_row.headline,
             subhead=article_row.subhead,
+            body=article_row.body,
             published_at=article_row.published_at,
             mentions=mentions,
             source="AP",

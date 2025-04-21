@@ -7,10 +7,13 @@ from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.topic_wise_user import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
-from poprox_recommender.components.joiners.rrf import ReciprocalRankFusion
+from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
 from poprox_recommender.paths import model_file_path
+
+##TODO:
+# allow weigths for the scores (1/-1)
 
 
 def configure(builder: PipelineBuilder, num_slots: int, device: str):
@@ -58,15 +61,15 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # Score and rank articles (history)
     n_scorer = builder.add_component("scorer", ArticleScorer, candidate_articles=e_candidates, interest_profile=e_user)
-    n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
 
     # Score and rank articles (topics)
-    n_scored2 = builder.add_component(
+    n_scorer2 = builder.add_component(
         "scorer2", ArticleScorer, candidate_articles=builder.node("candidate-embedder"), interest_profile=e_user2
     )
-    n_ranker2 = builder.add_component("ranker2", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scored2)
 
     # Combine click and topic scoring
-    builder.add_component(
-        "recommender", ReciprocalRankFusion, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_ranker2
+    fusion = builder.add_component(
+        "fusion", ScoreFusion, {"combiner": "avg"}, candidates1=n_scorer, candidates2=n_scorer2
     )
+
+    builder.add_component("recommender", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)

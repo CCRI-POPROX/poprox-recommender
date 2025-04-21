@@ -28,7 +28,7 @@ class NRMS(torch.nn.Module):
 
     @property
     def embedding_size(self) -> int:
-        return self.news_encoder.plm_hidden_size
+        return self.news_encoder.plm_config.plm_hidden_size
 
     def forward(self, candidate_news, clicked_news, clicked, mode="train"):
         # batch_size, 1 + K, word_embedding_dim
