@@ -87,39 +87,13 @@ def train(device, load_checkpoint):
     """check for NaN"""
     torch.autograd.set_detect_anomaly(True)
 
-    original_forward = model.forward
+    trainer.train()
 
+    # check gradients for NaNs after training
     def check_nan(tensor, name):
         if torch.isnan(tensor).any():
             raise ValueError(f"NaN in {name}: {tensor}")
 
-    def patched_forward(*args, **kwargs):
-        # check inputs for NaNs
-        for arg_name, arg_value in enumerate(args):
-            if isinstance(arg_value, torch.Tensor):
-                check_nan(arg_value, f"input arg[{arg_name}]")
-        for kwarg_name, kwarg_value in kwargs.items():
-            if isinstance(kwarg_value, torch.Tensor):
-                check_nan(kwarg_value, f"input arg[{kwarg_name}]")
-
-        # run original forward pass
-        output = original_forward(*args, **kwargs)
-
-        # check outputs for NaNs
-        if isinstance(output, dict):
-            for output_name, output_value in output.items():
-                if isinstance(output_value, torch.Tensor):
-                    check_nan(output_value, f"output[{output_name}]")
-        elif isinstance(output, torch.Tensor):
-            check_nan(output, "output")
-
-        return output
-
-    model.forward = patched_forward
-
-    trainer.train()
-
-    # check gradients for NaNs after training
     for param_name, param_value in model.named_parameters():
         if param_value.grad is not None:
             check_nan(param_value.grad, f"gradient[{param_name}]")
