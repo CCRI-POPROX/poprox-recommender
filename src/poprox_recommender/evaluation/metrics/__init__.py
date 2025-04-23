@@ -3,6 +3,7 @@ from typing import Any, NamedTuple
 from uuid import UUID
 
 import pandas as pd
+import ray
 from lenskit.data import ItemList
 from lenskit.metrics import call_metric
 from lenskit.metrics.ranking import NDCG, RecipRank
@@ -123,3 +124,11 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         )
 
     return results
+
+
+@ray.remote(num_cpus=1)
+def measure_batch(profiles: list[ProfileRecs]) -> list[list[dict[str, Any]]]:
+    """
+    Measure a batch of profile recommendations.
+    """
+    return [measure_profile_recs(profile) for profile in profiles]
