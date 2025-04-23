@@ -3,8 +3,8 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
-
 from poprox_concepts.domain import Article, CandidateSet, Entity, Mention
+
 from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
 
 
