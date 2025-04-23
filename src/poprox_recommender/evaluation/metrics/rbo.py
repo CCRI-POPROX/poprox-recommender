@@ -11,14 +11,23 @@ def rank_biased_overlap(recs_list_a: CandidateSet, recs_list_b: CandidateSet, p:
 
     https://dl.acm.org/doi/10.1145/1852102.1852106
     """
-    summands = []
+
+    if p == 0:
+        raise Exception("RBO: p=0")
+    # if len(recs_list_a.articles) < k or len(recs_list_b.articles) < k:
+    #     raise Exception(f"RBO: ranked or reranked list lesser than {k}")
+
+    sum = 0
+    weights = 0
     for d in range(1, k + 1):
         set_a = set([a.article_id for a in recs_list_a.articles[:d]])
         set_b = set([b.article_id for b in recs_list_b.articles[:d]])
         overlap = len(set_a.intersection(set_b))
         agreement = overlap / d
-        summands.append(agreement * np.power(p, d))
+        weight = np.power(p, d)
+        sum += agreement * weight
+        weights += weight
 
-    rbo = (1 - p) / p * sum(summands)
+    rbo = sum / weights
 
     return rbo
