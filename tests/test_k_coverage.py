@@ -56,9 +56,7 @@ class TestKCoverageScore(unittest.TestCase):
         ranked = CandidateSet(articles=self.all_articles[:5])
         reranked = CandidateSet(articles=self.all_articles[:3] + self.all_articles[:2])
         score = k_coverage_score(ranked, reranked, k=1)
-        print(score)
-        self.assertGreater(score, 0.0)
-        self.assertLessEqual(score, 1.0)
+        self.assertEqual(score, 0.6)
 
 
 if __name__ == "__main__":
