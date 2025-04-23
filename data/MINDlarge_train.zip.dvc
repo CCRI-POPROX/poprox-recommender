@@ -1,0 +1,5 @@
+outs:
+- md5: 41becb7e52353ceaee83ce611d283479
+  size: 530196631
+  hash: md5
+  path: MINDlarge_train.zip

@@ -1,4 +1,8 @@
 from pathlib import Path
+from uuid import UUID
+
+import numpy as np
+import pyarrow as pa
 
 from poprox_recommender.evaluation.writer import ParquetBatchedWriter
 
@@ -11,7 +15,6 @@ class RecOutputs:
     base_dir: Path
 
     rec_writer: ParquetBatchedWriter
-    emb_writer: ParquetBatchedWriter
 
     def __init__(self, dir: Path):
         self.base_dir = dir
@@ -23,13 +26,6 @@ class RecOutputs:
         with :func:`pd.read_parquet`, and it will load the shareds from it.
         """
         return self.base_dir / "recommendations"
-
-    @property
-    def emb_temp_dir(self):
-        """
-        Temporary directory for embeddings.
-        """
-        return self.base_dir / "embeddings.tmp"
 
     @property
     def emb_file(self):
@@ -49,14 +45,38 @@ class RecOutputs:
 
         self.rec_dir.mkdir(exist_ok=True, parents=True)
         self.rec_writer = ParquetBatchedWriter(self.rec_dir / fn)
-        # since this is temp storage be fast
-        self.emb_temp_dir.mkdir(exist_ok=True, parents=True)
-        self.emb_writer = ParquetBatchedWriter(self.emb_temp_dir / fn, compression="snappy")
 
     def close(self):
         self.rec_writer.close()
-        self.emb_writer.close()
 
     def __getstate__(self):
         # only the base dir is pickled
         return {"base_dir": self.base_dir}
+
+
+class EmbeddingWriter:
+    """
+    Write embeddings to disk.
+
+    Can be used as a Ray actor.
+    """
+
+    outputs: RecOutputs
+    seen: set[UUID]
+    writer: ParquetBatchedWriter
+
+    def __init__(self, outs: RecOutputs):
+        self.outputs = outs
+        self.seen = set()
+        self.writer = ParquetBatchedWriter(self.outputs.emb_file, compression="snappy")
+
+    def write_embeddings(self, embeddings: dict[UUID, np.ndarray]):
+        rows = [{"article_id": str(aid), "embedding": emb} for (aid, emb) in embeddings.items() if aid not in self.seen]
+        self.seen |= embeddings.keys()
+        if rows:
+            # directly use pyarrow to avoid DF overhead, small but easy to avoid here
+            emb_tbl = pa.Table.from_pylist(rows)
+            self.writer.write_frame(emb_tbl)
+
+    def close(self):
+        self.writer.close()

@@ -1,5 +1,6 @@
 # pyright: basic
 import logging
+from dataclasses import dataclass
 from os import PathLike
 from typing import Protocol
 from uuid import UUID
@@ -20,6 +21,12 @@ logger = logging.getLogger(__name__)
 TITLE_LENGTH_LIMIT = 30
 
 
+@dataclass
+class NRMSArticleEmbedderConfig:
+    model_path: PathLike
+    device: str | None
+
+
 class ArticleEmbeddingModel(Protocol):
     """
     Interface exposed by article embedding models.
@@ -31,30 +38,29 @@ class ArticleEmbeddingModel(Protocol):
 
 
 class NRMSArticleEmbedder(Component):
+    config: NRMSArticleEmbedderConfig
+
     model: ArticleEmbeddingModel
     tokenizer: PreTrainedTokenizer | PreTrainedTokenizerFast
-    device: str | None
     embedding_cache: dict[UUID, th.Tensor]
 
-    def __init__(self, model_path: PathLike, device: str | None):
-        self.model_path = model_path
-        self.device = device
+    def __init__(self, config: NRMSArticleEmbedderConfig | None = None, **kwargs):
+        super().__init__(config, **kwargs)
 
-        checkpoint = load_file(model_path)
-        config = ModelConfig()
+        checkpoint = load_file(self.config.model_path)
+        model_cfg = ModelConfig()
         self.news_encoder = NewsEncoder(
-            model_file_path(config.pretrained_model),
-            config.num_attention_heads,
-            config.additive_attn_hidden_dim,
+            model_file_path(model_cfg.pretrained_model),
+            model_cfg.num_attention_heads,
+            model_cfg.additive_attn_hidden_dim,
         )
         self.news_encoder.load_state_dict(checkpoint)
-        self.news_encoder.to(device)
+        self.news_encoder.to(self.config.device)
 
-        plm_path = model_file_path(config.pretrained_model)
+        plm_path = model_file_path(model_cfg.pretrained_model)
         logger.debug("loading tokenizer from %s", plm_path)
 
         self.tokenizer = AutoTokenizer.from_pretrained(plm_path, cache_dir="/tmp/", clean_up_tokenization_spaces=True)
-        self.device = device
         self.embedding_cache = {}
 
     @torch_inference
@@ -81,7 +87,7 @@ class NRMSArticleEmbedder(Component):
                             article.headline, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
                         ),
                         dtype=th.int32,
-                    ).to(self.device)
+                    ).to(self.config.device)
                     for article in uncached
                 ]
             )
@@ -90,7 +96,10 @@ class NRMSArticleEmbedder(Component):
             # Step 4: embed the uncached articles
             uc_embeddings = self.news_encoder(uc_title_tokens)
             assert_tensor_size(
-                uc_embeddings, len(uncached), self.news_encoder.plm_hidden_size, label="uncached article embeddings"
+                uc_embeddings,
+                len(uncached),
+                self.news_encoder.plm_config.hidden_size,
+                label="uncached article embeddings",
             )
 
             # Step 5: store embeddings to cache & result
@@ -105,7 +114,10 @@ class NRMSArticleEmbedder(Component):
         embed_single_tensors = [cached[article.article_id] for article in article_set.articles]  # type: ignore
         embed_tensor = th.stack(embed_single_tensors)  # type: ignore
         assert_tensor_size(
-            embed_tensor, len(article_set.articles), self.news_encoder.plm_hidden_size, label="final article embeddings"
+            embed_tensor,
+            len(article_set.articles),
+            self.news_encoder.plm_config.hidden_size,
+            label="final article embeddings",
         )
 
         # Step 7: put the embedding tensor on the output
@@ -115,6 +127,8 @@ class NRMSArticleEmbedder(Component):
 
 
 class EmbeddingCopier(Component):
+    config: None
+
     @torch_inference
     def __call__(self, candidate_set: CandidateSet, selected_set: CandidateSet) -> CandidateSet:
         """

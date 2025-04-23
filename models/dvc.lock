@@ -1,0 +1,35 @@
+schema: '2.0'
+stages:
+  train-model:
+    cmd: python -m poprox_recommender.training.train
+    deps:
+    - path: ../data/MINDlarge_dev
+      hash: md5
+      md5: a90bc1810ca5c0c4c4ef4320474cb67f.dir
+      size: 322720668
+      nfiles: 5
+    - path: ../data/MINDlarge_post_dev
+      hash: md5
+      md5: b46257fa21d5847dbb140fffee7bc289.dir
+      size: 65658285
+      nfiles: 1
+    - path: ../data/MINDlarge_post_test
+      hash: md5
+      md5: 76ef57e4d4f5c9c965bfc4b99334ce84.dir
+      size: 112514303
+      nfiles: 1
+    - path: ../data/MINDlarge_post_train
+      hash: md5
+      md5: 6b312ce0fa94e51252cc4b659b351d10.dir
+      size: 1163364294
+      nfiles: 3
+    - path: ../src/poprox_recommender/training/train.py
+      hash: md5
+      md5: 3be62a9cb08ed5924c9a27a936584d65
+      size: 5127
+    outs:
+    - path: nrms-mind
+      hash: md5
+      md5: 99c1d4b8c051bd207ca0929a87c26754.dir
+      size: 1571629281
+      nfiles: 21

@@ -33,7 +33,7 @@ class MindData(EvalData):
     behavior_df: pd.DataFrame
     behavior_id_map: dict[UUID, str]
 
-    def __init__(self, archive: str = "MINDlarge_dev"):
+    def __init__(self, archive: str = "MINDsmall_dev"):
         news_df, behavior_df = load_mind_frames(archive)
         # index data frames for quick lookup of users & articles
         self.news_df = news_df.set_index("id")
@@ -139,7 +139,7 @@ class MindData(EvalData):
         return article
 
 
-def load_mind_frames(archive: str = "MINDlarge_dev") -> tuple[pd.DataFrame, pd.DataFrame]:
+def load_mind_frames(archive: str = "MINDsmall_dev") -> tuple[pd.DataFrame, pd.DataFrame]:
     data = project_root() / "data"
     logger.info("loading MIND data from %s", archive)
     with zipfile.ZipFile(data / f"{archive}.zip") as zf:

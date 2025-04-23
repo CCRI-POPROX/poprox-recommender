@@ -1,7 +1,9 @@
 name: Check Data Pipeline
 
 on:
-  pull_request:
+  # temporarily disable the data pipeline checks, they are super expensive
+  # pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -31,11 +33,14 @@ jobs:
           python-version-file: ".python-version"
 
       - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=data
+        run: |
+          uv sync --extra=cpu --no-default-groups --group=data  --extra=cpu
+          echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
         run: |
-          uv run dvc pull
+          dvc config --local cache.type hardlink
+          dvc pull
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -73,11 +78,14 @@ jobs:
           python-version-file: ".python-version"
 
       - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=data
+        run: |
+          uv sync --extra=cpu --no-default-groups --group=data --extra=cpu
+          echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
         run: |
-          uv run dvc pull
+          dvc config --local cache.type hardlink
+          dvc pull
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
