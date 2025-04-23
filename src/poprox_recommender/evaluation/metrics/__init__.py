@@ -8,7 +8,8 @@ from lenskit.metrics import call_metric
 from lenskit.metrics.ranking import NDCG, RecipRank
 
 from poprox_concepts import Article, CandidateSet
-from poprox_recommender.evaluation.metrics.gini_topics import gini_coeff
+from poprox_recommender.evaluation.metrics.gini import gini_coeff
+from poprox_recommender.evaluation.metrics.gini_topics import gini_topics
 from poprox_recommender.evaluation.metrics.k_coverage import k_coverage_score
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
@@ -71,15 +72,16 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
         else:
             single_rbo5 = None
             single_rbo10 = None
-
         rbe = rank_bias_entropy(ranked, k=10, d=0.5)
         gini = gini_coeff(ranked)
+        gini_over_topics = gini_topics(ranked)
         k_coverage = k_coverage_score(ranked, reranked, k=1)
         lip = least_item_promoted(ranked, reranked, k=10)
 
         logger.debug(
             "profile %s rec %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f",
-            " LIP=%0.3f, KCoverage=%0.3f, RBE=%0.3f, Gini=%0.3f",
+            "RBO@5=%0.3f, RBO@10=%0.3f",
+            " LIP=%0.3f, KCoverage=%0.3f, RBE=%0.3f, Gini=%0.3f, Gini_=%0.3f",
             profile_id,
             name,
             single_ndcg5,
@@ -87,10 +89,11 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
             single_rr,
             single_rbo5 or -1.0,
             single_rbo10 or -1.0,
+            lip,
+            k_coverage,
             rbe,
             gini,
-            k_coverage,
-            lip,
+            gini_over_topics,
         )
 
         results.append(
@@ -108,6 +111,7 @@ def measure_profile_recs(profile: ProfileRecs) -> list[dict[str, Any]]:
                 "RBO@10": single_rbo10,
                 "rank_based_entropy": rbe,
                 "gini_index": gini,
+                "gini_topics": gini_over_topics,
                 "k_coverage": k_coverage,
                 "least_item_promoted": lip,
             }

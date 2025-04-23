@@ -13,11 +13,14 @@ def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.5):
     weighted_counts = defaultdict(float)
 
     for rank, article in enumerate(top_k_articles):
-        weight = d ** (rank + 1)  # d is the rank-based discount
-        article_details = mind_data.lookup_article(uuid=article.article_id)
-        mentions = [mention.entity.name for mention in article_details.mentions]
+        weight = d ** (rank + 1)
+        mentions = article.mentions
+        if not mentions:
+            article_details = mind_data.lookup_article(uuid=article.article_id)
+            mentions = article_details.mentions
 
-        for topic in mentions:
+        for mention in mentions:
+            topic = mention.entity.name
             weighted_counts[topic] += float(weight)
 
     total_weight = sum(weighted_counts.values())
