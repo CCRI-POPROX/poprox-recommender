@@ -1,11 +1,10 @@
 # pyright: basic
-import os
-from importlib.metadata import version
 
 from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts import CandidateSet, InterestProfile
-from poprox_concepts.domain import RecommenderInfo
+
+# Remove RecommenderInfo import
 from poprox_recommender.components.rankers.openai_ranker import LLMRanker, LLMRankerConfig
 from poprox_recommender.components.rewriters.openai_rewriter import LLMRewriter, LLMRewriterConfig
 
@@ -26,7 +25,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     rewrite_cfg = LLMRewriterConfig()
     builder.add_component("recommender", LLMRewriter, rewrite_cfg, recommendations=ranked, interest_profile=i_profile)
 
-    # Add version metadata for HTTP response
+    # Remove RecommenderInfo usage
     # Get the git SHA from environment or use package version as fallback
-    git_sha = os.environ.get("GIT_SHA", version("poprox-recommender"))
-    builder.add_metadata(RecommenderInfo(name="llm-rank-rewrite", version=git_sha))
+    # git_sha = os.environ.get("GIT_SHA", version("poprox-recommender"))
+    # builder.add_metadata(RecommenderInfo(name="llm-rank-rewrite", version=git_sha))

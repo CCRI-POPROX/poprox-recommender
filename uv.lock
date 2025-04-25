@@ -2894,7 +2894,6 @@ requires-dist = [
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
     { name = "openai", specifier = ">=0.27.0,<1" },
-    { name = "pandas", marker = "extra == 'eval'", specifier = "~=2.0" },
     { name = "poprox-concepts", git = "https://github.com/CCRI-POPROX/poprox-concepts.git" },
     { name = "rich", specifier = "~=13.9" },
     { name = "safetensors", specifier = ">=0.4,<1" },
