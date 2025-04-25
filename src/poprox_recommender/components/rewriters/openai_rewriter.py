@@ -73,6 +73,7 @@ class LLMRewriter(Component):
             Clicked article localities: {", ".join(clean_profile["click_locality_counts"])}
 
             Headline to rewrite: {art.headline}
+            Article text: {art.body}
             """
 
             response = client.responses.parse(

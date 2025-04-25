@@ -91,7 +91,7 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
         """
 
         response = client.responses.parse(
-            model=self.config.model, instructions=prompt, input=input_txt, text_format=LlmResponse
+            model=self.config.model, instructions=prompt, input=input_txt, text_format=LlmResponse, temperature=0.5
         )
 
         response = response.output_parsed
