@@ -1,11 +1,14 @@
 import os
 
 import openai
+from dotenv import load_dotenv
 from lenskit.pipeline import Component
 from pydantic import BaseModel, Field
 
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_concepts.domain import RecommendationList
+
+load_dotenv()
 
 
 class LlmResponse(BaseModel):
