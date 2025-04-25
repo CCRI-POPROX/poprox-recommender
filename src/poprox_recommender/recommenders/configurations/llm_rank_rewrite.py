@@ -12,7 +12,7 @@ from poprox_recommender.components.rewriters.openai_rewriter import LLMRewriter,
 def configure(builder: PipelineBuilder, num_slots: int, device: str):
     # Define inputs
     i_candidates = builder.create_input("candidate", CandidateSet)
-    builder.create_input("clicked", CandidateSet)
+    i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
 
     # LLM-based ranking
@@ -23,7 +23,9 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # LLM-based rewriting
     rewrite_cfg = LLMRewriterConfig()
-    builder.add_component("recommender", LLMRewriter, rewrite_cfg, recommendations=ranked, interest_profile=i_profile)
+    builder.add_component(
+        "recommender", LLMRewriter, rewrite_cfg, recommendations=ranked, interest_profile=i_profile, clicked=i_clicked
+    )
 
     # Remove RecommenderInfo usage
     # Get the git SHA from environment or use package version as fallback

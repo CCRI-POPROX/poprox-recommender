@@ -1,12 +1,15 @@
-import json
 import os
-from typing import List, Literal, Optional
 
 import openai
 from lenskit.pipeline import Component
 from pydantic import BaseModel, Field
 
-from poprox_concepts.domain import Article, RecommendationList
+from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import RecommendationList
+
+
+class LlmResponse(BaseModel):
+    headline: str
 
 
 class LLMRewriterConfig(BaseModel):
@@ -14,86 +17,69 @@ class LLMRewriterConfig(BaseModel):
     Configuration for the LLM-powered rewriter.
     """
 
-    model: str = "gpt-4.1-mini"
+    model: str = "gpt-4.1"
     openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
-    fields_to_rewrite: List[Literal["headline", "subhead", "body", "summary"]] = ["summary"]
-
-
-class RewrittenArticle(BaseModel):
-    """
-    Structured output for a single rewritten article.
-    """
-
-    headline: Optional[str] = None
-    subhead: Optional[str] = None
-    body: Optional[str] = None
-    summary: Optional[str] = None
-
-
-class RewrittenOutputs(BaseModel):
-    """
-    Structured output: list of rewritten article fields.
-    """
-
-    articles: List[RewrittenArticle]
 
 
 class LLMRewriter(Component):
     config: LLMRewriterConfig
 
-    def __call__(self, recommendations: RecommendationList, interest_profile: dict) -> RecommendationList:
-        # configure OpenAI key
-        openai.api_key = self.config.openai_api_key
+    def __call__(
+        self, recommendations: RecommendationList, interest_profile: InterestProfile, clicked: CandidateSet
+    ) -> RecommendationList:
+        with open("prompts/rewrite.txt", "r") as f:
+            prompt = f.read()
 
-        # collect article data to rewrite
-        items = []
-        for art in recommendations.articles:
-            article_data = {}
-            for field in self.config.fields_to_rewrite:
-                article_data[field] = getattr(art, field, None) or ""
-            items.append(article_data)
+        client = openai.OpenAI(api_key=self.config.openai_api_key)
 
-        prompt = (
-            f"Given the user interest profile: {interest_profile}, rewrite the specified fields "
-            f"of each article to better match interests. The fields to rewrite are: {self.config.fields_to_rewrite}. "
-            "Respond with a JSON object with field 'articles' containing a list of objects, each with "
-            f"only the rewritten fields ({', '.join(self.config.fields_to_rewrite)}). "
-            "Do not include extra text. Here are the article fields to rewrite:\n" + json.dumps(items, indent=2)
+        clicked_articles = clicked.articles if clicked else []
+        if not clicked_articles:
+            recent_clicked_headlines = []
+        else:
+            recent_clicked_headlines = [art.headline for art in clicked_articles][-5:]
+
+        # build concise profile for prompt
+        clean_profile = {
+            "topics": [
+                t.entity_name
+                for t in sorted(
+                    interest_profile.onboarding_topics, key=lambda t: getattr(t, "preference", 0), reverse=True
+                )
+            ],
+            "click_topic_counts": getattr(interest_profile, "click_topic_counts", None),
+            "click_locality_counts": getattr(interest_profile, "click_locality_counts", None),
+        }
+        # Sort the click counts from most clicked to least clicked
+        clean_profile["click_topic_counts"] = (
+            [t for t, c in sorted(clean_profile["click_topic_counts"].items(), key=lambda x: x[1], reverse=True)]
+            if clean_profile["click_topic_counts"]
+            else []
+        )
+        clean_profile["click_locality_counts"] = (
+            [t for t, c in sorted(clean_profile["click_locality_counts"].items(), key=lambda x: x[1], reverse=True)]
+            if clean_profile["click_locality_counts"]
+            else []
         )
 
-        response = openai.ChatCompletion.create(model=self.config.model, messages=[{"role": "user", "content": prompt}])
-        content = response.choices[0].message.content
-        data = RewrittenOutputs.model_validate_json(content)
+        # rewrite article headlines
+        for art in recommendations.articles:
+            # build prompt
+            input_txt = f"""User topics of interest (from most to least important): {", ".join(clean_profile["topics"])}
+            Recent clicked articles: {", ".join(recent_clicked_headlines)}
+            Clicked article topics: {", ".join(clean_profile["click_topic_counts"])}
+            Clicked article localities: {", ".join(clean_profile["click_locality_counts"])}
 
-        # apply rewrites while ensuring immutability
-        new_arts = []
-        for art, rewritten in zip(recommendations.articles, data.articles):
-            # Create a dictionary from the original article
-            if hasattr(art, "model_dump"):
-                article_data = art.model_dump()
-            else:
-                # Fallback for non-pydantic models
-                article_data = {
-                    k: getattr(art, k) for k in dir(art) if not k.startswith("_") and not callable(getattr(art, k))
-                }
+            Headline to rewrite: {art.headline}
+            """
 
-            # Update with rewritten fields
-            for field in self.config.fields_to_rewrite:
-                rewritten_value = getattr(rewritten, field)
-                if rewritten_value:
-                    article_data[field] = rewritten_value
+            response = client.responses.parse(
+                model=self.config.model,
+                instructions=prompt,
+                input=input_txt,
+                temperature=0.5,
+                text_format=LlmResponse,
+            )
+            # Update the article headline with the rewritten one
+            art.headline = response.parsed_output.headline
 
-            # Create a new Article instance
-            if hasattr(Article, "parse_obj"):
-                # Legacy Pydantic v1
-                new_art = Article.parse_obj(article_data)
-            elif hasattr(Article, "model_validate"):
-                # Pydantic v2
-                new_art = Article.model_validate(article_data)
-            else:
-                # Generic fallback (less ideal)
-                new_art = type(art)(**article_data)
-
-            new_arts.append(new_art)
-
-        return RecommendationList(articles=new_arts)
+        return recommendations
