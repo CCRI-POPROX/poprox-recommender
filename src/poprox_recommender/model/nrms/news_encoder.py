@@ -9,7 +9,8 @@ class NewsEncoder(torch.nn.Module):
     def __init__(self, model_path, num_attention_heads, additive_attn_hidden_dim):
         super(NewsEncoder, self).__init__()
 
-        self.plm = AutoModel.from_pretrained(model_path, cache_dir="/tmp/")
+        self.plm_config = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/")
+        self.plm = AutoModel.from_config(self.plm_config)
         self.plm.requires_grad_(False)
 
         self.plm_hidden_size = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/").hidden_size
