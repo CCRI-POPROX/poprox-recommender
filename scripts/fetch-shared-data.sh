@@ -5,7 +5,7 @@ dvc config --local cache.type hardlink
 echo "fetching data for $GH_EVT on $GH_REPO"
 
 if ! dvc pull -r public -R models tests; then
-    if [ "$GH_EVT" = pull_request -a "$GH_REPO" = "CCRI-POPROX/poprox-recommender" ]; then
+    if [ ! -z "$AWS_ACCESS_KEY_ID" ]; then
         echo '::warning::Public repository missing data, trying private'
         if ! dvc pull -R models tests; then
             echo '::error::Private repository not available or missing model/test data'
