@@ -84,10 +84,10 @@ def train(device, load_checkpoint):
         eval_dataset=eval_dataset,
     )
 
-    """check for NaN"""
-    torch.autograd.set_detect_anomaly(True)
-
     trainer.train()
+
+    """
+    torch.autograd.set_detect_anomaly(True)
 
     # check gradients for NaNs after training
     def check_nan(tensor, name):
@@ -97,6 +97,7 @@ def train(device, load_checkpoint):
     for param_name, param_value in model.named_parameters():
         if param_value.grad is not None:
             check_nan(param_value.grad, f"gradient[{param_name}]")
+    """
 
     # 4. save and extract tensors
     save_model(model)

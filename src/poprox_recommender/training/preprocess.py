@@ -100,8 +100,8 @@ if __name__ == "__main__":
     The followings need modification based on need
     """
     root = project_root()
-    train_dir = root / "data/MINDsmall_train"
-    val_dir = root / "data/MINDsmall_dev"
+    train_dir = root / "data/MINDlarge_train"
+    val_dir = root / "data/MINDlarge_dev"
     test_dir = root / "data/MINDlarge_test"
 
     post_train_dir = root / "data/MINDlarge_post_train"
