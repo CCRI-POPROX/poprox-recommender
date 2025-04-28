@@ -34,8 +34,8 @@ stages:
       size: 103456245
     - path: models/nrms-mind/
       hash: md5
-      md5: 509003cd59ab5b5571e7961895e33434.dir
-      size: 2222208485
+      md5: e1b38b965f2bcb3f36edf5a99f37cad7.dir
+      size: 2224727458
       nfiles: 33
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
@@ -61,8 +61,8 @@ stages:
       size: 30948560
     - path: models/nrms-mind/
       hash: md5
-      md5: 509003cd59ab5b5571e7961895e33434.dir
-      size: 2222208485
+      md5: e1b38b965f2bcb3f36edf5a99f37cad7.dir
+      size: 2224727458
       nfiles: 33
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
@@ -114,8 +114,8 @@ stages:
       size: 30948560
     - path: models/nrms-mind/
       hash: md5
-      md5: 509003cd59ab5b5571e7961895e33434.dir
-      size: 2222208485
+      md5: e1b38b965f2bcb3f36edf5a99f37cad7.dir
+      size: 2224727458
       nfiles: 33
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
