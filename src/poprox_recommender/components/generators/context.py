@@ -166,7 +166,7 @@ refine_system_prompt = (
 
 
 class ContextGeneratorConfig(BaseModel):
-    similarity_threshold: float = 0.3
+    similarity_threshold: float = 0.4
 
 
 class ContextGenerator(Component):
@@ -189,7 +189,7 @@ class ContextGenerator(Component):
         interest_profile: InterestProfile,
         similarity_threshold: float | None,
     ) -> RecommendationList:
-        similarity_threshold = 0.3 if similarity_threshold is None else similarity_threshold
+        similarity_threshold = 0.4 if similarity_threshold is None else similarity_threshold
 
         logger.error(f"clicked embeddings {len(clicked.embeddings)}")
         logger.error(f"selected embeddings {len(selected.embeddings)}")
