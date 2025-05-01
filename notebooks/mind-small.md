@@ -47,7 +47,7 @@ from poprox_recommender.eval_tables import EvalTable
 ### 1. 2 Loading Data
 
 ```{code-cell} ipython3
-mind_small_user_metrics = pd.read_csv("../outputs/mind-small/profile-metrics.csv.gz")
+mind_small_user_metrics = pd.read_csv("../outputs/mind-small-profile-metrics.csv.gz")
 mind_small_user_metrics.head()
 ```
 
