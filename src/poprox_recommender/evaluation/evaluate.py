@@ -34,7 +34,7 @@ from lenskit.parallel.ray import init_cluster
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
-from poprox_recommender.evaluation.metrics import ProfileRecs, measure_batch, measure_profile_recs
+from poprox_recommender.evaluation.metrics import ProfileRecs, measure_profile_recs
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
@@ -134,6 +134,14 @@ def main():
     out_fn = project_root() / "outputs" / eval_name / "metrics.csv"
     logger.info("saving evaluation to %s", out_fn)
     agg_metrics.to_csv(out_fn)
+
+
+@ray.remote(num_cpus=1)
+def measure_batch(profiles: list[ProfileRecs]) -> list[list[dict[str, Any]]]:
+    """
+    Measure a batch of profile recommendations.
+    """
+    return [measure_profile_recs(profile) for profile in profiles]
 
 
 if __name__ == "__main__":
