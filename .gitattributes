@@ -1,5 +1,5 @@
 # GitHub syntax highlighting
 pixi.lock linguist-language=YAML linguist-generated=true
 uv.lock linguist-language=TOML linguist-generated=true
-dvc.lock linguist-language=YAML linguist-generated=TRUE
+dvc.lock linguist-language=YAML linguist-generated=true
 notebooks/*.ipynb linguist-generated=true
