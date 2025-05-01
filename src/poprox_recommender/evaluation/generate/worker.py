@@ -1,3 +1,4 @@
+import copyreg
 import itertools as it
 
 import ray
@@ -160,9 +161,13 @@ def dynamic_remote(task_or_actor):
         # Let's take a wild guess that 20 MP units are enough per worker, so a
         # 80-MP A40 can theoretically run 4 workers.  If we do not request GPUs,
         # Ray will keep us from accessing them.
+        gpu_frac = 20 / _cuda_props.multi_processor_count
+        logger.debug("setting up GPU task with %d CPU, %.3f GPU", pc.backend_threads, gpu_frac)
         remote = ray.remote(
             num_cpus=pc.backend_threads,
-            num_gpus=20 / _cuda_props.multi_processor_count,
+            num_gpus=gpu_frac,
+            # reuse worker processes between batches
+            max_calls=0,
         )
     else:
         # if we don't have CUDA, don't request GPU
@@ -173,3 +178,13 @@ def dynamic_remote(task_or_actor):
         )
 
     return remote(task_or_actor)
+
+
+def _pickle_tensor(tensor: torch.Tensor):
+    """
+    Pickle support function to pickle a tensor, transferring to CPU.
+    """
+    return torch.from_numpy, (tensor.cpu().numpy(),)
+
+
+copyreg.pickle(torch.Tensor, _pickle_tensor)
