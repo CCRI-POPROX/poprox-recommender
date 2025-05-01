@@ -8,12 +8,15 @@ import pandas as pd
 import pyarrow as pa
 import torch
 import zstandard
+from lenskit.logging import get_logger
 from lenskit.pipeline import PipelineState
 from pydantic import BaseModel
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.evaluation.writer import ParquetBatchedWriter
+
+logger = get_logger(__name__)
 
 
 class OfflineRecommendations(BaseModel):
@@ -33,8 +36,6 @@ class RecOutputs:
     """
 
     base_dir: Path
-
-    rec_writer: ParquetBatchedWriter
 
     def __init__(self, dir: Path):
         self.base_dir = dir
@@ -68,25 +69,6 @@ class RecOutputs:
         """
         return self.base_dir / "embeddings.parquet"
 
-    def open(self, part: int | str | None):
-        """
-        Open the writers for collecting recommendation output.
-        """
-        if part is None:
-            fn = "data.parquet"
-        else:
-            fn = f"part-{part}.parquet"
-
-        self.rec_dir.mkdir(exist_ok=True, parents=True)
-        self.rec_writer = ParquetBatchedWriter(self.rec_dir / fn)
-
-    def close(self):
-        self.rec_writer.close()
-
-    def __getstate__(self):
-        # only the base dir is pickled
-        return {"base_dir": self.base_dir}
-
 
 class RecommendationWriter(Protocol):
     """
@@ -108,18 +90,20 @@ class ParquetRecommendationWriter:
     Can be used as a Ray actor.
     """
 
+    path: Path
     writer: ParquetBatchedWriter
 
     def __init__(self, outs: RecOutputs):
+        self.path = outs.rec_parquet_file
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = ParquetBatchedWriter(outs.rec_parquet_file, compression="snappy")
 
     def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
         assert isinstance(request, RecommendationRequest)
+        logger.debug("writing recommendations to Parquet", profile_id=request.interest_profile.profile_id)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
         profile = request.interest_profile.profile_id
-        assert profile is not None
 
         # get the different recommendation lists to record
         recs = pipeline_state["recommender"]
@@ -180,6 +164,7 @@ class JSONRecommendationWriter:
 
     def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
         assert isinstance(request, RecommendationRequest)
+        logger.debug("writing recommendations to Parquet", profile_id=request.interest_profile.profile_id)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
         profile = request.interest_profile.profile_id

@@ -27,16 +27,19 @@ stages:
         - outputs/mind-val/${item}/embeddings.parquet
 
   measure-mind-val:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev mind-val
-    deps:
-      - src/poprox_recommender/evaluation/evaluate.py
-      - data/MINDlarge_dev.zip
-      - outputs/mind-val/recommendations
-    outs:
-      - outputs/mind-val/profile-metrics.csv.gz
-    metrics:
-      - outputs/mind-val/metrics.csv:
-          cache: false
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev mind-val ${item}
+      deps:
+        - src/poprox_recommender/evaluation/evaluate.py
+        - src/poprox_recommender/evaluation/metrics/
+        - data/MINDlarge_dev.zip
+        - outputs/mind-val/${item}/recommendations.parquet
+      outs:
+        - outputs/mind-val/${item}/profile-metrics.csv.gz
+      metrics:
+        - outputs/mind-val/${item}/metrics.json:
+            cache: false
 
   recommend-mind-small:
     foreach: ${pipelines}
@@ -53,16 +56,19 @@ stages:
         - outputs/mind-small/${item}/embeddings.parquet
 
   measure-mind-small:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small
-    deps:
-      - src/poprox_recommender/evaluation/evaluate.py
-      - data/MINDlarge_dev.zip
-      - outputs/mind-small/recommendations
-    outs:
-      - outputs/mind-small/profile-metrics.csv.gz
-    metrics:
-      - outputs/mind-small/metrics.csv:
-          cache: false
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small ${item}
+      deps:
+        - src/poprox_recommender/evaluation/evaluate.py
+        - src/poprox_recommender/evaluation/metrics/
+        - data/MINDlarge_dev.zip
+        - outputs/mind-small/${item}/recommendations.parquet
+      outs:
+        - outputs/mind-small/${item}/profile-metrics.csv.gz
+      metrics:
+        - outputs/mind-small/${item}/metrics.json:
+            cache: false
 
   # small subset for quick testing
   recommend-mind-subset:
@@ -80,13 +86,16 @@ stages:
         - outputs/mind-subset/${item}/embeddings.parquet
 
   measure-mind-subset:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset
-    deps:
-      - src/poprox_recommender/evaluation/evaluate.py
-      - data/MINDlarge_dev.zip
-      - outputs/mind-subset/recommendations
-    outs:
-      - outputs/mind-subset/profile-metrics.csv.gz
-    metrics:
-      - outputs/mind-subset/metrics.csv:
-          cache: false
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset ${item}
+      deps:
+        - src/poprox_recommender/evaluation/evaluate.py
+        - src/poprox_recommender/evaluation/metrics/
+        - data/MINDlarge_dev.zip
+        - outputs/mind-subset/${item}/recommendations.parquet
+      outs:
+        - outputs/mind-subset/${item}/profile-metrics.csv.gz
+      metrics:
+        - outputs/mind-subset/${item}/metrics.json:
+            cache: false

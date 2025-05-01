@@ -47,9 +47,9 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
             init_cluster(global_logging=True)
 
             writers = [
-                ray.remote(ParquetRecommendationWriter).remote(outs),
-                ray.remote(JSONRecommendationWriter).remote(outs),
-                ray.remote(EmbeddingWriter).remote(outs),
+                ray.remote(num_cpus=1)(ParquetRecommendationWriter).remote(outs),
+                ray.remote(num_cpus=1)(JSONRecommendationWriter).remote(outs),
+                ray.remote(num_cpus=1)(EmbeddingWriter).remote(outs),
             ]
 
             task = dynamic_remote(recommend_batch)
@@ -68,14 +68,14 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
             logger.debug("waiting for remaining actors")
             while tasks:
                 done, tasks = ray.wait(tasks)
+                for t in done:
+                    ray.get(t)
                 pb.update(sum(ray.get(r) for r in done))
 
             logger.info("closing writers")
             close = [w.close.remote() for w in writers]
-            while close:
-                _, close = ray.wait(close)
-
-            logger.info("finished recommending")
+            for cr in close:
+                ray.get(cr)
 
         else:
             logger.info("starting serial evaluation")
@@ -140,12 +140,17 @@ def recommend_batch(pipeline, batch: list[RecommendationRequest], writers: list[
         state = ray.put(state)
         # rate-limit our requests to the writers
         while len(writes) >= 10:
-            _done, writes = ray.wait(writes)
-        writes += [w.write_recommendations.remote(request, state) for w in writers]
+            done, writes = ray.wait(writes)
+            for t in done:
+                ray.get(t)
+        for w in writers:
+            writes.append(w.write_recommendations.remote(request, state))
 
     # wait for outstanding writes on this batch
     while writes:
-        _done, writes = ray.wait(writes)
+        done, writes = ray.wait(writes)
+        for t in done:
+            ray.get(t)
 
     return len(batch)
 

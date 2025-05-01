@@ -412,8 +412,8 @@ stages:
       nfiles: 21
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
-      md5: 346a81008e776733440726114ccc1da6.dir
-      size: 17483
+      md5: a1ecf5637b183d2380dab2680970ae96.dir
+      size: 17497
       nfiles: 4
     - path: src/poprox_recommender/recommenders/configurations/nrms.py
       hash: md5
@@ -422,16 +422,16 @@ stages:
     outs:
     - path: outputs/mind-subset/nrms/embeddings.parquet
       hash: md5
-      md5: c342ec8e5a857a7ed6f54362d0ef080a
-      size: 110787811
+      md5: 5be0e6b8d8ac5db91631091652c90ebb
+      size: 110783904
     - path: outputs/mind-subset/nrms/recommendations.ndjson.zst
       hash: md5
-      md5: ef4d4adbfaca6b382aad3b96712ff13e
-      size: 10287389
+      md5: 4babd50114d9a3de61d2a8e5f3c7386d
+      size: 10283655
     - path: outputs/mind-subset/nrms/recommendations.parquet
       hash: md5
-      md5: 2b85af6abf9be8e9a8bb4d661cde9488
-      size: 4
+      md5: 4502b8fda80db8af053328c2a853b919
+      size: 96719
   recommend-mind-subset@nrms_rrf_static_user:
     cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000
       -o outputs/mind-subset/nrms_rrf_static_user nrms_rrf_static_user
@@ -467,3 +467,29 @@ stages:
       hash: md5
       md5: ab6086c9744f9069d0f2f44f54a0fec5
       size: 97638
+  measure-mind-subset@nrms_rrf_static_user:
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset
+      nrms_rrf_static_user
+    deps:
+    - path: data/MINDlarge_dev.zip
+      hash: md5
+      md5: c93fa1728e3537649b441c78cce5e6f1
+      size: 103456245
+    - path: outputs/mind-subset/nrms_rrf_static_user/recommendations.parquet
+      hash: md5
+      md5: ab6086c9744f9069d0f2f44f54a0fec5
+      size: 97638
+    - path: src/poprox_recommender/evaluation/
+      hash: md5
+      md5: 05969871a245394730ffa1676b79d85b.dir
+      size: 28620
+      nfiles: 9
+    outs:
+    - path: outputs/mind-subset/nrms_rrf_static_user/metrics.json
+      hash: md5
+      md5: f192fabdb54726d7c9283d492b3d2096
+      size: 90
+    - path: outputs/mind-subset/nrms_rrf_static_user/profile-metrics.csv.gz
+      hash: md5
+      md5: 14839d085285746a3184d753202d113e
+      size: 27312
