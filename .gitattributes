@@ -1,3 +1,4 @@
 # GitHub syntax highlighting
 pixi.lock linguist-language=YAML linguist-generated=true
 uv.lock linguist-language=TOML linguist-generated=true
+notebooks/*.ipynb linguist-generated=true
