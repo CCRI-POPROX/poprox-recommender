@@ -3,11 +3,11 @@ import itertools as it
 
 import ray
 import torch
-from lenskit.logging import get_logger, item_progress
+from humanize import naturaldelta
+from lenskit.logging import Task, get_logger, item_progress
 from lenskit.parallel import get_parallel_config
 from lenskit.parallel.ray import init_cluster
 from lenskit.pipeline import PipelineState
-from lenskit.util import Stopwatch
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import CandidateSet
@@ -24,7 +24,7 @@ from poprox_recommender.recommenders.load import get_pipeline
 
 logger = get_logger(__name__)
 
-BATCH_SIZE = 10
+BATCH_SIZE = 25
 STAGES = ["final", "ranked", "reranked"]
 
 
@@ -39,8 +39,14 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
         logger.info("running on subset of %d profiles", n_profiles)
         profile_iter = it.islice(profile_iter, n_profiles)
 
-    timer = Stopwatch()
-    with item_progress("recommend", total=n_profiles) as pb:
+    with (
+        item_progress("recommend", total=n_profiles) as pb,
+        Task(
+            f"generate-{dataset}-{pipeline}",
+            tags=["poprox", "generate", dataset, pipeline],
+        ) as task,
+    ):
+        task.save_to_file(outs.base_dir / "task.json")
         pc = get_parallel_config()
         if pc.processes > 1:
             logger.info("starting evaluation with %d workers", pc.processes)
@@ -52,7 +58,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
                 ray.remote(num_cpus=1)(EmbeddingWriter).remote(outs),
             ]
 
-            task = dynamic_remote(recommend_batch)
+            rec_batch = dynamic_remote(recommend_batch)
 
             tasks = []
             for batch in it.batched(profile_iter, BATCH_SIZE):
@@ -61,16 +67,21 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
                     logger.debug("waiting for workers to finish")
                     done, tasks = ray.wait(tasks)
                     # update # of finished items
-                    pb.update(sum(ray.get(r) for r in done))
+                    for rh in done:
+                        n, btask = ray.get(rh)
+                        pb.update(n)
+                        task.add_subtask(btask)
 
-                tasks.append(task.remote(pipeline, batch, writers))
+                tasks.append(rec_batch.remote(pipeline, batch, writers))
 
             logger.debug("waiting for remaining actors")
             while tasks:
                 done, tasks = ray.wait(tasks)
-                for t in done:
-                    ray.get(t)
-                pb.update(sum(ray.get(r) for r in done))
+                for rh in done:
+                    for rh in done:
+                        n, btask = ray.get(rh)
+                        pb.update(n)
+                        task.add_subtask(btask)
 
             logger.info("closing writers")
             close = [w.close.remote() for w in writers]
@@ -95,8 +106,10 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
             for w in writers:
                 w.close()
 
-    timer.stop()
-    logger.info("finished recommending in %s", timer)
+    logger.info("finished recommending in %s", naturaldelta(task.duration) if task.duration else "unknown time")
+    cpu = task.total_cpu()
+    if cpu:
+        logger.info("recommendation took %.2f CPU-hours", cpu / 3600)
 
 
 def recommend_for_profile(pipeline: str, request: RecommendationRequest) -> PipelineState:
@@ -134,25 +147,26 @@ def recommend_batch(pipeline, batch: list[RecommendationRequest], writers: list[
 
     writes = []
 
-    for request in batch:
-        state = recommend_for_profile(pipeline, request)
-        # put once, so all actors share the object
-        state = ray.put(state)
-        # rate-limit our requests to the writers
-        while len(writes) >= 10:
+    with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
+        for request in batch:
+            state = recommend_for_profile(pipeline, request)
+            # put once, so all actors share the object
+            state = ray.put(state)
+            # rate-limit our requests to the writers
+            while len(writes) >= 10:
+                done, writes = ray.wait(writes)
+                for t in done:
+                    ray.get(t)
+            for w in writers:
+                writes.append(w.write_recommendations.remote(request, state))
+
+        # wait for outstanding writes on this batch
+        while writes:
             done, writes = ray.wait(writes)
             for t in done:
                 ray.get(t)
-        for w in writers:
-            writes.append(w.write_recommendations.remote(request, state))
 
-    # wait for outstanding writes on this batch
-    while writes:
-        done, writes = ray.wait(writes)
-        for t in done:
-            ray.get(t)
-
-    return len(batch)
+    return len(batch), task
 
 
 def dynamic_remote(task_or_actor):
