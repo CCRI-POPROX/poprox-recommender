@@ -41,7 +41,7 @@ def main():
     path = Path("outputs") / name
 
     agg_results = {}
-    for mf in path.glob("*/metrics.json"):
+    for mf in sorted(path.glob("*/metrics.json"), key=lambda p: p.as_posix()):
         pipe = mf.parent.name
         logger.info("reading pipeline metrics", pipeline=pipe, path=mf)
         metrics = json.loads(mf.read_text())
@@ -54,7 +54,7 @@ def main():
     rdf.to_csv(csv_out, index=True)
 
     prof_results = {}
-    for mf in path.glob("*/profile-metrics.csv.gz"):
+    for mf in sorted(path.glob("*/profile-metrics.csv.gz"), key=lambda p: p.as_posix()):
         pipe = mf.parent.name
         logger.info("reading pipeline profile metrics", pipeline=pipe, path=mf)
         metrics = pd.read_csv(mf).set_index("profile_id")
