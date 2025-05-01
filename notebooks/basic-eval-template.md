@@ -12,8 +12,6 @@ kernelspec:
   name: python3
 ---
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
-
 # Offline Evaluation Metrics Visualizations
 
 This notebook visualizes user-specific performance metrics of various recommenders in the mind-subset dataset to assess effectiveness and ranking overlap. We explore two metric groups:
@@ -25,95 +23,58 @@ This notebook visualizes user-specific performance metrics of various recommende
 > This is a *parameterized* notebook, and is used to render the other specific evaluation notebooks with [Papermill](https://papermill.readthedocs.io/en/latest/).  By default, it displays
 > the MIND Subset results, for easy editing.
 
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
-tags: [parameters]
----
+```{code-cell}
+:tags: [parameters]
+
 EVAL_NAME = "mind-subset"
 ```
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
-
 ## Setup
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
++++
 
 ### Importing Libraries
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
++++
 
 PyData packages:
 
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
+```{code-cell}
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 ```
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
-
 Local code and display support:
 
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
+```{code-cell}
 from IPython.display import HTML
 
 from poprox_recommender.eval_tables import EvalTable
 ```
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
-
 ### Loading Data
 
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
+```{code-cell}
 mind_subset_user_metrics = pd.read_csv(f"../outputs/{EVAL_NAME}-profile-metrics.csv.gz")
 mind_subset_user_metrics.head()
 ```
 
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
+```{code-cell}
 effectiveness_metrics = ["NDCG@5", "NDCG@10", "RR"]
 overlap_metrics = ["RBO@5", "RBO@10"]
 ```
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
-
 ## Results
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
++++
 
 ### Effectiveness Metrics
 
 NDCG measures how well the recommendations align with user test data, focusing on the top-k positions, such as the top 5 (NDCG@5) or top 10 (NDCG@10). Likewise, RR evaluates how well the recommender finds the most relevant item as the top result.
 
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
+```{code-cell}
 plt.figure(figsize=(12, 3))
 plt.subplots_adjust(wspace=0.3)
 
@@ -127,12 +88,7 @@ plt.show()
 
 The summary tables show the mean values, standard deviation, and quantiles (10%ile, Median, 90%ile), each accompanied by their respective 95% confidence intervals for effectiveness metrics across recommenders.
 
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
+```{code-cell}
 for metric in effectiveness_metrics:
     tw = EvalTable(mind_subset_user_metrics, "pipeline", metric)
     tw.add_stat("Mean", np.mean, ci=True)
@@ -142,17 +98,10 @@ for metric in effectiveness_metrics:
     display(HTML(tw.html_table()))
 ```
 
-+++ {"editable": true, "slideshow": {"slide_type": ""}}
-
 ### Ranking Overlap Metrics
 RBO measures the similarity between two ranked lists, evaluating how much overlap exists between pure top-k recommendations and the actual rankings produced after recommendations. RBO can be applied at different list depths to analyze performance consistency, such as RBO@5 and RBO@10.
 
-```{code-cell} ipython3
----
-editable: true
-slideshow:
-  slide_type: ''
----
+```{code-cell}
 plt.figure(figsize=(8, 3))
 plt.subplots_adjust(wspace=0.3)
 
@@ -166,7 +115,7 @@ plt.show()
 
 The summary tables show the mean values, standard deviation, and quantiles (10%ile, Median, 90%ile), each accompanied by their respective 95% confidence intervals for ranking overlap metrics across recommenders.
 
-```{code-cell} ipython3
+```{code-cell}
 for metric in overlap_metrics:
     tw = EvalTable(mind_subset_user_metrics, "pipeline", metric)
     tw.add_stat("Mean", np.mean, ci=True)
