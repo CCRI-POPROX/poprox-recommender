@@ -53,10 +53,10 @@ stages:
     deps:
     - path: basic-eval-template.md
       hash: md5
-      md5: ab8a298c4dea968bf73f5d8201af5f57
-      size: 4987
+      md5: 3ea6c439d84ecf54c608919271369c01
+      size: 4002
     outs:
     - path: basic-eval-template.ipynb
       hash: md5
-      md5: 3b1b7940011310b6dca476a43a3365fe
-      size: 7954
+      md5: 82a9639de3a8c1967be3305908b6ee71
+      size: 6716

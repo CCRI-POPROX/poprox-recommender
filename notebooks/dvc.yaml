@@ -15,7 +15,7 @@ stages:
       - mind-small
       - mind-val
     do:
-      cmd: papermill -p "EVAL_NAME=${item}" basic-eval-template.ipynb ${item}.ipynb
+      cmd: papermill -p EVAL_NAME ${item} basic-eval-template.ipynb ${item}.ipynb
       deps:
         - basic-eval-template.ipynb
         - ../outputs/${item}-profile-metrics.csv.gz
