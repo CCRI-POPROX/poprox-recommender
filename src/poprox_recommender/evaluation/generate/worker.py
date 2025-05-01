@@ -27,6 +27,8 @@ logger = get_logger(__name__)
 
 BATCH_SIZE = 25
 STAGES = ["final", "ranked", "reranked"]
+# outputs we want for the result, to pre-filter
+TO_SAVE = ["candidate-selector", "recommender", "ranker", "reranker"]
 
 
 def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
@@ -167,7 +169,8 @@ def recommend_batch(pipeline, batch: list[RecommendationRequest], writers: list[
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
         for request in batch:
             state = recommend_for_profile(pipeline, request)
-            outputs.append((request.interest_profile.profile_id, request.model_dump(), state))
+            state = {k: v for (k, v) in state.items() if k in TO_SAVE}
+            outputs.append((request.interest_profile.profile_id, request, state))
 
         outputs = ray.put(outputs)
         writes = [w.write_recommendation_batch.remote(outputs) for w in writers]
