@@ -762,3 +762,38 @@ stages:
       hash: md5
       md5: e5b2a73320f9f4172937f67639ac4770
       size: 265282
+  recommend-mind-small@nrms:
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small/nrms
+      nrms
+    deps:
+    - path: data/MINDsmall_dev.zip
+      hash: md5
+      md5: e3bac5485be8fc7a9934e85e3b78615f
+      size: 30948560
+    - path: models/nrms-mind/
+      hash: md5
+      md5: 99c1d4b8c051bd207ca0929a87c26754.dir
+      size: 1571629281
+      nfiles: 21
+    - path: src/poprox_recommender/evaluation/generate/
+      hash: md5
+      md5: 1d19b8e06f9e0b18f70f7e8721903d28.dir
+      size: 18043
+      nfiles: 4
+    - path: src/poprox_recommender/recommenders/configurations/nrms.py
+      hash: md5
+      md5: 3a0c56a78bd29f7681401b7711927b32
+      size: 2602
+    outs:
+    - path: outputs/mind-small/nrms/embeddings.parquet
+      hash: md5
+      md5: b85f49918aa844c7175520912d01e45b
+      size: 8426730673
+    - path: outputs/mind-small/nrms/recommendations.ndjson.zst
+      hash: md5
+      md5: ac9490097f4def1e72ae4f3076e504d5
+      size: 756135513
+    - path: outputs/mind-small/nrms/recommendations.parquet
+      hash: md5
+      md5: c0ba7f3522933080872cdbbe734b17c3
+      size: 5578126
