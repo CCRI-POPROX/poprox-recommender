@@ -2,7 +2,7 @@
 Generate recommendations for offline test data.
 
 Usage:
-    poprox_recommender.evaluation.generate [options]
+    poprox_recommender.evaluation.generate [options] PIPELINE
 
 Options:
     -v, --verbose
@@ -17,6 +17,8 @@ Options:
             read POPROX test data DATA
     --subset=N
             test only on the first N test profiles
+    PIPELINE
+            The name of the pipeline to generate from
 """
 
 import logging
@@ -60,7 +62,9 @@ def generate_main():
     elif options["--mind-data"]:
         dataset = MindData(options["--mind-data"])
 
-    worker_usage = generate_profile_recs(dataset, outputs, n_profiles)
+    pipe_name = options["PIPELINE"]
+
+    worker_usage = generate_profile_recs(dataset, outputs, pipe_name, n_profiles)
 
     try:
         import resource

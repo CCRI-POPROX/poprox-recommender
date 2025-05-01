@@ -18,7 +18,7 @@ from poprox_concepts.domain import CandidateSet, RecommendationList
 from poprox_recommender.config import default_device
 from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import EmbeddingWriter, RecOutputs
-from poprox_recommender.recommenders import load_all_pipelines
+from poprox_recommender.recommenders.load import get_pipeline
 
 logger = get_logger(__name__)
 
@@ -31,14 +31,14 @@ class RecGenerator:
     Generate recommendations. Can be used as a Ray actor.
     """
 
-    pipelines: dict[str, Pipeline]
+    pipeline: Pipeline
     worker_out: RecOutputs
     emb_seen: set[UUID]
     emb_writer: EmbeddingWriter
 
-    def __init__(self, outs: RecOutputs, emb_writer: EmbeddingWriter):
+    def __init__(self, pipeline: str, outs: RecOutputs, emb_writer: EmbeddingWriter):
         proc = mp.current_process()
-        self.pipelines = load_all_pipelines(device=default_device())
+        self.pipeline = get_pipeline(pipeline, device=default_device())
         self.worker_out = outs
         self.worker_out.open(proc.pid)
         self.emb_seen = set()
@@ -54,34 +54,31 @@ class RecGenerator:
                 request.num_recs,
             )
 
-        pipe_names = list(self.pipelines.keys())
         inputs = {
             "candidate": CandidateSet(articles=request.todays_articles),
             "clicked": CandidateSet(articles=request.past_articles),
             "profile": request.interest_profile,
         }
 
-        for name, pipe in self.pipelines.items():
-            try:
-                outputs = pipe.run_all(**inputs)
-            except Exception as e:
-                logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
-                raise e
+        try:
+            outputs = self.pipeline.run_all(**inputs)
+        except Exception as e:
+            logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
+            raise e
 
-            rec_df, embeddings = extract_recs(name, request, outputs)
-            rec_df["recommender"] = pd.Categorical(rec_df["recommender"], categories=pipe_names)
-            rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
-            self.worker_out.rec_writer.write_frame(rec_df)
+        rec_df, embeddings = extract_recs(request, outputs)
+        rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
+        self.worker_out.rec_writer.write_frame(rec_df)
 
-            # find any embeddings we haven't yet written (reduces overhead)
-            # the writer will also deduplicate between workers.
-            emb_to_write = {aid: emb for (aid, emb) in embeddings.items() if aid not in self.emb_seen}
-            # call remote if we have an actor
-            if hasattr(self.emb_writer.write_embeddings, "remote"):
-                ray.get(self.emb_writer.write_embeddings.remote(emb_to_write))
-            else:
-                self.emb_writer.write_embeddings(emb_to_write)
-            self.emb_seen |= embeddings.keys()
+        # find any embeddings we haven't yet written (reduces overhead)
+        # the writer will also deduplicate between workers.
+        emb_to_write = {aid: emb for (aid, emb) in embeddings.items() if aid not in self.emb_seen}
+        # call remote if we have an actor
+        if hasattr(self.emb_writer.write_embeddings, "remote"):
+            ray.get(self.emb_writer.write_embeddings.remote(emb_to_write))
+        else:
+            self.emb_writer.write_embeddings(emb_to_write)
+        self.emb_seen |= embeddings.keys()
 
         # just return the ID to indicate success
         return request.interest_profile.profile_id
@@ -114,6 +111,7 @@ def dynamic_remote(actor):
         )
     else:
         # if we don't have CUDA, don't request GPU
+        logger.debug("setting up remote CPU-only actor with %d threads", pc.total_threads)
         remote = ray.remote(
             num_cpus=pc.total_threads,
             num_gpus=0,
@@ -123,7 +121,6 @@ def dynamic_remote(actor):
 
 
 def extract_recs(
-    name: str,
     request: RecommendationRequest,
     pipeline_state: PipelineState,
 ) -> tuple[pd.DataFrame, dict[UUID, np.ndarray]]:
@@ -137,7 +134,6 @@ def extract_recs(
     rec_lists = [
         pd.DataFrame(
             {
-                "recommender": name,
                 "profile_id": str(profile),
                 "stage": "final",
                 "item_id": [str(a.article_id) for a in recs.articles],
@@ -147,11 +143,10 @@ def extract_recs(
     ]
     ranked = pipeline_state.get("ranker", None)
     if ranked is not None:
-        assert isinstance(ranked, RecommendationList), f"reranked has unexpected type {type(ranked)} in pipeline {name}"
+        assert isinstance(ranked, RecommendationList), f"reranked has unexpected type {type(ranked)}"
         rec_lists.append(
             pd.DataFrame(
                 {
-                    "recommender": name,
                     "profile_id": str(profile),
                     "stage": "ranked",
                     "item_id": [str(a.article_id) for a in ranked.articles],
@@ -161,13 +156,10 @@ def extract_recs(
         )
     reranked = pipeline_state.get("reranker", None)
     if reranked is not None:
-        assert isinstance(
-            reranked, RecommendationList
-        ), f"reranked has unexpected type {type(reranked)} in pipeline {name}"
+        assert isinstance(reranked, RecommendationList), f"reranked has unexpected type {type(reranked)}"
         rec_lists.append(
             pd.DataFrame(
                 {
-                    "recommender": name,
                     "profile_id": str(profile),
                     "stage": "reranked",
                     "item_id": [str(a.article_id) for a in reranked.articles],
@@ -181,7 +173,7 @@ def extract_recs(
     embedded = pipeline_state.get("candidate-embedder", None)
     embeddings = {}
     if embedded is not None:
-        assert isinstance(embedded, CandidateSet), f"embedded has unexpected type {type(embedded)} in pipeline {name}"
+        assert isinstance(embedded, CandidateSet), f"embedded has unexpected type {type(embedded)}"
         assert hasattr(embedded, "embeddings")
 
         for idx, article in enumerate(embedded.articles):
@@ -189,7 +181,7 @@ def extract_recs(
     return output_df, embeddings
 
 
-def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None):
+def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
     logger.info("generating recommendations")
 
     profile_iter = dataset.iter_profiles()
@@ -210,7 +202,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
             emb_out = ray.remote(EmbeddingWriter).remote(outs)
 
             gen_actor = dynamic_remote(RecGenerator)
-            actors = [gen_actor.remote(outs, emb_out) for _i in range(pc.processes)]
+            actors = [gen_actor.remote(pipeline, outs, emb_out) for _i in range(pc.processes)]
             pool = ray.util.ActorPool(actors)
             batches = it.batched(profile_iter, BATCH_SIZE)
 
@@ -225,7 +217,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None
             logger.info("starting serial evaluation")
             # directly call things in-process
             emb_out = EmbeddingWriter(outs)
-            gen = RecGenerator(outs, emb_out)
+            gen = RecGenerator(pipeline, outs, emb_out)
 
             for request in profile_iter:
                 gen.generate(request)
