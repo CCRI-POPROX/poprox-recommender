@@ -742,11 +742,19 @@ stages:
     deps:
     - path: outputs/mind-subset/
       hash: md5
-      md5: 9352acac8f9f028bf7882bf587f7d47c.dir
-      size: 1106961864
-      nfiles: 57
+      md5: 793f72be2b92e57828df66260d95c6e1.dir
+      size: 1106961082
+      nfiles: 56
+    - path: src/poprox_recommender/evaluation/collect.py
+      hash: md5
+      md5: 3095f0670a3c1607f5615a21cf9d16e8
+      size: 2169
     outs:
     - path: outputs/mind-subset-metrics.csv
       hash: md5
-      md5: f4b7ad02395fe827aa65b263a9b725db
+      md5: 6385f6a1ac6557dbb0b8c056c02a3eed
       size: 629
+    - path: outputs/mind-subset-profile-metrics.csv.gz
+      hash: md5
+      md5: 7de15e7ca21e4d525bdf424feaccc9d2
+      size: 265373

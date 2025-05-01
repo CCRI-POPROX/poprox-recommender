@@ -106,7 +106,9 @@ stages:
     do:
       cmd: python -m poprox_recommender.evaluation.collect ${item}
       deps:
+        - src/poprox_recommender/evaluation/collect.py
         - outputs/${item}/
       outs:
+        - outputs/${item}-profile-metrics.csv.gz
         - outputs/${item}-metrics.csv:
             cache: false

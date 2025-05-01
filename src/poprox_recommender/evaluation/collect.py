@@ -3,6 +3,7 @@ Collect offline metrics from different pipelines for a run.
 
 For an evaluation EVAL, this script collects metrics from
 outputs/EVAL/*/metrics.json, and outputs them to outputs/EVAL-metrics.csv.
+It likewise aggregates the profile metrics.
 
 Usage:
     poprox_recommender.evaluation.collect [options] EVAL
@@ -39,18 +40,30 @@ def main():
     assert isinstance(name, str)
     path = Path("outputs") / name
 
-    results = {}
+    agg_results = {}
     for mf in path.glob("*/metrics.json"):
         pipe = mf.parent.name
         logger.info("reading pipeline metrics", pipeline=pipe, path=mf)
         metrics = json.loads(mf.read_text())
-        results[pipe] = metrics
+        agg_results[pipe] = metrics
 
-    rdf = pd.DataFrame.from_dict(results)
-    rdf.index.rename("pipeline", inplace=True)
+    rdf = pd.DataFrame.from_dict(agg_results, "index")
+    rdf.index.name = "pipeline"
     csv_out = path.parent / f"{name}-metrics.csv"
-    logger.info("saving metrics for %d pipelines", len(results), file=str(csv_out))
+    logger.info("saving metrics for %d pipelines", len(agg_results), file=str(csv_out))
     rdf.to_csv(csv_out, index=True)
+
+    prof_results = {}
+    for mf in path.glob("*/profile-metrics.csv.gz"):
+        pipe = mf.parent.name
+        logger.info("reading pipeline profile metrics", pipeline=pipe, path=mf)
+        metrics = pd.read_csv(mf).set_index("profile_id")
+        prof_results[pipe] = metrics
+
+    prof_df = pd.concat(prof_results, names=["pipeline"])
+    csv_out = path.parent / f"{name}-profile-metrics.csv.gz"
+    logger.info("saving profile metrics for %d pipelines", len(prof_results), file=str(csv_out))
+    prof_df.to_csv(csv_out, index=True)
 
 
 if __name__ == "__main__":
