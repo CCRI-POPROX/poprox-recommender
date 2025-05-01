@@ -1,27 +1,24 @@
 stages:
-  results-mind-val:
-    cmd: jupytext --to notebook --execute mind-val.md
+  # convert the basic template from source-managed Markdown to Jupyter
+  basic-template:
+    cmd: jupytext --to notebook basic-eval-template.md
     deps:
-      - mind-val.md
-      - ../outputs/mind-val/profile-metrics.csv.gz
+      - basic-eval-template.md
     outs:
-      - mind-val.ipynb:
+      - basic-eval-template.ipynb:
           cache: false
 
-  results-mind-small:
-    cmd: jupytext --to notebook --execute mind-small.md
-    deps:
-      - mind-small.md
-      - ../outputs/mind-small/profile-metrics.csv.gz
-    outs:
-      - mind-small.ipynb:
-          cache: false
-
-  results-mind-subset:
-    cmd: jupytext --to notebook --execute mind-subset.md
-    deps:
-      - mind-subset.md
-      - ../outputs/mind-subset/profile-metrics.csv.gz
-    outs:
-      - mind-subset.ipynb:
-          cache: false
+  # apply the basic template to a data subset
+  basic-results:
+    foreach:
+      - mind-subset
+      - mind-small
+      - mind-val
+    do:
+      cmd: papermill -p "EVAL_NAME=${item}" basic-eval-template.ipynb ${item}.ipynb
+      deps:
+        - basic-eval-template.ipynb
+        - ../outputs/${item}-profile-metrics.csv.gz
+      outs:
+        - ${item}.ipynb:
+            cache: false

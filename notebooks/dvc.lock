@@ -48,3 +48,15 @@ stages:
       hash: md5
       md5: 1a9c79950b6480e7eb398dd9889ab6db
       size: 208632
+  basic-template:
+    cmd: jupytext --to notebook basic-eval-template.md
+    deps:
+    - path: basic-eval-template.md
+      hash: md5
+      md5: f2d7a13d6938d33ed7830ceabebf0e13
+      size: 4986
+    outs:
+    - path: basic-eval-template.ipynb
+      hash: md5
+      md5: 3e20870cb5e3a1d5bb36980267aadaf9
+      size: 7944
