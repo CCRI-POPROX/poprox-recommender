@@ -84,6 +84,7 @@ stages:
         - outputs/mind-subset/${item}/recommendations.parquet
         - outputs/mind-subset/${item}/recommendations.ndjson.zst
         - outputs/mind-subset/${item}/embeddings.parquet
+        - outputs/mind-subset/${item}/generate-task.json
 
   measure-mind-subset:
     foreach: ${pipelines}

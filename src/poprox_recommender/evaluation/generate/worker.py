@@ -12,7 +12,7 @@ from lenskit.pipeline import PipelineState
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import CandidateSet
 from poprox_recommender.config import default_device
-from poprox_recommender.data.mind import TEST_REC_COUNT
+from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
 from poprox_recommender.evaluation.generate.outputs import (
     EmbeddingWriter,
     JSONRecommendationWriter,
@@ -21,6 +21,7 @@ from poprox_recommender.evaluation.generate.outputs import (
     RecOutputs,
 )
 from poprox_recommender.recommenders.load import get_pipeline
+from poprox_recommender.rusage import pretty_time
 
 logger = get_logger(__name__)
 
@@ -28,8 +29,8 @@ BATCH_SIZE = 25
 STAGES = ["final", "ranked", "reranked"]
 
 
-def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
-    logger.info("generating recommendations")
+def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
+    logger.info("generating recommendations", dataset=dataset.name)
 
     profile_iter = dataset.iter_profiles()
     if n_profiles is None:
@@ -42,11 +43,11 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
     with (
         item_progress("recommend", total=n_profiles) as pb,
         Task(
-            f"generate-{dataset}-{pipeline}",
-            tags=["poprox", "generate", dataset, pipeline],
+            f"generate-{dataset.name}-{pipeline}",
+            tags=["poprox", "generate", dataset.name, pipeline],
         ) as task,
     ):
-        task.save_to_file(outs.base_dir / "task.json")
+        task.save_to_file(outs.base_dir / "generate-task.json")
         pc = get_parallel_config()
         if pc.processes > 1:
             logger.info("starting evaluation with %d workers", pc.processes)
@@ -109,7 +110,7 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
     logger.info("finished recommending in %s", naturaldelta(task.duration) if task.duration else "unknown time")
     cpu = task.total_cpu()
     if cpu:
-        logger.info("recommendation took %.2f CPU-hours", cpu / 3600)
+        logger.info("recommendation took %s CPU", pretty_time(cpu))
 
 
 def recommend_for_profile(pipeline: str, request: RecommendationRequest) -> PipelineState:
