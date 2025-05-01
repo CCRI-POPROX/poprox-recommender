@@ -737,3 +737,16 @@ stages:
       hash: md5
       md5: 7162e93f88af26c98acd2096c3516019
       size: 27335
+  collect-metrics@mind-subset:
+    cmd: python -m poprox_recommender.evaluation.collect mind-subset
+    deps:
+    - path: outputs/mind-subset/
+      hash: md5
+      md5: 9352acac8f9f028bf7882bf587f7d47c.dir
+      size: 1106961864
+      nfiles: 57
+    outs:
+    - path: outputs/mind-subset-metrics.csv
+      hash: md5
+      md5: f4b7ad02395fe827aa65b263a9b725db
+      size: 629

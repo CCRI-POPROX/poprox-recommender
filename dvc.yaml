@@ -99,3 +99,14 @@ stages:
       metrics:
         - outputs/mind-subset/${item}/metrics.json:
             cache: false
+
+  collect-metrics:
+    foreach:
+      - mind-subset
+    do:
+      cmd: python -m poprox_recommender.evaluation.collect ${item}
+      deps:
+        - outputs/${item}/
+      outs:
+        - outputs/${item}-metrics.csv:
+            cache: false
