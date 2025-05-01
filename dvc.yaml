@@ -15,7 +15,7 @@ stages:
   recommend-mind-val:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val ${item}
+      cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val/${item} ${item}
       deps:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
@@ -40,7 +40,7 @@ stages:
   recommend-mind-small:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small ${item}
+      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small/${item} ${item}
       deps:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
@@ -66,7 +66,7 @@ stages:
   recommend-mind-subset:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000 -o outputs/mind-subset ${item}
+      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000 -o outputs/mind-subset/${item} ${item}
       deps:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
