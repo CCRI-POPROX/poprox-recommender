@@ -21,7 +21,7 @@ class OfflineRecommendations(BaseModel):
     results: OfflineRecResults
 
 
-class OfflineRecResults(BaseModel):
+class OfflineRecResults(BaseModel, validate_assignment=True):
     final: RecommendationList
     ranked: RecommendationList | None = None
     reranked: RecommendationList | None = None
@@ -184,34 +184,28 @@ class JSONRecommendationWriter:
         assert profile is not None
 
         # get the different recommendation lists to record
+
         recs = pipeline_state["recommender"]
-        results = OfflineRecResults(final=self._clean_torch(recs))
+        results = OfflineRecResults(final=recs)
 
         ranked = pipeline_state.get("ranker", None)
         if ranked is not None:
-            results.ranked = self._clean_torch(ranked)
+            results.ranked = ranked
 
         reranked = pipeline_state.get("reranker", None)
         if reranked is not None:
-            results.reranked = self._clean_torch(reranked)
+            results.reranked = reranked
 
         data = OfflineRecommendations(request=request, results=results)
-        print(data.model_dump_json(serialize_as_any=True), file=self.writer)
-
-    def _clean_torch(self, recs: RecommendationList):
-        """
-        Replace all Torch tensors in a recommendation list with NumPy arrays prior to serializatin.
-
-        NB: this should be provided by RecommendationList?
-        """
-        for k, v in list(recs):
-            if isinstance(v, torch.Tensor):
-                setattr(recs, k, v.numpy())
-
-        return recs
+        print(data.model_dump_json(serialize_as_any=True, fallback=_json_fallback), file=self.writer)
 
     def close(self):
         self.writer.close()
+
+
+def _json_fallback(v):
+    if isinstance(v, torch.Tensor):
+        return v.tolist()
 
 
 class EmbeddingWriter:
