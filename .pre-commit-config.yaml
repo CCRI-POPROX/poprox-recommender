@@ -48,6 +48,6 @@ repos:
           - yaml
           - toml
           - json
-        exclude: ^models/
+        exclude: ^(models/|outputs/.*/metrics)
         additional_dependencies:
           - dprint
