@@ -1,13 +1,29 @@
+vars:
+  - pipelines:
+      - nrms
+      - mmr
+      - pfar
+      - softmax
+      - topic_cali
+      - nrms_rrf_static_user
+      - nrms_topic_scores
+      - nrms_topics_static
+      - nrms_images
+
 stages:
+  # these are *foreach stages*: they have multiple versions, one for each pipeline.
   recommend-mind-val:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val
-    deps:
-      - src/poprox_recommender/evaluation/generate/
-      - models/nrms-mind/
-      - data/MINDlarge_dev.zip
-    outs:
-      - outputs/mind-val/recommendations
-      - outputs/mind-val/embeddings.parquet
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o outputs/mind-val ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/MINDlarge_dev.zip
+      outs:
+        - outputs/mind-val/${item}/recommendations
+        - outputs/mind-val/${item}/embeddings.parquet
 
   measure-mind-val:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev mind-val
@@ -22,14 +38,18 @@ stages:
           cache: false
 
   recommend-mind-small:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small
-    deps:
-      - src/poprox_recommender/evaluation/generate/
-      - models/nrms-mind/
-      - data/MINDsmall_dev.zip
-    outs:
-      - outputs/mind-small/recommendations
-      - outputs/mind-small/embeddings.parquet
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o outputs/mind-small ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/MINDsmall_dev.zip
+      outs:
+        - outputs/mind-small/${item}/recommendations
+        - outputs/mind-small/${item}/embeddings.parquet
+
   measure-mind-small:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small
     deps:
@@ -44,14 +64,18 @@ stages:
 
   # small subset for quick testing
   recommend-mind-subset:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000 -o outputs/mind-subset
-    deps:
-      - src/poprox_recommender/evaluation/generate/
-      - models/nrms-mind/
-      - data/MINDsmall_dev.zip
-    outs:
-      - outputs/mind-subset/recommendations
-      - outputs/mind-subset/embeddings.parquet
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000 -o outputs/mind-subset ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/MINDsmall_dev.zip
+      outs:
+        - outputs/mind-subset/${item}/recommendations
+        - outputs/mind-subset/${item}/embeddings.parquet
+
   measure-mind-subset:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset
     deps:
