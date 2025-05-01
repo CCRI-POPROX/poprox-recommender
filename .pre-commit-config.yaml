@@ -30,6 +30,7 @@ repos:
       - id: ruff
         args: [--fix]
         name: auto-fix Python lint errors
+        exclude: ^notebooks/.*\.ipynb
       # Run the formatter.
       - id: ruff-format
         name: format Python source
