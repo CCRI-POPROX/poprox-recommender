@@ -62,6 +62,7 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
             rec_batch = dynamic_remote(recommend_batch)
 
             tasks = []
+            writes = []
             for batch in it.batched(profile_iter, BATCH_SIZE):
                 # backpressure
                 while len(tasks) >= pc.processes:
@@ -69,9 +70,16 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
                     done, tasks = ray.wait(tasks)
                     # update # of finished items
                     for rh in done:
-                        n, btask = ray.get(rh)
+                        n, btask, bwrites = ray.get(rh)
                         pb.update(n)
                         task.add_subtask(btask)
+                        writes += bwrites
+
+                # clear pending writes
+                while len(writes) >= 50:
+                    done, writes = ray.wait(writes)
+                    for rh in done:
+                        ray.get(rh)
 
                 tasks.append(rec_batch.remote(pipeline, batch, writers))
 
@@ -80,9 +88,17 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
                 done, tasks = ray.wait(tasks)
                 for rh in done:
                     for rh in done:
-                        n, btask = ray.get(rh)
+                        n, btask, bwrites = ray.get(rh)
                         pb.update(n)
                         task.add_subtask(btask)
+                        writes += bwrites
+
+            logger.debug("waiting for remaining writes")
+            # clear pending writes
+            while writes:
+                done, writes = ray.wait(writes)
+                for rh in done:
+                    ray.get(rh)
 
             logger.info("closing writers")
             close = [w.close.remote() for w in writers]
@@ -146,28 +162,17 @@ def recommend_batch(pipeline, batch: list[RecommendationRequest], writers: list[
     Batch-recommend function, to be used as a Ray worker task.
     """
 
-    writes = []
+    outputs = []
 
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
         for request in batch:
             state = recommend_for_profile(pipeline, request)
-            # put once, so all actors share the object
-            state = ray.put(state)
-            # rate-limit our requests to the writers
-            while len(writes) >= 10:
-                done, writes = ray.wait(writes)
-                for t in done:
-                    ray.get(t)
-            for w in writers:
-                writes.append(w.write_recommendations.remote(request, state))
+            outputs.append((request, state))
 
-        # wait for outstanding writes on this batch
-        while writes:
-            done, writes = ray.wait(writes)
-            for t in done:
-                ray.get(t)
+        outputs = ray.put(outputs)
+        writes = [w.write_recommendation_batch.remote(outputs) for w in writers]
 
-    return len(batch), task
+    return len(batch), task, writes
 
 
 def dynamic_remote(task_or_actor):

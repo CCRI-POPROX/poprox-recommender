@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Protocol, TextIO
+from typing import TextIO
 
 import numpy as np
 import pandas as pd
@@ -70,19 +71,24 @@ class RecOutputs:
         return self.base_dir / "embeddings.parquet"
 
 
-class RecommendationWriter(Protocol):
+class RecommendationWriter(ABC):
     """
     Interface for recommendation writers that write various aspects of recommendations to disk.
     """
 
+    @abstractmethod
     def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
         """
         Write recommendations to this writer's storage.
         """
         ...
 
+    def write_recommendation_batch(self, batch: list[tuple[RecommendationRequest, PipelineState]]):
+        for req, state in batch:
+            self.write_recommendations(req, state)
 
-class ParquetRecommendationWriter:
+
+class ParquetRecommendationWriter(RecommendationWriter):
     """
     Implementation of :class:`RecommendationWriter` that writes the recommendations in
     tabular format to Parquet for easy analysis.
@@ -148,7 +154,7 @@ class ParquetRecommendationWriter:
         self.writer.close()
 
 
-class JSONRecommendationWriter:
+class JSONRecommendationWriter(RecommendationWriter):
     """
     Implementation of :class:`RecommendationWriter` that writes the recommendations in
     compressed NDJSON format for detailed analysis.
@@ -195,7 +201,7 @@ def _json_fallback(v):
         return v.tolist()
 
 
-class EmbeddingWriter:
+class EmbeddingWriter(RecommendationWriter):
     """
     Implementation of :class:`RecommendationWriter` that extracts the candidate embeddings and writes them to disk.
 
