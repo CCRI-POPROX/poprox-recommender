@@ -113,6 +113,7 @@ class ParquetRecommendationWriter:
         self.writer = ParquetBatchedWriter(outs.rec_parquet_file)
 
     def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
+        assert isinstance(request, RecommendationRequest)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
         profile = request.interest_profile.profile_id
@@ -175,6 +176,7 @@ class JSONRecommendationWriter:
         self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(6))
 
     def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
+        assert isinstance(request, RecommendationRequest)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
         profile = request.interest_profile.profile_id
