@@ -84,6 +84,9 @@ class RecommendationWriter(ABC):
         """
         ...
 
+    @abstractmethod
+    def close(self): ...
+
     def write_recommendation_batch(self, batch: list[tuple[UUID, RecommendationRequest, PipelineState]]):
         for profile, req, state in batch:
             self.write_recommendations(profile, req, state)
@@ -166,7 +169,7 @@ class JSONRecommendationWriter(RecommendationWriter):
 
     def __init__(self, outs: RecOutputs):
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
-        self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(6))
+        self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(1))
 
     def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
         # assert isinstance(request, RecommendationRequest)
