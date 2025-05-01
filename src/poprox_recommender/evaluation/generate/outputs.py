@@ -111,7 +111,8 @@ class ParquetRecommendationWriter:
     writer: ParquetBatchedWriter
 
     def __init__(self, outs: RecOutputs):
-        self.writer = ParquetBatchedWriter(outs.rec_parquet_file)
+        outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
+        self.writer = ParquetBatchedWriter(outs.rec_parquet_file, compression="snappy")
 
     def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
         assert isinstance(request, RecommendationRequest)
@@ -174,6 +175,7 @@ class JSONRecommendationWriter:
     writer: TextIO
 
     def __init__(self, outs: RecOutputs):
+        outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(6))
 
     def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
@@ -222,6 +224,7 @@ class EmbeddingWriter:
     def __init__(self, outs: RecOutputs):
         self.outputs = outs
         self.seen = set()
+        outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = ParquetBatchedWriter(self.outputs.emb_file, compression="snappy")
 
     def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
