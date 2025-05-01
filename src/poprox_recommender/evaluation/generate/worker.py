@@ -93,11 +93,9 @@ def generate_profile_recs(dataset: str, outs: RecOutputs, pipeline: str, n_profi
 
             for w in writers:
                 w.close()
-            rusage = None
 
     timer.stop()
     logger.info("finished recommending in %s", timer)
-    return rusage
 
 
 def recommend_for_profile(pipeline: str, request: RecommendationRequest) -> PipelineState:
