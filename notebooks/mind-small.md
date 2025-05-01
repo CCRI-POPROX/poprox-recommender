@@ -69,7 +69,7 @@ plt.subplots_adjust(wspace=0.3)
 
 for i, metric in enumerate(effectiveness_metrics, 1):
     plt.subplot(1, 3, i)
-    sns.barplot(data=mind_small_user_metrics, x="recommender", y=metric)
+    sns.barplot(data=mind_small_user_metrics, x="pipeline", y=metric)
     plt.xticks(rotation=45)
 
 plt.show()
@@ -79,7 +79,7 @@ The summary tables show the mean values, standard deviation, and quantiles (10%i
 
 ```{code-cell} ipython3
 for metric in effectiveness_metrics:
-    tw = EvalTable(mind_small_user_metrics, "recommender", metric)
+    tw = EvalTable(mind_small_user_metrics, "pipeline", metric)
     tw.add_stat("Mean", np.mean, ci=True)
     tw.add_stat("Std Dev", np.std, ci=True)
     tw.add_quantiles(["10%ile", "Median", "90%ile"], [0.1, 0.5, 0.9], ci=True)
@@ -96,7 +96,7 @@ plt.subplots_adjust(wspace=0.3)
 
 for i, metric in enumerate(overlap_metrics, 1):
     plt.subplot(1, 2, i)
-    sns.barplot(data=mind_small_user_metrics, x="recommender", y=metric)
+    sns.barplot(data=mind_small_user_metrics, x="pipeline", y=metric)
     plt.xticks(rotation=45)
 
 plt.show()
@@ -106,7 +106,7 @@ The summary tables show the mean values, standard deviation, and quantiles (10%i
 
 ```{code-cell} ipython3
 for metric in overlap_metrics:
-    tw = EvalTable(mind_small_user_metrics, "recommender", metric)
+    tw = EvalTable(mind_small_user_metrics, "pipeline", metric)
     tw.add_stat("Mean", np.mean, ci=True)
     tw.add_stat("Std Dev", np.std, ci=True)
     tw.add_quantiles(["10%ile", "Median", "90%ile"], [0.1, 0.5, 0.9], ci=True)
