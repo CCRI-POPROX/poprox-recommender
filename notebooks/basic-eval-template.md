@@ -23,7 +23,7 @@ This notebook visualizes user-specific performance metrics of various recommende
 > This is a *parameterized* notebook, and is used to render the other specific evaluation notebooks with [Papermill](https://papermill.readthedocs.io/en/latest/).  By default, it displays
 > the MIND Subset results, for easy editing.
 
-```{code-cell}
+```{code-cell} ipython3
 :tags: [parameters]
 
 EVAL_NAME = "mind-subset"
@@ -39,7 +39,7 @@ EVAL_NAME = "mind-subset"
 
 PyData packages:
 
-```{code-cell}
+```{code-cell} ipython3
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -48,7 +48,7 @@ import seaborn as sns
 
 Local code and display support:
 
-```{code-cell}
+```{code-cell} ipython3
 from IPython.display import HTML
 
 from poprox_recommender.eval_tables import EvalTable
@@ -56,12 +56,12 @@ from poprox_recommender.eval_tables import EvalTable
 
 ### Loading Data
 
-```{code-cell}
+```{code-cell} ipython3
 mind_subset_user_metrics = pd.read_csv(f"../outputs/{EVAL_NAME}-profile-metrics.csv.gz")
 mind_subset_user_metrics.head()
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 effectiveness_metrics = ["NDCG@5", "NDCG@10", "RR"]
 overlap_metrics = ["RBO@5", "RBO@10"]
 ```
@@ -74,7 +74,7 @@ overlap_metrics = ["RBO@5", "RBO@10"]
 
 NDCG measures how well the recommendations align with user test data, focusing on the top-k positions, such as the top 5 (NDCG@5) or top 10 (NDCG@10). Likewise, RR evaluates how well the recommender finds the most relevant item as the top result.
 
-```{code-cell}
+```{code-cell} ipython3
 plt.figure(figsize=(12, 3))
 plt.subplots_adjust(wspace=0.3)
 
@@ -88,7 +88,7 @@ plt.show()
 
 The summary tables show the mean values, standard deviation, and quantiles (10%ile, Median, 90%ile), each accompanied by their respective 95% confidence intervals for effectiveness metrics across recommenders.
 
-```{code-cell}
+```{code-cell} ipython3
 for metric in effectiveness_metrics:
     tw = EvalTable(mind_subset_user_metrics, "pipeline", metric)
     tw.add_stat("Mean", np.mean, ci=True)
@@ -101,7 +101,7 @@ for metric in effectiveness_metrics:
 ### Ranking Overlap Metrics
 RBO measures the similarity between two ranked lists, evaluating how much overlap exists between pure top-k recommendations and the actual rankings produced after recommendations. RBO can be applied at different list depths to analyze performance consistency, such as RBO@5 and RBO@10.
 
-```{code-cell}
+```{code-cell} ipython3
 plt.figure(figsize=(8, 3))
 plt.subplots_adjust(wspace=0.3)
 
@@ -115,7 +115,7 @@ plt.show()
 
 The summary tables show the mean values, standard deviation, and quantiles (10%ile, Median, 90%ile), each accompanied by their respective 95% confidence intervals for ranking overlap metrics across recommenders.
 
-```{code-cell}
+```{code-cell} ipython3
 for metric in overlap_metrics:
     tw = EvalTable(mind_subset_user_metrics, "pipeline", metric)
     tw.add_stat("Mean", np.mean, ci=True)
