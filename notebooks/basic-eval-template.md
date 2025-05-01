@@ -70,6 +70,7 @@ slideshow:
   slide_type: ''
 ---
 from IPython.display import HTML
+
 from poprox_recommender.eval_tables import EvalTable
 ```
 
