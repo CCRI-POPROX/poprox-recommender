@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TextIO
+from uuid import UUID
 
 import numpy as np
 import pandas as pd
@@ -77,15 +78,15 @@ class RecommendationWriter(ABC):
     """
 
     @abstractmethod
-    def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
+    def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
         """
         Write recommendations to this writer's storage.
         """
         ...
 
-    def write_recommendation_batch(self, batch: list[tuple[RecommendationRequest, PipelineState]]):
-        for req, state in batch:
-            self.write_recommendations(req, state)
+    def write_recommendation_batch(self, batch: list[tuple[UUID, RecommendationRequest, PipelineState]]):
+        for profile, req, state in batch:
+            self.write_recommendations(profile, req, state)
 
 
 class ParquetRecommendationWriter(RecommendationWriter):
@@ -104,12 +105,11 @@ class ParquetRecommendationWriter(RecommendationWriter):
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = ParquetBatchedWriter(outs.rec_parquet_file, compression="snappy")
 
-    def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
-        assert isinstance(request, RecommendationRequest)
-        logger.debug("writing recommendations to Parquet", profile_id=request.interest_profile.profile_id)
+    def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
+        logger.debug("writing recommendations to Parquet", profile_id=profile)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
-        profile = request.interest_profile.profile_id
+        # profile = request.interest_profile.profile_id
 
         # get the different recommendation lists to record
         recs = pipeline_state["recommender"]
@@ -168,13 +168,11 @@ class JSONRecommendationWriter(RecommendationWriter):
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(6))
 
-    def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
-        assert isinstance(request, RecommendationRequest)
-        logger.debug("writing recommendations to Parquet", profile_id=request.interest_profile.profile_id)
+    def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
+        # assert isinstance(request, RecommendationRequest)
+        logger.debug("writing recommendations to JSON", profile_id=profile)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
-        profile = request.interest_profile.profile_id
-        assert profile is not None
 
         # get the different recommendation lists to record
 
@@ -218,7 +216,7 @@ class EmbeddingWriter(RecommendationWriter):
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = ParquetBatchedWriter(self.outputs.emb_file, compression="snappy")
 
-    def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
+    def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
         # get the embeddings
         embedded = pipeline_state.get("candidate-embedder", None)
         rows = []

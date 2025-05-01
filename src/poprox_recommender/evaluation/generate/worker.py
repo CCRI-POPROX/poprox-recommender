@@ -108,7 +108,7 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
         else:
             logger.info("starting serial evaluation")
             # directly call things in-process
-            writers = [
+            writers: list[RecommendationWriter] = [
                 ParquetRecommendationWriter(outs),
                 JSONRecommendationWriter(outs),
                 EmbeddingWriter(outs),
@@ -117,7 +117,7 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
             for request in profile_iter:
                 state = recommend_for_profile(pipeline, request)
                 for w in writers:
-                    w.write_recommendations(request, state)
+                    w.write_recommendations(request.interest_profile.profile_id, request, state)
                 pb.update()
 
             for w in writers:
@@ -167,7 +167,7 @@ def recommend_batch(pipeline, batch: list[RecommendationRequest], writers: list[
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
         for request in batch:
             state = recommend_for_profile(pipeline, request)
-            outputs.append((request, state))
+            outputs.append((request.interest_profile.profile_id, request.model_dump(), state))
 
         outputs = ray.put(outputs)
         writes = [w.write_recommendation_batch.remote(outputs) for w in writers]
