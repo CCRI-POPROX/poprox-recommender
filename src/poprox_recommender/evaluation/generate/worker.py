@@ -29,7 +29,7 @@ logger = get_logger(__name__)
 BATCH_SIZE = 25
 STAGES = ["final", "ranked", "reranked"]
 # outputs we want for the result, to pre-filter
-TO_SAVE = ["candidate-selector", "recommender", "ranker", "reranker"]
+TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
 
 
 def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
