@@ -230,6 +230,8 @@ class JSONRecommendationWriter(RecommendationWriter):
 def _json_fallback(v):
     if isinstance(v, torch.Tensor):
         return v.tolist()
+    else:
+        return v
 
 
 class EmbeddingWriter(RecommendationWriter):
