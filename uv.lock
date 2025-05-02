@@ -2806,7 +2806,7 @@ wheels = [
 [[package]]
 name = "poprox-concepts"
 version = "0.0.1"
-source = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git?rev=mdekstrand%2Frelax-pydantic#68c8c631e9d391d4c0725c1a1b79927e4255bd36" }
+source = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git#d0e27c90f6eddcc4f041e5d871ff4a13c2ec70f7" }
 dependencies = [
     { name = "pydantic" },
 ]
@@ -2910,7 +2910,7 @@ requires-dist = [
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
-    { name = "poprox-concepts", git = "https://github.com/CCRI-POPROX/poprox-concepts.git?rev=mdekstrand%2Frelax-pydantic" },
+    { name = "poprox-concepts", git = "https://github.com/CCRI-POPROX/poprox-concepts.git" },
     { name = "rich", specifier = "~=13.9" },
     { name = "safetensors", specifier = ">=0.4,<1" },
     { name = "smart-open", specifier = "==7.*" },
