@@ -2,3 +2,4 @@
 /recommendations.ndjson.zst
 /embeddings.parquet
 /profile-metrics.csv.gz
+/generate-task.json

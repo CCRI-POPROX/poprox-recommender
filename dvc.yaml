@@ -25,6 +25,7 @@ stages:
         - outputs/mind-val/${item}/recommendations.parquet
         - outputs/mind-val/${item}/recommendations.ndjson.zst
         - outputs/mind-val/${item}/embeddings.parquet
+        - outputs/mind-val/${item}/generate-task.json
 
   measure-mind-val:
     foreach: ${pipelines}
@@ -54,6 +55,7 @@ stages:
         - outputs/mind-small/${item}/recommendations.parquet
         - outputs/mind-small/${item}/recommendations.ndjson.zst
         - outputs/mind-small/${item}/embeddings.parquet
+        - outputs/mind-small/${item}/generate-task.json
 
   measure-mind-small:
     foreach: ${pipelines}
