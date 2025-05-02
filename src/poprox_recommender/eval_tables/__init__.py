@@ -4,6 +4,7 @@ from typing import NamedTuple
 import numpy as np
 import pandas as pd
 from scipy import stats as sps
+from scipy.linalg import LinAlgError
 
 from . import statutil as u
 
@@ -13,7 +14,7 @@ _log = logging.getLogger(__name__)
 class RowData(NamedTuple):
     name: object
     data: np.ndarray
-    kde: sps.gaussian_kde
+    kde: sps.gaussian_kde | None
     stats: list
 
 
@@ -31,10 +32,13 @@ class EvalTable:
     def _prepare_table(self):
         self.rowdata = []
         for g, gs in self.table.groupby(self.sys_col)[self.metric_col]:
-            kde = sps.gaussian_kde(gs)
+            try:
+                kde = sps.gaussian_kde(gs)
+            except LinAlgError:
+                kde = None
             self.rowdata.append(RowData(g, np.array(gs), kde, []))
 
-        self.kde_scale = np.max([u.kde_max(r.kde) for r in self.rowdata])  # type: ignore
+        self.kde_scale = np.max([u.kde_max(r.kde) for r in self.rowdata if r.kde is not None])  # type: ignore
 
     def add_stat(self, label, func, ci=True):
         self.stats.append(label)
