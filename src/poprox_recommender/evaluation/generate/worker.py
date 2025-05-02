@@ -1,11 +1,12 @@
 import copyreg
 import itertools as it
+from collections.abc import Iterator
 
 import ray
 import torch
 from humanize import naturaldelta
-from lenskit.logging import Task, get_logger, item_progress
-from lenskit.parallel import get_parallel_config
+from lenskit.logging import Progress, Task, get_logger, item_progress
+from lenskit.parallel.config import ParallelConfig, get_parallel_config
 from lenskit.parallel.ray import init_cluster
 from lenskit.pipeline import PipelineState
 
@@ -52,84 +53,99 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
         task.save_to_file(outs.base_dir / "generate-task.json")
         pc = get_parallel_config()
         if pc.processes > 1:
-            logger.info("starting evaluation with %d workers", pc.processes)
-            init_cluster(global_logging=True)
-
-            writers = [
-                ray.remote(num_cpus=1)(ParquetRecommendationWriter).remote(outs),
-                ray.remote(num_cpus=1)(JSONRecommendationWriter).remote(outs),
-                ray.remote(num_cpus=1)(EmbeddingWriter).remote(outs),
-            ]
-
-            rec_batch = dynamic_remote(recommend_batch)
-
-            tasks = []
-            writes = []
-            for batch in it.batched(profile_iter, BATCH_SIZE):
-                # backpressure
-                while len(tasks) >= pc.processes:
-                    logger.debug("waiting for workers to finish")
-                    done, tasks = ray.wait(tasks)
-                    # update # of finished items
-                    for rh in done:
-                        n, btask, bwrites = ray.get(rh)
-                        pb.update(n)
-                        task.add_subtask(btask)
-                        writes += bwrites
-
-                # clear pending writes
-                while len(writes) >= 50:
-                    done, writes = ray.wait(writes)
-                    for rh in done:
-                        ray.get(rh)
-
-                tasks.append(rec_batch.remote(pipeline, batch, writers))
-
-            logger.debug("waiting for remaining actors")
-            while tasks:
-                done, tasks = ray.wait(tasks)
-                for rh in done:
-                    for rh in done:
-                        n, btask, bwrites = ray.get(rh)
-                        pb.update(n)
-                        task.add_subtask(btask)
-                        writes += bwrites
-
-            logger.debug("waiting for remaining writes")
-            # clear pending writes
-            while writes:
-                done, writes = ray.wait(writes)
-                for rh in done:
-                    ray.get(rh)
-
-            logger.info("closing writers")
-            close = [w.close.remote() for w in writers]
-            for cr in close:
-                wt = ray.get(cr)
-                task.add_subtask(wt)
+            cluster_recommend(pipeline, profile_iter, outs, pc, task, pb)
 
         else:
-            logger.info("starting serial evaluation")
-            # directly call things in-process
-            writers: list[RecommendationWriter] = [
-                ParquetRecommendationWriter(outs),
-                JSONRecommendationWriter(outs),
-                EmbeddingWriter(outs),
-            ]
-
-            for request in profile_iter:
-                state = recommend_for_profile(pipeline, request)
-                for w in writers:
-                    w.write_recommendations(request.interest_profile.profile_id, request, state)
-                pb.update()
-
-            for w in writers:
-                w.close()
+            serial_recommend(pipeline, profile_iter, outs, pb)
 
     logger.info("finished recommending in %s", naturaldelta(task.duration) if task.duration else "unknown time")
     cpu = task.total_cpu()
     if cpu:
         logger.info("recommendation took %s CPU", pretty_time(cpu))
+
+
+def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
+    logger.info("starting serial evaluation")
+    # directly call things in-process
+    writers: list[RecommendationWriter] = [
+        ParquetRecommendationWriter(outs),
+        JSONRecommendationWriter(outs),
+        EmbeddingWriter(outs),
+    ]
+
+    for request in profiles:
+        state = recommend_for_profile(pipeline, request)
+        for w in writers:
+            w.write_recommendations(request, state)
+        pb.update()
+
+    for w in writers:
+        w.close()
+
+
+def cluster_recommend(
+    pipeline: str,
+    profiles: Iterator[RecommendationRequest],
+    outs: RecOutputs,
+    pc: ParallelConfig,
+    task: Task,
+    pb: Progress,
+):
+    logger.info("starting evaluation with %d workers", pc.processes)
+    init_cluster(global_logging=True)
+
+    writers = [
+        ParquetRecommendationWriter.make_actor().remote(outs),
+        JSONRecommendationWriter.make_actor().remote(outs),
+        EmbeddingWriter.make_actor().remote(outs),
+    ]
+
+    rec_batch = dynamic_remote(recommend_batch)
+
+    tasks = []
+    writes = []
+    for batch in it.batched(profiles, BATCH_SIZE):
+        # backpressure
+        while len(tasks) >= pc.processes:
+            logger.debug("waiting for workers to finish")
+            done, tasks = ray.wait(tasks)
+            # update # of finished items
+            for rh in done:
+                n, btask, bwrites = ray.get(rh)
+                pb.update(n)
+                task.add_subtask(btask)
+                writes += bwrites
+
+        # clear pending writes
+        while len(writes) >= 50:
+            done, writes = ray.wait(writes)
+            for rh in done:
+                ray.get(rh)
+
+        tasks.append(rec_batch.remote(pipeline, batch, writers))
+
+    logger.debug("waiting for remaining actors")
+    while tasks:
+        done, tasks = ray.wait(tasks)
+        for rh in done:
+            for rh in done:
+                n, btask, bwrites = ray.get(rh)
+                pb.update(n)
+                task.add_subtask(btask)
+                writes += bwrites
+
+    logger.debug("waiting for remaining writes")
+    # clear pending writes
+    while writes:
+        done, writes = ray.wait(writes)
+        for rh in done:
+            ray.get(rh)
+
+    logger.info("closing writers")
+    close = [w.close.remote() for w in writers]
+    for cr in close:
+        wt = ray.get(cr)
+        task.add_subtask(wt)
 
 
 def recommend_for_profile(pipeline: str, request: RecommendationRequest) -> PipelineState:
@@ -171,7 +187,7 @@ def recommend_batch(pipeline, batch: list[RecommendationRequest], writers: list[
         for request in batch:
             state = recommend_for_profile(pipeline, request)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
-            outputs.append((request.interest_profile.profile_id, request, state))
+            outputs.append((request, state))
 
         outputs = ray.put(outputs)
         writes = [w.write_recommendation_batch.remote(outputs) for w in writers]

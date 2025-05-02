@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Collection
 from pathlib import Path
-from typing import TextIO
-from uuid import UUID
+from typing import ClassVar, TextIO
 
 import numpy as np
 import pandas as pd
 import pyarrow as pa
+import ray
+import ray.actor
 import torch
 import zstandard
 from lenskit.logging import Task, get_logger
@@ -77,6 +79,8 @@ class RecommendationWriter(ABC):
     Interface for recommendation writers that write various aspects of recommendations to disk.
     """
 
+    WANTED_NODES: ClassVar[Collection[str]] = {}
+
     task: Task
 
     def __init__(self):
@@ -84,8 +88,16 @@ class RecommendationWriter(ABC):
         self.task = Task(f"write-{name}", tags=["output", name], subprocess=True)
         self.task.start()
 
+    @classmethod
+    def make_actor(cls) -> ray.actor.ActorClass:
+        """
+        Turn this writer into a Ray actor class.
+        """
+        remote = ray.remote(num_cpus=1)
+        return remote(cls)  # type: ignore
+
     @abstractmethod
-    def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
+    def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
         """
         Write recommendations to this writer's storage.
         """
@@ -96,9 +108,9 @@ class RecommendationWriter(ABC):
         self.task.finish()
         return self.task
 
-    def write_recommendation_batch(self, batch: list[tuple[UUID, RecommendationRequest, PipelineState]]):
-        for profile, req, state in batch:
-            self.write_recommendations(profile, req, state)
+    def write_recommendation_batch(self, batch: list[tuple[RecommendationRequest, PipelineState]]):
+        for req, state in batch:
+            self.write_recommendations(req, state)
 
 
 class ParquetRecommendationWriter(RecommendationWriter):
@@ -109,6 +121,8 @@ class ParquetRecommendationWriter(RecommendationWriter):
     Can be used as a Ray actor.
     """
 
+    WANTED_NODES = {"recommender", "ranker", "reranker"}
+
     path: Path
     writer: ParquetBatchedWriter
 
@@ -118,7 +132,8 @@ class ParquetRecommendationWriter(RecommendationWriter):
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = ParquetBatchedWriter(outs.rec_parquet_file, compression="snappy")
 
-    def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
+    def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
+        profile = request.interest_profile.profile_id
         logger.debug("writing recommendations to Parquet", profile_id=profile)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
@@ -176,6 +191,8 @@ class JSONRecommendationWriter(RecommendationWriter):
     Can be used as a Ray actor.
     """
 
+    WANTED_NODES = {"recommender", "ranker", "reranker"}
+
     writer: TextIO
 
     def __init__(self, outs: RecOutputs):
@@ -183,8 +200,8 @@ class JSONRecommendationWriter(RecommendationWriter):
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(1))
 
-    def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
-        # assert isinstance(request, RecommendationRequest)
+    def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
+        profile = request.interest_profile.profile_id
         logger.debug("writing recommendations to JSON", profile_id=profile)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
@@ -222,6 +239,8 @@ class EmbeddingWriter(RecommendationWriter):
     Can be used as a Ray actor.
     """
 
+    WANTED_NODES = {"candidate-selector"}
+
     outputs: RecOutputs
     seen: set[str]
     writer: ParquetBatchedWriter
@@ -233,7 +252,7 @@ class EmbeddingWriter(RecommendationWriter):
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = ParquetBatchedWriter(self.outputs.emb_file, compression="snappy")
 
-    def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
+    def write_recommendations(self, request: RecommendationRequest, pipeline_state: PipelineState):
         # get the embeddings
         embedded = pipeline_state.get("candidate-embedder", None)
         rows = []
