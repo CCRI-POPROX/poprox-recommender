@@ -4,5 +4,6 @@
 
 # there are 2 sharing commands: 'public' and 'shared'
 public models/*-mind
-public -R outputs/mind-*
+public outputs/mind-*/*/*.parquet outputs/mind-*/*/*.csv.gz outputs/*/*/*-task.json
+shared -R outputs/mind-*/
 public -R tests/request_data

@@ -39,7 +39,7 @@ fi
 public() {
     # upload public files to all repos
     echo "uploading public files"
-    echo + dvc push -r $repo -R "$@"
+    echo + dvc push -r $repo "$@"
     if [[ $upload == yes ]]; then
         dvc push -r $repo "$@"
     fi
@@ -48,7 +48,7 @@ public() {
 shared() {
     if [[ $repo == shared ]]; then
         echo "uploading shared files"
-        echo + dvc push -r $repo -R "$@"
+        echo + dvc push -r $repo "$@"
         if [[ $upload == yes ]]; then
             dvc push -r $repo "$@"
         fi
