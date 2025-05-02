@@ -105,7 +105,8 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
             logger.info("closing writers")
             close = [w.close.remote() for w in writers]
             for cr in close:
-                ray.get(cr)
+                wt = ray.get(cr)
+                task.add_subtask(wt)
 
         else:
             logger.info("starting serial evaluation")

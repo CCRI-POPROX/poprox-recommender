@@ -10,7 +10,7 @@ import pandas as pd
 import pyarrow as pa
 import torch
 import zstandard
-from lenskit.logging import get_logger
+from lenskit.logging import Task, get_logger
 from lenskit.pipeline import PipelineState
 from pydantic import BaseModel
 
@@ -77,6 +77,13 @@ class RecommendationWriter(ABC):
     Interface for recommendation writers that write various aspects of recommendations to disk.
     """
 
+    task: Task
+
+    def __init__(self):
+        name = self.__class__.__name__
+        self.task = Task(f"write-{name}", tags=["output", name], subprocess=True)
+        self.task.start()
+
     @abstractmethod
     def write_recommendations(self, profile: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
         """
@@ -85,7 +92,9 @@ class RecommendationWriter(ABC):
         ...
 
     @abstractmethod
-    def close(self): ...
+    def close(self):
+        self.task.finish()
+        return self.task
 
     def write_recommendation_batch(self, batch: list[tuple[UUID, RecommendationRequest, PipelineState]]):
         for profile, req, state in batch:
@@ -104,6 +113,7 @@ class ParquetRecommendationWriter(RecommendationWriter):
     writer: ParquetBatchedWriter
 
     def __init__(self, outs: RecOutputs):
+        super().__init__()
         self.path = outs.rec_parquet_file
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = ParquetBatchedWriter(outs.rec_parquet_file, compression="snappy")
@@ -155,6 +165,7 @@ class ParquetRecommendationWriter(RecommendationWriter):
 
     def close(self):
         self.writer.close()
+        return super().close()
 
 
 class JSONRecommendationWriter(RecommendationWriter):
@@ -168,6 +179,7 @@ class JSONRecommendationWriter(RecommendationWriter):
     writer: TextIO
 
     def __init__(self, outs: RecOutputs):
+        super().__init__()
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
         self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(1))
 
@@ -195,6 +207,7 @@ class JSONRecommendationWriter(RecommendationWriter):
 
     def close(self):
         self.writer.close()
+        return super().close()
 
 
 def _json_fallback(v):
@@ -214,6 +227,7 @@ class EmbeddingWriter(RecommendationWriter):
     writer: ParquetBatchedWriter
 
     def __init__(self, outs: RecOutputs):
+        super().__init__()
         self.outputs = outs
         self.seen = set()
         outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
@@ -243,3 +257,4 @@ class EmbeddingWriter(RecommendationWriter):
 
     def close(self):
         self.writer.close()
+        return super().close()
