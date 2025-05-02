@@ -74,5 +74,5 @@ stages:
     outs:
     - path: mind-subset.ipynb
       hash: md5
-      md5: 5038af058e982ba9d5d520a7f95c5fe1
-      size: 207043
+      md5: be7bd0844f888acc9f8f75497ed866a1
+      size: 206665
