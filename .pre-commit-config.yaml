@@ -34,6 +34,7 @@ repos:
       # Run the formatter.
       - id: ruff-format
         name: format Python source
+        exclude: ^notebooks/.*\.ipynb
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.10.0-1
     hooks:
