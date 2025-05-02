@@ -269,12 +269,13 @@ class EmbeddingWriter(RecommendationWriter):
 
         if rows:
             # directly use pyarrow to avoid DF overhead, small but easy to avoid here
+            logger.debug("writing %d embedding rows", len(rows))
             emb_tbl = pa.Table.from_pylist(rows)
             self.writer.write_frame(emb_tbl)
 
         # record the article IDs we have written for future dedup
-        for aid, _e in rows:
-            self.seen.add(aid)
+        for row in rows:
+            self.seen.add(row["article_id"])
 
     def close(self):
         self.writer.close()
