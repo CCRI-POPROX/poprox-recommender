@@ -28,12 +28,14 @@ class MindData(EvalData):
     News and behavior data loaded from MIND data.
     """
 
+    name: str
     news_df: pd.DataFrame
     news_id_map: dict[UUID, str]
     behavior_df: pd.DataFrame
     behavior_id_map: dict[UUID, str]
 
     def __init__(self, archive: str = "MINDsmall_dev"):
+        self.name = archive
         news_df, behavior_df = load_mind_frames(archive)
         # index data frames for quick lookup of users & articles
         self.news_df = news_df.set_index("id")
