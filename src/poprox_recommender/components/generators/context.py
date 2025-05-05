@@ -322,6 +322,8 @@ class ContextGenerator(Component):
                     article.headline,
                     article.subhead,
                 )
+                extra_logging["rewritten_headline"] = rec_headline
+                extra_logging["rewritten_subheadline"] = rec_subheadline
             else:
                 raise Exception("Not generating GPT previews in dev mode")
         else:
@@ -350,6 +352,8 @@ class ContextGenerator(Component):
                         article.headline,
                         article.subhead,
                     )
+                    extra_logging["rewritten_headline"] = rec_headline
+                    extra_logging["rewritten_subheadline"] = rec_subheadline
                 else:
                     raise Exception("Not generating GPT previews in dev mode")
             else:
