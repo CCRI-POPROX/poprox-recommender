@@ -42,11 +42,14 @@ class NRMS(torch.nn.Module):
 
         # batch_size, word_embedding_dim
         user_vector = self.user_encoder(clicked_news_vector)
+
         # batch_size, 1 + K
         click_probability = self.click_predictor(candidate_news_vector, user_vector)
 
+        loss = self.loss_fn(click_probability, clicked)
+
         if mode == "train":
-            return {"click_prob": click_probability, "loss": self.loss_fn(click_probability, clicked)}
+            return {"click_prob": click_probability, "loss": loss}
 
         return click_probability
 
