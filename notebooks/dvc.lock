@@ -48,3 +48,31 @@ stages:
       hash: md5
       md5: 1a9c79950b6480e7eb398dd9889ab6db
       size: 208632
+  basic-template:
+    cmd: jupytext --to notebook basic-eval-template.md
+    deps:
+    - path: basic-eval-template.md
+      hash: md5
+      md5: 3e4d1217000ccc22aeebb0d38be85ad0
+      size: 4083
+    outs:
+    - path: basic-eval-template.ipynb
+      hash: md5
+      md5: d7a609cac9a5ed5ae8606ea5dd2ee28a
+      size: 6716
+  basic-results@mind-subset:
+    cmd: papermill -p EVAL_NAME mind-subset basic-eval-template.ipynb mind-subset.ipynb
+    deps:
+    - path: ../outputs/mind-subset-profile-metrics.csv.gz
+      hash: md5
+      md5: 4e7c1e9a8a6653386163667ed1522dfb
+      size: 263556
+    - path: basic-eval-template.ipynb
+      hash: md5
+      md5: d7a609cac9a5ed5ae8606ea5dd2ee28a
+      size: 6716
+    outs:
+    - path: mind-subset.ipynb
+      hash: md5
+      md5: be7bd0844f888acc9f8f75497ed866a1
+      size: 206665

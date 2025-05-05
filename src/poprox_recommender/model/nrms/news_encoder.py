@@ -10,7 +10,7 @@ class NewsEncoder(torch.nn.Module):
         super(NewsEncoder, self).__init__()
 
         self.plm_config = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/")
-        self.plm = AutoModel.from_pretrained(model_path, cache_dir="/tmp/")
+        self.plm = AutoModel.from_config(self.plm_config)
         self.plm.requires_grad_(False)
 
         self.multihead_attention = nn.MultiheadAttention(
