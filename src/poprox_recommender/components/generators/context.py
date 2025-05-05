@@ -269,7 +269,7 @@ class ContextGenerator(Component):
                 treated_extras.append(extra)
 
         if treated_articles:
-            treated_articles = await self.diversify_treatment_previews(treated_articles)
+            treated_articles, treated_extras = await self.diversify_treatment_previews(treated_articles, treated_extras)
 
         for article, extra in zip(treated_articles, treated_extras):
             # Subtract rougel score of rewritten headline + subhead and body from baseline
@@ -322,8 +322,6 @@ class ContextGenerator(Component):
                     article.headline,
                     article.subhead,
                 )
-                extra_logging["rewritten_headline"] = rec_headline
-                extra_logging["rewritten_subheadline"] = rec_subheadline
             else:
                 raise Exception("Not generating GPT previews in dev mode")
         else:
@@ -352,8 +350,6 @@ class ContextGenerator(Component):
                         article.headline,
                         article.subhead,
                     )
-                    extra_logging["rewritten_headline"] = rec_headline
-                    extra_logging["rewritten_subheadline"] = rec_subheadline
                 else:
                     raise Exception("Not generating GPT previews in dev mode")
             else:
@@ -367,6 +363,7 @@ class ContextGenerator(Component):
     async def diversify_treatment_previews(
         self,
         articles: list[Article],
+        extras: list[dict],
     ):
         input_prompt = []
         for i, article in enumerate(articles):
@@ -391,7 +388,10 @@ class ContextGenerator(Component):
             articles[i].headline = rewritten_preview["HEADLINE"]
             articles[i].subhead = rewritten_preview["SUB_HEADLINE"]
 
-        return articles
+            extras[i]["rewritten_headline"] = rewritten_preview["HEADLINE"]
+            extras[i]["rewritten_subheadline"] = rewritten_preview["SUB_HEADLINE"]
+
+        return articles, extras
 
     def offline_metric_calculation(self, headline, subhead, gen_headline, gen_subhead):
         logger.info(f"Calculating metrics for Article: '{headline[:30]}'")
