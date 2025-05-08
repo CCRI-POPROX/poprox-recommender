@@ -20,10 +20,27 @@ class AdditiveAttention(nn.Module):
             nn.Linear(
                 hidden_dim, 1, bias=False
             ),  # in: (batch_size, seq_len, hidden_dim), out: (batch_size, seq_len, 1)
-            nn.Softmax(dim=-2),
         )
+        self.softmax = nn.Softmax(dim=-2)
         self.attention.apply(init_weights)
 
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
-        attention_weight = self.attention(input)
-        return input * attention_weight
+    def forward(
+        self, input: torch.Tensor, padding_mask: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        softmax_input = self.attention(input)
+
+        if padding_mask is not None:
+            # When some positions are masked they should receive zero weights, so
+            # apply mask to the softmax input by making masked positions -infinity
+            mask_values = torch.nan_to_num(-torch.inf * padding_mask)
+            softmax_input = softmax_input + mask_values.unsqueeze(dim=2)
+            # When *all* positions are masked softmax outputs equal weights, so
+            # apply mask to the softmax output by making masked positions zero
+            attention_weights = self.softmax(softmax_input) * (~padding_mask.bool()).int().unsqueeze(dim=-1)
+        else:
+            attention_weights = self.softmax(softmax_input)
+
+        attention_outputs = input * attention_weights
+        weighted_sum = torch.sum(attention_outputs, dim=1)
+
+        return weighted_sum, attention_outputs, attention_weights

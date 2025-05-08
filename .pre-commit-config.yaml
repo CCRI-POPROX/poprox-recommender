@@ -12,6 +12,7 @@ repos:
         exclude: cloudformation\.yml
       - id: debug-statements
       - id: end-of-file-fixer
+        exclude: ^notebooks/.*\.ipynb
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/gitleaks/gitleaks
@@ -30,9 +31,11 @@ repos:
       - id: ruff
         args: [--fix]
         name: auto-fix Python lint errors
+        exclude: ^notebooks/.*\.ipynb
       # Run the formatter.
       - id: ruff-format
         name: format Python source
+        exclude: ^notebooks/.*\.ipynb
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.10.0-1
     hooks:
@@ -48,6 +51,6 @@ repos:
           - yaml
           - toml
           - json
-        exclude: ^models/
+        exclude: ^(models/|outputs/.*/metrics)
         additional_dependencies:
           - dprint
