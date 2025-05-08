@@ -1,7 +1,9 @@
 name: Check Data Pipeline
 
 on:
-  pull_request:
+  # temporarily disable the data pipeline checks, they are super expensive
+  # pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -32,7 +34,7 @@ jobs:
 
       - name: 📦 Set up dependencies
         run: |
-          uv sync --extra=cpu --no-default-groups --group=data
+          uv sync --extra=cpu --no-default-groups --group=data  --extra=cpu
           echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
@@ -77,7 +79,7 @@ jobs:
 
       - name: 📦 Set up dependencies
         run: |
-          uv sync --extra=cpu --no-default-groups --group=data
+          uv sync --extra=cpu --no-default-groups --group=data --extra=cpu
           echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data

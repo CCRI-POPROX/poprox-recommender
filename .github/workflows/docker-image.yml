@@ -26,17 +26,14 @@ jobs:
 
       - name: 🕶️ Install uv
         uses: astral-sh/setup-uv@v5
-
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version-file: ".python-version"
+          python-version: "3.12"
 
       - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=test --group=data
+        run: uv sync --no-default-groups --group=test --group=data --extra=cpu
 
       - name: Show DVC config
-        run: uv run dvc config --list
+        run: dvc config --list
 
       - name: Cache model data
         uses: actions/cache@v4
@@ -44,11 +41,11 @@ jobs:
           path: .dvc/cache
           key: docker-dvc-cache-${{ hashFiles('models/**.dvc', 'tests/**.dvc') }}
 
-      - name: Fetch model data
-        run: |
-          uv run dvc config --local cache.type hardlink
-          uv run dvc pull -R models tests data
+      - name: Fetch model and test data
+        run: ./scripts/fetch-shared-data.sh
         env:
+          GH_EVT: ${{github.event_name}}
+          GH_REPO: ${{github.repository}}
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
@@ -62,7 +59,7 @@ jobs:
 
       - name: Run web service tests
         run: |
-          uv run pytest -v tests/web_service
+          uv run --no-sync pytest -v tests/web_service
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000
@@ -70,7 +67,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          uv run pytest -v tests/integration
+          uv run --no-sync pytest -v tests/integration
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000

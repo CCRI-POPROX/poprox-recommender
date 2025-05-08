@@ -2,19 +2,16 @@
 
 set -eo pipefail
 
-repo="UNKNOWN"
-file_attr_pattern=""
+repo=""
 upload=yes
 
 while [[ -n $1 ]]; do
     case "$1" in
     --shared)
-        file_attr_pattern='poprox-sharing: (shared|public)$'
         repo=shared
         shift
         ;;
     --public)
-        file_attr_pattern='poprox-sharing: public$'
         repo=public
         shift
         ;;
@@ -33,21 +30,29 @@ while [[ -n $1 ]]; do
     esac
 done
 
-if [[ -z $file_attr_pattern ]]; then
+if [[ -z $repo ]]; then
     echo "no target specified" >&2
     exit 2
 fi
 
-# find the files with the appropriate attribute
-echo "listing shared files"
-declare -a files
-files=($(dvc list --dvc-only -R . |
-    git check-attr --stdin poprox-sharing |
-    grep -E "$file_attr_pattern" |
-    sed -e 's/:.*$//'))
+# define our commands for sharing
+public() {
+    # upload public files to all repos
+    echo "uploading public files"
+    echo + dvc push -r $repo "$@"
+    if [[ $upload == yes ]]; then
+        dvc push -r $repo "$@"
+    fi
+}
 
-echo "found ${#files[@]} files to share"
-if [[ $upload == yes ]]; then
-    set -x
-    dvc push -r $repo "${files[@]}"
-fi
+shared() {
+    if [[ $repo == shared ]]; then
+        echo "uploading shared files"
+        echo + dvc push -r $repo "$@"
+        if [[ $upload == yes ]]; then
+            dvc push -r $repo "$@"
+        fi
+    fi
+}
+
+. shared-data.sh

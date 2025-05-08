@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from transformers import AutoConfig, AutoModel
 
-from ..general.attention.newsadditive import NewsAdditiveAttention
+from ..general.attention.additive import AdditiveAttention
 
 
 class NewsEncoder(torch.nn.Module):
@@ -13,34 +13,40 @@ class NewsEncoder(torch.nn.Module):
         self.plm = AutoModel.from_config(self.plm_config)
         self.plm.requires_grad_(False)
 
-        self.plm_hidden_size = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/").hidden_size
-
         self.multihead_attention = nn.MultiheadAttention(
-            embed_dim=self.plm_hidden_size,
+            embed_dim=self.plm_config.hidden_size,
             num_heads=num_attention_heads,
             batch_first=True,
         )
 
-        self.additive_attention = NewsAdditiveAttention(self.plm_hidden_size, additive_attn_hidden_dim)
+        self.additive_attention = AdditiveAttention(self.plm_config.hidden_size, additive_attn_hidden_dim)
 
     @property
     def embedding_size(self) -> int:
-        return self.plm_hidden_size
+        return self.plm_config.hidden_size
 
-    def forward(self, news_input: torch.Tensor) -> torch.Tensor:
-        # batch_size, num_words_title, word_embedding_dim
+    def forward(self, article_tokens: torch.Tensor) -> torch.Tensor:
+        nonzero_inputs = article_tokens.bool()
 
-        V = self.plm(news_input, attention_mask=news_input.bool().int()).last_hidden_state
+        # [batch_size, seq_len] -> [batch_size, seq_len, hidden_size]
+        token_embeddings = self.plm(article_tokens, attention_mask=nonzero_inputs.int()).last_hidden_state
+
+        # Multi-head attention needs at least one position to be unmasked
+        # or it returns NaNs, so unmask the first position even if it's padding
+        # (Note: article headline tokens are padded on the right)
+        mha_padding_mask = ~nonzero_inputs
+        mha_padding_mask[:, 0] = False
+
+        # [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size]
         multihead_attn_output, _ = self.multihead_attention(
-            V, V, V
-        )  # [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size]
+            token_embeddings, token_embeddings, token_embeddings, key_padding_mask=mha_padding_mask
+        )
 
-        additive_attn_output = self.additive_attention(
-            multihead_attn_output
-        )  # [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size]
+        # Additive attention can handle all positions being masked and will zero
+        # the weights of the non-zero vectors coming from MHA in masked positions
+        add_padding_mask = ~nonzero_inputs
 
-        output = torch.sum(
-            additive_attn_output, dim=1
-        )  # [batch_size, seq_len, hidden_size] -> [batch_size, hidden_size]
+        # [batch_size, seq_len, hidden_size] -> [batch_size, hidden_size]
+        article_vectors, _, _ = self.additive_attention(multihead_attn_output, padding_mask=add_padding_mask)
 
-        return output
+        return article_vectors
