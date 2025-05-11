@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import json
 import logging
-import math
 import random
 from datetime import datetime
 from itertools import chain, product
@@ -177,14 +176,13 @@ class PoproxData(EvalData):
 
         for newsletter_id in newsletter_ids:
             impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]
-            # TODO: Change `account_id` to `profile_id` in the export
-            profile_id = impressions_df.iloc[0]["account_id"]
+            profile_id = impressions_df.iloc[0]["profile_id"]
             newsletter_created_at = impressions_df.iloc[0]["created_at"]
 
             # Filter clicks to those before the newsletter
             profile_clicks_df = self.clicks_df.loc[self.clicks_df["profile_id"] == profile_id]
-            # TODO: Change `timestamp` to `created_at` in the export
-            filtered_clicks_df = profile_clicks_df[profile_clicks_df["timestamp"] < newsletter_created_at]
+            logger.info(profile_clicks_df.columns)
+            filtered_clicks_df = profile_clicks_df[profile_clicks_df["clicked_at"] < newsletter_created_at]
             if len(filtered_clicks_df) == 0:
                 logger.warning(f"No clicks for profile {profile_id} before newsletter {newsletter_id}")
                 continue
@@ -201,7 +199,7 @@ class PoproxData(EvalData):
                         Click(
                             article_id=article_row.article_id,
                             newsletter_id=article_row.newsletter_id,
-                            timestamp=article_row.timestamp,
+                            timestamp=article_row.clicked_at,
                         )
                     )
 
@@ -214,7 +212,7 @@ class PoproxData(EvalData):
                         entity_id=interest.entity_id,
                         entity_name=interest.entity_name,
                         preference=interest.preference,
-                        frequency=interest.frequency if not math.isnan(interest.frequency) else -1,
+                        # frequency=interest.frequency if not math.isnan(interest.frequency) else -1,
                     )
                 )
 
