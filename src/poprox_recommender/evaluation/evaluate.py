@@ -31,7 +31,7 @@ import pandas as pd
 from docopt import docopt
 from lenskit.logging import LoggingConfig, item_progress
 
-from poprox_recommender.config import available_cpu_parallelism
+# from poprox_recommender.config import available_cpu_parallelism
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
@@ -102,7 +102,8 @@ def main():
             logger.warning("--jobs must be positive, using single job")
             n_jobs = 1
     else:
-        n_jobs = available_cpu_parallelism(4)
+        # n_jobs = available_cpu_parallelism(4)
+        n_jobs = 1
 
     eval_name = options["<name>"]
     logger.info("measuring evaluation %s", eval_name)
