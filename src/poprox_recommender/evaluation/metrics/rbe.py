@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 import numpy as np
+from lenskit.metrics import GeometricRankWeight
 
 from poprox_concepts.domain import CandidateSet
 from poprox_recommender.data.mind import MindData  # Import MindData to access lookup_article
@@ -8,12 +9,14 @@ from poprox_recommender.data.mind import MindData  # Import MindData to access l
 mind_data = MindData()
 
 
-def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.5):
+def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.85):
     top_k_articles = final_recs.articles[:k]
     weighted_counts = defaultdict(float)
 
-    for rank, article in enumerate(top_k_articles):
-        weight = d ** (rank + 1)
+    rank_weight = GeometricRankWeight(d)
+    weights = [rank_weight.weight(rank) for rank in range(1, k + 1)]
+
+    for rank, (article, weight) in enumerate(zip(top_k_articles, weights), start=1):
         mentions = article.mentions
         if not mentions:
             article_details = mind_data.lookup_article(uuid=article.article_id)

@@ -55,7 +55,7 @@ def test_entropy_with_same_mentions_present(test_data):
 def test_entropy_with_diverse_mentions(test_data):
     ranked = CandidateSet(articles=test_data["all_articles"])
     score = rank_bias_entropy(ranked, k=3)
-    assert score == pytest.approx(1.3250112108241772)
+    assert score == pytest.approx(1.484630757682105)
 
 
 def test_entropy_with_different_discount(test_data):
