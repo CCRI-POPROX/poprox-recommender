@@ -7,6 +7,8 @@ from poprox_concepts.domain import CandidateSet
 from poprox_recommender.data.mind import MindData  # Import MindData to access lookup_article
 from poprox_recommender.topics import extract_general_topics
 
+mind_data = MindData()
+
 
 def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.85):
     top_k_articles = final_recs.articles[:k]
@@ -31,5 +33,4 @@ def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.85):
 
     topic_probs = {topic: count / total_weight for topic, count in weighted_counts.items()}
     entropy = -sum(p * np.log2(p) for p in topic_probs.values() if p > 0)
-
     return entropy
