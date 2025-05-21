@@ -1,4 +1,5 @@
 # Simulates a request to the recommender without requiring Serverless
+import json
 import warnings
 
 from poprox_concepts.api.recommendations.v2 import RecommendationRequestV2, RecommendationResponseV2
@@ -27,7 +28,17 @@ if __name__ == "__main__":
         response_llm = root(req.model_dump(), pipeline="llm_rank_rewrite")
         response_llm = RecommendationResponseV2.model_validate(response_llm)
 
-        print("\n")
-        print(f"{event_profile['queryStringParameters']['pipeline']}")
-        for idx, article in enumerate(response_llm.recommendations.articles):
-            print(f"{idx + 1}. {article.headline}")
+        structured_output = {
+            "recommendations": [
+                {
+                    "rank": idx + 1,
+                    "headline": article.headline,
+                }
+                for idx, article in enumerate(response_llm.recommendations.articles)
+            ],
+            "profile_name": profile_path.stem,
+            "candidate_pool": [i.headline for i in req.candidates.articles],
+        }
+
+        with open(f"data/{profile_path.stem}_output.json", "w") as output_file:
+            json.dump(structured_output, output_file, indent=2)
