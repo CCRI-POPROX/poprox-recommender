@@ -30,6 +30,8 @@ dependencies = [
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
   "openai>=1.76.0",
   "python-dotenv>=1.1.0",
+  "pydantic>=2.7.4",
+  "scikit-learn>=1.6.1",
 ]
 
 [project.optional-dependencies]

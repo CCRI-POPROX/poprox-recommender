@@ -28,11 +28,15 @@ if __name__ == "__main__":
         response_llm = root(req.model_dump(), pipeline="llm_rank_rewrite")
         response_llm = RecommendationResponseV2.model_validate(response_llm)
 
+        # Map article_id to original headline for quick lookup
+        article_id_to_headline = {article.article_id: article.headline for article in req.candidates.articles}
+
         structured_output = {
             "recommendations": [
                 {
                     "rank": idx + 1,
                     "headline": article.headline,
+                    "original_headline": article_id_to_headline.get(article.article_id, "Unknown"),
                 }
                 for idx, article in enumerate(response_llm.recommendations.articles)
             ],

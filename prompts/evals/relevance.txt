@@ -1,0 +1,9 @@
+You are grading the outputs of a recommender system.
+
+You will be given a **name** that broadly describes the user's preferences and/or reading behaviors, the **recommendation list** of headlines that the system picked, and the **full candidate pool** of articles that the system chose from.
+
+Given this information, you need to decide how **relevant** the chosen items and their ranking are to this reader. Relevance is defined as news coverage that would be engaging to the given reader, such that they would want to click on the stories (e.g., a sports fan would be likely to click on football game roundups or basketball trade news).
+
+Your response should contain these elements:
+- A **relevance score**, from 1-100, indicating how well you think the chosen items **and** their ranking have done in terms of curating stories the reader will want to click on.
+- An **explanation**, detailing why you gave the score you did.
