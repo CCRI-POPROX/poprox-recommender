@@ -1,9 +1,13 @@
 import json
+from pathlib import Path
 from typing import Union
 
+from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
 from sklearn.metrics.pairwise import cosine_similarity
+
+load_dotenv()
 
 
 class JudgeContinuous(BaseModel):
@@ -38,7 +42,7 @@ def llm_judge_evals(
     if eval_name == "relevance":
         llm_input = f"""PROFILE: {output_path.split("_output")[0]}
 CANDIDATE POOL: {data["candidate_pool"]}
-RECOMMENDED HEADLINES: {"\n".join([item["rank"] + ". " + item["headline"] for item in data["recommendations"]])}
+RECOMMENDED HEADLINES: {"\n".join([str(item["rank"]) + ". " + item["headline"] for item in data["recommendations"]])}
 """
     else:
         llm_input = "\n".join(f"{item['rank']}. {item['headline']}" for item in data["recommendations"])
@@ -108,5 +112,14 @@ def run_evals(output_path: str):
     for eval_name, eval_output_format in evals:
         eval_output = llm_judge_evals(output_path, eval_name, eval_output_format)
 
-        eval_results.append({eval_name: eval_output})
+        eval_results.append({eval_name: eval_output.model_dump_json()})
     return eval_results
+
+
+if __name__ == "__main__":
+    output_paths = Path("data").glob("*_output.json")
+    for output_path in output_paths:
+        print(f"Running evaluations for {output_path}")
+        eval_results = run_evals(str(output_path))
+        with open(f"data/{output_path.stem}_evals.json", "w") as output_file:
+            json.dump(eval_results, output_file, indent=2)
