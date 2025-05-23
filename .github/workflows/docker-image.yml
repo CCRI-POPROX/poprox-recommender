@@ -65,7 +65,7 @@ jobs:
 
       - name: Start Docker container
         run: |
-          docker run -d -p 9000:8080 --name=poprox-recommender poprox-recommender:ci
+          docker run -d -p 9000:8080 -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} --name=poprox-recommender poprox-recommender:ci
 
       - name: Run web service tests
         run: |

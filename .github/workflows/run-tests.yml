@@ -10,6 +10,9 @@ jobs:
   full-tests:
     name: Run the PyTest tests
     runs-on: ubuntu-latest
+    env:
+      POPROX_CI_WITHOUT_MIND: 1
+      OPENAI_API_KEY: ${{secrets.OPENAI_API_KEY}}
 
     steps:
       - name: Checkout
@@ -51,8 +54,6 @@ jobs:
       - name: Run tests
         run: |
           pytest -v tests
-        env:
-          POPROX_CI_WITHOUT_MIND: 1
 
   nodata-tests:
     name: Run the PyTest tests without model data
