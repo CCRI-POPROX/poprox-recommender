@@ -16,7 +16,7 @@ region=${region:-us-east-1}
 echo "ENV: $env"
 echo "Region: $region"
 
-# Download model artifacts
+# Download model artifacts (skipping bc dvc isn't quite working)
 # uv run dvc pull -R models
 
 # Build container and deploy functions
