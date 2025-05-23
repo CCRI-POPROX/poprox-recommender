@@ -12,6 +12,8 @@ provider:
   memorySize: 2048 # 2gb
   timeout: 25
   architecture: x86_64
+  environment:
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
 
   iam:
     role:

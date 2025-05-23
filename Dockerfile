@@ -33,6 +33,9 @@ RUN /opt/poprox/bin/python3 -m nltk.downloader -d /opt/poprox/nltk_data punkt
 # Bake the model data into the image
 COPY models/ /opt/poprox/models/
 
+# Bake the prompts into the image
+COPY prompts/ /var/task/prompts/
+
 # Make sure we can import the recommender
 RUN /opt/poprox/bin/python -m poprox_recommender.api.main
 
