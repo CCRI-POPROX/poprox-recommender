@@ -101,12 +101,6 @@ TOPIC_ARTICLES = [
 ]
 
 
-##TODO:
-# 1. Which topic preference should go which embedding
-# 2. How many virtual click goes on each preference
-# 3. How much weight we should assign each embedding
-
-
 def virtual_clicks(onboarding_topics, topic_articles):
     topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
     virtual_clicks = []
@@ -190,11 +184,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         if self.embedded_topic_articles is None:
             self.embedded_topic_articles = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
 
-        topic_embeddings_by_uuid = {
-            article.article_id: embedding
-            for article, embedding in zip(TOPIC_ARTICLES, self.embedded_topic_articles.embeddings)
-        }
-
         if self.config.topic_pref_values is not None:
             topic_clicks = virtual_pn_clicks(
                 interest_profile.onboarding_topics, TOPIC_ARTICLES, self.config.topic_pref_values
@@ -239,7 +228,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
             combined_click_history = interest_profile.click_history
             embedding_lookup = {**click_lookup}
         else:
-            # print("Articlescorer")
             combined_click_history = topic_clicks
             embedding_lookup = {**topic_lookup}
 
@@ -252,9 +240,8 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         interest_profile.topic_embeddings = topic_lookup
         interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        interest_profile.click_history = combined_click_history
-        interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
-        print(f"embedding:{interest_profile.embedding}")
+        # breakpoint()
+
         return interest_profile
 
     def build_article_lookup(self, article_set: CandidateSet):

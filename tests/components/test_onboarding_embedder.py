@@ -8,7 +8,7 @@ import torch as th
 
 from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSUserEmbedder
-from poprox_recommender.components.embedders.topic_wise_user import TOPIC_ARTICLES, UserOnboardingEmbedder
+from poprox_recommender.components.embedders.topic_wise_user import TOPIC_ARTICLES, UserArticleFeedbackEmbedder
 from poprox_recommender.paths import model_file_path
 
 
@@ -17,7 +17,7 @@ def test_embed_user():
         plain_nrms_embedder = NRMSUserEmbedder(
             model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device="cpu"
         )
-        topic_aware_embedder = UserOnboardingEmbedder(
+        topic_aware_embedder = UserArticleFeedbackEmbedder(
             model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device="cpu"
         )
     except FileNotFoundError:

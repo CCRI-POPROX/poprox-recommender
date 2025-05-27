@@ -17,19 +17,20 @@ class ScoreFusion(Component):
         combined_score = defaultdict(float)
         combined_article = {}
 
-        for article, score in zip(candidates1.articles, candidates1.scores):
-            article_id = article.article_id
-            combined_score[article_id] += score
-            combined_article[article_id] = article
-
-        for article, score in zip(candidates2.articles, candidates2.scores):
-            article_id = article.article_id
-            if self.config.combiner == "sub":
-                # print("Me TOO")
-                combined_score[article_id] -= score
-            else:
+        if candidates1.articles is not None and candidates1.scores is not None:
+            for article, score in zip(candidates1.articles, candidates1.scores):
+                article_id = article.article_id
                 combined_score[article_id] += score
-            combined_article[article_id] = article
+                combined_article[article_id] = article
+
+        if candidates2.articles is not None and candidates2.scores is not None:
+            for article, score in zip(candidates2.articles, candidates2.scores):
+                article_id = article.article_id
+                if self.config.combiner == "sub":
+                    combined_score[article_id] -= score
+                else:
+                    combined_score[article_id] += score
+                combined_article[article_id] = article
 
         merged_scores = []
         merged_articles = []
@@ -43,9 +44,5 @@ class ScoreFusion(Component):
             merged_articles.append(combined_article[key])
             merged_scores.append(score / denominator)
 
-        print(self.config.combiner)
-        print(candidates1.scores)
-        print(candidates2.scores)
-        print(merged_scores)
-
+        # breakpoint()
         return CandidateSet(articles=merged_articles, scores=merged_scores)
