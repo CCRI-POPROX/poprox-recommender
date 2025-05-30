@@ -13,10 +13,12 @@ class ArticleScorer(Component):
         candidate_embeddings = candidate_articles.embeddings
         user_embedding = interest_profile.embedding
 
+        candidate_copy = candidate_articles.model_copy()
+
         if user_embedding is not None:
             pred = torch.matmul(candidate_embeddings, user_embedding.t()).squeeze()
-            candidate_articles.scores = pred.cpu().detach().numpy()
+            candidate_copy.scores = pred.cpu().detach().numpy()
         else:
-            candidate_articles.scores = None
+            candidate_copy.scores = None
 
-        return candidate_articles
+        return candidate_copy

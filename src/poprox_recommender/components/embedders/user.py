@@ -32,7 +32,7 @@ class NRMSUserEmbedder(Component):
 
     @torch_inference
     def __call__(self, clicked_articles: CandidateSet, interest_profile: InterestProfile) -> InterestProfile:
-        if len(clicked_articles.articles) == 0:
+        if len(interest_profile.click_history) == 0:
             interest_profile.embedding = None
         else:
             embedding_lookup = {}
