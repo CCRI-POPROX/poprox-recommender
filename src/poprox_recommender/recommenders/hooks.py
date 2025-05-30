@@ -17,3 +17,5 @@ def shallow_copy_pydantic_model(
     """
     if isinstance(value, BaseModel):
         return value.model_copy()
+    else:
+        return value
