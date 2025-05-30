@@ -35,27 +35,17 @@ jobs:
       - name: Show DVC config
         run: dvc config --list
 
-      - name: 🛠️ Configure data retrieval
-        run: |
-          dvc config --local cache.type hardlink
-
       - name: Cache model data
         uses: actions/cache@v4
         with:
           path: .dvc/cache
           key: docker-dvc-cache-${{ hashFiles('models/**.dvc', 'tests/**.dvc') }}
 
-      - name: Fetch model data
-        run: |
-          dvc config --local cache.type hardlink
-          dvc pull -r public -R models tests
-
-      - name: Fetch test data
-        run: |
-          if ! dvc pull data/MINDsmall_dev.zip; then
-            echo '::warning::Private repository not available, some tests will be skipped'
-          fi
+      - name: Fetch model and test data
+        run: ./scripts/fetch-shared-data.sh
         env:
+          GH_EVT: ${{github.event_name}}
+          GH_REPO: ${{github.repository}}
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
@@ -69,7 +59,7 @@ jobs:
 
       - name: Run web service tests
         run: |
-          uv run pytest -v tests/web_service
+          uv run --no-sync pytest -v tests/web_service
         env:
           POPROX_TEST_TARGET: docker
           POPROX_TEST_PORT: 9000

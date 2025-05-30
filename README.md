@@ -119,8 +119,8 @@ Pass the `-h` option to `send-request.py` to see command-line options.
 The default setup for this package is CPU-only, which works for basic testing
 and for deployment, but is very inefficient for evaluation.  The current set of
 models work on both CUDA (on Linux with NVidia cards) and MPS (macOS on Apple
-Silicon).  To make use of a GPU, do the following:, run `dvc repro` under the
-`eval-cuda` or `dev-cuda` environment (using either `pixi run` or `pixi shell`).
+Silicon).  To make use of a GPU, install with the `cuda` extra (and the `eval` group,
+which is included by default).
 
 Timing information for generating recommendations with the MIND validation set:
 
