@@ -1979,12 +1979,25 @@ wheels = [
 ]
 
 [[package]]
-name = "lenskit"
-version = "2025.3.0a2.post2"
+name = "lazy-loader"
+version = "0.4"
 source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6f/6b/c875b30a1ba490860c93da4cabf479e03f584eba06fe5963f6f6644653d8/lazy_loader-0.4.tar.gz", hash = "sha256:47c75182589b91a4e1a85a136c074285a5ad4d9f39c63e0d7fb76391c4574cd1", size = 15431 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/83/60/d497a310bde3f01cb805196ac61b7ad6dc5dcf8dce66634dc34364b20b4f/lazy_loader-0.4-py3-none-any.whl", hash = "sha256:342aa8e14d543a154047afb4ba8ef17f5563baad3fc610d7b15b213b0f119efc", size = 12097 },
+]
+
+[[package]]
+name = "lenskit"
+version = "2025.3.0a4.dev85+g16e5fc7d"
+source = { registry = "https://pypi.lenskit.org/lenskit-dev/" }
 dependencies = [
     { name = "click" },
     { name = "humanize" },
+    { name = "lazy-loader" },
     { name = "more-itertools" },
     { name = "numpy" },
     { name = "pandas" },
@@ -2003,26 +2016,15 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "xopen" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/54/d0/76d537d126ede91c13344611ba9d3a112428909130a5c83474df424d3b00/lenskit-2025.3.0a2.post2.tar.gz", hash = "sha256:8bd55f6c23c9ab4ba8e7e77c3da69afbbc3d87f4c1a138f8ff05fd9bf634d61a", size = 2586170 }
+sdist = { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev85%2Bg16e5fc7d.tar.gz" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/27/25d66214668b857f8b56130e1c43dfd0f765ae9bcb4ebe1b478b263a3000/lenskit-2025.3.0a2.post2-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:e937db4e7432234fb62d38273d2bdd2092b503668252785d8bd582c2a8f9750d", size = 836262 },
-    { url = "https://files.pythonhosted.org/packages/d9/c4/d0146b0aafe5c2d4f16175f5578e9a311f5669db8b2df3254feeaa17f76d/lenskit-2025.3.0a2.post2-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:6b7c222aa6a2a0a59099ce17b4520ae927d3915884f81a4fb0740e0045b1ffa0", size = 816592 },
-    { url = "https://files.pythonhosted.org/packages/90/fe/7389f94b3703b6d8649b1c260b1a5f7a81af6bc01333a69646ab402c1b19/lenskit-2025.3.0a2.post2-cp312-cp312-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:bb033523215c26c6795f101b54efd657caec8bd18c7d7cb35246cdf046a21fa5", size = 901457 },
-    { url = "https://files.pythonhosted.org/packages/cd/08/19a400cbcdceb3babfe5e94867ad90fdf11fba51bd3c51721ec12f3f81e8/lenskit-2025.3.0a2.post2-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c15f9a58ba4a112f193ba936f3ffe8767302831671446e29f249afe8df83d136", size = 880041 },
-    { url = "https://files.pythonhosted.org/packages/0f/0b/f169d5d8b6782b196d32d6a31708385ae17a70c5d94bc7138b4f50099f83/lenskit-2025.3.0a2.post2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f3d8acb6ab2f785672a3654da0d6609d5790712c08c2102617ae5aec8d4fda4e", size = 883962 },
-    { url = "https://files.pythonhosted.org/packages/42/d7/a97ecdcf1c0496998c09599f27a024672b7b19aad910e446ec452a1209a0/lenskit-2025.3.0a2.post2-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:15648370a278be08dddeda19cbcdab0c4253a2057bc8328e49c25f2349e02161", size = 937976 },
-    { url = "https://files.pythonhosted.org/packages/89/2e/328990380627fb8c0de109c1dad5faaf9d552fcb35a702880f71a67311ee/lenskit-2025.3.0a2.post2-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:0a921486c609a07050718a4ac593a47dc31f68b452833fbc8d12db28b7ed907a", size = 963228 },
-    { url = "https://files.pythonhosted.org/packages/78/55/7ba0bcdd20365da222a03ab12e4316d47a40e739ccf34dad04892ff8b4af/lenskit-2025.3.0a2.post2-cp312-cp312-win32.whl", hash = "sha256:17f4b208f0edaa00ef5f67340344ba85ff416315516e2ff940f6243ee485de09", size = 681669 },
-    { url = "https://files.pythonhosted.org/packages/c6/20/652b9dd320aa3855b05ebbed27c52183532309c26ad1d2fb87a813b1b716/lenskit-2025.3.0a2.post2-cp312-cp312-win_amd64.whl", hash = "sha256:46b92b2689d53f8380c7c46f4bb91beb9bdc8f0f500e1a1b6128255c58a24d78", size = 735809 },
-    { url = "https://files.pythonhosted.org/packages/11/43/eedf9d6dff5d5ea378a11429e4f5e0f7ac271828321f18534a3ffffcb849/lenskit-2025.3.0a2.post2-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:606c37f34b6120ca1864baa6c0c08a9a2e15c177cb2f1636cb524e4c8aa88691", size = 836402 },
-    { url = "https://files.pythonhosted.org/packages/4f/d2/4587721dbdde6b0351b3c1cf3ead8279edb174b2b8993b32a0b82f79228f/lenskit-2025.3.0a2.post2-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:baa9927751c12ef755f55f61e072619d4bfbf0d1a0202a10e1ae37bea77163a3", size = 816778 },
-    { url = "https://files.pythonhosted.org/packages/b1/c7/52a918fafadc02520356af68a4d25d116d751c4204db7ac0232268c2db9f/lenskit-2025.3.0a2.post2-cp313-cp313-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:185bc8f0ac274f770effb411335a98db4c34549a421a91e2a4c775596a4af025", size = 901496 },
-    { url = "https://files.pythonhosted.org/packages/53/d7/b56547f610c552bc4cdf8c39370eb73845f85a008ca307392be7af582bba/lenskit-2025.3.0a2.post2-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ffe9d0d719943f4c8ebcd1c1fa4d49bbef3509cf133a02d700850863d469d798", size = 880249 },
-    { url = "https://files.pythonhosted.org/packages/81/fb/f83f10307e13625a3f8b9f680b2e83c1ccd4a87f2e9d1226503206ecc0d4/lenskit-2025.3.0a2.post2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:037ae953e1ab4b86fd80b67b9d41b90ac45a14d432a8a71a788487e1881ab02d", size = 884434 },
-    { url = "https://files.pythonhosted.org/packages/b2/af/7ffca1aef896b14878a5dfe94cd87cc115ac44258eeb3ded7d1bb437d9e2/lenskit-2025.3.0a2.post2-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:940e8099cb65f8a0f8d1a18c8ac826db10ce90f5171e6d0a5e3ae10b15121d2c", size = 937979 },
-    { url = "https://files.pythonhosted.org/packages/cb/f7/f9effbd4e273faee3f7319e55176bf0c5767566bbf2dff254f36030b70a7/lenskit-2025.3.0a2.post2-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:4c69ec031afa55a3c37d847a07c9d669a59527aa680c5db81a366ed35059b97c", size = 963511 },
-    { url = "https://files.pythonhosted.org/packages/c2/4e/6388d8ea6f377dcc22e92d4e14a82c41209f58881cc130dc4623944ceb30/lenskit-2025.3.0a2.post2-cp313-cp313-win32.whl", hash = "sha256:dc6dda5e211e8d6b78b91f10e8f1e4a6edfb247198020fda2f97f66aa1cffdc3", size = 681705 },
-    { url = "https://files.pythonhosted.org/packages/ed/e3/9917d89568b59eb0092b8c71dd2b7c3c9cb9de9ced4bd15599d5905eb571/lenskit-2025.3.0a2.post2-cp313-cp313-win_amd64.whl", hash = "sha256:e749e6bb5e736ce72828b2d8ccaf972a77c57662fd35bb1044f2057ab53dc31e", size = 735315 },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev85%2Bg16e5fc7d-cp311-abi3-macosx_10_12_x86_64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev85%2Bg16e5fc7d-cp311-abi3-macosx_11_0_arm64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev85%2Bg16e5fc7d-cp311-abi3-manylinux_2_17_i686.manylinux2014_i686.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev85%2Bg16e5fc7d-cp311-abi3-manylinux_2_28_aarch64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev85%2Bg16e5fc7d-cp311-abi3-manylinux_2_28_x86_64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev85%2Bg16e5fc7d-cp311-abi3-win32.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev85%2Bg16e5fc7d-cp311-abi3-win_amd64.whl" },
 ]
 
 [[package]]
@@ -2906,7 +2908,7 @@ requires-dist = [
     { name = "awslambdaric", marker = "extra == 'deploy'", specifier = "~=2.2" },
     { name = "fastapi", extras = ["all"], specifier = "~=0.115.11" },
     { name = "httpx", specifier = "~=0.28.1" },
-    { name = "lenskit", specifier = "~=2025.3.0a2" },
+    { name = "lenskit", specifier = ">=2025.3.0a4.dev85" },
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
