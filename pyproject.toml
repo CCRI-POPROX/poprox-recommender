@@ -19,7 +19,7 @@ dependencies = [
   "fastapi[all]~=0.115.11",
   "mangum~=0.19.0",
   "uvicorn~=0.34.0",
-  "lenskit~=2025.3.0a2",
+  "lenskit>=2025.3.0a4.dev85",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
   "torch~=2.2",
@@ -83,6 +83,10 @@ torch = [
   { index = "pytorch-cpu", extra = "cpu" },
   { index = "pytorch-cu124", extra = "cuda" },
 ]
+
+[[tool.uv.index]]
+name = "lenskit-dev"
+url = "https://pypi.lenskit.org/lenskit-dev/"
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
