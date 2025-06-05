@@ -58,6 +58,7 @@ dev = [
   { include-group = "test" },
   { include-group = "data" },
   { include-group = "eval" },
+  "py-spy>=0.4.0",
 ]
 data = [
   "dvc ~=3.51",
