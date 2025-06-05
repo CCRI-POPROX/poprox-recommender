@@ -883,6 +883,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/41/65/46cbbe4907a14d458be93e4f3fdc6b25011623aa705ef0d9bbce11b53509/dvc-3.59.1-py3-none-any.whl", hash = "sha256:445c66f5d8304cf868ecff7b6d9428bff7879cff9545f0ac5a896572e14e14dd", size = 457702 },
 ]
 
+[package.optional-dependencies]
+s3 = [
+    { name = "dvc-s3" },
+]
+
 [[package]]
 name = "dvc-data"
 version = "3.16.9"
@@ -2850,8 +2855,7 @@ deploy = [
 [package.dev-dependencies]
 data = [
     { name = "docopt-ng" },
-    { name = "dvc" },
-    { name = "dvc-s3" },
+    { name = "dvc", extra = ["s3"] },
     { name = "jq" },
     { name = "jupytext" },
     { name = "matplotlib" },
@@ -2865,8 +2869,7 @@ data = [
 dev = [
     { name = "coverage" },
     { name = "docopt-ng" },
-    { name = "dvc" },
-    { name = "dvc-s3" },
+    { name = "dvc", extra = ["s3"] },
     { name = "hatch" },
     { name = "ipython" },
     { name = "jq" },
@@ -2927,8 +2930,7 @@ provides-extras = ["cpu", "cuda", "deploy"]
 [package.metadata.requires-dev]
 data = [
     { name = "docopt-ng", specifier = ">=0.9" },
-    { name = "dvc", specifier = "~=3.51" },
-    { name = "dvc-s3", specifier = ">=3" },
+    { name = "dvc", extras = ["s3"], specifier = "~=3.51" },
     { name = "jq", specifier = "~=1.8" },
     { name = "jupytext", specifier = ">=1.16" },
     { name = "matplotlib", specifier = "~=3.6" },
@@ -2942,8 +2944,7 @@ data = [
 dev = [
     { name = "coverage", specifier = ">=6.5" },
     { name = "docopt-ng", specifier = ">=0.9" },
-    { name = "dvc", specifier = "~=3.51" },
-    { name = "dvc-s3", specifier = ">=3" },
+    { name = "dvc", extras = ["s3"], specifier = "~=3.51" },
     { name = "hatch", specifier = "~=1.13" },
     { name = "ipython", specifier = ">=8" },
     { name = "jq", specifier = "~=1.8" },

@@ -60,8 +60,7 @@ dev = [
   { include-group = "eval" },
 ]
 data = [
-  "dvc ~=3.51",
-  "dvc-s3 >=3",
+  "dvc[s3] ~=3.51",
   "docopt-ng >=0.9",
   "pandas ~=2.0",
   "matplotlib ~=3.6",
