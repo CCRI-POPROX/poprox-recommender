@@ -16,7 +16,7 @@ root = project_root()
 MODEL_DIR = root / "models" / "nrms-mind"
 
 
-def train(device, load_checkpoint):
+def train(device, load_checkpoint, args):
     # 1. Initialize model
     if not device.startswith("cuda"):
         logger.warning("training on %s, not CUDA", device)
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     More detailed hyper-parameters for model training need to be modified in TrainingArguments
     """
     parser = argparse.ArgumentParser(description="processing some parameters")
-
+    parser.add_argument("--subset", type=int, default=None, help="train on subset")
     parser.add_argument("-v", "--verbose", help="enable verbose logging")
     parser.add_argument("--num_clicked_news_a_user", type=float, default=50)  # length of clicked history
     parser.add_argument("--dataset_attributes", type=str, default="title")
@@ -151,4 +151,4 @@ if __name__ == "__main__":
 
     torch.cuda.empty_cache()
 
-    train(device, args.load_checkpoint)
+    train(device, args.load_checkpoint, args)
