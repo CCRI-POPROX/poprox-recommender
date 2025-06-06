@@ -37,7 +37,7 @@ class BaseDataset(Dataset):
         # if empty, padding title token by zeros
         self.padding = {k: v for k, v in padding_all.items() if k in [args.dataset_attributes]}
 
-        if hasattr(self.args, "subset") and self.args.subset is not None:
+        if self.args.subset and self.args.subset is not None:
             self.behaviors_parsed = self.behaviors_parsed.iloc[: self.args.subset]
 
     def __len__(self):
