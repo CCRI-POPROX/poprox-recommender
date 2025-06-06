@@ -16,7 +16,7 @@ root = project_root()
 MODEL_DIR = root / "models" / "nrms-mind"
 
 
-def train(device, load_checkpoint, args, output_dir):
+def train(device, args):
     # 1. Initialize model
     if not device.startswith("cuda"):
         logger.warning("training on %s, not CUDA", device)
@@ -26,7 +26,7 @@ def train(device, load_checkpoint, args, output_dir):
 
     model = Model(args)
 
-    if load_checkpoint:
+    if args.load_checkpoint:
         checkpoint = load_file(args.checkpoint_path)
         model.load_state_dict(checkpoint)
 
@@ -58,7 +58,7 @@ def train(device, load_checkpoint, args, output_dir):
     # 3. Train model
     logger.info("Training Start")
     training_args = TrainingArguments(
-        output_dir=fspath(output_dir),
+        output_dir=fspath(args.output_dir),
         logging_strategy="steps",
         save_total_limit=5,
         lr_scheduler_type="constant",
@@ -72,7 +72,7 @@ def train(device, load_checkpoint, args, output_dir):
         per_device_eval_batch_size=1,
         num_train_epochs=3,
         remove_unused_columns=False,
-        logging_dir=fspath(output_dir),
+        logging_dir=fspath(args.output_dir),
         logging_steps=1,
         report_to=None,
     )
@@ -100,7 +100,7 @@ def train(device, load_checkpoint, args, output_dir):
     """
 
     # 4. save and extract tensors
-    save_model(model, output_dir)
+    save_model(model, args.output_dir)
 
 
 def save_model(model, output_dir):
@@ -126,6 +126,7 @@ if __name__ == "__main__":
     """
     parser = argparse.ArgumentParser(description="processing some parameters")
     parser.add_argument("--subset", type=int, default=None, help="train on subset")
+    parser.add_argument("--output_dir", type=str, default=None, help="where to save the model")
     parser.add_argument("-v", "--verbose", help="enable verbose logging")
     parser.add_argument("--num_clicked_news_a_user", type=float, default=50)  # length of clicked history
     parser.add_argument("--dataset_attributes", type=str, default="title")
@@ -146,8 +147,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # set a seperate output directory for subset
-    if args.subset is not None:
-        args.output_dir = root / f"models/nrms-mind-subset-{args.subset}"
+    if args.output_dir is None:
+        if args.subset is not None:
+            args.output_dir = root / f"models/nrms-mind-subset-{args.subset}"
     else:
         args.output_dir = MODEL_DIR
 
@@ -160,4 +162,4 @@ if __name__ == "__main__":
 
     torch.cuda.empty_cache()
 
-    train(device, args.load_checkpoint, args, args.output_dir)
+    train(device, args)
