@@ -150,8 +150,8 @@ if __name__ == "__main__":
     if args.output_dir is None:
         if args.subset is not None:
             args.output_dir = root / f"models/nrms-mind-subset-{args.subset}"
-    else:
-        args.output_dir = MODEL_DIR
+        else:
+            args.output_dir = MODEL_DIR
 
     os.makedirs(args.output_dir, exist_ok=True)
 
