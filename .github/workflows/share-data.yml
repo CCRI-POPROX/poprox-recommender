@@ -8,8 +8,7 @@ on:
 jobs:
   share-data:
     name: Share data to S3
-    runs-on: ubuntu-latest
-
+    runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
     environment: data-publish
 
     steps:
