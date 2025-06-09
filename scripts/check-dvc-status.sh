@@ -31,7 +31,7 @@ This is not a hard error, but the DVC-controlled outputs in this PR, such as eva
 If the MIND eval CI job also fails, then the pipeline is not only out-of-date but cannot be rerun to produce current outputs.
 
 <details>
-<summary>\`dvc status\` output
+<summary>\`dvc status\` output</summary>
 
 \`\`\`console
 $ dvc status
