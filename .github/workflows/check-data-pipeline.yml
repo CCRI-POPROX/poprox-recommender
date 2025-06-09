@@ -1,8 +1,7 @@
 name: Check Data Pipeline
 
 on:
-  # temporarily disable the data pipeline checks, they are super expensive
-  # pull_request:
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -13,7 +12,7 @@ permissions:
 jobs:
   check-status:
     name: "Check data pipeline is up-to-date"
-    runs-on: ubuntu-latest
+    runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
     environment: data-fetch
     env:
       UV_LOCKED: 1
@@ -60,7 +59,7 @@ jobs:
   rerun-subset-recs:
     name: "Rerun MIND subset recommendations"
     # run this on MacOS for performance
-    runs-on: macos-latest
+    runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
     environment: data-fetch
 
     steps:
@@ -95,4 +94,6 @@ jobs:
           uv run dvc repro -f measure-mind-subset
         env:
           # POPROX_REC_DEVICE: mps
-          POPROX_CPU_COUNT: 1
+          LK_NUM_PROCS: 4
+          LK_NUM_THREADS: 2
+          LK_NUM_BACKEND_THREADS: 2
