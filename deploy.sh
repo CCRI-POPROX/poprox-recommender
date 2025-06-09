@@ -16,8 +16,5 @@ region=${region:-us-east-1}
 echo "ENV: $env"
 echo "Region: $region"
 
-# Download model artifacts
-dvc pull -R models
-
 # Build container and deploy functions
 npx serverless deploy --stage "${env}" --region "${region}"
