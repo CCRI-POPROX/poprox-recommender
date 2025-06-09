@@ -2861,6 +2861,7 @@ data = [
     { name = "pylatex" },
     { name = "scipy" },
     { name = "seaborn" },
+    { name = "zstandard" },
 ]
 dev = [
     { name = "coverage" },
@@ -2886,11 +2887,23 @@ dev = [
     { name = "ruff" },
     { name = "scipy" },
     { name = "seaborn" },
+    { name = "zstandard" },
 ]
 eval = [
     { name = "docopt-ng" },
+    { name = "dvc" },
+    { name = "dvc-s3" },
+    { name = "jq" },
+    { name = "jupytext" },
+    { name = "matplotlib" },
     { name = "pandas" },
+    { name = "papermill" },
+    { name = "plotnine" },
+    { name = "pylatex" },
     { name = "ray" },
+    { name = "scipy" },
+    { name = "seaborn" },
+    { name = "zstandard" },
 ]
 lint = [
     { name = "pre-commit" },
@@ -2938,6 +2951,7 @@ data = [
     { name = "pylatex", specifier = "~=1.4.2" },
     { name = "scipy", specifier = "~=1.14.1" },
     { name = "seaborn", specifier = "~=0.13.2" },
+    { name = "zstandard", specifier = "~=0.23" },
 ]
 dev = [
     { name = "coverage", specifier = ">=6.5" },
@@ -2963,11 +2977,23 @@ dev = [
     { name = "ruff", specifier = ">=0.4" },
     { name = "scipy", specifier = "~=1.14.1" },
     { name = "seaborn", specifier = "~=0.13.2" },
+    { name = "zstandard", specifier = "~=0.23" },
 ]
 eval = [
     { name = "docopt-ng", specifier = ">=0.9" },
+    { name = "dvc", specifier = "~=3.51" },
+    { name = "dvc-s3", specifier = ">=3" },
+    { name = "jq", specifier = "~=1.8" },
+    { name = "jupytext", specifier = ">=1.16" },
+    { name = "matplotlib", specifier = "~=3.6" },
     { name = "pandas", specifier = "~=2.0" },
+    { name = "papermill", specifier = "~=2.6" },
+    { name = "plotnine", specifier = "~=0.14.1" },
+    { name = "pylatex", specifier = "~=1.4.2" },
     { name = "ray", specifier = "~=2.44" },
+    { name = "scipy", specifier = "~=1.14.1" },
+    { name = "seaborn", specifier = "~=0.13.2" },
+    { name = "zstandard", specifier = "~=0.23" },
 ]
 lint = [
     { name = "pre-commit", specifier = "~=3.7" },
