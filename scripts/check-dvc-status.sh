@@ -1,5 +1,4 @@
 #!/bin/bash
-set -eo pipefail
 
 report_file=dvc-status.log
 status_file=$(mktemp --tmpdir poprox-dvc-status.XXXXXXXX)
@@ -29,15 +28,23 @@ cat >$report_file <<EOF
 
 This is not a hard error, but the DVC-controlled outputs in this PR, such as evaluation metrics, are not current with respect to their code and data inputs.
 
-If the MIND eval CI job also fails, then the pipeline is not only out-of-date but cannot be rerun to produce current outputs.
+If the CI job also fails, then the pipeline is not only out-of-date but cannot be rerun to produce current outputs.
+
+<details>
+<summary><code>dvc status</code> output</summary>
 
 \`\`\`console
 $ dvc status
 EOF
 
 dvc status --no-updates | tee -a $report_file
-echo -e '```\n' >>$report_file
-echo -e 'Creator: check-dvc-status' >>$report_file
+cat >>$report_file <<EOF
+\`\`\`
+
+</details>
+
+Creator: check-dvc-status
+EOF
 
 # emit GitHub error messages attached to each individual stage
 jq -r 'keys | .[] | sub(":"; " ")' <$status_file | (while read file stage; do
