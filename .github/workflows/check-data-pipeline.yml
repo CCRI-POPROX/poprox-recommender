@@ -15,51 +15,7 @@ permissions:
 
 jobs:
   check-status:
-    name: "Check data pipeline is up-to-date"
-    runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
-    environment: data-fetch
-    env:
-      UV_LOCKED: 1
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🕶️ Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: 3.12
-
-      - name: 📦 Set up dependencies
-        run: |
-          uv sync --extra=cpu --no-default-groups --group=data  --extra=cpu
-          echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
-
-      - name: Fetch pipeline data
-        run: |
-          dvc config --local cache.type hardlink
-          dvc pull || true
-        env:
-          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-
-      - name: Check pipeline status
-        run: |
-          /bin/bash scripts/check-dvc-status.sh
-
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { postDvcStatus } = require('./scripts/auto-comments.js')
-            await postDvcStatus({github, context});
-
-  rerun-subset-recs:
-    name: "Rerun MIND subset recommendations"
-    # run this on MacOS for performance
+    name: "Check data pipeline"
     runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
     environment: data-fetch
     env:
@@ -88,6 +44,18 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+
+      - name: Check pipeline status
+        run: |
+          /bin/bash scripts/check-dvc-status.sh
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { postDvcStatus } = require('./scripts/auto-comments.js')
+            await postDvcStatus({github, context});
 
       - name: Re-run MIND subset outputs
         run: |

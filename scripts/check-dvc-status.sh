@@ -28,7 +28,7 @@ cat >$report_file <<EOF
 
 This is not a hard error, but the DVC-controlled outputs in this PR, such as evaluation metrics, are not current with respect to their code and data inputs.
 
-If the MIND eval CI job also fails, then the pipeline is not only out-of-date but cannot be rerun to produce current outputs.
+If the CI job also fails, then the pipeline is not only out-of-date but cannot be rerun to produce current outputs.
 
 <details>
 <summary><code>dvc status</code> output</summary>
