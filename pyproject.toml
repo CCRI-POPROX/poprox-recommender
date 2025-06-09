@@ -48,6 +48,7 @@ eval = [
   "docopt-ng >=0.9",
   "pandas ~=2.0",
   "ray ~=2.44",
+  { include-group = "data" },
 ]
 dev = [
   "hatch ~=1.13",
@@ -72,6 +73,7 @@ data = [
   "scipy ~=1.14.1",
   "pylatex ~=1.4.2",
   "jq ~=1.8",
+  "zstandard ~=0.23",
 ]
 
 ## UV index setup for PyTorch
