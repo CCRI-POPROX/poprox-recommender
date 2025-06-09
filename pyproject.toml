@@ -48,6 +48,7 @@ eval = [
   "docopt-ng >=0.9",
   "pandas ~=2.0",
   "ray ~=2.44",
+  { include-group = "data" },
 ]
 dev = [
   "hatch ~=1.13",
