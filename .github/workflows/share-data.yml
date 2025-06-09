@@ -43,13 +43,13 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Upload shared data
-        run: ./scripts/upload-shared-data.sh --shared
+        run: invoke upload-shared-data
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Upload public data
-        run: ./scripts/upload-shared-data.sh --public
+        run: invoke upload-shared-data --public
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
