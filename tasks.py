@@ -39,7 +39,7 @@ def list_artifacts(c: Context, public=False, shared=False):
 
 
 @task
-def upload_shared_data(c: Context, public=False, dry_run=False):
+def upload_shared_data(c: Context, public=False, dry_run=False, verbose=False):
     "Upload shared or public data."
     target = "public" if public else "shared"
     up_files = []
@@ -58,7 +58,11 @@ def upload_shared_data(c: Context, public=False, dry_run=False):
 
     # filter out files covered by directories
     up_files = [f for f in up_files if not any(f.startswith(d) for d in up_dirs)]
-    print(f"uploading {len(up_files)} {target} files")
+    if verbose:
+        for file in up_files:
+            print(f"uploading {target} file {file}")
+    else:
+        print(f"uploading {len(up_files)} {target} files")
     if not dry_run:
         c.run(f"dvc push -r {target} --no-run-cache " + " ".join(up_files))
 
