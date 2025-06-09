@@ -16,5 +16,7 @@ region=${region:-us-east-1}
 echo "ENV: $env"
 echo "Region: $region"
 
+dvc pull -R models || exit 2
+
 # Build container and deploy functions
-npx serverless deploy --stage "${env}" --region "${region}"
+npx serverless deploy --stage "${env}" --region "${region}" || exit 3
