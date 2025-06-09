@@ -1,5 +1,4 @@
 #!/bin/bash
-set -eo pipefail
 
 report_file=dvc-status.log
 status_file=$(mktemp --tmpdir poprox-dvc-status.XXXXXXXX)
