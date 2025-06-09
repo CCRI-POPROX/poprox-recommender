@@ -48,8 +48,10 @@ jobs:
           uv run dvc pull -r "$DVC_REMOTE" -R models
         env:
           UV_NO_SYNC: y
-          # you can change the remote here if needed
-          DVC_REMOTE: public
+          # can change the remote name here if needed
+          # external researchers: you can deploy from 'public' with our pre-trained models,
+          # we don't do that to avoid dependency ordering problems in our infrastructure.
+          DVC_REMOTE: poprox-s3
           # if you need to use different credentials, replace these here
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
