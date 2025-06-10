@@ -30,6 +30,6 @@ stages:
     outs:
     - path: nrms-mind
       hash: md5
-      md5: e1b38b965f2bcb3f36edf5a99f37cad7.dir
-      size: 2224727458
-      nfiles: 33
+      md5: fc8cc08f0ef9d25f78d493aa278108a8.dir
+      size: 571192256
+      nfiles: 3

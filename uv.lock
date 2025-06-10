@@ -400,6 +400,15 @@ wheels = [
 ]
 
 [[package]]
+name = "bracex"
+version = "2.5.post1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/6c/57418c4404cd22fe6275b8301ca2b46a8cdaa8157938017a9ae0b3edf363/bracex-2.5.post1.tar.gz", hash = "sha256:12c50952415bfa773d2d9ccb8e79651b8cdb1f31a42f6091b804f6ba2b4a66b6", size = 26641 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4b/02/8db98cdc1a58e0abd6716d5e63244658e6e63513c65f469f34b6f1053fd0/bracex-2.5.post1-py3-none-any.whl", hash = "sha256:13e5732fec27828d6af308628285ad358047cec36801598368cb28bc631dbaf6", size = 11558 },
+]
+
+[[package]]
 name = "celery"
 version = "5.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -881,6 +890,11 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ec/3b/fb2256d3637dcf42cf8351356a6edda15173f62fea852fc3b31b2a883736/dvc-3.59.1.tar.gz", hash = "sha256:76c9cadc97a458321845424ff91489e8a2c5c6eaf36e52a79d8609beaed78cd6", size = 652872 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/65/46cbbe4907a14d458be93e4f3fdc6b25011623aa705ef0d9bbce11b53509/dvc-3.59.1-py3-none-any.whl", hash = "sha256:445c66f5d8304cf868ecff7b6d9428bff7879cff9545f0ac5a896572e14e14dd", size = 457702 },
+]
+
+[package.optional-dependencies]
+s3 = [
+    { name = "dvc-s3" },
 ]
 
 [[package]]
@@ -1439,6 +1453,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d7/4b/cbd8e699e64a6f16ca3a8220661b5f83792b3017d0f79807cb8708d33913/iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3", size = 4646 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ef/a6/62565a6e1cf69e10f5727360368e451d4b7f58beeac6173dc9db836a5b46/iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374", size = 5892 },
+]
+
+[[package]]
+name = "invoke"
+version = "2.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f9/42/127e6d792884ab860defc3f4d80a8f9812e48ace584ffc5a346de58cdc6c/invoke-2.2.0.tar.gz", hash = "sha256:ee6cbb101af1a859c7fe84f2a264c059020b0cb7fe3535f9424300ab568f6bd5", size = 299835 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0a/66/7f8c48009c72d73bc6bbe6eb87ac838d6a526146f7dab14af671121eb379/invoke-2.2.0-py3-none-any.whl", hash = "sha256:6ea924cc53d4f78e3d98bc436b08069a03077e6f85ad1ddaa8a116d7dad15820", size = 160274 },
 ]
 
 [[package]]
@@ -2850,8 +2873,8 @@ deploy = [
 [package.dev-dependencies]
 data = [
     { name = "docopt-ng" },
-    { name = "dvc" },
-    { name = "dvc-s3" },
+    { name = "dvc", extra = ["s3"] },
+    { name = "invoke" },
     { name = "jq" },
     { name = "jupytext" },
     { name = "matplotlib" },
@@ -2861,14 +2884,15 @@ data = [
     { name = "pylatex" },
     { name = "scipy" },
     { name = "seaborn" },
+    { name = "wcmatch" },
     { name = "zstandard" },
 ]
 dev = [
     { name = "coverage" },
     { name = "docopt-ng" },
-    { name = "dvc" },
-    { name = "dvc-s3" },
+    { name = "dvc", extra = ["s3"] },
     { name = "hatch" },
+    { name = "invoke" },
     { name = "ipython" },
     { name = "jq" },
     { name = "jupytext" },
@@ -2887,12 +2911,13 @@ dev = [
     { name = "ruff" },
     { name = "scipy" },
     { name = "seaborn" },
+    { name = "wcmatch" },
     { name = "zstandard" },
 ]
 eval = [
     { name = "docopt-ng" },
-    { name = "dvc" },
-    { name = "dvc-s3" },
+    { name = "dvc", extra = ["s3"] },
+    { name = "invoke" },
     { name = "jq" },
     { name = "jupytext" },
     { name = "matplotlib" },
@@ -2903,6 +2928,7 @@ eval = [
     { name = "ray" },
     { name = "scipy" },
     { name = "seaborn" },
+    { name = "wcmatch" },
     { name = "zstandard" },
 ]
 lint = [
@@ -2940,8 +2966,8 @@ provides-extras = ["cpu", "cuda", "deploy"]
 [package.metadata.requires-dev]
 data = [
     { name = "docopt-ng", specifier = ">=0.9" },
-    { name = "dvc", specifier = "~=3.51" },
-    { name = "dvc-s3", specifier = ">=3" },
+    { name = "dvc", extras = ["s3"], specifier = "~=3.51" },
+    { name = "invoke", specifier = "~=2.2" },
     { name = "jq", specifier = "~=1.8" },
     { name = "jupytext", specifier = ">=1.16" },
     { name = "matplotlib", specifier = "~=3.6" },
@@ -2951,14 +2977,15 @@ data = [
     { name = "pylatex", specifier = "~=1.4.2" },
     { name = "scipy", specifier = "~=1.14.1" },
     { name = "seaborn", specifier = "~=0.13.2" },
+    { name = "wcmatch", specifier = ">=10.0" },
     { name = "zstandard", specifier = "~=0.23" },
 ]
 dev = [
     { name = "coverage", specifier = ">=6.5" },
     { name = "docopt-ng", specifier = ">=0.9" },
-    { name = "dvc", specifier = "~=3.51" },
-    { name = "dvc-s3", specifier = ">=3" },
+    { name = "dvc", extras = ["s3"], specifier = "~=3.51" },
     { name = "hatch", specifier = "~=1.13" },
+    { name = "invoke", specifier = "~=2.2" },
     { name = "ipython", specifier = ">=8" },
     { name = "jq", specifier = "~=1.8" },
     { name = "jupytext", specifier = ">=1.16" },
@@ -2977,12 +3004,13 @@ dev = [
     { name = "ruff", specifier = ">=0.4" },
     { name = "scipy", specifier = "~=1.14.1" },
     { name = "seaborn", specifier = "~=0.13.2" },
+    { name = "wcmatch", specifier = ">=10.0" },
     { name = "zstandard", specifier = "~=0.23" },
 ]
 eval = [
     { name = "docopt-ng", specifier = ">=0.9" },
-    { name = "dvc", specifier = "~=3.51" },
-    { name = "dvc-s3", specifier = ">=3" },
+    { name = "dvc", extras = ["s3"], specifier = "~=3.51" },
+    { name = "invoke", specifier = "~=2.2" },
     { name = "jq", specifier = "~=1.8" },
     { name = "jupytext", specifier = ">=1.16" },
     { name = "matplotlib", specifier = "~=3.6" },
@@ -2993,6 +3021,7 @@ eval = [
     { name = "ray", specifier = "~=2.44" },
     { name = "scipy", specifier = "~=1.14.1" },
     { name = "seaborn", specifier = "~=0.13.2" },
+    { name = "wcmatch", specifier = ">=10.0" },
     { name = "zstandard", specifier = "~=0.23" },
 ]
 lint = [
@@ -4691,6 +4720,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/f2/e1/0025d365cf6248c4d1ee4c3d2e3d373bdd3f6aff78ba4298f97b4fad2740/watchfiles-1.0.4-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:308ac265c56f936636e3b0e3f59e059a40003c655228c131e1ad439957592303", size = 611911 },
     { url = "https://files.pythonhosted.org/packages/55/55/035838277d8c98fc8c917ac9beeb0cd6c59d675dc2421df5f9fcf44a0070/watchfiles-1.0.4-cp313-cp313-win32.whl", hash = "sha256:aee397456a29b492c20fda2d8961e1ffb266223625346ace14e4b6d861ba9c80", size = 271152 },
     { url = "https://files.pythonhosted.org/packages/f0/e5/96b8e55271685ddbadc50ce8bc53aa2dff278fb7ac4c2e473df890def2dc/watchfiles-1.0.4-cp313-cp313-win_amd64.whl", hash = "sha256:d6097538b0ae5c1b88c3b55afa245a66793a8fec7ada6755322e465fb1a0e8cc", size = 285216 },
+]
+
+[[package]]
+name = "wcmatch"
+version = "10.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "bracex" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/41/ab/b3a52228538ccb983653c446c1656eddf1d5303b9cb8b9aef6a91299f862/wcmatch-10.0.tar.gz", hash = "sha256:e72f0de09bba6a04e0de70937b0cf06e55f36f37b3deb422dfaf854b867b840a", size = 115578 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ab/df/4ee467ab39cc1de4b852c212c1ed3becfec2e486a51ac1ce0091f85f38d7/wcmatch-10.0-py3-none-any.whl", hash = "sha256:0dd927072d03c0a6527a20d2e6ad5ba8d0380e60870c383bc533b71744df7b7a", size = 39347 },
 ]
 
 [[package]]

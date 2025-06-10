@@ -12,6 +12,7 @@ import zipfile
 from typing import Generator, cast
 from uuid import NAMESPACE_URL, UUID, uuid5
 
+import numpy as np
 import pandas as pd
 
 from poprox_concepts import Article, Click, Entity, InterestProfile, Mention
@@ -31,6 +32,7 @@ class MindData(EvalData):
     name: str
     news_df: pd.DataFrame
     news_id_map: dict[UUID, str]
+    news_id_rmap: dict[str, UUID]
     behavior_df: pd.DataFrame
     behavior_id_map: dict[UUID, str]
 
@@ -49,7 +51,9 @@ class MindData(EvalData):
         # add and reverse-index the UUIDs
         ns_article = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
         self.news_df["uuid"] = [uuid5(ns_article, aid) for aid in self.news_df.index.values]
+        # set up bidirectional maps for news IDs
         self.news_id_map = dict(zip(self.news_df["uuid"], self.news_df.index))
+        self.news_id_rmap = dict(zip(self.news_df.index, self.news_df["uuid"]))
 
         ns_impression = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/impression/")
         self.behavior_df["uuid"] = [uuid5(ns_impression, str(iid)) for iid in self.behavior_df.index.values]
@@ -59,7 +63,7 @@ class MindData(EvalData):
         return self.news_id_map[uuid]
 
     def news_uuid_for_id(self, id: str) -> UUID:
-        return cast(UUID, self.news_df.loc[id, "uuid"])
+        return self.news_id_rmap[id]
 
     def behavior_id_for_uuid(self, uuid: UUID) -> str:
         return self.behavior_id_map[uuid]
@@ -96,8 +100,10 @@ class MindData(EvalData):
             split_records(),
             columns=["mind_item_id", "rating"],
         )
-        truth["item_id"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
-        return truth.set_index("item_id")
+        ids = np.array([self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]])
+        truth = truth.set_index(ids)
+        truth.index.name = "item_id"
+        return truth
 
     def iter_profiles(self) -> Generator[RecommendationRequest]:
         for row in self.behavior_df.itertuples():
