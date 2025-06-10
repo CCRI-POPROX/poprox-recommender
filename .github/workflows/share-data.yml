@@ -8,8 +8,7 @@ on:
 jobs:
   share-data:
     name: Share data to S3
-    runs-on: ubuntu-latest
-
+    runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
     environment: data-publish
 
     steps:
@@ -43,13 +42,13 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Upload shared data
-        run: ./scripts/upload-shared-data.sh --shared
+        run: invoke upload-shared-data
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Upload public data
-        run: ./scripts/upload-shared-data.sh --public
+        run: invoke upload-shared-data --public
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}

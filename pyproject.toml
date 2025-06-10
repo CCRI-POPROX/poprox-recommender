@@ -61,8 +61,8 @@ dev = [
   { include-group = "eval" },
 ]
 data = [
-  "dvc ~=3.51",
-  "dvc-s3 >=3",
+  "invoke ~=2.2",
+  "dvc[s3] ~=3.51",
   "docopt-ng >=0.9",
   "pandas ~=2.0",
   "matplotlib ~=3.6",
@@ -74,6 +74,7 @@ data = [
   "pylatex ~=1.4.2",
   "jq ~=1.8",
   "zstandard ~=0.23",
+  "wcmatch>=10.0",
 ]
 
 ## UV index setup for PyTorch
