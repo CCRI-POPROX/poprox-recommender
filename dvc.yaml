@@ -106,6 +106,8 @@ stages:
   collect-metrics:
     foreach:
       - mind-subset
+      - mind-small
+      - mind-val
     do:
       cmd: python -m poprox_recommender.evaluation.collect ${item}
       deps:

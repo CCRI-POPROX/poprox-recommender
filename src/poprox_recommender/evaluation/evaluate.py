@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Generate evaluations for offline test data.
 
