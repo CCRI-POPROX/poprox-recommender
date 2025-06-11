@@ -240,7 +240,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         interest_profile.topic_embeddings = topic_lookup
         interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        # breakpoint()
 
         return interest_profile
 
