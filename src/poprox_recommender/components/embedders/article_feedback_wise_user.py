@@ -66,7 +66,7 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
             interest_profile.embedding = None
         else:
             ##### article_feedbacks = dict[UUID --> article_id, bool --> feedback] #####
-            FEEDBACKED_ARTICLES = feedbacked_article_convertion(
+            feedbacked_articles = feedbacked_article_convertion(
                 interest_profile.article_feedbacks, clicked_articles.articles
             )
             self.embedded_feedbacked_articles = self.article_embedder(CandidateSet(articles=FEEDBACKED_ARTICLES))
