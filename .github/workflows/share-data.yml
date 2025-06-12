@@ -9,6 +9,7 @@ jobs:
   share-data:
     name: Share data to S3
     runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
+    if: github.repository_owner == 'CCRI-POPROX'
     environment: data-publish
 
     steps:
