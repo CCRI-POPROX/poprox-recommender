@@ -86,6 +86,7 @@ torch = [
   { index = "pytorch-cpu", extra = "cpu" },
   { index = "pytorch-cu124", extra = "cuda" },
 ]
+lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
 
 [[tool.uv.index]]
 name = "lenskit-dev"
