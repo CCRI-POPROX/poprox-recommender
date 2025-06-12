@@ -12,8 +12,9 @@ def test_select_by_topic_filters_articles():
     profile = InterestProfile(
         click_history=[],
         onboarding_topics=[
-            AccountInterest(entity_id=uuid4(), entity_name="U.S. News", preference=2, frequency=1),
-            AccountInterest(entity_id=uuid4(), entity_name="Politics", preference=3, frequency=2),
+            AccountInterest(entity_id=uuid4(), entity_name="U.S. News", preference=4, frequency=1),
+            AccountInterest(entity_id=uuid4(), entity_name="Politics", preference=5, frequency=2),
+            AccountInterest(entity_id=uuid4(), entity_name="Entertainment", preference=1, frequency=1),
         ],
     )
 
