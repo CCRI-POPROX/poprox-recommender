@@ -2016,7 +2016,7 @@ wheels = [
 [[package]]
 name = "lenskit"
 version = "2025.3.0a4"
-source = { git = "https://github.com/mdekstrand/lkpy.git?branch=feature%2Fsettings-and-metrics#f3bb50bfc4b1a738f2225a1ff08641533fe3cfb5" }
+source = { git = "https://github.com/mdekstrand/lkpy.git?branch=feature%2Fsettings-and-metrics#e508304cf2d2c68bf89e8a27728320208b5bebcb" }
 dependencies = [
     { name = "click" },
     { name = "humanize" },
