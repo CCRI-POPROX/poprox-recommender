@@ -24,14 +24,26 @@ class EpsilonGreedy(Component):
         candidate_idx = 0
 
         # Shuffle the candidates so taking the first one amounts to sampling uniformly at random
-        candidates.articles = random.sample(candidates.articles, len(candidates.articles))
+        shuffled = random.sample(candidates.articles, len(candidates.articles))
 
         for slot_idx in range(self.config.num_slots):
+            selected = None
+
+            # If our weighted coin comes up heads, try to select an article from the candidates
             if random.random() < self.config.epsilon:
-                selected_articles.append(candidates.articles[candidate_idx])
-                candidate_idx += 1
-            else:
-                selected_articles.append(ranked.articles[ranked_idx])
+                tentative = shuffled[candidate_idx]
+                while tentative in selected_articles and candidate_idx < len(shuffled) - 1:
+                    candidate_idx += 1
+                    tentative = shuffled[candidate_idx]
+
+                if tentative not in selected_articles:
+                    selected = tentative
+
+            # If the coin came up tails or we couldn't find an article that wasn't already selected,
+            # then pick the next article from the ranked list
+            if selected is None:
+                selected = ranked.articles[ranked_idx]
                 ranked_idx += 1
 
+            selected_articles.append(selected)
         return RecommendationList(articles=selected_articles)
