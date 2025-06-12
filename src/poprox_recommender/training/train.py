@@ -76,7 +76,7 @@ def train(device, args):
         num_train_epochs=3,
         remove_unused_columns=False,
         logging_dir=fspath(args.output_dir),
-        logging_steps=1,
+        logging_steps=500,
         report_to=None,
     )
 
