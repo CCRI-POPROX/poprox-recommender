@@ -1,8 +1,11 @@
 import argparse
 from os import fspath
 
+import lenskit
+import lenskit.config
 import torch
-from lenskit.logging import LoggingConfig, get_logger
+from humanize import metric
+from lenskit.logging import LoggingConfig, Task, friendly_duration, get_logger
 from safetensors.torch import load_file, save_file
 from transformers import Trainer, TrainingArguments
 
@@ -73,7 +76,7 @@ def train(device, args):
         num_train_epochs=3,
         remove_unused_columns=False,
         logging_dir=fspath(args.output_dir),
-        logging_steps=1,
+        logging_steps=500,
         report_to=None,
     )
 
@@ -159,7 +162,20 @@ if __name__ == "__main__":
     if args.verbose:
         lc.set_verbose(True)
     lc.apply()
+    lenskit.configure(project_root())
 
     torch.cuda.empty_cache()
 
-    train(device, args)
+    with Task("train NRMS") as task:
+        task.save_to_file(args.output_dir / "task.json")
+        train(device, args)
+
+    logger.info("training completed in %s", friendly_duration(task.duration or -1))
+    if task.system_power:
+        # divide by 3600 to convert Joules to Wh
+        logger.info(
+            "training power: %s (%s CPU, %s GPU)",
+            metric(task.system_power / 3600, "Wh"),
+            metric(task.cpu_power / 3600, "Wh") if task.cpu_power else "unknown",
+            metric(task.gpu_power / 3600, "Wh") if task.gpu_power else "unknown",
+        )
