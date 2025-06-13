@@ -172,6 +172,7 @@ if __name__ == "__main__":
 
     logger.info("training completed in %s", friendly_duration(task.duration or -1))
     if task.system_power:
+        # divide by 3600 to convert Joules to Wh
         logger.info(
             "training power: %s (%s CPU, %s GPU)",
             metric(task.system_power / 3600, "Wh"),
