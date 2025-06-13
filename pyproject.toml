@@ -19,7 +19,7 @@ dependencies = [
   "fastapi[all]~=0.115.11",
   "mangum~=0.19.0",
   "uvicorn~=0.34.0",
-  "lenskit>=2025.3.0a4.dev85",
+  "lenskit>=2025.3.0a3.dev435",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
   "torch~=2.2",
@@ -86,7 +86,8 @@ torch = [
   { index = "pytorch-cpu", extra = "cpu" },
   { index = "pytorch-cu124", extra = "cuda" },
 ]
-lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
+# following can be uncommented when temporarily using a git checkout
+# lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
 
 [[tool.uv.index]]
 name = "lenskit-dev"

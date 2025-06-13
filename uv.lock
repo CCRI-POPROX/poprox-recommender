@@ -2015,8 +2015,8 @@ wheels = [
 
 [[package]]
 name = "lenskit"
-version = "2025.3.0a4"
-source = { git = "https://github.com/mdekstrand/lkpy.git?branch=feature%2Fsettings-and-metrics#e508304cf2d2c68bf89e8a27728320208b5bebcb" }
+version = "2025.3.0a4.dev145+g76bbdb3f"
+source = { registry = "https://pypi.lenskit.org/lenskit-dev/" }
 dependencies = [
     { name = "click" },
     { name = "humanize" },
@@ -2042,6 +2042,16 @@ dependencies = [
     { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-18-poprox-recommender-cuda'" },
     { name = "typing-extensions" },
     { name = "xopen" },
+]
+sdist = { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev145%2Bg76bbdb3f.tar.gz" }
+wheels = [
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev145%2Bg76bbdb3f-cp311-abi3-macosx_10_12_x86_64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev145%2Bg76bbdb3f-cp311-abi3-macosx_11_0_arm64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev145%2Bg76bbdb3f-cp311-abi3-manylinux_2_17_i686.manylinux2014_i686.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev145%2Bg76bbdb3f-cp311-abi3-manylinux_2_28_aarch64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev145%2Bg76bbdb3f-cp311-abi3-manylinux_2_28_x86_64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev145%2Bg76bbdb3f-cp311-abi3-win32.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev145%2Bg76bbdb3f-cp311-abi3-win_amd64.whl" },
 ]
 
 [[package]]
@@ -2941,7 +2951,7 @@ requires-dist = [
     { name = "awslambdaric", marker = "extra == 'deploy'", specifier = "~=2.2" },
     { name = "fastapi", extras = ["all"], specifier = "~=0.115.11" },
     { name = "httpx", specifier = "~=0.28.1" },
-    { name = "lenskit", git = "https://github.com/mdekstrand/lkpy.git?branch=feature%2Fsettings-and-metrics" },
+    { name = "lenskit", specifier = ">=2025.3.0a3.dev435" },
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
