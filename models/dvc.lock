@@ -33,3 +33,36 @@ stages:
       md5: fc8cc08f0ef9d25f78d493aa278108a8.dir
       size: 571192256
       nfiles: 3
+  train-nrms-mind:
+    cmd: python -m poprox_recommender.training.train
+    deps:
+    - path: ../data/MINDlarge_dev
+      hash: md5
+      md5: a90bc1810ca5c0c4c4ef4320474cb67f.dir
+      size: 322720668
+      nfiles: 5
+    - path: ../data/MINDlarge_post_dev
+      hash: md5
+      md5: b46257fa21d5847dbb140fffee7bc289.dir
+      size: 65658285
+      nfiles: 1
+    - path: ../data/MINDlarge_post_test
+      hash: md5
+      md5: 76ef57e4d4f5c9c965bfc4b99334ce84.dir
+      size: 112514303
+      nfiles: 1
+    - path: ../data/MINDlarge_post_train
+      hash: md5
+      md5: 1596fb67e704f44da0f990adfdb8975c.dir
+      size: 1163363644
+      nfiles: 3
+    - path: ../src/poprox_recommender/training/train.py
+      hash: md5
+      md5: 56e7f68ff5bf4383373a69a37e3a4c4b
+      size: 6578
+    outs:
+    - path: nrms-mind
+      hash: md5
+      md5: 1c9964f0d88a3b3d36b82415dd094a30.dir
+      size: 571192693
+      nfiles: 4
