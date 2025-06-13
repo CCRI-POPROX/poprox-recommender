@@ -5,7 +5,8 @@ from lenskit.stats import gini
 
 from poprox_concepts.domain import CandidateSet
 from poprox_recommender.data.mind import MindData  # Import MindData to access lookup_article
-from poprox_recommender.topics import extract_general_topics
+
+mind_data = MindData()
 
 
 def gini_coeff(final_recs: CandidateSet) -> float:
