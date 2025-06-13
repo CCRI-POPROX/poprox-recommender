@@ -58,8 +58,8 @@ stages:
       nfiles: 3
     - path: ../src/poprox_recommender/training/train.py
       hash: md5
-      md5: 3fae29fa4aed7901b41b2177751d854f
-      size: 6529
+      md5: 56e7f68ff5bf4383373a69a37e3a4c4b
+      size: 6578
     outs:
     - path: nrms-mind
       hash: md5
