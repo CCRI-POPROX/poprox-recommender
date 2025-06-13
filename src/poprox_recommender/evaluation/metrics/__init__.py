@@ -6,8 +6,8 @@ import pandas as pd
 from lenskit.data import ItemList
 from lenskit.metrics import call_metric
 from lenskit.metrics.ranking import NDCG, RecipRank
-from poprox_concepts import Article, CandidateSet
 
+from poprox_concepts import Article, CandidateSet
 from poprox_recommender.evaluation.metrics.gini_topics import gini_topics
 from poprox_recommender.evaluation.metrics.k_coverage import k_coverage_score
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted

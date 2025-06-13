@@ -2,8 +2,8 @@ from collections import Counter
 
 import numpy as np
 from lenskit.stats import gini
-from poprox_concepts.domain import CandidateSet
 
+from poprox_concepts.domain import CandidateSet
 from poprox_recommender.data.mind import MindData  # Import MindData to access lookup_article
 from poprox_recommender.topics import extract_general_topics
 

@@ -3,8 +3,8 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
-from poprox_concepts.domain import Article, CandidateSet, Entity, Mention
 
+from poprox_concepts.domain import Article, CandidateSet, Entity, Mention
 from poprox_recommender.evaluation.metrics.gini import gini_coeff
 
 logger = logging.getLogger(__name__)
