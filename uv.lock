@@ -2951,7 +2951,7 @@ requires-dist = [
     { name = "awslambdaric", marker = "extra == 'deploy'", specifier = "~=2.2" },
     { name = "fastapi", extras = ["all"], specifier = "~=0.115.11" },
     { name = "httpx", specifier = "~=0.28.1" },
-    { name = "lenskit", specifier = ">=2025.3.0a3.dev435" },
+    { name = "lenskit", specifier = ">=2025.3.0a4.dev145" },
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "numpy", specifier = ">=1.26,<2" },
