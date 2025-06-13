@@ -12,6 +12,7 @@ class NewsEncoder(torch.nn.Module):
         self.plm_config = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/")
         self.plm = AutoModel.from_config(self.plm_config)
         self.plm.requires_grad_(False)
+        self.plm.eval()
 
         self.multihead_attention = nn.MultiheadAttention(
             embed_dim=self.plm_config.hidden_size,

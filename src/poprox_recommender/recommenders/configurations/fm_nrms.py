@@ -5,14 +5,19 @@ from lenskit.pipeline import PipelineBuilder
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
+from poprox_recommender.components.embedders.explicit_topical_pref import (
+    UserExplicitTopicalEmbedder,
+    UserExplicitTopicalEmbedderConfig,
+)
 from poprox_recommender.components.embedders.multiple_users import (
     NRMSMultipleUserEmbedder,
     NRMSMultipleUserEmbedderConfig,
 )
-from poprox_recommender.components.filters.topic import TopicFilter
-from poprox_recommender.components.joiners.fill import FillRecs
+from poprox_recommender.components.embedders.topic_infused_article import (
+    FMStyleArticleEmbedder,
+)
+from poprox_recommender.components.joiners.feature_combiner import FeatureCombiner
 from poprox_recommender.components.rankers.topk import TopkRanker
-from poprox_recommender.components.samplers.uniform import UniformSampler
 from poprox_recommender.components.scorers.fm import FMScorer
 from poprox_recommender.paths import model_file_path
 
@@ -27,7 +32,9 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     ae_config = NRMSArticleEmbedderConfig(
         model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
     )
-    e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=i_candidates)
+    e_candidates = builder.add_component(
+        "candidate-embedder", FMStyleArticleEmbedder, ae_config, article_set=i_candidates
+    )
     e_clicked = builder.add_component(
         "history-NRMSArticleEmbedder", NRMSArticleEmbedder, ae_config, article_set=i_clicked
     )
@@ -36,7 +43,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     ue_config = NRMSMultipleUserEmbedderConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device=device
     )
-    e_user = builder.add_component(
+    e_user_history = builder.add_component(
         "user-embedder",
         NRMSMultipleUserEmbedder,
         ue_config,
@@ -45,15 +52,30 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         interest_profile=i_profile,
     )
 
-    # Score and rank articles
-    n_scorer = builder.add_component("scorer", FMScorer, candidate_articles=e_candidates, interest_profile=e_user)
-    n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
-
-    # Fallback: sample from user topic interests
-    n_topic_filter = builder.add_component(
-        "topic-filter", TopicFilter, candidate=i_candidates, interest_profile=i_profile
+    # Embed the user (topics)
+    ue_config2 = UserExplicitTopicalEmbedderConfig(
+        model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
+        device=device,
     )
-    n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
+    e_user_topic = builder.add_component(
+        "user-embedder2",
+        UserExplicitTopicalEmbedder,
+        ue_config2,
+        candidate_articles=e_candidates,
+        clicked_articles=e_clicked,
+        interest_profile=i_profile,
+    )
 
-    # Combine primary ranker and fallback
-    builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
+    e_user_combined_interest_profile = builder.add_component(
+        "user-combined-embedder",
+        FeatureCombiner,
+        None,
+        profiles_1=e_user_history,
+        profiles_2=e_user_topic,
+    )
+
+    # Score and rank articles
+    n_scorer = builder.add_component(
+        "scorer", FMScorer, candidate_articles=e_candidates, interest_profile=e_user_combined_interest_profile
+    )
+    builder.add_component("recommender", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
