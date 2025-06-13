@@ -9,7 +9,7 @@ from poprox_recommender.data.mind import MindData  # Import MindData to access l
 mind_data = MindData()
 
 
-def gini_coeff(final_recs: CandidateSet) -> float:
+def gini_topics(final_recs: CandidateSet) -> float:
     topic_counter = Counter()
     for article in final_recs.articles:
         article_details = mind_data.lookup_article(uuid=article.article_id)
