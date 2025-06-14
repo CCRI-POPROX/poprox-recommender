@@ -54,7 +54,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # Fallback: sample from user topic interests
     n_topic_filter = builder.add_component(
-        "topic-filter", TopicFilter, candidate=i_candidates, interest_profile=i_profile
+        "topic-filter", TopicFilter, candidates=i_candidates, interest_profile=i_profile
     )
     n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
 

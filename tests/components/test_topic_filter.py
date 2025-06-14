@@ -12,8 +12,9 @@ def test_select_by_topic_filters_articles():
     profile = InterestProfile(
         click_history=[],
         onboarding_topics=[
-            AccountInterest(entity_id=uuid4(), entity_name="U.S. News", preference=2, frequency=1),
-            AccountInterest(entity_id=uuid4(), entity_name="Politics", preference=3, frequency=2),
+            AccountInterest(entity_id=uuid4(), entity_name="U.S. News", preference=4, frequency=1),
+            AccountInterest(entity_id=uuid4(), entity_name="Politics", preference=5, frequency=2),
+            AccountInterest(entity_id=uuid4(), entity_name="Entertainment", preference=1, frequency=1),
         ],
     )
 
@@ -50,7 +51,7 @@ def test_select_by_topic_filters_articles():
     builder = PipelineBuilder()
     i_profile = builder.create_input("profile", InterestProfile)
     i_cand = builder.create_input("candidates", CandidateSet)
-    c_filter = builder.add_component("topic-filter", topic_filter, candidate=i_cand, interest_profile=i_profile)
+    c_filter = builder.add_component("topic-filter", topic_filter, candidates=i_cand, interest_profile=i_profile)
     c_sampler = builder.add_component("sampler", sampler, candidates1=c_filter, candidates2=i_cand)
     pipeline = builder.build()
 
