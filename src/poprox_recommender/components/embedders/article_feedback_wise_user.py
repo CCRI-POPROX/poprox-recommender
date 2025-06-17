@@ -69,14 +69,14 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
             feedbacked_articles = feedbacked_article_convertion(
                 interest_profile.article_feedbacks, clicked_articles.articles
             )
-            self.embedded_feedbacked_articles = self.article_embedder(CandidateSet(articles=FEEDBACKED_ARTICLES))
+            self.embedded_feedbacked_articles = self.article_embedder(CandidateSet(articles=feedbacked_articles))
 
             feedbacked_embeddings_by_article_id = {
                 article.article_id: embedding
-                for article, embedding in zip(FEEDBACKED_ARTICLES, self.embedded_feedbacked_articles.embeddings)
+                for article, embedding in zip(feedbacked_articles, self.embedded_feedbacked_articles.embeddings)
             }
 
-            article_feedback_as_clicks = virtual_pn_clicks(FEEDBACKED_ARTICLES, self.config.feedback_type)
+            article_feedback_as_clicks = virtual_pn_clicks(feedbacked_articles, self.config.feedback_type)
 
             feedbacked_article_lookup = {
                 article_id: embedding for article_id, embedding in feedbacked_embeddings_by_article_id.items()
