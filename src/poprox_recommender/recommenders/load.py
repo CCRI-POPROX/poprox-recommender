@@ -14,6 +14,7 @@ from structlog.stdlib import get_logger
 from poprox_recommender.config import default_device
 
 from .configurations import DEFAULT_PIPELINE
+from .hooks import shallow_copy_pydantic_model
 
 logger = get_logger(__name__)
 
@@ -78,6 +79,7 @@ def get_pipeline_builder(name: str, device: str | None = None, num_slots: int = 
         pipe_ver = version("poprox-recommender")
 
     builder = PipelineBuilder(norm_name, pipe_ver)
+    builder.add_run_hook("component-input", shallow_copy_pydantic_model)
     pipe_mod.configure(builder, num_slots=num_slots, device=device)
     return builder
 

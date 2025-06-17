@@ -10,7 +10,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
 ]
-requires-python = ">= 3.11"
+requires-python = ">= 3.12"
 readme = "README.md"
 license = { file = "LICENSE.md" }
 dynamic = ["version"]
@@ -19,7 +19,7 @@ dependencies = [
   "fastapi[all]~=0.115.11",
   "mangum~=0.19.0",
   "uvicorn~=0.34.0",
-  "lenskit~=2025.2",
+  "lenskit>=2025.3.0a4.dev145",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
   "torch~=2.2",
@@ -27,12 +27,10 @@ dependencies = [
   "safetensors>=0.4,<1",
   "transformers[torch]>=4.41,<5",
   "rich ~=13.9",
-  "ipyparallel ~=8.0",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
 ]
 
 [project.optional-dependencies]
-eval = ["docopt-ng >=0.9", "pandas ~=2.0"]
 deploy = ["awslambdaric ~=2.2"]
 # declare extras for Torch install
 cpu = ["torch~=2.2"]
@@ -46,28 +44,37 @@ GitHub = "https://github.com/CCRI-POPROX/poprox-recommender"
 [dependency-groups]
 lint = ["pre-commit ~=3.7", "ruff >=0.4", "pyright ~=1.1"]
 test = ["requests >=2.31,<3", "coverage >=6.5", "pytest >=8"]
+eval = [
+  "docopt-ng >=0.9",
+  "pandas ~=2.0",
+  "ray ~=2.44",
+  { include-group = "data" },
+]
 dev = [
   "hatch ~=1.13",
   "ipython >=8",
   "notebook >=7.2",
-  "jupytext ~=1.16",
   "pyarrow-stubs ~=17.11",
   { include-group = "lint" },
   { include-group = "test" },
   { include-group = "data" },
+  { include-group = "eval" },
 ]
 data = [
-  "dvc ~=3.51",
-  "dvc-s3 >=3",
+  "invoke ~=2.2",
+  "dvc[s3] ~=3.51",
   "docopt-ng >=0.9",
   "pandas ~=2.0",
   "matplotlib ~=3.6",
   "seaborn ~=0.13.2",
   "plotnine ~=0.14.1",
   "jupytext >=1.16",
+  "papermill~=2.6",
   "scipy ~=1.14.1",
   "pylatex ~=1.4.2",
   "jq ~=1.8",
+  "zstandard ~=0.23",
+  "wcmatch>=10.0",
 ]
 
 ## UV index setup for PyTorch
@@ -79,6 +86,12 @@ torch = [
   { index = "pytorch-cpu", extra = "cpu" },
   { index = "pytorch-cu124", extra = "cuda" },
 ]
+# following can be uncommented when temporarily using a git checkout
+# lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
+
+[[tool.uv.index]]
+name = "lenskit-dev"
+url = "https://pypi.lenskit.org/lenskit-dev/"
 
 [[tool.uv.index]]
 name = "pytorch-cpu"

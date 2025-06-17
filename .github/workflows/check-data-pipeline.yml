@@ -1,9 +1,12 @@
 name: Check Data Pipeline
 
 on:
-  # temporarily disable the data pipeline checks, they are super expensive
-  # pull_request:
+  pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: pipeline-check-${{github.ref}}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -12,8 +15,9 @@ permissions:
 
 jobs:
   check-status:
-    name: "Check data pipeline is up-to-date"
-    runs-on: ubuntu-latest
+    name: "Check data pipeline"
+    runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
+    if: github.repository_owner == 'CCRI-POPROX'
     environment: data-fetch
     env:
       UV_LOCKED: 1
@@ -26,28 +30,25 @@ jobs:
 
       - name: 🕶️ Install uv
         uses: astral-sh/setup-uv@v5
-
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version-file: ".python-version"
+          python-version: 3.12
 
       - name: 📦 Set up dependencies
         run: |
-          uv sync --extra=cpu --no-default-groups --group=data  --extra=cpu
+          uv sync --extra=cpu --no-dev --group=eval
           echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
         run: |
           dvc config --local cache.type hardlink
-          dvc pull
+          dvc pull || true
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Check pipeline status
         run: |
-          uv run /bin/bash scripts/check-dvc-status.sh
+          /bin/bash scripts/check-dvc-status.sh
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'
@@ -57,42 +58,11 @@ jobs:
             const { postDvcStatus } = require('./scripts/auto-comments.js')
             await postDvcStatus({github, context});
 
-  rerun-subset-recs:
-    name: "Rerun MIND subset recommendations"
-    # run this on MacOS for performance
-    runs-on: macos-latest
-    environment: data-fetch
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🕶️ Install uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
-
-      - name: 📦 Set up dependencies
-        run: |
-          uv sync --extra=cpu --no-default-groups --group=data --extra=cpu
-          echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
-
-      - name: Fetch pipeline data
-        run: |
-          dvc config --local cache.type hardlink
-          dvc pull
-        env:
-          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-
       - name: Re-run MIND subset outputs
         run: |
-          uv run dvc repro -f measure-mind-subset
+          dvc repro -f measure-mind-subset@nrms
         env:
           # POPROX_REC_DEVICE: mps
-          POPROX_CPU_COUNT: 1
+          LK_NUM_PROCS: 4
+          LK_NUM_THREADS: 2
+          LK_NUM_BACKEND_THREADS: 2

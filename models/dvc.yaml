@@ -1,5 +1,5 @@
 stages:
-  train-model:
+  train-nrms-mind:
     cmd: python -m poprox_recommender.training.train
     deps:
     - ../data/MINDlarge_dev
