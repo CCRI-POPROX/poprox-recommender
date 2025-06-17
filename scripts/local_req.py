@@ -26,7 +26,7 @@ if __name__ == "__main__":
     }
     event_feedback_score = {
         "body": raw_json,
-        "queryStringParameters": {"pipeline": "nrms_feedback_scores"},
+        "queryStringParameters": {"pipeline": "nrms_article_feedback"},
         "isBase64Encoded": False,
     }
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     response_topic_score = root(req.model_dump(), pipeline="nrms_topic_scores")
     response_topic_score = RecommendationResponseV2.model_validate(response_topic_score)
 
-    response_feedback_score = root(req.model_dump(), pipeline="nrms_feedback_scores")
+    response_feedback_score = root(req.model_dump(), pipeline="nrms_article_feedback")
     response_feedback_score = RecommendationResponseV2.model_validate(response_feedback_score)
 
     print("\n")
