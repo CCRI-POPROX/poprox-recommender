@@ -101,12 +101,6 @@ TOPIC_ARTICLES = [
 ]
 
 
-##TODO:
-# 1. Which topic preference should go which embedding
-# 2. How many virtual click goes on each preference
-# 3. How much weight we should assign each embedding
-
-
 def virtual_clicks(onboarding_topics, topic_articles):
     topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
     virtual_clicks = []
@@ -166,10 +160,6 @@ class UserOnboardingConfig(NRMSUserEmbedderConfig):
     topic_pref_values: list | None = None
 
 
-##TODO:
-# 1. if some of the topics then which topic should go in which embedder
-
-
 class UserOnboardingEmbedder(NRMSUserEmbedder):
     # ignore type because we are overriding a read-only property
     config: UserOnboardingConfig  # type: ignore
@@ -202,7 +192,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         else:
             topic_clicks = virtual_clicks(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        # breakpoint()
         embeddings_from_definitions = self.build_embeddings_from_definitions()
         embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
         embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
