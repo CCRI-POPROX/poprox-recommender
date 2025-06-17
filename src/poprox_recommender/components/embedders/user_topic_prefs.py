@@ -160,10 +160,6 @@ class UserOnboardingConfig(NRMSUserEmbedderConfig):
     topic_pref_values: list | None = None
 
 
-##TODO:
-# 1. if some of the topics then which topic should go in which embedder
-
-
 class UserOnboardingEmbedder(NRMSUserEmbedder):
     # ignore type because we are overriding a read-only property
     config: UserOnboardingConfig  # type: ignore
