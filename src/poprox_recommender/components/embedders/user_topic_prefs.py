@@ -233,7 +233,7 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.config.device)
 
         interest_profile.click_history = combined_click_history
-        interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
+        interest_profile.embedding = th.nan_to_num(self.build_user_embedding(combined_click_history, embedding_lookup))
 
         # adding topic_embeddings separately
         interest_profile.topic_embeddings = topic_lookup
