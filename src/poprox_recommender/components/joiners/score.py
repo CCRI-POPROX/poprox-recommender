@@ -46,5 +46,4 @@ class ScoreFusion(Component):
             merged_articles.append(combined_article[key])
             merged_scores.append(score / denominator)
 
-        # breakpoint()
         return CandidateSet(articles=merged_articles, scores=merged_scores)
