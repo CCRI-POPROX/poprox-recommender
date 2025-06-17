@@ -26,16 +26,19 @@ class ScoreFusion(Component):
         if candidates2.scores is not None:
             for article, score in zip(candidates2.articles, candidates2.scores):
                 article_id = article.article_id
-                combined_score[article_id] += score
+                if self.config.combiner == "sub":
+                    combined_score[article_id] -= score
+                else:
+                    combined_score[article_id] += score
                 combined_article[article_id] = article
+
+        merged_scores = []
+        merged_articles = []
 
         if self.config.combiner == "avg":
             denominator = 2
         else:
             denominator = 1
-
-        merged_scores = []
-        merged_articles = []
 
         for key, score in combined_score.items():
             merged_articles.append(combined_article[key])
