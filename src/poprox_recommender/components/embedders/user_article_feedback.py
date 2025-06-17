@@ -62,7 +62,7 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
 
     @torch_inference
     def __call__(self, clicked_articles: CandidateSet, interest_profile: InterestProfile) -> InterestProfile:
-        if len(interest_profile.article_feedbacks) == 0:
+        if not hasattr(interest_profile, "article_feedbacks") or len(interest_profile.article_feedbacks) == 0:
             interest_profile.embedding = None
         else:
             ##### article_feedbacks = dict[UUID --> article_id, bool --> feedback] #####
