@@ -59,4 +59,3 @@ if __name__ == "__main__":
     for idx, article in enumerate(response_feedback_score.recommendations.articles):
         article_topics = extract_general_topics(article)
         print(f"{idx + 1}. {article.headline} {article_topics}")
-
