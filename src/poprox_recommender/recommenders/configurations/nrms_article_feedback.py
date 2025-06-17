@@ -1,19 +1,18 @@
-# pyright: basic
-
 from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
+from poprox_recommender.components.embedders.user_article_feedback import (
+    UserArticleFeedbackConfig,
+    UserArticleFeedbackEmbedder,
+)
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
 from poprox_recommender.paths import model_file_path
-
-##TODO:
-# allow weigths for the scores (1/-1)
 
 
 def configure(builder: PipelineBuilder, num_slots: int, device: str):
@@ -51,8 +50,8 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         topic_embedding="nrms",
         topic_pref_values=[4, 5],
     )
-    e_user_positive = builder.add_component(
-        "pos-topic-embedder",
+    e_topic_positive = builder.add_component(
+        "user-embedder2",
         UserOnboardingEmbedder,
         ue_config2,
         candidate_articles=e_candidates,
@@ -66,12 +65,42 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         device=device,
         embedding_source="static",
         topic_embedding="nrms",
-        topic_pref_values=[1, 2],
+        topic_pref_values=[1,2],
     )
-    e_user_negative = builder.add_component(
-        "neg-topic-embedder",
+    e_topic_negative = builder.add_component(
+        "user-embedder3",
         UserOnboardingEmbedder,
         ue_config3,
+        candidate_articles=e_candidates,
+        clicked_articles=e_clicked,
+        interest_profile=i_profile,
+    )
+
+    # Embed the user (feedbacks)
+    ue_config4 = UserArticleFeedbackConfig(
+        model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
+        device=device,
+        feedback_type="positive",
+    )
+    e_feedback_positive = builder.add_component(
+        "user-embedder4",
+        UserArticleFeedbackEmbedder,
+        ue_config4,
+        candidate_articles=e_candidates,
+        clicked_articles=e_clicked,
+        interest_profile=i_profile,
+    )
+
+    # Embed the user2 (feedbacks)
+    ue_config5 = UserArticleFeedbackConfig(
+        model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
+        device=device,
+        feedback_type="negative",
+    )
+    e_feedback_negative = builder.add_component(
+        "user-embedder5",
+        UserArticleFeedbackEmbedder,
+        ue_config5,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
         interest_profile=i_profile,
@@ -85,14 +114,14 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         "positive_topic_score",
         ArticleScorer,
         candidate_articles=builder.node("candidate-embedder"),
-        interest_profile=e_user_positive,
+        interest_profile=e_topic_positive,
     )
 
     negative_topic_score = builder.add_component(
         "negative_topic_score",
         ArticleScorer,
         candidate_articles=builder.node("candidate-embedder"),
-        interest_profile=e_user_negative,
+        interest_profile=e_topic_negative,
     )
 
     topic_fusion = builder.add_component(
@@ -103,9 +132,45 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         candidates2=negative_topic_score,
     )
 
-    # Combine click and topic scoring
+    # Score and rank articles (feedbacks)
+    positive_feedback_score = builder.add_component(
+        "positive_feedback_score",
+        ArticleScorer,
+        candidate_articles=builder.node("candidate-embedder"),
+        interest_profile=e_feedback_positive,
+    )
+
+    negative_feedback_score = builder.add_component(
+        "negative_feedback_score",
+        ArticleScorer,
+        candidate_articles=builder.node("candidate-embedder"),
+        interest_profile=e_feedback_negative,
+    )
+
+    feedback_fusion = builder.add_component(
+        "feedback_fusion",
+        ScoreFusion,
+        {"combiner": "sub"},
+        candidates1=positive_feedback_score,
+        candidates2=negative_feedback_score,
+    )
+
+    # Combine topic scoring and feedback -> all explicit data
+    explicit_fusion = builder.add_component(
+        "explicit_fusion",
+        ScoreFusion,
+        {"combiner": "avg"},
+        candidates1=topic_fusion,
+        candidates2=feedback_fusion,
+    )
+
+    # Combine click and explicit feedback -> all preference
     fusion = builder.add_component(
-        "fusion", ScoreFusion, {"combiner": "avg"}, candidates1=n_scorer, candidates2=topic_fusion
+        "fusion",
+        ScoreFusion,
+        {"combiner": "avg", "weight1": 1, "weight2": 2},
+        candidates1=n_scorer,
+        candidates2=explicit_fusion,
     )
 
     builder.add_component("recommender", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)

@@ -180,11 +180,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         if self.embedded_topic_articles is None:
             self.embedded_topic_articles = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
 
-        topic_embeddings_by_uuid = {
-            article.article_id: embedding
-            for article, embedding in zip(TOPIC_ARTICLES, self.embedded_topic_articles.embeddings)
-        }
-
         if self.config.topic_pref_values is not None:
             topic_clicks = virtual_pn_clicks(
                 interest_profile.onboarding_topics, TOPIC_ARTICLES, self.config.topic_pref_values
@@ -234,14 +229,11 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.config.device)
 
         interest_profile.click_history = combined_click_history
-        interest_profile.embedding = self.build_user_embedding(combined_click_history, embedding_lookup)
+        interest_profile.embedding = th.nan_to_num(self.build_user_embedding(combined_click_history, embedding_lookup))
 
         # adding topic_embeddings separately
         interest_profile.topic_embeddings = topic_lookup
         interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, TOPIC_ARTICLES)
-
-        interest_profile.click_history = combined_click_history
-        interest_profile.embedding = th.nan_to_num(self.build_user_embedding(combined_click_history, embedding_lookup))
 
         return interest_profile
 

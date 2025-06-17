@@ -1,9 +1,28 @@
 {
   "interest_profile": {
     "profile_id": "b5e9b183-3264-4e08-aff2-cbc6bd0583b3",
-    "click_history": [],
+    "click_history": [
+      {
+        "article_id": "67a7d7e1-8500-4b83-bd19-29669a37424e"
+      },
+      {
+        "article_id": "4c0bc199-1450-42dd-ae61-5eef0b1c2294"
+      },
+      {
+        "article_id": "36a3ac56-6c45-41b2-b799-81e69d242d2e"
+      }
+    ],
     "click_topic_counts": null,
     "click_locality_counts": null,
+    "article_feedbacks": {
+      "36a3ac56-6c45-41b2-b799-81e69d242d2e": true,
+      "728cc3c8-6ab5-44c9-8675-0a4168a195fd": true,
+      "59c22225-00f9-4119-a27f-d930a48cd76f": true,
+      "4c326e07-48e7-40b5-a414-5a2dab3b0fc0": true,
+      "4c0bc199-1450-42dd-ae61-5eef0b1c2294": false,
+      "40f1c3e5-2e33-49ac-ab95-067f0e40908b": false,
+      "f04d2066-b567-4f61-b23c-198f88edfd31": false
+    },
     "onboarding_topics": [
       {
         "entity_id": "c74a986e-3bd9-4be0-b8c1-bd95e376d064",
@@ -23,7 +42,7 @@
       {
         "entity_id": "b822877a-c1e2-44a9-8d6c-4610d8047a9a",
         "entity_name": "Climate and environment",
-        "preference": 3
+        "preference": 5
       },
       {
         "entity_id": "b967a4f4-ac9d-4c09-81d3-af228f846d06",
@@ -43,7 +62,7 @@
       {
         "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
         "entity_name": "U.S. news",
-        "preference": 3
+        "preference": 5
       },
       {
         "entity_id": "1e813fd6-0998-43fb-9839-75fa96b69b32",
@@ -53,7 +72,7 @@
       {
         "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
         "entity_name": "Business",
-        "preference": 3
+        "preference": 5
       },
       {
         "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",

@@ -8,7 +8,7 @@ import torch as th
 
 from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSUserEmbedder
-from poprox_recommender.components.embedders.topic_wise_user import TOPIC_ARTICLES, UserOnboardingEmbedder
+from poprox_recommender.components.embedders.user_topic_prefs import TOPIC_ARTICLES, UserOnboardingEmbedder
 from poprox_recommender.paths import model_file_path
 
 
