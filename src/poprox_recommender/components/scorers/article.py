@@ -1,5 +1,3 @@
-from copy import copy
-
 import torch
 from lenskit.pipeline import Component
 
