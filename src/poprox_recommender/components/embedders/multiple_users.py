@@ -32,6 +32,8 @@ class NRMSMultipleUserEmbedder(Component):
 
     @torch_inference
     def __call__(self, clicked_articles: CandidateSet, interest_profile: InterestProfile) -> InterestProfile:
+        interest_profile = interest_profile.model_copy()
+
         if len(interest_profile.click_history) == 0:
             interest_profile.embedding = None
         else:

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -5,7 +6,7 @@ from uuid import uuid4
 import torch as th
 import torch.nn.functional as F
 
-from poprox_concepts import Article, CandidateSet, Click, InterestProfile
+from poprox_concepts import AccountInterest, Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.multiple_users import (
     NRMSMultipleUserEmbedder,
@@ -32,7 +33,23 @@ TOPIC_ARTICLES = [
 ]
 
 
-def virtual_clicks_for_explicit_topical_pref(onboarding_topics, topic_articles):
+def find_implicit_topical_pref(articles: list[Article]) -> list[AccountInterest]:
+    topic_names = list(TOPIC_DESCRIPTIONS.keys())
+    topic_counts = defaultdict(int)
+
+    for article in articles:
+        article_topics = {mention.entity.name for mention in article.mentions}
+        for topic in topic_names:
+            if topic in article_topics:
+                topic_counts[topic] += 1
+
+    implicit_topical_interest = [
+        AccountInterest(entity_name=topic, frequency=count) for topic, count in topic_counts.items()
+    ]
+    return implicit_topical_interest
+
+
+def virtual_clicks_for_implicit_topical_freq(onboarding_topics, topic_articles):
     topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
     virtual_clicks = []
     for interest in onboarding_topics:
@@ -46,34 +63,18 @@ def virtual_clicks_for_explicit_topical_pref(onboarding_topics, topic_articles):
     return virtual_clicks
 
 
-def virtual_pn_clicks_for_explicit_topical_pref(onboarding_topics, topic_articles, topic_values):
-    topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
-    virtual_clicks = []
-    for interest in onboarding_topics:
-        topic_name = interest.entity_name
-        preference = interest.preference or -1
-
-        if preference in topic_values:
-            abs_pref = abs(preference - 2) + 1
-            if topic_name in topic_uuids_by_name:
-                article_id = topic_uuids_by_name[topic_name]
-                virtual_clicks.extend([Click(article_id=article_id)] * abs_pref)
-    return virtual_clicks
-
-
 @dataclass
-class UserExplicitTopicalEmbedderConfig(NRMSMultipleUserEmbedderConfig):
-    topic_pref_values: list | None = None
+class UserImplicitTopicalEmbedderConfig(NRMSMultipleUserEmbedderConfig):
     max_clicks_per_user: int = 70
 
 
-class UserExplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
-    config: UserExplicitTopicalEmbedderConfig
+class UserImplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
+    config: UserImplicitTopicalEmbedderConfig
 
     article_embedder: NRMSArticleEmbedder
     embedded_topic_articles: CandidateSet | None = None
 
-    def __init__(self, config: UserExplicitTopicalEmbedderConfig | None = None, **kwargs):
+    def __init__(self, config: UserImplicitTopicalEmbedderConfig | None = None, **kwargs):
         super().__init__(config, **kwargs)
         self.article_embedder = NRMSArticleEmbedder(
             model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.config.device
@@ -85,21 +86,14 @@ class UserExplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
     ) -> InterestProfile:
         interest_profile = interest_profile.model_copy()
 
-        # 01: check which kind of topical preference interpretation is required
-        if self.config.topic_pref_values is not None:
-            topic_clicks = virtual_pn_clicks_for_explicit_topical_pref(
-                interest_profile.onboarding_topics, TOPIC_ARTICLES, self.config.topic_pref_values
-            )
-        else:
-            topic_clicks = virtual_clicks_for_explicit_topical_pref(interest_profile.onboarding_topics, TOPIC_ARTICLES)
-
-        # 02: according to that interpretation check whether there is any virtual click produced or not
-        if len(topic_clicks) == 0:
+        # 01: check whether the user have any click hostory
+        if len(interest_profile.click_history) == 0:
             interest_profile.embedding = None
         else:
-            # 03: only if there is any virtual click, work on embeding.
-            # It is because if there is no virtual click and still generate
-            # the embedding, it will produce NaN and eventually score will turn into NaN
+            # 02: if there is any click then find the topics of the clicked article
+            users_implicit_pref_topics = find_implicit_topical_pref(clicked_articles)
+            topic_clicks = virtual_clicks_for_implicit_topical_freq(users_implicit_pref_topics, TOPIC_ARTICLES)
+
             embeddings_from_definitions = self.build_embeddings_from_definitions()
             embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
 
