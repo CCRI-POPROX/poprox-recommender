@@ -9,7 +9,7 @@ from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
-def feedbacked_article_convertion(article_feedbacks, clicked_articles):
+def feedbacked_article_conversion(article_feedbacks, clicked_articles):
     feedbacked_articles = []
 
     for feedbacked_article_id, feedback in article_feedbacks.items():
@@ -17,7 +17,7 @@ def feedbacked_article_convertion(article_feedbacks, clicked_articles):
             if article.article_id == feedbacked_article_id:
                 feedbacked_articles.append((article, feedback))
 
-    FEEDBACKED_ARTICLES = [
+    feedbacked_articles = [
         Article(
             article_id=article.article_id,
             headline=article.headline,
@@ -32,7 +32,7 @@ def feedbacked_article_convertion(article_feedbacks, clicked_articles):
         )
         for article, feedback in feedbacked_articles
     ]
-    return FEEDBACKED_ARTICLES
+    return feedbacked_articles
 
 
 def virtual_pn_clicks(feedbacked_articles, feedback_type):
@@ -66,7 +66,7 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
             interest_profile.embedding = None
         else:
             ##### article_feedbacks = dict[UUID --> article_id, bool --> feedback] #####
-            feedbacked_articles = feedbacked_article_convertion(
+            feedbacked_articles = feedbacked_article_conversion(
                 interest_profile.article_feedbacks, clicked_articles.articles
             )
             self.embedded_feedbacked_articles = self.article_embedder(CandidateSet(articles=feedbacked_articles))
