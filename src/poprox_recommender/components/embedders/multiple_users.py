@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from os import PathLike
 
 import torch as th
+import torch.nn.functional as F
 from lenskit.pipeline import Component
 from safetensors.torch import load_file
 
@@ -47,6 +48,12 @@ class NRMSMultipleUserEmbedder(Component):
             )
 
             interest_profile.embedding = self.build_user_embedding(interest_profile.click_history, embedding_lookup)
+
+            interest_profile.embedding = F.normalize(interest_profile.embedding, dim=2)
+
+            interest_profile.embedding /= len(clicked_articles.articles)
+
+        # breakpoint()
 
         return interest_profile
 

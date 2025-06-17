@@ -30,4 +30,6 @@ class FMScorer(Component):
         else:
             candidate_copy.scores = None
 
+        # breakpoint()
+
         return candidate_copy

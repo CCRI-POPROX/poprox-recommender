@@ -43,6 +43,23 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         interest_profile=i_profile,
     )
 
+    # Embed the user (topics (single))
+    ue_config4 = UserOnboardingConfig(
+        model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
+        device=device,
+        embedding_source="static",
+        topic_embedding="nrms",
+    )
+
+    e_user_topic = builder.add_component(
+        "user-embedder4",
+        UserOnboardingEmbedder,
+        ue_config4,
+        candidate_articles=e_candidates,
+        clicked_articles=e_clicked,
+        interest_profile=i_profile,
+    )
+
     # Embed the user (topics)
     ue_config2 = UserOnboardingConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
@@ -79,6 +96,14 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # Score and rank articles (history)
     n_scorer = builder.add_component("scorer", ArticleScorer, candidate_articles=e_candidates, interest_profile=e_user)
+
+    # Score and rank articles (topics)
+    topic_score = builder.add_component(
+        "topic_score",
+        ArticleScorer,
+        candidate_articles=builder.node("candidate-embedder"),
+        interest_profile=e_user_topic,
+    )
 
     # Score and rank articles (topics)
     positive_topic_score = builder.add_component(
