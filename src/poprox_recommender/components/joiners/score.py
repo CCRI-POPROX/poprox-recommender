@@ -34,13 +34,13 @@ class ScoreFusion(Component):
                     combined_score[article_id] += self.config.weight2 * score
                 combined_article[article_id] = article
 
+        merged_scores = []
+        merged_articles = []
+
         if self.config.combiner == "avg":
             denominator = self.config.weight1 + self.config.weight2
         else:
             denominator = 1
-
-        merged_scores = []
-        merged_articles = []
 
         for key, score in combined_score.items():
             merged_articles.append(combined_article[key])

@@ -1,8 +1,11 @@
 import argparse
 from os import fspath
 
+import lenskit
+import lenskit.config
 import torch
-from lenskit.logging import LoggingConfig, get_logger
+from humanize import metric
+from lenskit.logging import LoggingConfig, Task, friendly_duration, get_logger
 from safetensors.torch import load_file, save_file
 from transformers import Trainer, TrainingArguments
 
@@ -16,7 +19,7 @@ root = project_root()
 MODEL_DIR = root / "models" / "nrms-mind"
 
 
-def train(device, load_checkpoint):
+def train(device, args):
     # 1. Initialize model
     if not device.startswith("cuda"):
         logger.warning("training on %s, not CUDA", device)
@@ -26,7 +29,7 @@ def train(device, load_checkpoint):
 
     model = Model(args)
 
-    if load_checkpoint:
+    if args.load_checkpoint:
         checkpoint = load_file(args.checkpoint_path)
         model.load_state_dict(checkpoint)
 
@@ -58,7 +61,7 @@ def train(device, load_checkpoint):
     # 3. Train model
     logger.info("Training Start")
     training_args = TrainingArguments(
-        output_dir=fspath(MODEL_DIR),
+        output_dir=fspath(args.output_dir),
         logging_strategy="steps",
         save_total_limit=5,
         lr_scheduler_type="constant",
@@ -72,8 +75,8 @@ def train(device, load_checkpoint):
         per_device_eval_batch_size=1,
         num_train_epochs=3,
         remove_unused_columns=False,
-        logging_dir=fspath(MODEL_DIR),
-        logging_steps=1,
+        logging_dir=fspath(args.output_dir),
+        logging_steps=500,
         report_to=None,
     )
 
@@ -100,19 +103,19 @@ def train(device, load_checkpoint):
     """
 
     # 4. save and extract tensors
-    save_model(model)
+    save_model(model, args.output_dir)
 
 
-def save_model(model):
+def save_model(model, output_dir):
     """
     Save a model, both the entire model and extracting the encoders.
     """
     logger.info("saving model", file="model.safetensors")
-    save_file(model.state_dict(), MODEL_DIR / "model.safetensors")
+    save_file(model.state_dict(), output_dir / "model.safetensors")
     logger.info("saving news encoder", file="news_encoder.safetensors")
-    save_file(model.news_encoder.state_dict(), MODEL_DIR / "news_encoder.safetensors")
+    save_file(model.news_encoder.state_dict(), output_dir / "news_encoder.safetensors")
     logger.info("saving user encoder", file="user_encoder.safetensors")
-    save_file(model.user_encoder.state_dict(), MODEL_DIR / "user_encoder.safetensors")
+    save_file(model.user_encoder.state_dict(), output_dir / "user_encoder.safetensors")
 
 
 if __name__ == "__main__":
@@ -125,7 +128,8 @@ if __name__ == "__main__":
     More detailed hyper-parameters for model training need to be modified in TrainingArguments
     """
     parser = argparse.ArgumentParser(description="processing some parameters")
-
+    parser.add_argument("--subset", type=int, default=None, help="train on subset")
+    parser.add_argument("--output_dir", type=str, default=None, help="where to save the model")
     parser.add_argument("-v", "--verbose", help="enable verbose logging")
     parser.add_argument("--num_clicked_news_a_user", type=float, default=50)  # length of clicked history
     parser.add_argument("--dataset_attributes", type=str, default="title")
@@ -144,11 +148,34 @@ if __name__ == "__main__":
     parser.add_argument("--num_words_title", type=float, default=30)
 
     args = parser.parse_args()
+
+    # set a seperate output directory for subset
+    if args.output_dir is None:
+        if args.subset is not None:
+            args.output_dir = root / f"models/nrms-mind-subset-{args.subset}"
+        else:
+            args.output_dir = MODEL_DIR
+
+    os.makedirs(args.output_dir, exist_ok=True)
+
     lc = LoggingConfig()
     if args.verbose:
         lc.set_verbose(True)
     lc.apply()
+    lenskit.configure(project_root())
 
     torch.cuda.empty_cache()
 
-    train(device, args.load_checkpoint)
+    with Task("train NRMS") as task:
+        task.save_to_file(args.output_dir / "task.json")
+        train(device, args)
+
+    logger.info("training completed in %s", friendly_duration(task.duration or -1))
+    if task.system_power:
+        # divide by 3600 to convert Joules to Wh
+        logger.info(
+            "training power: %s (%s CPU, %s GPU)",
+            metric(task.system_power / 3600, "Wh"),
+            metric(task.cpu_power / 3600, "Wh") if task.cpu_power else "unknown",
+            metric(task.gpu_power / 3600, "Wh") if task.gpu_power else "unknown",
+        )

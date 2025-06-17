@@ -123,7 +123,7 @@ def virtual_pn_clicks(onboarding_topics, topic_articles, topic_values):
         preference = interest.preference or -1
 
         if preference in topic_values:
-            abs_pref = abs(preference - 2) + 1
+            abs_pref = abs(preference - 3) + 1
             if topic_name in topic_uuids_by_name:
                 article_id = topic_uuids_by_name[topic_name]
                 virtual_clicks.extend([Click(article_id=article_id)] * abs_pref)
@@ -191,7 +191,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         else:
             topic_clicks = virtual_clicks(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        # breakpoint()
         embeddings_from_definitions = self.build_embeddings_from_definitions()
         embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
         embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
@@ -239,7 +238,6 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         # adding topic_embeddings separately
         interest_profile.topic_embeddings = topic_lookup
         interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, TOPIC_ARTICLES)
-
 
         return interest_profile
 
