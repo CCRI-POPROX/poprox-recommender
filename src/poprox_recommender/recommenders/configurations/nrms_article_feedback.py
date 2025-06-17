@@ -48,7 +48,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         device=device,
         embedding_source="static",
         topic_embedding="nrms",
-        topic_pref_values=[2, 3, 4, 5],
+        topic_pref_values=[4, 5],
     )
     e_topic_positive = builder.add_component(
         "user-embedder2",
@@ -65,7 +65,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         device=device,
         embedding_source="static",
         topic_embedding="nrms",
-        topic_pref_values=[1],
+        topic_pref_values=[1,2],
     )
     e_topic_negative = builder.add_component(
         "user-embedder3",
