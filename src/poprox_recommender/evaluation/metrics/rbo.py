@@ -1,3 +1,4 @@
+import numpy as np
 from lenskit.metrics import GeometricRankWeight
 
 from poprox_concepts.domain import CandidateSet
@@ -12,11 +13,8 @@ def rank_biased_overlap(recs_list_a: CandidateSet, recs_list_b: CandidateSet, p:
     https://dl.acm.org/doi/10.1145/1852102.1852106
     """
 
-    if p == 0:
-        raise Exception("RBO: p=0")
-
     rank_weight = GeometricRankWeight(p)
-    weights = [rank_weight.weight(d) for d in range(1, k + 1)]
+    weights = rank_weight.weight(np.arange(1, k + 1))
 
     sum = 0
     total_weights = 0

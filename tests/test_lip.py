@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from uuid import UUID
 
+import numpy as np
 import pytest
 
 from poprox_concepts.domain import Article, CandidateSet
@@ -44,7 +45,7 @@ def test_mild_promotion_beyond_k(all_articles):
     reference = CandidateSet(articles=all_articles[:5])
     reranked = CandidateSet(articles=all_articles[2:5] + all_articles[0:2])
     lip_score = least_item_promoted(reference, reranked, k=3)
-    assert pytest.approx(lip_score, 0.00001) == 0.4
+    assert lip_score == pytest.approx(0.4)
 
 
 def test_no_overlap(all_articles):
@@ -52,7 +53,7 @@ def test_no_overlap(all_articles):
     reranked = CandidateSet(articles=all_articles[5:10])
     lip_score = least_item_promoted(reference, reranked, k=3)
     expected = (4 - 3) / 5
-    assert pytest.approx(lip_score, 0.00001) == expected
+    assert lip_score == pytest.approx(expected)
 
 
 def test_partial_overlap(all_articles):
@@ -69,7 +70,7 @@ def test_empty_reference(all_articles):
     reference = CandidateSet(articles=[])
     reranked = CandidateSet(articles=all_articles[:5])
     lip_score = least_item_promoted(reference, reranked, k=3)
-    assert lip_score == 0.0
+    assert np.isnan(lip_score)
 
 
 def test_empty_reranked(all_articles):
@@ -78,4 +79,4 @@ def test_empty_reranked(all_articles):
     lip_score = least_item_promoted(reference, reranked, k=3)
     logger.info("test_empty_reranked %s", lip_score)
     expected = (4 - 3) / 5
-    assert pytest.approx(lip_score, 0.00001) == expected
+    assert lip_score == pytest.approx(expected)
