@@ -9,6 +9,10 @@ from poprox_recommender.components.embedders.explicit_topical_pref import (
     UserExplicitTopicalEmbedder,
     UserExplicitTopicalEmbedderConfig,
 )
+from poprox_recommender.components.embedders.implicit_topical_pref import (
+    UserImplicitTopicalEmbedder,
+    UserImplicitTopicalEmbedderConfig,
+)
 from poprox_recommender.components.embedders.multiple_users import (
     NRMSMultipleUserEmbedder,
     NRMSMultipleUserEmbedderConfig,
@@ -52,12 +56,12 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         interest_profile=i_profile,
     )
 
-    # Embed the user (topics)
+    # Embed the user (explicit topics)
     ue_config2 = UserExplicitTopicalEmbedderConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
     )
-    e_user_topic = builder.add_component(
+    e_user_topic_explicit = builder.add_component(
         "user-embedder2",
         UserExplicitTopicalEmbedder,
         ue_config2,
@@ -66,12 +70,28 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         interest_profile=i_profile,
     )
 
+    # Embed the user (implicit topics)
+    ue_config3 = UserImplicitTopicalEmbedderConfig(
+        model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
+        device=device,
+    )
+    e_user_topic_implicit = builder.add_component(
+        "user-embedder3",
+        UserImplicitTopicalEmbedder,
+        ue_config3,
+        candidate_articles=e_candidates,
+        clicked_articles=e_clicked,
+        interest_profile=i_profile,
+    )
+
+    # combined user
     e_user_combined_interest_profile = builder.add_component(
         "user-combined-embedder",
         FeatureCombiner,
         None,
         profiles_1=e_user_history,
-        profiles_2=e_user_topic,
+        profiles_2=e_user_topic_explicit,
+        profiles_3=e_user_topic_implicit,
     )
 
     # Score and rank articles

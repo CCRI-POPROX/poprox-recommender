@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -34,17 +35,16 @@ TOPIC_ARTICLES = [
 
 
 def find_implicit_topical_pref(articles: list[Article]) -> list[AccountInterest]:
-    topic_names = list(TOPIC_DESCRIPTIONS.keys())
+    topic_names = set(TOPIC_DESCRIPTIONS.keys())
     topic_counts = defaultdict(int)
 
     for article in articles:
-        article_topics = {mention.entity.name for mention in article.mentions}
-        for topic in topic_names:
-            if topic in article_topics:
-                topic_counts[topic] += 1
+        article_topics = {mention.entity.name for mention in article.mentions if mention.entity.name in topic_names}
+        for topic in article_topics:
+            topic_counts[topic] += 1 / len(article_topics)
 
     implicit_topical_interest = [
-        AccountInterest(entity_name=topic, frequency=count) for topic, count in topic_counts.items()
+        AccountInterest(entity_name=topic, frequency=math.ceil(count)) for topic, count in topic_counts.items()
     ]
     return implicit_topical_interest
 
@@ -54,18 +54,20 @@ def virtual_clicks_for_implicit_topical_freq(onboarding_topics, topic_articles):
     virtual_clicks = []
     for interest in onboarding_topics:
         topic_name = interest.entity_name
-        preference = interest.preference or 1
+        frequency = math.ceil(math.log1p(interest.frequency or 0))
+        # frequency = interest.frequency or 0
 
         if topic_name in topic_uuids_by_name:
             article_id = topic_uuids_by_name[topic_name]
 
-            virtual_clicks.extend([Click(article_id=article_id)] * (preference - 1))
+            virtual_clicks.extend([Click(article_id=article_id)] * (frequency))
     return virtual_clicks
 
 
 @dataclass
 class UserImplicitTopicalEmbedderConfig(NRMSMultipleUserEmbedderConfig):
-    max_clicks_per_user: int = 70
+    max_clicked_articles: int = 50
+    max_clicks_per_user: int = 56
 
 
 class UserImplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
@@ -91,8 +93,11 @@ class UserImplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
             interest_profile.embedding = None
         else:
             # 02: if there is any click then find the topics of the clicked article
-            users_implicit_pref_topics = find_implicit_topical_pref(clicked_articles)
-            topic_clicks = virtual_clicks_for_implicit_topical_freq(users_implicit_pref_topics, TOPIC_ARTICLES)
+            clicked_article_from_history = []
+            for click in interest_profile.click_history[-self.config.max_clicked_articles :]:
+                for clicked_article in clicked_articles.articles:
+                    if click.article_id == clicked_article.article_id:
+                        clicked_article_from_history.append(clicked_article)
 
             embeddings_from_definitions = self.build_embeddings_from_definitions()
             embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
@@ -115,6 +120,10 @@ class UserImplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
                 list(embedding_lookup.values())[0].size(), device=self.config.device
             )
 
+            users_implicit_pref_topics = find_implicit_topical_pref(clicked_article_from_history)
+
+            topic_clicks = virtual_clicks_for_implicit_topical_freq(users_implicit_pref_topics, TOPIC_ARTICLES)
+
             interest_profile.click_history = topic_clicks
 
             interest_profile.embedding = self.build_user_embedding(interest_profile.click_history, embedding_lookup)
@@ -122,6 +131,8 @@ class UserImplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
             interest_profile.embedding = F.normalize(interest_profile.embedding, dim=2)
 
             interest_profile.embedding /= len(topic_clicks)
+
+            # breakpoint()
 
         return interest_profile
 

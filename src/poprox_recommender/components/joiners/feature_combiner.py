@@ -12,19 +12,24 @@ class FeatureCombiner(Component):
     config: None
 
     @torch_inference
-    def __call__(self, profiles_1: InterestProfile, profiles_2: InterestProfile) -> InterestProfile:
+    def __call__(
+        self, profiles_1: InterestProfile, profiles_2: InterestProfile, profiles_3: InterestProfile
+    ) -> InterestProfile:
         integrated_interest_profile = profiles_1.model_copy()
 
-        if profiles_1.embedding is None and profiles_2.embedding is None:
+        if profiles_1.embedding is None and profiles_2.embedding is None and profiles_3.embedding:
             integrated_interest_profile.embedding = th.zeros((1, 50, 768), device="cpu", dtype=th.float32)
         else:
             emb1 = []  # click
             emb2 = []  # explicit topic
+            emb3 = []  # implicit topic
 
-            if profiles_1.embedding is not None:
+            if profiles_1.embedding is not None and profiles_3.embedding is not None:
                 emb1 = profiles_1.embedding
+                emb3 = profiles_3.embedding
             else:
                 emb1 = th.zeros_like(profiles_2.embedding)
+                emb3 = th.zeros_like(profiles_2.embedding)
 
             if profiles_2.embedding is not None:
                 emb2 = profiles_2.embedding
@@ -46,7 +51,7 @@ class FeatureCombiner(Component):
             # emb1=click
             # emb2=explicit topic
 
-            combined = th.cat([0.995 * emb1, 0.005 * emb2], dim=1)
+            combined = th.cat([0 * emb1, 0 * emb2, 1 * emb3], dim=1)
 
             integrated_interest_profile.embedding = combined
 

@@ -2,9 +2,9 @@
   "interest_profile": {
     "profile_id": "b5e9b183-3264-4e08-aff2-cbc6bd0583b3",
     "click_history": [
-      { "article_id": "4c326e07-48e7-40b5-a414-5a2dab3b0fc0" },
-      { "article_id": "59c22225-00f9-4119-a27f-d930a48cd76f" },
-      { "article_id": "728cc3c8-6ab5-44c9-8675-0a4168a195fd" }
+      { "article_id": "4c0bc199-1450-42dd-ae61-5eef0b1c2294" },
+      { "article_id": "67a7d7e1-8500-4b83-bd19-29669a37424e" },
+      { "article_id": "21576ea0-76c8-4033-8ddc-b2c67b271c96" }
     ],
     "click_topic_counts": null,
     "click_locality_counts": null,
