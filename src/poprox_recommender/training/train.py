@@ -3,9 +3,12 @@ from os import fspath
 
 import lenskit
 import lenskit.config
+import ray.train.huggingface.transformers
 import torch
 from humanize import metric
 from lenskit.logging import LoggingConfig, Task, friendly_duration, get_logger
+from ray.train import ScalingConfig
+from ray.train.torch import TorchTrainer
 from safetensors.torch import load_file, save_file
 from transformers import Trainer, TrainingArguments
 
@@ -20,90 +23,84 @@ MODEL_DIR = root / "models" / "nrms-mind"
 
 
 def train(device, args):
-    # 1. Initialize model
-    if not device.startswith("cuda"):
-        logger.warning("training on %s, not CUDA", device)
+    def _train_fn():
+        # 1. Initialize model
+        if not device.startswith("cuda"):
+            logger.warning("training on %s, not CUDA", device)
 
-    logger.info("Initialize Model")
-    from poprox_recommender.model.nrms import NRMS as Model
+        logger.info("Initialize Model")
+        from poprox_recommender.model.nrms import NRMS as Model
 
-    model = Model(args)
+        model = Model(args)
 
-    if args.load_checkpoint:
-        checkpoint = load_file(args.checkpoint_path)
-        model.load_state_dict(checkpoint)
+        if args.load_checkpoint:
+            checkpoint = load_file(args.checkpoint_path)
+            model.load_state_dict(checkpoint)
 
-    model = model.to(device)
+        model = model.to(device)
 
-    """
-    def print_model_size(model):
-        print("Model: ", model.__class__.__name__)
-        total_params = 0
-        for name, param in model.named_parameters():
-            print(f"Layer: {name} | Size: {param.size()} | Number of parameters: {param.numel()}")
-            total_params += param.numel()
-        print(f"Total number of parameters in the model: {total_params}")
-    """
+        """
+        def print_model_size(model):
+            print("Model: ", model.__class__.__name__)
+            total_params = 0
+            for name, param in model.named_parameters():
+                print(f"Layer: {name} | Size: {param.size()} | Number of parameters: {param.numel()}")
+                total_params += param.numel()
+            print(f"Total number of parameters in the model: {total_params}")
+        """
 
-    # 2. Load and create datasets
-    logger.info("Initialize Dataset")
-    train_dataset = BaseDataset(
-        args,
-        root / "data/MINDlarge_post_train/behaviors_parsed.tsv",
-        root / "data/MINDlarge_post_train/news_parsed.tsv",
-    )
-    logger.info(f"The size of train_dataset is {len(train_dataset)}.")
-    eval_dataset = ValDataset(
-        args, root / "data/MINDlarge_dev/behaviors.tsv", root / "data/MINDlarge_post_dev/news_parsed.tsv"
-    )
-    logger.info(f"The size of eval_dataset is {len(eval_dataset)}.")
+        # 2. Load and create datasets
+        logger.info("Initialize Dataset")
+        train_dataset = BaseDataset(
+            args,
+            root / "data/MINDlarge_post_train/behaviors_parsed.tsv",
+            root / "data/MINDlarge_post_train/news_parsed.tsv",
+        )
+        logger.info(f"The size of train_dataset is {len(train_dataset)}.")
+        eval_dataset = ValDataset(
+            args, root / "data/MINDlarge_dev/behaviors.tsv", root / "data/MINDlarge_post_dev/news_parsed.tsv"
+        )
+        logger.info(f"The size of eval_dataset is {len(eval_dataset)}.")
 
-    # 3. Train model
-    logger.info("Training Start")
-    training_args = TrainingArguments(
-        output_dir=fspath(args.output_dir),
-        logging_strategy="steps",
-        save_total_limit=5,
-        lr_scheduler_type="constant",
-        weight_decay=0.0,
-        optim="adamw_torch",
-        save_strategy="epoch",
-        eval_strategy="no",
-        gradient_accumulation_steps=8,
-        learning_rate=1e-4,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=1,
-        num_train_epochs=3,
-        remove_unused_columns=False,
-        logging_dir=fspath(args.output_dir),
-        logging_steps=500,
-        report_to=None,
-    )
+        # 3. Train model
+        logger.info("Training Start")
+        training_args = TrainingArguments(
+            output_dir=fspath(args.output_dir),
+            logging_strategy="steps",
+            save_total_limit=5,
+            lr_scheduler_type="constant",
+            weight_decay=0.0,
+            optim="adamw_torch",
+            save_strategy="epoch",
+            eval_strategy="no",
+            gradient_accumulation_steps=8,
+            learning_rate=1e-4,
+            per_device_train_batch_size=16,
+            per_device_eval_batch_size=1,
+            num_train_epochs=3,
+            remove_unused_columns=False,
+            logging_dir=fspath(args.output_dir),
+            logging_steps=500,
+            report_to=None,
+        )
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
-    )
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+        )
 
-    trainer.train()
+        # Report metrics and checkpoints to Ray Train
+        callback = ray.train.huggingface.transformers.RayTrainReportCallback()
+        trainer.add_callback(callback)
 
-    """
-    torch.autograd.set_detect_anomaly(True)
+        # Prepare Transformers trainer
+        trainer = ray.train.huggingface.transformers.prepare_trainer(trainer)
 
-    # check gradients for NaNs after training
-    def check_nan(tensor, name):
-        if torch.isnan(tensor).any():
-            raise ValueError(f"NaN in {name}: {tensor}")
+        trainer.train()
 
-    for param_name, param_value in model.named_parameters():
-        if param_value.grad is not None:
-            check_nan(param_value.grad, f"gradient[{param_name}]")
-    """
-
-    # 4. save and extract tensors
-    save_model(model, args.output_dir)
+    return _train_fn
 
 
 def save_model(model, output_dir):
@@ -168,7 +165,19 @@ if __name__ == "__main__":
 
     with Task("train NRMS") as task:
         task.save_to_file(args.output_dir / "task.json")
-        train(device, args)
+        train_func = train(device, args)
+        ray_trainer = TorchTrainer(
+            train_func,
+            scaling_config=ScalingConfig(num_workers=2, use_gpu=True),
+        )
+        result: ray.train.Result = ray_trainer.fit()
+        with result.checkpoint.as_directory() as checkpoint_dir:
+            checkpoint_path = os.path.join(
+                checkpoint_dir,
+                ray.train.huggingface.transformers.RayTrainReportCallback.CHECKPOINT_NAME,
+            )
+            model = torch.load(checkpoint_path)
+            save_model(model, args.output_dir)
 
     logger.info("training completed in %s", friendly_duration(task.duration or -1))
     if task.system_power:
