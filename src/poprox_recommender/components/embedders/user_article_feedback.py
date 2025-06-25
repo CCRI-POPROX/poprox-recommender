@@ -84,13 +84,16 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
 
             embedding_lookup = {**feedbacked_article_lookup}
 
-            embedding_lookup["PADDED_NEWS"] = th.zeros(
-                list(embedding_lookup.values())[0].size(), device=self.config.device
-            )
+            if len(embedding_lookup.values()) > 0:
+                embedding_lookup["PADDED_NEWS"] = th.zeros(
+                    list(embedding_lookup.values())[0].size(), device=self.config.device
+                )
 
-            interest_profile.click_history = article_feedback_as_clicks
+                interest_profile.click_history = article_feedback_as_clicks
 
-            interest_profile.embedding = self.build_user_embedding(interest_profile.click_history, embedding_lookup)
+                interest_profile.embedding = self.build_user_embedding(interest_profile.click_history, embedding_lookup)
+            else:
+                interest_profile.embedding = None
 
         return interest_profile
 
