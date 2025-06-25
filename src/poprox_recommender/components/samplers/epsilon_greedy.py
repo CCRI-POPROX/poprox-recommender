@@ -40,10 +40,17 @@ class EpsilonGreedy(Component):
                     selected = tentative
 
             # If the coin came up tails or we couldn't find an article that wasn't already selected,
-            # then pick the next article from the ranked list
+            # then pick the next article from the ranked list that hasn't already been selected
             if selected is None:
-                selected = ranked.articles[ranked_idx]
-                ranked_idx += 1
+                tentative = ranked.articles[ranked_idx]
+                while tentative in selected_articles and ranked_idx < len(ranked.articles) - 1:
+                    ranked_idx += 1
+                    tentative = ranked.articles[ranked_idx]
 
-            selected_articles.append(selected)
+                if tentative not in selected_articles:
+                    selected = tentative
+
+            if selected:
+                selected_articles.append(selected)
+
         return RecommendationList(articles=selected_articles)
