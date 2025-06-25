@@ -14,6 +14,8 @@ if __name__ == "__main__":
         raw_json = req_file.read()
         req = RecommendationRequestV2.model_validate_json(raw_json)
 
+        # breakpoint()
+
     # event_nrms = {
     #     "body": raw_json,
     #     "queryStringParameters": {"pipeline": "nrms"},
