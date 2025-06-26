@@ -99,7 +99,6 @@ for day in tqdm(cadidate_dates):
         continue
 
     for persona_topic, persona_profile in single_topic_personas.items():
-        breakpoint()
 
         full_request = {
             "interest_profile": persona_profile.model_dump(),
