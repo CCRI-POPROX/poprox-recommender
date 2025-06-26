@@ -27,7 +27,5 @@ for persona in topics:
         topic_profile.onboarding_topics.append(
             AccountInterest(entity_id=topic["entity_id"], entity_name=topic["entity_name"], preference=preference)
         )
-        single_topic_personas[topic["entity_name"]] = topic_profile
-    breakpoint()
+    single_topic_personas[persona["entity_name"]] = topic_profile
 
-# print(single_topic_personas[0])
