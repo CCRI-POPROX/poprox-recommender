@@ -19,8 +19,11 @@ for id, row in rec_df.iterrows():
         if topic_name in article_topics:
             topical_count += 1
 
+    recall = topical_count/total_topical_candidate if total_topical_candidate else float('nan')
+    precision = topical_count/10
+
     print(
-        f"{topic_name}: recall:{topical_count/total_topical_candidate if total_topical_candidate else float('nan')} precesion:{topical_count/10}"
+        f"{topic_name}: precision: {precision} recall: {recall}"
     )
     for i, (article, score) in enumerate(zip(articles, scores)):
         article_topics = set([m["entity"]["name"] for m in article["mentions"] if m["entity"] is not None])
