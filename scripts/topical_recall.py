@@ -12,9 +12,9 @@ for id, row in rec_df.iterrows():
     topic_name = row.persona_name
     total_topical_candidate = row.candidate_count
     articles = response["recommendations"]["articles"]
-    scores = response["recommendations"]["scores"]
+    # scores = response["recommendations"]["scores"]
     topical_count = 0
-    for i, (article, score) in enumerate(zip(articles, scores)):
+    for i, article in enumerate(articles):
         article_topics = set([m["entity"]["name"] for m in article["mentions"] if m["entity"] is not None])
         if topic_name in article_topics:
             topical_count += 1
@@ -25,6 +25,6 @@ for id, row in rec_df.iterrows():
     print(
         f"{topic_name}: precision: {precision} recall: {recall}"
     )
-    for i, (article, score) in enumerate(zip(articles, scores)):
-        article_topics = set([m["entity"]["name"] for m in article["mentions"] if m["entity"] is not None])
-        print(f"{i+1}. [{score:.4f}] {article['headline']} {article_topics}")
+    # for i, (article, score) in enumerate(zip(articles, scores)):
+    #     article_topics = set([m["entity"]["name"] for m in article["mentions"] if m["entity"] is not None])
+    #     print(f"{i+1}. [{score:.4f}] {article['headline']} {article_topics}")
