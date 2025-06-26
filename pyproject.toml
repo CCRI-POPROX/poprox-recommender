@@ -27,6 +27,10 @@ dependencies = [
   "safetensors>=0.4,<1",
   "transformers[torch]>=4.41,<5",
   "rich ~=13.9",
+  "ray[train]",
+  "scikit-learn",
+  "datasets",
+  "evaluate",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
 ]
 
