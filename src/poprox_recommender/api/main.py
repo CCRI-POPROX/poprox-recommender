@@ -1,13 +1,21 @@
 import logging
 import os
 from typing import Annotated, Any
+from uuid import uuid4
 
 import structlog
 from fastapi import Body, FastAPI
 from fastapi.responses import Response
 from mangum import Mangum
 
-from poprox_concepts.api.recommendations.v2 import ProtocolModelV2_0, RecommendationRequestV2, RecommendationResponseV2
+from poprox_concepts.api.recommendations.v3 import (
+    ProtocolModelV3_0,
+    RecommendationList_v3,
+    RecommendationRequestV3,
+    RecommendationResponseSection,
+    RecommendationResponseV3,
+)
+from poprox_concepts.domain import Impression
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
 from poprox_recommender.recommenders import load_all_pipelines, select_articles
@@ -25,7 +33,7 @@ logger = logging.getLogger(__name__)
 @app.get("/warmup")
 def warmup(response: Response):
     # Headers set on the response param get included in the response wrapped around return val
-    response.headers["poprox-protocol-version"] = ProtocolModelV2_0().protocol_version.value
+    response.headers["poprox-protocol-version"] = ProtocolModelV3_0().protocol_version.value
 
     # Load and cache available recommenders
     available_recommenders = load_all_pipelines(device=default_device())
@@ -40,7 +48,7 @@ def root(
 ):
     logger.info(f"Decoded body: {body}")
 
-    req = RecommendationRequestV2.model_validate(body)
+    req = RecommendationRequestV3.model_validate(body)
 
     candidate_articles = req.candidates.articles
     num_candidates = len(candidate_articles)
@@ -62,12 +70,26 @@ def root(
         {"pipeline": pipeline},
     )
 
-    resp_body = RecommendationResponseV2.model_validate(
-        {"recommendations": outputs.default, "recommender": outputs.meta.model_dump()}
-    )
+    sections = [create_section(title="News for You!", recs=outputs)]
+    resp_body = RecommendationResponseV3(recommendations=sections, recommender=outputs.meta.model_dump())
 
     logger.info(f"Response body: {resp_body}")
     return resp_body.model_dump()
+
+
+def create_section(title: str, recs):
+    articles = recs.default.articles
+    newsletter_id = uuid4()
+    impressions = [
+        {"newsletter_id": newsletter_id, "position": i, "article": articles[i]} for i in range(len(articles))
+    ]
+    return RecommendationResponseSection(
+        title=title,
+        recommendations=RecommendationList_v3(
+            impressions=impressions,
+            extras=recs.default.extras,
+        ),
+    )
 
 
 handler = Mangum(app)
