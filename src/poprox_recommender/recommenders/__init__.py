@@ -28,11 +28,11 @@ __all__ = [
     "get_pipeline",
     "discover_pipelines",
     "load_all_pipelines",
-    "select_articles",
+    "select_sections",
 ]
 
 
-def select_articles(
+def select_sections(
     candidate_articles: CandidateSet,
     clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
@@ -58,11 +58,9 @@ def select_articles(
     else:
         wanted = (topk, recs)
 
-    outputs = pipeline.run_all(
-        *wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile
-    )
+    outputs = pipeline.run_all(recs, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
 
-    return [create_section(title="News for You!", recs=outputs.default)], outputs.meta
+    return outputs.default, outputs.meta
 
 
 def create_section(title: str, recs: RecommendationList):

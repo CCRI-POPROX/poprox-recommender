@@ -18,7 +18,7 @@ from poprox_concepts.api.recommendations.v3 import (
 from poprox_concepts.domain import Impression
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
-from poprox_recommender.recommenders import load_all_pipelines, select_articles
+from poprox_recommender.recommenders import load_all_pipelines, select_sections
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ def root(
     profile.click_topic_counts = user_topic_preference(req.interacted.articles, profile.click_history)
     profile.click_locality_counts = user_locality_preference(req.interacted.articles, profile.click_history)
 
-    sections, meta = select_articles(
+    sections, meta = select_sections(
         req.candidates,
         req.interacted,
         profile,

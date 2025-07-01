@@ -11,6 +11,7 @@ from poprox_recommender.components.joiners.fill import FillRecs
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers.uniform import UniformSampler
 from poprox_recommender.components.scorers.article import ArticleScorer
+from poprox_recommender.components.sectioners.single import SingleSection
 from poprox_recommender.paths import model_file_path
 
 
@@ -51,4 +52,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
 
     # Combine primary ranker and fallback
-    builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
+    f_recs = builder.add_component("fill", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
+
+    # Turn the result into a section
+    builder.add_component("recommender", SingleSection, {"title": "For You"}, recs1=f_recs)
