@@ -1,9 +1,15 @@
 import logging
 from typing import Any
+from uuid import uuid4
 
-from lenskit.pipeline import PipelineState
-
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.api.recommendations.v3 import (
+    ProtocolModelV3_0,
+    RecommendationList_v3,
+    RecommendationRequestV3,
+    RecommendationResponseSection,
+    RecommendationResponseV3,
+)
+from poprox_concepts.domain import CandidateSet, InterestProfile, RecommendationList
 
 from .load import (
     PipelineLoadError,
@@ -31,7 +37,7 @@ def select_articles(
     clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
-) -> PipelineState:
+):
     """
     Select articles with default recommender configuration.  It returns a
     pipeline state whose ``default`` is the final list of recommendations.
@@ -52,4 +58,23 @@ def select_articles(
     else:
         wanted = (topk, recs)
 
-    return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
+    outputs = pipeline.run_all(
+        *wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile
+    )
+
+    return [create_section(title="News for You!", recs=outputs.default)], outputs.meta
+
+
+def create_section(title: str, recs: RecommendationList):
+    articles = recs.articles
+    newsletter_id = uuid4()
+    impressions = [
+        {"newsletter_id": newsletter_id, "position": i, "article": articles[i]} for i in range(len(articles))
+    ]
+    return RecommendationResponseSection(
+        title=title,
+        recommendations=RecommendationList_v3(
+            impressions=impressions,
+            extras=recs.extras,
+        ),
+    )

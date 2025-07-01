@@ -63,33 +63,17 @@ def root(
     profile.click_topic_counts = user_topic_preference(req.interacted.articles, profile.click_history)
     profile.click_locality_counts = user_locality_preference(req.interacted.articles, profile.click_history)
 
-    outputs = select_articles(
+    sections, meta = select_articles(
         req.candidates,
         req.interacted,
         profile,
         {"pipeline": pipeline},
     )
 
-    sections = [create_section(title="News for You!", recs=outputs)]
-    resp_body = RecommendationResponseV3(recommendations=sections, recommender=outputs.meta.model_dump())
+    resp_body = RecommendationResponseV3(recommendations=sections, recommender=meta.model_dump())
 
     logger.info(f"Response body: {resp_body}")
     return resp_body.model_dump()
-
-
-def create_section(title: str, recs):
-    articles = recs.default.articles
-    newsletter_id = uuid4()
-    impressions = [
-        {"newsletter_id": newsletter_id, "position": i, "article": articles[i]} for i in range(len(articles))
-    ]
-    return RecommendationResponseSection(
-        title=title,
-        recommendations=RecommendationList_v3(
-            impressions=impressions,
-            extras=recs.default.extras,
-        ),
-    )
 
 
 handler = Mangum(app)
