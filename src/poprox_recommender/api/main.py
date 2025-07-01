@@ -1,7 +1,6 @@
 import logging
 import os
 from typing import Annotated, Any
-from uuid import uuid4
 
 import structlog
 from fastapi import Body, FastAPI
@@ -10,12 +9,9 @@ from mangum import Mangum
 
 from poprox_concepts.api.recommendations.v3 import (
     ProtocolModelV3_0,
-    RecommendationList_v3,
     RecommendationRequestV3,
-    RecommendationResponseSection,
     RecommendationResponseV3,
 )
-from poprox_concepts.domain import Impression
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
 from poprox_recommender.recommenders import load_all_pipelines, select_sections

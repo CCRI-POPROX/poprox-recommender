@@ -1,7 +1,6 @@
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts import CandidateSet
 from poprox_concepts.api.recommendations.v3 import RecommendationList_v3, RecommendationResponseSection
 from poprox_concepts.domain import RecommendationList
 from poprox_concepts.domain.newsletter import Impression

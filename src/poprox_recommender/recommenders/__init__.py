@@ -3,11 +3,8 @@ from typing import Any
 from uuid import uuid4
 
 from poprox_concepts.api.recommendations.v3 import (
-    ProtocolModelV3_0,
     RecommendationList_v3,
-    RecommendationRequestV3,
     RecommendationResponseSection,
-    RecommendationResponseV3,
 )
 from poprox_concepts.domain import CandidateSet, InterestProfile, RecommendationList
 

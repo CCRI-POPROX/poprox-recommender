@@ -3,13 +3,9 @@ Test basic request by initializing test data.
 """
 
 import logging
-import warnings
 
-from pydantic import ValidationError
-from pytest import mark, skip
+from pytest import mark
 
-from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
-from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.recommenders import discover_pipelines
 from poprox_recommender.testing import RequestGenerator, mind_data
 from poprox_recommender.testing import auto_service as service
