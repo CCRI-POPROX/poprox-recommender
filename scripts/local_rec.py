@@ -5,9 +5,9 @@ import pandas as pd
 from poprox_recommender.paths import project_root
 
 data = project_root() / "data"
-rec_df = pd.read_parquet(data / "Test" / "recommendation.parquet")
+rec_df = pd.read_parquet(data / "Test" / "recommendation" / "nrms.parquet")
 
-row = rec_df.iloc[-1]
+row = rec_df.iloc[0]
 
 response = json.loads(row["response"])
 topic_name = row["persona_name"]

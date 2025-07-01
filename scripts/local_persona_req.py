@@ -2,6 +2,9 @@ import json
 from pathlib import Path
 
 import pandas as pd
+
+# from single_tagged_click_persona_generator import single_topic_personas
+from multi_tagged_click_presona_generator import at_least_one_news_per_topic_personas
 from persona_generator import single_topic_personas
 from tqdm import tqdm
 
@@ -14,7 +17,7 @@ data = project_root() / "data"
 articles_df = pd.read_parquet(data / "Test" / "articles.parquet")
 mentions_df = pd.read_parquet(data / "Test" / "mentions.parquet")
 
-output_path = Path(data / "Test" / "recommendation.parquet")
+output_path = Path(data / "Test" / "recommendation")
 rec_response = []
 
 all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
@@ -23,9 +26,9 @@ static_num_recs = 10
 
 ### preserved some articles for user history
 
-history_dates = all_dates[:5]
+history_dates = all_dates[20:35]
 history_df = articles_df[articles_df["published_at"].dt.normalize().isin(history_dates)]
-interacted_articles = []
+interactable_articles = {}
 
 
 for row in history_df.itertuples():
@@ -54,8 +57,9 @@ for row in history_df.itertuples():
         raw_data=json.loads(row.raw_data) if row.raw_data else None,
     )
 
-    interacted_articles.append(article)
+    interactable_articles[article.article_id] = article
 
+print("After History")
 ### preserved some articles for user history
 
 
@@ -95,14 +99,20 @@ for day in tqdm(cadidate_dates):
 
         candidate_articles.append(article)
 
+    print("Candidate Append")
+
     if len(candidate_articles) < static_num_recs:
         continue
 
-    for persona_topic, persona_profile in single_topic_personas.items():
+    for persona_topic, persona_profile in at_least_one_news_per_topic_personas.items():
+        clicked_article = []
+        for click in persona_profile.click_history:
+            clicked_article.append(interactable_articles[click.article_id])
 
+        print(persona_topic)
         full_request = {
             "interest_profile": persona_profile.model_dump(),
-            "interacted": CandidateSet(articles=interacted_articles),
+            "interacted": CandidateSet(articles=clicked_article),
             "candidates": CandidateSet(articles=candidate_articles),
             "num_recs": static_num_recs,
         }
@@ -131,4 +141,5 @@ for day in tqdm(cadidate_dates):
 ### day to day caddidate article
 
 df = pd.DataFrame(rec_response)
+output_path = output_path / "nrms_topic_pn_scores_click.parquet"
 df.to_parquet(output_path)

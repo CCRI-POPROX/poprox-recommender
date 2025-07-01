@@ -39,12 +39,15 @@ class FMStyleArticleEmbedder(NRMSArticleEmbedder):
 
         for article in article_set.articles:
             attribute_text = [article.headline]
-            topical_text = find_topical_text(TOPIC_DESCRIPTIONS, article)
-            num_topic = len(topical_text)
-            attribute_text.extend(topical_text)
 
-            while len(attribute_text) < MAX_ATTRIBUTES:
-                attribute_text.append("")
+            # this part is for topical embedddings, remove this for topicless embeddings
+            # topical_text = find_topical_text(TOPIC_DESCRIPTIONS, article)
+            # num_topic = len(topical_text)
+            # attribute_text.extend(topical_text)
+
+            # while len(attribute_text) < MAX_ATTRIBUTES:
+            #     attribute_text.append("")
+            # this part is for topical embedddings, remove this for topicless embeddings
 
             attribute_tensors = th.stack(
                 [
@@ -62,7 +65,7 @@ class FMStyleArticleEmbedder(NRMSArticleEmbedder):
 
             attribute_embeddings = F.normalize(attribute_embeddings, dim=1)
 
-            attribute_embeddings[1 : num_topic + 1] = attribute_embeddings[1 : num_topic + 1] / num_topic
+            # attribute_embeddings[1 : num_topic + 1] = attribute_embeddings[1 : num_topic + 1] / num_topic #for topicless embedding, remove this line
 
             all_article_embeddings.append(attribute_embeddings)
 

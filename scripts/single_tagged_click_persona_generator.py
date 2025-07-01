@@ -11,6 +11,7 @@ with open(project_root() / "tests/request_data/onboarding.json", "r") as req_fil
     base_request_data = json.load(req_file)
 
 topics = base_request_data["interest_profile"]["onboarding_topics"]
+topic_names = [topic["entity_name"] for topic in topics]
 
 # fetching historical data
 data = project_root() / "data"
@@ -19,7 +20,7 @@ mentions_df = pd.read_parquet(data / "Test" / "mentions.parquet")
 
 all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 
-history_dates = all_dates[:5]
+history_dates = all_dates
 history_df = articles_df[articles_df["published_at"].dt.normalize().isin(history_dates)]
 interacted_articles = []
 
@@ -56,34 +57,35 @@ for row in history_df.itertuples():
 
 topical_clicks = {}
 
-for topic in topics:
-    topic_name = topic["entity_name"]
-    for article in interacted_articles:
-        all_mentions = [mention.entity.name for mention in article.mentions if mention.entity is not None]
-        if len(all_mentions) == 1 and all_mentions[0] == topic_name:
+for article in interacted_articles:
+    all_mentions = list({mention.entity.name for mention in article.mentions if mention.entity.name in topic_names})
+
+    if len(all_mentions) == 1:
+        topic_name = all_mentions[0]
+        if topic_name not in topical_clicks:
             topical_click = Click(article_id=article.article_id)
             topical_clicks[topic_name] = topical_click
-            break
 
 
-single_topical_click_personas = []
+single_topic_personas = {}
 
 for persona in topics:
-    topic_profile = InterestProfile(
-        profile_id=uuid4(),
-        click_history=[topical_clicks[topic.entity_name]],
-        click_topic_counts=None,
-        click_locality_counts=None,
-        article_feedbacks={},
-        onboarding_topics=[],
-    )
-
-    for topic in topics:
-        preference = 5 if topic["entity_name"] == persona["entity_name"] else 1
-        topic_profile.onboarding_topics.append(
-            AccountInterest(entity_id=topic["entity_id"], entity_name=topic["entity_name"], preference=preference)
+    if persona["entity_name"] in topical_clicks:
+        topic_profile = InterestProfile(
+            profile_id=uuid4(),
+            click_history=[topical_clicks[persona["entity_name"]]],
+            click_topic_counts=None,
+            click_locality_counts=None,
+            article_feedbacks={},
+            onboarding_topics=[],
         )
 
-    single_topical_click_personas.append(topic_profile)
+        for topic in topics:
+            preference = 5 if topic["entity_name"] == persona["entity_name"] else 1
+            topic_profile.onboarding_topics.append(
+                AccountInterest(entity_id=topic["entity_id"], entity_name=topic["entity_name"], preference=preference)
+            )
 
-print(single_topical_click_personas[0])
+        single_topic_personas[persona["entity_name"]] = topic_profile
+
+# breakpoint()
