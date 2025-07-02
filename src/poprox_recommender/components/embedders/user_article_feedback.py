@@ -67,6 +67,8 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
                     list(embedding_lookup.values())[0].size(), device=self.config.device
                 )
 
+                interest_profile.click_history = feedback_clicks
+
                 interest_profile.embedding = self.build_user_embedding(feedback_clicks, embedding_lookup)
             else:
                 interest_profile.embedding = None
