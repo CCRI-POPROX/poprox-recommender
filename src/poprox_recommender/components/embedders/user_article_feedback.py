@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -7,6 +8,8 @@ from poprox_concepts import Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
+
+logger = logging.getLogger(__name__)
 
 
 def feedbacked_article_conversion(article_feedbacks, clicked_articles):
@@ -63,8 +66,10 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
     @torch_inference
     def __call__(self, clicked_articles: CandidateSet, interest_profile: InterestProfile) -> InterestProfile:
         if not hasattr(interest_profile, "article_feedbacks") or len(interest_profile.article_feedbacks) == 0:
+            logger.info("No feedback available, defaulting feedback embedding to None")
             interest_profile.embedding = None
         else:
+            logger.info(f"{len(interest_profile.article_feedbacks)} feedback available, computing embedding")
             ##### article_feedbacks = dict[UUID --> article_id, bool --> feedback] #####
             feedbacked_articles = feedbacked_article_conversion(
                 interest_profile.article_feedbacks, clicked_articles.articles
