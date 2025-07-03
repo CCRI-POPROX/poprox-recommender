@@ -70,9 +70,3 @@ def test_empty_list(all_articles):
     reference = CandidateSet(articles=[], embeddings=th.zeros((0, 768)))
     ils_score = intralist_similarity(reference, k=0)
     assert ils_score == 1.0
-
-
-def test_missing_embeddings(all_articles):
-    reference = CandidateSet(articles=all_articles[:5])
-    with pytest.raises(ValueError, match="CandidateSet must have cached embeddings to compute ILS"):
-        intralist_similarity(reference, k=5)

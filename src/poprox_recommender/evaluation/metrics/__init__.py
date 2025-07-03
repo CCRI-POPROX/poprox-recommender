@@ -8,6 +8,7 @@ from lenskit.metrics import call_metric
 from lenskit.metrics.ranking import NDCG, RecipRank
 
 from poprox_concepts import Article, CandidateSet
+from poprox_recommender.data.eval import EvalData
 from poprox_recommender.evaluation.metrics.ils import intralist_similarity
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
@@ -42,7 +43,7 @@ def convert_df_to_article_set(rec_df):
     return CandidateSet(articles=articles)
 
 
-def measure_profile_recs(profile: ProfileRecs) -> dict[str, Any]:
+def measure_profile_recs(profile: ProfileRecs, eval_data: EvalData | None = None) -> dict[str, Any]:
     """
     Measure a single user profile's recommendations.  Returns the profile ID and
     a dictionary of evaluation metrics.
@@ -77,7 +78,7 @@ def measure_profile_recs(profile: ProfileRecs) -> dict[str, Any]:
         single_rbo10 = None
         lip = None
 
-    rbe = rank_bias_entropy(ranked, k=10, d=0.5)
+    rbe = rank_bias_entropy(ranked, k=10, d=0.5, eval_data=eval_data)
     ils = intralist_similarity(ranked, k=10)
 
     logger.debug(

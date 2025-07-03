@@ -67,6 +67,8 @@ def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Ite
         logger.info("starting parallel measurement with %d workers", pc.processes)
         init_cluster(global_logging=True)
 
+        eval_data_ref = ray.put(eval_data)
+
         # use the batch backpressure mechanism
         # https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html
         result_refs = []
@@ -77,7 +79,7 @@ def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Ite
                 for rr in ready_refs:
                     yield from ray.get(rr)
 
-            result_refs.append(measure_batch.remote(batch))
+            result_refs.append(measure_batch.remote(batch, eval_data_ref))
 
         # yield remaining items
         while result_refs:
@@ -87,7 +89,7 @@ def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Ite
 
     else:
         for profile in rec_profiles(eval_data, profile_recs):
-            yield measure_profile_recs(profile)
+            yield measure_profile_recs(profile, eval_data)
 
 
 def main():
@@ -145,11 +147,12 @@ def main():
 
 
 @ray.remote(num_cpus=1)
-def measure_batch(profiles: list[ProfileRecs]) -> list[dict[str, Any]]:
+def measure_batch(profiles: list[ProfileRecs], eval_data_ref) -> list[dict[str, Any]]:
     """
     Measure a batch of profile recommendations.
     """
-    return [measure_profile_recs(profile) for profile in profiles]
+    eval_data = eval_data_ref
+    return [measure_profile_recs(profile, eval_data) for profile in profiles]
 
 
 if __name__ == "__main__":

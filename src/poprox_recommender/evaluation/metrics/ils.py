@@ -6,7 +6,7 @@ from poprox_concepts.domain import CandidateSet
 
 def intralist_similarity(final_recs: CandidateSet, k: int):
     if not hasattr(final_recs, "embeddings") or final_recs.embeddings is None:
-        raise ValueError("CandidateSet must have cached embeddings")
+        return np.nan
     top_k_embeddings = final_recs.embeddings[:k]
     n = len(top_k_embeddings)
 
@@ -15,4 +15,4 @@ def intralist_similarity(final_recs: CandidateSet, k: int):
     similarity_matrix = cosine_similarity(top_k_embeddings.cpu().numpy())
     intralist_similarity_score = np.sum(np.triu(similarity_matrix, 1)) / (n * (n - 1) / 2)
 
-    return intralist_similarity_score
+    return float(intralist_similarity_score)

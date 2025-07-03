@@ -1,22 +1,28 @@
 import numpy as np
 
 from poprox_concepts.domain import CandidateSet
+from poprox_recommender.data.eval import EvalData
 
 
-def least_item_promoted(reference_article_set: CandidateSet, reranked_article_set: CandidateSet, k: int = 10) -> float:
+def least_item_promoted(
+    reference_article_set: CandidateSet,
+    reranked_article_set: CandidateSet,
+    k: int = 10,
+    eval_data: EvalData | None = None,
+) -> float:
     if not reference_article_set.articles:
         return np.nan
 
-    lip_rank = 0
-    reranked_articles_list = reranked_article_set.articles
-
-    for item in reference_article_set.articles:
+    reference_articles_list = reference_article_set.articles
+    ranks = []
+    for item in reranked_article_set.articles[:k]:
         try:
-            rank_item = reranked_articles_list.index(item) + 1
+            rank = reference_articles_list.index(item)
+            ranks.append(rank)
         except ValueError:
-            rank_item = k + 1
-
-        if rank_item > lip_rank:
-            lip_rank = rank_item
-
-    return (lip_rank - k) / len(reference_article_set.articles)
+            continue
+    if ranks:
+        lip_rank = max(ranks)  # worst (least promoted) rank among matches
+    else:
+        lip_rank = len(reference_articles_list) - 1  # fallback: worst possible rank
+    return (lip_rank - (k - 1)) / len(reference_articles_list)
