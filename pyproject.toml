@@ -28,6 +28,7 @@ dependencies = [
   "transformers[torch]>=4.41,<5",
   "rich ~=13.9",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
+  "scikit-learn>=1.3,<2",
 ]
 
 [project.optional-dependencies]
@@ -43,12 +44,18 @@ GitHub = "https://github.com/CCRI-POPROX/poprox-recommender"
 ## dependencies for various task sets
 [dependency-groups]
 lint = ["pre-commit ~=3.7", "ruff >=0.4", "pyright ~=1.1"]
-test = ["requests >=2.31,<3", "coverage >=6.5", "pytest >=8"]
+test = [
+  "requests >=2.31,<3",
+  "coverage >=6.5",
+  "pytest >=8",
+  "scikit-learn>=1.3,<2",
+]
 eval = [
   "docopt-ng >=0.9",
   "pandas ~=2.0",
   "ray ~=2.44",
   { include-group = "data" },
+  "scikit-learn>=1.3,<2",
 ]
 dev = [
   "hatch ~=1.13",
@@ -59,6 +66,7 @@ dev = [
   { include-group = "test" },
   { include-group = "data" },
   { include-group = "eval" },
+  "scikit-learn>=1.3,<2",
 ]
 data = [
   "invoke ~=2.2",
