@@ -52,8 +52,8 @@ def test_no_overlap(all_articles):
     reference = CandidateSet(articles=all_articles[:5])
     reranked = CandidateSet(articles=all_articles[5:10])
     lip_score = least_item_promoted(reference, reranked, k=3)
-    expected = (4 - 2) / 5
-    assert lip_score == pytest.approx(expected)
+    # No overlap, so LIP should be 0.0
+    assert lip_score == 0.0
 
 
 def test_empty_reference(all_articles):
@@ -67,5 +67,5 @@ def test_empty_reranked(all_articles):
     reference = CandidateSet(articles=all_articles[:5])
     reranked = CandidateSet(articles=[])
     lip_score = least_item_promoted(reference, reranked, k=3)
-    expected = (4 - 2) / 5
-    assert lip_score == pytest.approx(expected)
+    # No overlap, so LIP should be 0.0
+    assert lip_score == 0.0

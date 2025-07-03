@@ -23,6 +23,6 @@ def least_item_promoted(
             continue
     if ranks:
         lip_rank = max(ranks)  # worst (least promoted) rank among matches
+        return (lip_rank - (k - 1)) / len(reference_articles_list)
     else:
-        lip_rank = len(reference_articles_list) - 1  # fallback: worst possible rank
-    return (lip_rank - (k - 1)) / len(reference_articles_list)
+        return 0.0
