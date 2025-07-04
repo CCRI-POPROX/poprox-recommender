@@ -23,7 +23,8 @@ ARG LOG_LEVEL=INFO
 ENV POPROX_MODELS=${LAMBDA_TASK_ROOT}/models
 
 # Copy the installed packages from build stage
-COPY --from=build ${LAMBDA_TASK_ROOT}/ ${LAMBDA_TASK_ROOT}/
+COPY --from=build ${LAMBDA_TASK_ROOT}/lib/python3.12/site-packages/ ${LAMBDA_TASK_ROOT}/
+
 
 # Debug: Check what was actually installed
 RUN ls -la ${LAMBDA_TASK_ROOT}/
