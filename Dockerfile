@@ -20,6 +20,10 @@ RUN uv pip install --system .
 FROM public.ecr.aws/lambda/python:3.12
 ARG LOG_LEVEL=INFO
 
+# Accept the API key as a build-time argument and set it as a runtime env var
+ARG OPENAI_API_KEY
+ENV OPENAI_API_KEY=${OPENAI_API_KEY}
+
 ENV POPROX_MODELS=${LAMBDA_TASK_ROOT}/models
 
 # Copy the installed packages from build stage
