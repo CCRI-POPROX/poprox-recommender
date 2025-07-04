@@ -1,7 +1,6 @@
 useDotenv: true
 
 service: poprox-default-recommender
-frameworkVersion: "3"
 
 provider:
   name: aws
@@ -25,11 +24,10 @@ provider:
           Resource: "*"
 
   ecr:
-    # In this section you can define images that will be built locally and uploaded to ECR
+    # Using the pre-built image from ECR instead of building locally
     images:
       poprox-recommender:
-        path: "./"
-        platform: linux/amd64
+        uri: 787842565111.dkr.ecr.us-east-1.amazonaws.com/serverless-poprox-default-recommender-prod:latest
 
 package:
   patterns:

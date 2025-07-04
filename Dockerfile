@@ -1,50 +1,47 @@
-# Use Lambda "Provided" base image for build
-FROM public.ecr.aws/lambda/provided:al2023 AS build
+# Use Python Lambda base image for build
+FROM public.ecr.aws/lambda/python:3.12 AS build
 
 RUN dnf install -y git
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-# Copy the soure code into the image to install it and create the environment
-# TODO do we want to copy the sdist or wheel instead?
+# Copy the source code into the image to install it and create the environment
 COPY pyproject.toml uv.lock README.md LICENSE.md .python-version /src/poprox-recommender/
 COPY src/ /src/poprox-recommender/src/
 WORKDIR /src/poprox-recommender
-RUN mkdir build
 
-# install the production environment (will include poprox-recommender)
-ENV UV_PYTHON_INSTALL_DIR=/opt/python
-ENV UV_PROJECT_ENVIRONMENT=/opt/poprox
+# Install directly to the Lambda task root instead of a separate venv
+ENV UV_PROJECT_ENVIRONMENT=${LAMBDA_TASK_ROOT}
 ENV UV_PYTHON=3.12
 ENV UV_LOCKED=TRUE
-RUN uv venv
 RUN uv sync --no-editable --no-default-groups --extra cpu --extra deploy
+# Install the local package properly
+RUN uv pip install --system .
 
-FROM public.ecr.aws/lambda/provided:al2023
+FROM public.ecr.aws/lambda/python:3.12
 ARG LOG_LEVEL=INFO
 
-ENV VIRTUAL_ENV=/opt/poprox
-ENV POPROX_MODELS=/opt/poprox/models
+ENV POPROX_MODELS=${LAMBDA_TASK_ROOT}/models
 
-COPY --from=build /opt/ /opt/
+# Copy the installed packages from build stage
+COPY --from=build ${LAMBDA_TASK_ROOT}/ ${LAMBDA_TASK_ROOT}/
 
-# Download the punkt NLTK data
-RUN /opt/poprox/bin/python3 -m nltk.downloader -d /opt/poprox/nltk_data punkt
+# Debug: Check what was actually installed
+RUN ls -la ${LAMBDA_TASK_ROOT}/
+RUN find ${LAMBDA_TASK_ROOT}/ -name "*poprox*" -type d || echo "No poprox directories found"
+RUN python -c "import sys; print('Python path:'); [print(p) for p in sys.path]"
 
 # Bake the model data into the image
-COPY models/ /opt/poprox/models/
+COPY models/ ${LAMBDA_TASK_ROOT}/models/
 
 # Bake the prompts into the image
-COPY prompts/ /var/task/prompts/
+COPY prompts/ ${LAMBDA_TASK_ROOT}/prompts/
 
-# Make sure we can import the recommender
-RUN /opt/poprox/bin/python -m poprox_recommender.api.main
-
-# Copy the bootstrap script
-COPY --chmod=0555 lambda-bootstrap.sh /var/runtime/bootstrap
+# Try to import - if this fails, we'll see the debug info above
+# RUN python -c "import poprox_recommender.api.main; print('Import successful')"
 
 # Set the transformers cache to a writeable directory
 ENV TRANSFORMERS_CACHE=/tmp/.transformers
 ENV AWS_LAMBDA_LOG_LEVEL=${LOG_LEVEL}
 
-# Run the bootstrap with our handler by default
+# Set the handler
 CMD ["poprox_recommender.api.main.handler"]

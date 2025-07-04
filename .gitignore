@@ -156,3 +156,5 @@ $RECYCLE.BIN/
 *.egg-info
 
 data/*.json
+
+commands.txt
