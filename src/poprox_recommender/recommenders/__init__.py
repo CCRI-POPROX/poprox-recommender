@@ -46,24 +46,14 @@ def select_articles(
 
     pipeline = get_pipeline(name)
 
-    recs = pipeline.node("recommender")
-    topk = pipeline.node("ranker", missing="none")
-    if topk is None:
-        wanted = (recs,)
-    else:
-        wanted = (topk, recs)
+    # Get the final node of the pipeline, which is always named 'recommender'.
+    recs_node = pipeline.node("recommender")
 
     outputs = pipeline.run_all(
-        *wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile
+        recs_node,
+        candidate=candidate_articles,
+        clicked=clicked_articles,
+        profile=interest_profile,
     )
-
-    # Check if we're using the LLM pipeline and fix the output structure if needed
-    if name == "llm-rank-rewrite" and isinstance(outputs[recs], RecommendationList):
-        # If the output is a RecommendationList without proper metadata wrapping, fix it
-        if not hasattr(outputs, "default") or not hasattr(outputs, "meta"):
-            # Remove the logic related to RecommenderInfo and setting outputs.meta
-            # Store the recommendations in the expected location
-            outputs.default = outputs[recs]
-            # outputs.meta is no longer set
 
     return outputs

@@ -5,6 +5,7 @@ service: poprox-default-recommender
 provider:
   name: aws
   runtime: python3.11
+  profile: admin
   versionFunctions: false
   region: ${opt:region, "us-east-1"}
   stage: ${opt:stage, "local"}
