@@ -7,10 +7,10 @@ import logging
 from pytest import xfail
 
 from poprox_concepts import CandidateSet, Click
-from poprox_concepts.api.recommendations.v2 import RecommendationRequestV2
+from poprox_concepts.api.recommendations.v3 import RecommendationRequestV3
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
-from poprox_recommender.recommenders import PipelineLoadError, select_articles
+from poprox_recommender.recommenders import PipelineLoadError, select_sections
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def test_direct_basic_request():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
     try:
-        req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+        req = RecommendationRequestV3.model_validate_json(req_f.read_text())
     except FileNotFoundError as e:
         if allow_data_test_failures():
             xfail("data not pulled")
@@ -28,7 +28,7 @@ def test_direct_basic_request():
 
     logger.info("generating recommendations")
     try:
-        outputs = select_articles(
+        outputs = select_sections(
             req.candidates,
             req.interacted,
             req.interest_profile,
@@ -47,7 +47,7 @@ def test_direct_basic_request_without_clicks():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
     try:
-        req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+        req = RecommendationRequestV3.model_validate_json(req_f.read_text())
     except FileNotFoundError as e:
         if allow_data_test_failures():
             xfail("models not pulled")
@@ -59,7 +59,7 @@ def test_direct_basic_request_without_clicks():
     profile = req.interest_profile
     profile.click_history = []
     try:
-        outputs = select_articles(
+        outputs = select_sections(
             req.candidates,
             req.interacted,
             req.interest_profile,
@@ -78,7 +78,7 @@ def test_direct_basic_request_explicit_none():
     test_dir = project_root() / "tests"
     req_f = test_dir / "request_data" / "basic-request.json"
     try:
-        req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+        req = RecommendationRequestV3.model_validate_json(req_f.read_text())
     except FileNotFoundError as e:
         if allow_data_test_failures():
             xfail("data not pulled")
@@ -87,7 +87,7 @@ def test_direct_basic_request_explicit_none():
 
     logger.info("generating recommendations")
     try:
-        outputs = select_articles(
+        outputs = select_sections(
             req.candidates, req.interacted, req.interest_profile, pipeline_params={"pipeline": None}
         )
     except PipelineLoadError as e:

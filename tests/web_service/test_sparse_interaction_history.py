@@ -8,7 +8,7 @@ import warnings
 from pydantic import ValidationError
 from pytest import mark, skip
 
-from poprox_concepts.api.recommendations import RecommendationRequestV2, RecommendationResponseV2
+from poprox_concepts.api.recommendations import RecommendationRequestV3, RecommendationResponseV3
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.recommenders import discover_pipelines
 from poprox_recommender.testing import RequestGenerator, mind_data

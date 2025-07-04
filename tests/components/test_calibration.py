@@ -8,10 +8,10 @@ import pytest
 from pytest import skip, xfail
 
 from poprox_concepts import CandidateSet
-from poprox_concepts.api.recommendations import RecommendationRequestV2
+from poprox_concepts.api.recommendations import RecommendationRequestV3
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
-from poprox_recommender.recommenders import PipelineLoadError, select_articles
+from poprox_recommender.recommenders import PipelineLoadError, select_sections
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
@@ -23,18 +23,18 @@ def test_request_with_topic_calibrator():
     if allow_data_test_failures() and not req_f.exists():
         skip("request file does not exist")
 
-    req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    req = RecommendationRequestV3.model_validate_json(req_f.read_text())
     req.interest_profile.click_topic_counts = user_topic_preference(
         req.interacted.articles, req.interest_profile.click_history
     )
 
     try:
-        base_outputs = select_articles(
+        base_outputs = select_sections(
             req.candidates,
             req.interacted,
             req.interest_profile,
         )
-        topic_calibrated_outputs = select_articles(
+        topic_calibrated_outputs = select_sections(
             req.candidates,
             req.interacted,
             req.interest_profile,
@@ -66,17 +66,17 @@ def test_request_with_locality_calibrator():
     if allow_data_test_failures() and not req_f.exists():
         skip("request file does not exist")
 
-    req = RecommendationRequestV2.model_validate_json(req_f.read_text())
+    req = RecommendationRequestV3.model_validate_json(req_f.read_text())
     req.interest_profile.click_locality_counts = user_locality_preference(
         req.interacted.articles, req.interest_profile.click_history
     )
     try:
-        base_outputs = select_articles(
+        base_outputs = select_sections(
             req.candidates,
             req.interacted,
             req.interest_profile,
         )
-        locality_calibrated_outputs = select_articles(
+        locality_calibrated_outputs = select_sections(
             req.candidates,
             req.interacted,
             req.interest_profile,
