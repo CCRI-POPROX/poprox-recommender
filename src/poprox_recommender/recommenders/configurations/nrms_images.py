@@ -4,7 +4,7 @@ from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedderConfig
-from poprox_recommender.components.filters.image_selector import ImageSelector
+from poprox_recommender.components.filters.image_selector_clip import ClipImageSelector
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.fill import FillRecs
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -53,7 +53,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     n_fill = builder.add_component("fill", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
 
     # Image selection
-    image_selector = ImageSelector(model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device)
+    image_selector = ClipImageSelector(device="cpu")
     builder.add_component(
         "recommender",
         image_selector,
