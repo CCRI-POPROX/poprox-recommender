@@ -15,6 +15,9 @@ class ArticleScorer(Component):
 
         with_scores = candidate_articles.model_copy()
 
+        #aggregation piece
+        #change from one user embeddings to 32, which gets 32 scores for each article. and then aggregate (average them)
+        #need to create mind interest profile (list)
         if user_embedding is not None:
             pred = torch.matmul(candidate_embeddings, user_embedding.t()).squeeze()
             with_scores.scores = pred.cpu().detach().numpy()

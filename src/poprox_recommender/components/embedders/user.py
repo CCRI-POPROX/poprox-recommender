@@ -45,6 +45,7 @@ class NRMSUserEmbedder(Component):
             )
 
             interest_profile.embedding = self.build_user_embedding(interest_profile.click_history, embedding_lookup)
+            #maybe just make an array of interest_profile embeddings for each of the different interests (K = 32)
 
         return interest_profile
 
