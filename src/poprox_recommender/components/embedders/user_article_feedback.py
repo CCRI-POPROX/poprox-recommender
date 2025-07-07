@@ -30,7 +30,7 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
 
     @torch_inference
     def __call__(self, interacted_articles: CandidateSet, interest_profile: InterestProfile) -> InterestProfile:
-        if not hasattr(interest_profile, "article_feedbacks") or len(interest_profile.article_feedbacks) == 0:
+        if not hasattr(interest_profile, "article_feedbacks") or len(interest_profile.article_feedbacks or []) == 0:
             logger.info("No feedback available, defaulting feedback embedding to None")
             interest_profile.embedding = None
         else:
