@@ -19,17 +19,17 @@ if __name__ == "__main__":
         "queryStringParameters": {"pipeline": "nrms"},
         "isBase64Encoded": False,
     }
-    event_miner = {
-        "body": raw_json,
-        "queryStringParameters": {"pipeline": "miner"},
-        "isBase64Encoded": False,
-    }
+    #event_miner = {
+    #    "body": raw_json,
+    #    "queryStringParameters": {"pipeline": "miner"},
+    #    "isBase64Encoded": False,
+    #}
 
     response_nrms = root(req.model_dump(), pipeline="nrms")
     response_nrms = RecommendationResponseV2.model_validate(response_nrms)
 
-    response_miner = root(req.model_dump(), pipeline="miner")
-    response_miner = RecommendationResponseV2.model_validate(response_miner)
+    #response_miner = root(req.model_dump(), pipeline="miner")
+    #response_miner = RecommendationResponseV2.model_validate(response_miner)
 
     print("\n")
     print(f"{event_nrms['queryStringParameters']['pipeline']}")
@@ -38,9 +38,5 @@ if __name__ == "__main__":
         article_topics = extract_general_topics(article)
         print(f"{idx + 1}. {article.headline} {article_topics}")
 
-    print("\n")
-    print(f"{event_miner['queryStringParameters']['pipeline']}")
-
-    for idx, article in enumerate(response_miner.recommendations.articles):
-        article_topics = extract_general_topics(article)
-        print(f"{idx + 1}. {article.headline} {article_topics}")
+    #print("\n")
+    #print(f"{event_miner['queryStringParameters']['pipeline']}")
