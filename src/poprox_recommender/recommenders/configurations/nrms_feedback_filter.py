@@ -93,7 +93,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         UserArticleFeedbackEmbedder,
         ue_config4,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 
@@ -108,7 +108,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         UserArticleFeedbackEmbedder,
         ue_config5,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 

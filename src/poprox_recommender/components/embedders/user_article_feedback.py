@@ -1,10 +1,9 @@
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
 
 import torch as th
 
-from poprox_concepts import Article, CandidateSet, Click, InterestProfile
+from poprox_concepts import CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
@@ -12,43 +11,9 @@ from poprox_recommender.pytorch.decorators import torch_inference
 logger = logging.getLogger(__name__)
 
 
-def feedbacked_article_conversion(article_feedbacks, clicked_articles):
-    feedbacked_articles = []
-
-    for feedbacked_article_id, feedback in article_feedbacks.items():
-        for article in clicked_articles:
-            if article.article_id == feedbacked_article_id:
-                feedbacked_articles.append((article, feedback))
-
-    feedbacked_articles = [
-        Article(
-            article_id=article.article_id,
-            headline=article.headline,
-            subhead=article.subhead,
-            url=article.url,
-            preview_image_id=article.preview_image_id,
-            published_at=datetime.now(timezone.utc),  # Set current time for simplicity
-            mentions=[],
-            source="article_feedback",
-            external_id="positive" if feedback else "negative",
-            raw_data={},
-        )
-        for article, feedback in feedbacked_articles
-    ]
-    return feedbacked_articles
-
-
-def virtual_pn_clicks(feedbacked_articles, feedback_type):
-    virtual_clicks = []
-    for feedbacked_article in feedbacked_articles:
-        if feedbacked_article.external_id == feedback_type:
-            virtual_clicks.extend([Click(article_id=feedbacked_article.article_id)])
-    return virtual_clicks
-
-
 @dataclass
 class UserArticleFeedbackConfig(NRMSUserEmbedderConfig):
-    feedback_type: str | None = None
+    feedback_type: bool | None = None
 
 
 class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
@@ -64,39 +29,47 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
         )
 
     @torch_inference
-    def __call__(self, clicked_articles: CandidateSet, interest_profile: InterestProfile) -> InterestProfile:
-        if not hasattr(interest_profile, "article_feedbacks") or len(interest_profile.article_feedbacks) == 0:
+    def __call__(self, interacted_articles: CandidateSet, interest_profile: InterestProfile) -> InterestProfile:
+        if not hasattr(interest_profile, "article_feedbacks") or len(interest_profile.article_feedbacks or []) == 0:
             logger.info("No feedback available, defaulting feedback embedding to None")
             interest_profile.embedding = None
         else:
-            logger.info(f"{len(interest_profile.article_feedbacks)} feedback available, computing embedding")
-            ##### article_feedbacks = dict[UUID --> article_id, bool --> feedback] #####
-            feedbacked_articles = feedbacked_article_conversion(
-                interest_profile.article_feedbacks, clicked_articles.articles
-            )
-            self.embedded_feedbacked_articles = self.article_embedder(CandidateSet(articles=feedbacked_articles))
+            feedback = interest_profile.article_feedbacks
+            logger.info(f"{len(feedback)} unfiltered article feedbacks of types {set(feedback.values())}")
 
-            feedbacked_embeddings_by_article_id = {
+            # Filter the list of feedback to only include the type this component is configured to process
+            filtered_feedback = {
+                article_id: feedback_type
+                for article_id, feedback_type in feedback.items()
+                if feedback_type == self.config.feedback_type
+            }
+
+            logger.info(f"{len(filtered_feedback)} filtered article feedbacks of type {self.config.feedback_type}")
+
+            # Make a list of the articles with feedback and embed them
+            feedbacked_articles = [
+                article for article in interacted_articles.articles if article.article_id in filtered_feedback.keys()
+            ]
+
+            embedded_feedbacked_articles = self.article_embedder(CandidateSet(articles=feedbacked_articles))
+
+            # Turn the list of embedded articles into a UUID -> embedding dictionary
+            embedding_lookup = {
                 article.article_id: embedding
-                for article, embedding in zip(feedbacked_articles, self.embedded_feedbacked_articles.embeddings)
+                for article, embedding in zip(feedbacked_articles, embedded_feedbacked_articles.embeddings)
             }
 
-            article_feedback_as_clicks = virtual_pn_clicks(feedbacked_articles, self.config.feedback_type)
-
-            feedbacked_article_lookup = {
-                article_id: embedding for article_id, embedding in feedbacked_embeddings_by_article_id.items()
-            }
-
-            embedding_lookup = {**feedbacked_article_lookup}
+            # Turn the dictionary of embedded articles into a list of clicks
+            feedback_clicks = [Click(article_id=article_id) for article_id in embedding_lookup.keys()]
 
             if len(embedding_lookup.values()) > 0:
                 embedding_lookup["PADDED_NEWS"] = th.zeros(
                     list(embedding_lookup.values())[0].size(), device=self.config.device
                 )
 
-                interest_profile.click_history = article_feedback_as_clicks
+                interest_profile.click_history = feedback_clicks
 
-                interest_profile.embedding = self.build_user_embedding(interest_profile.click_history, embedding_lookup)
+                interest_profile.embedding = self.build_user_embedding(feedback_clicks, embedding_lookup)
             else:
                 interest_profile.embedding = None
 

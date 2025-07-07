@@ -80,14 +80,13 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     ue_config4 = UserArticleFeedbackConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
-        feedback_type="positive",
+        feedback_type=True,
     )
     e_feedback_positive = builder.add_component(
         "user-embedder4",
         UserArticleFeedbackEmbedder,
         ue_config4,
-        candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 
@@ -95,14 +94,13 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     ue_config5 = UserArticleFeedbackConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
-        feedback_type="negative",
+        feedback_type=False,
     )
     e_feedback_negative = builder.add_component(
         "user-embedder5",
         UserArticleFeedbackEmbedder,
         ue_config5,
-        candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 
