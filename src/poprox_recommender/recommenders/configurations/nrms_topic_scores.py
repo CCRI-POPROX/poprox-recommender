@@ -6,7 +6,10 @@ from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
-from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
+from poprox_recommender.components.embedders.user_topic_prefs import (
+    StaticDefinitionUserTopicEmbedder,
+    UserTopicEmbedderConfig,
+)
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
@@ -44,16 +47,15 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Embed the user (topics)
-    ue_config2 = UserOnboardingConfig(
+    ue_config2 = UserTopicEmbedderConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
-        embedding_source="static",
         topic_embedding="nrms",
         topic_pref_values=[4, 5],
     )
     e_user_positive = builder.add_component(
         "pos-topic-embedder",
-        UserOnboardingEmbedder,
+        StaticDefinitionUserTopicEmbedder,
         ue_config2,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
@@ -61,16 +63,15 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Embed the user2 (topics)
-    ue_config3 = UserOnboardingConfig(
+    ue_config3 = UserTopicEmbedderConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
-        embedding_source="static",
         topic_embedding="nrms",
         topic_pref_values=[1, 2],
     )
     e_user_negative = builder.add_component(
         "neg-topic-embedder",
-        UserOnboardingEmbedder,
+        StaticDefinitionUserTopicEmbedder,
         ue_config3,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,

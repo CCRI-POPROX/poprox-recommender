@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -153,21 +154,20 @@ def compute_topic_weights(onboarding_topics, topic_articles):
 
 
 @dataclass
-class UserOnboardingConfig(NRMSUserEmbedderConfig):
-    embedding_source: str = "static"
+class UserTopicEmbedderConfig(NRMSUserEmbedderConfig):
     topic_embedding: str = "nrms"
     scorer_source: str = "ArticleScorer"
     topic_pref_values: list | None = None
 
 
-class UserOnboardingEmbedder(NRMSUserEmbedder):
+class UserTopicEmbedder(NRMSUserEmbedder, ABC):
     # ignore type because we are overriding a read-only property
-    config: UserOnboardingConfig  # type: ignore
+    config: UserTopicEmbedderConfig  # type: ignore
 
     article_embedder: NRMSArticleEmbedder
     embedded_topic_articles: CandidateSet | None = None
 
-    def __init__(self, config: UserOnboardingConfig | None = None, **kwargs):
+    def __init__(self, config: UserTopicEmbedderConfig | None = None, **kwargs):
         super().__init__(config, **kwargs)
         self.article_embedder = NRMSArticleEmbedder(
             model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=self.config.device
@@ -187,53 +187,55 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         else:
             topic_clicks = virtual_clicks(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        embeddings_from_definitions = self.build_embeddings_from_definitions()
-        embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
-        embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
-
-        if self.config.embedding_source == "static":
-            topic_embeddings_by_uuid = embeddings_from_definitions
-        elif self.config.embedding_source == "candidates":
-            topic_embeddings_by_uuid = {**embeddings_from_definitions, **embeddings_from_candidates}
-        elif self.config.embedding_source == "clicked":
-            topic_embeddings_by_uuid = {
-                **embeddings_from_definitions,
-                **embeddings_from_candidates,
-                **embeddings_from_clicked,
-            }
-        elif self.config.embedding_source == "hybrid":
-            all_topic_uuids = (
-                set(embeddings_from_definitions) | set(embeddings_from_candidates) | set(embeddings_from_clicked)
-            )
-            topic_embeddings_by_uuid = {}
-            for topic_uuid in all_topic_uuids:
-                def_emb = embeddings_from_definitions.get(topic_uuid, th.zeros(768, device=self.config.device))
-                cand_emb = embeddings_from_candidates.get(topic_uuid, th.zeros(768, device=self.config.device))
-                clicked_emb = embeddings_from_clicked.get(topic_uuid, th.zeros(768, device=self.config.device))
-
-                avg_emb = 0.5 * def_emb + 0.5 * cand_emb + 0.0 * clicked_emb
-                topic_embeddings_by_uuid[topic_uuid] = avg_emb
-        else:
-            raise ValueError(f"Unknown embedding source: {self.config.embedding_source}")
-
-        click_lookup = self.build_article_lookup(clicked_articles)
-        topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
+        topic_embeddings_by_uuid = self.compute_topic_embeddings(candidate_articles, clicked_articles)
 
         if self.config.scorer_source == "TopicalArticleScorer":
-            combined_click_history = interest_profile.click_history
-            embedding_lookup = {**click_lookup}
+            click_history, topic_lookup, embedding_lookup = self.build_article_click_lookups(
+                clicked_articles, interest_profile, topic_embeddings_by_uuid
+            )
+        elif self.config.scorer_source == "ArticleScorer":
+            click_history, topic_lookup, embedding_lookup = self.build_virtual_click_lookups(
+                topic_clicks, topic_embeddings_by_uuid
+            )
         else:
-            combined_click_history = topic_clicks
-            embedding_lookup = {**topic_lookup}
+            raise ValueError(f"Unknown scorer_source value: {self.config.scorer_source}")
+
+        return self.update_interest_profile(
+            interest_profile, topic_lookup, click_history, embedding_lookup, TOPIC_ARTICLES
+        )
+
+    @abstractmethod
+    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+        return {}
+
+    def build_article_click_lookups(self, clicked_articles, interest_profile, topic_embeddings_by_uuid):
+        topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
+
+        # Use article clicks and virtual topic clicks
+        click_history = interest_profile.click_history
+        embedding_lookup = self.build_article_lookup(clicked_articles)
 
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.config.device)
+        return click_history, topic_lookup, embedding_lookup
 
-        interest_profile.click_history = combined_click_history
-        interest_profile.embedding = th.nan_to_num(self.build_user_embedding(combined_click_history, embedding_lookup))
+    def build_virtual_click_lookups(self, topic_clicks, topic_embeddings_by_uuid):
+        topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
+
+        click_history = topic_clicks
+        embedding_lookup = {**topic_lookup}
+
+        embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.config.device)
+        return click_history, topic_lookup, embedding_lookup
+
+    def update_interest_profile(
+        self, interest_profile, topic_embeddings, click_history, embedding_lookup, topic_articles
+    ):
+        interest_profile.click_history = click_history
+        interest_profile.embedding = th.nan_to_num(self.build_user_embedding(click_history, embedding_lookup))
 
         # adding topic_embeddings separately
-        interest_profile.topic_embeddings = topic_lookup
-        interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, TOPIC_ARTICLES)
+        interest_profile.topic_embeddings = topic_embeddings
+        interest_profile.topic_weights = compute_topic_weights(interest_profile.onboarding_topics, topic_articles)
 
         return interest_profile
 
@@ -332,3 +334,51 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
         ).to(self.config.device)
 
         return averaged_click_vector
+
+
+class StaticDefinitionUserTopicEmbedder(UserTopicEmbedder):
+    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+        topic_embeddings_by_uuid = self.build_embeddings_from_definitions()
+        return topic_embeddings_by_uuid
+
+
+class CandidateArticleUserTopicEmbedder(UserTopicEmbedder):
+    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+        embeddings_from_definitions = self.build_embeddings_from_definitions()
+        embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
+        topic_embeddings_by_uuid = {**embeddings_from_definitions, **embeddings_from_candidates}
+        return topic_embeddings_by_uuid
+
+
+class ClickedArticleUserTopicEmbedder(UserTopicEmbedder):
+    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+        embeddings_from_definitions = self.build_embeddings_from_definitions()
+        embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
+        embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
+
+        topic_embeddings_by_uuid = {
+            **embeddings_from_definitions,
+            **embeddings_from_candidates,
+            **embeddings_from_clicked,
+        }
+        return topic_embeddings_by_uuid
+
+
+class HybridUserTopicEmbedder(UserTopicEmbedder):
+    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+        embeddings_from_definitions = self.build_embeddings_from_definitions()
+        embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
+        embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
+
+        all_topic_uuids = (
+            set(embeddings_from_definitions) | set(embeddings_from_candidates) | set(embeddings_from_clicked)
+        )
+        topic_embeddings_by_uuid = {}
+        for topic_uuid in all_topic_uuids:
+            def_emb = embeddings_from_definitions.get(topic_uuid, th.zeros(768, device=self.config.device))
+            cand_emb = embeddings_from_candidates.get(topic_uuid, th.zeros(768, device=self.config.device))
+            clicked_emb = embeddings_from_clicked.get(topic_uuid, th.zeros(768, device=self.config.device))
+
+            avg_emb = 0.5 * def_emb + 0.5 * cand_emb + 0.0 * clicked_emb
+            topic_embeddings_by_uuid[topic_uuid] = avg_emb
+        return topic_embeddings_by_uuid
