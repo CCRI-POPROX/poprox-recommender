@@ -16,11 +16,11 @@ if __name__ == "__main__":
 
         # breakpoint()
 
-    # event_nrms = {
-    #     "body": raw_json,
-    #     "queryStringParameters": {"pipeline": "nrms"},
-    #     "isBase64Encoded": False,
-    # }
+    event_nrms = {
+        "body": raw_json,
+        "queryStringParameters": {"pipeline": "nrms"},
+        "isBase64Encoded": False,
+    }
 
     # event_topic_score = {
     #     "body": raw_json,
@@ -34,14 +34,14 @@ if __name__ == "__main__":
     #     "isBase64Encoded": False,
     # }
 
-    event_fm_style_nrms = {
-        "body": raw_json,
-        "queryStringParameters": {"pipeline": "fm_nrms"},
-        "isBase64Encoded": False,
-    }
+    # event_fm_style_nrms = {
+    #     "body": raw_json,
+    #     "queryStringParameters": {"pipeline": "fm_nrms"},
+    #     "isBase64Encoded": False,
+    # }
 
-    # response_nrms = root(req.model_dump(), pipeline="nrms")
-    # response_nrms = RecommendationResponseV2.model_validate(response_nrms)
+    response_nrms = root(req.model_dump(), pipeline="nrms_with_ate")
+    response_nrms = RecommendationResponseV2.model_validate(response_nrms)
 
     # response_topic_score = root(req.model_dump(), pipeline="nrms_topic_scores")
     # response_topic_score = RecommendationResponseV2.model_validate(response_topic_score)
@@ -49,15 +49,17 @@ if __name__ == "__main__":
     # response_feedback_score = root(req.model_dump(), pipeline="nrms_feedback_scores")
     # response_feedback_score = RecommendationResponseV2.model_validate(response_feedback_score)
 
-    response_fm_style_nrms = root(req.model_dump(), pipeline="fm_nrms")
-    response_fm_style_nrms = RecommendationResponseV2.model_validate(response_fm_style_nrms)
+    # response_fm_style_nrms = root(req.model_dump(), pipeline="fm_nrms")
+    # response_fm_style_nrms = RecommendationResponseV2.model_validate(response_fm_style_nrms)
 
-    # print("\n")
-    # print(f"{event_nrms['queryStringParameters']['pipeline']}")
+    print("\n")
+    print(f"{event_nrms['queryStringParameters']['pipeline']}")
 
-    # for idx, article in enumerate(response_nrms.recommendations.articles):
-    #     article_topics = extract_general_topics(article)
-    #     print(f"{idx + 1}. {article.headline} {article_topics}")
+    for idx, (article, score) in enumerate(
+        zip(response_nrms.recommendations.articles, response_nrms.recommendations.scores)
+    ):
+        article_topics = extract_general_topics(article)
+        print(f"{idx + 1}. [{score:.5f}] {article.headline} {article_topics}")
 
     # print("\n")
     # print(f"{event_topic_score['queryStringParameters']['pipeline']}")
@@ -73,11 +75,11 @@ if __name__ == "__main__":
     #     article_topics = extract_general_topics(article)
     #     print(f"{idx + 1}. {article.headline} {article_topics}")
 
-    print("\n")
-    print(f"{event_fm_style_nrms['queryStringParameters']['pipeline']}")
+    # print("\n")
+    # print(f"{event_fm_style_nrms['queryStringParameters']['pipeline']}")
 
-    for idx, (article, score) in enumerate(
-        zip(response_fm_style_nrms.recommendations.articles, response_fm_style_nrms.recommendations.scores)
-    ):
-        article_topics = extract_general_topics(article)
-        print(f"{idx + 1}. [{score:.5f}] {article.headline} {article_topics}")
+    # for idx, (article, score) in enumerate(
+    #     zip(response_fm_style_nrms.recommendations.articles, response_fm_style_nrms.recommendations.scores)
+    # ):
+    #     article_topics = extract_general_topics(article)
+    #     print(f"{idx + 1}. [{score:.5f}] {article.headline} {article_topics}")

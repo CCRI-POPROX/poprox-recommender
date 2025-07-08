@@ -59,7 +59,7 @@ for row in history_df.itertuples():
 
     interactable_articles[article.article_id] = article
 
-print("After History")
+# print("After History")
 ### preserved some articles for user history
 
 
@@ -99,7 +99,7 @@ for day in tqdm(cadidate_dates):
 
         candidate_articles.append(article)
 
-    print("Candidate Append")
+    # print("Candidate Append")
 
     if len(candidate_articles) < static_num_recs:
         continue
@@ -109,7 +109,7 @@ for day in tqdm(cadidate_dates):
         for click in persona_profile.click_history:
             clicked_article.append(interactable_articles[click.article_id])
 
-        print(persona_topic)
+        # print(persona_topic)
         full_request = {
             "interest_profile": persona_profile.model_dump(),
             "interacted": CandidateSet(articles=clicked_article),
@@ -119,7 +119,7 @@ for day in tqdm(cadidate_dates):
 
         req = RecommendationRequestV2.model_validate(full_request)
 
-        response = root(req.model_dump(), pipeline="nrms_topic_scores")
+        response = root(req.model_dump(), pipeline="fm_nrms")
         response = RecommendationResponseV2.model_validate(response)
 
         candidate_count = 0
@@ -141,5 +141,5 @@ for day in tqdm(cadidate_dates):
 ### day to day caddidate article
 
 df = pd.DataFrame(rec_response)
-output_path = output_path / "nrms_topic_pn_scores_click.parquet"
+output_path = output_path / "click_fm_nrms_UH.parquet"
 df.to_parquet(output_path)

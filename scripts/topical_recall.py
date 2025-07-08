@@ -5,7 +5,7 @@ import pandas as pd
 from poprox_recommender.paths import project_root
 
 data = project_root() / "data"
-rec_df = pd.read_parquet(data / "Test" / "recommendation" / "nrms_topic_pn_scores_click.parquet")
+rec_df = pd.read_parquet(data / "Test" / "recommendation" / "click_fm_nrms_UH.parquet")
 
 for id, row in rec_df.iterrows():
     response = json.loads(row.response)

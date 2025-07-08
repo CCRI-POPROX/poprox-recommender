@@ -22,4 +22,5 @@ class TopkRanker(Component):
             articles = [candidate_articles.articles[int(idx)] for idx in article_indices]
             scores = [candidate_articles.scores[int(idx)] for idx in article_indices]
 
+        # breakpoint()
         return RecommendationList(articles=articles, scores=scores)

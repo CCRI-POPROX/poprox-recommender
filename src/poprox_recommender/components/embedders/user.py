@@ -46,6 +46,7 @@ class NRMSUserEmbedder(Component):
 
             interest_profile.embedding = self.build_user_embedding(interest_profile.click_history, embedding_lookup)
 
+        # breakpoint()
         return interest_profile
 
     # Compute a vector for each user

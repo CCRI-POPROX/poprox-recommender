@@ -42,13 +42,15 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # Score and rank articles
     n_scorer = builder.add_component("scorer", ArticleScorer, candidate_articles=e_candidates, interest_profile=e_user)
-    n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
+    # n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
 
-    # Fallback: sample from user topic interests
-    n_topic_filter = builder.add_component(
-        "topic-filter", TopicFilter, candidate=i_candidates, interest_profile=i_profile
-    )
-    n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
+    # # Fallback: sample from user topic interests
+    # n_topic_filter = builder.add_component(
+    #     "topic-filter", TopicFilter, candidate=i_candidates, interest_profile=i_profile
+    # )
+    # n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
 
-    # Combine primary ranker and fallback
-    builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
+    # # Combine primary ranker and fallback
+    # builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
+
+    builder.add_component("recommender", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)

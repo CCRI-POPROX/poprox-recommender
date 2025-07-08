@@ -130,7 +130,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # Combine click and topic scoring
     fusion = builder.add_component(
-        "fusion", ScoreFusion, {"combiner": "avg"}, candidates1=n_scorer, candidates2=topic_fusion
+        "fusion", ScoreFusion, {"combiner": "avg"}, candidates1=n_scorer, candidates2=topic_score
     )
 
     builder.add_component("recommender", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)

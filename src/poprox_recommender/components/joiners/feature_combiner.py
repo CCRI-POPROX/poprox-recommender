@@ -51,7 +51,7 @@ class FeatureCombiner(Component):
             # emb1=click
             # emb2=explicit topic
 
-            combined = th.cat([0 * emb1, 1 * emb2, 0 * emb3], dim=1)
+            combined = th.cat([1 * emb1, 0 * emb2, 0 * emb3], dim=1)
 
             integrated_interest_profile.embedding = combined
 
