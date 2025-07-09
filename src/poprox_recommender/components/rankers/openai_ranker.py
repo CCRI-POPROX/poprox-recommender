@@ -132,6 +132,7 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
 
 
 # TODOs
+# - Incorporate full click history where available
 # - Updated prompt to reflect input data
 # - Pass through to rewriter
 # - Updated rewriter prompt to reflect input data
