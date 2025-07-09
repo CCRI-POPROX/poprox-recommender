@@ -41,6 +41,51 @@ class RankedIndices(BaseModel):
 class LLMRanker(Component):
     config: LLMRankerConfig
 
+    def _structure_interest_profile(self, interest_profile: InterestProfile) -> str:
+        """
+        Structure the interest profile for the prompt.
+        """
+        clean_profile = {
+            "topics": [
+                t.entity_name
+                for t in sorted(
+                    interest_profile.onboarding_topics, key=lambda t: getattr(t, "preference", 0), reverse=True
+                )
+            ],
+            "click_topic_counts": getattr(interest_profile, "click_topic_counts", None),
+            "click_locality_counts": getattr(interest_profile, "click_locality_counts", None),
+        }
+        # Sort the click counts from most clicked to least clicked
+        clean_profile["click_topic_counts"] = (
+            [t for t, _ in sorted(clean_profile["click_topic_counts"].items(), key=lambda x: x[1], reverse=True)]
+            if clean_profile["click_topic_counts"]
+            else []
+        )
+        clean_profile["click_locality_counts"] = (
+            [t for t, _ in sorted(clean_profile["click_locality_counts"].items(), key=lambda x: x[1], reverse=True)]
+            if clean_profile["click_locality_counts"]
+            else []
+        )
+
+        profile_str = f"""Topics the user has shown interest in (from most to least):
+{", ".join(clean_profile["topics"])}
+
+Topics the user has clicked on (from most to least):
+{", ".join(clean_profile["click_topic_counts"])}
+
+Localities the user has clicked on (from most to least):
+{", ".join(clean_profile["click_locality_counts"])}
+"""
+
+        return profile_str
+
+    def _build_user_profile(self, interest_profile: InterestProfile) -> str:
+        """
+        Build a concise user model from the provided interest data.
+        """
+
+        return "<user_profile>"
+
     def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
         with open("prompts/rank.txt", "r") as f:
             prompt = f.read()
