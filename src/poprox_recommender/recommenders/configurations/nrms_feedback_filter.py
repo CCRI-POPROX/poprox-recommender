@@ -1,16 +1,18 @@
-# pyright: basic
-
 from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
-from poprox_recommender.components.embedders.article_feedback_wise_user import (
+from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
+from poprox_recommender.components.embedders.user_article_feedback import (
     UserArticleFeedbackConfig,
     UserArticleFeedbackEmbedder,
 )
-from poprox_recommender.components.embedders.topic_wise_user import UserOnboardingConfig, UserOnboardingEmbedder
-from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
+from poprox_recommender.components.embedders.user_topic_prefs import (
+    StaticDefinitionUserTopicEmbedder,
+    UserTopicEmbedderConfig,
+)
+from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
@@ -24,11 +26,16 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
 
+    # Filter articles based on topic preferences
+    f_candidates = builder.add_component(
+        "topic-filter", TopicFilter, candidates=i_candidates, interest_profile=i_profile
+    )
+
     # Embed candidate and clicked articles
     ae_config = NRMSArticleEmbedderConfig(
         model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
     )
-    e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=i_candidates)
+    e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=f_candidates)
     e_clicked = builder.add_component(
         "history-NRMSArticleEmbedder", NRMSArticleEmbedder, ae_config, article_set=i_clicked
     )
@@ -45,16 +52,15 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Embed the user (topics)
-    ue_config2 = UserOnboardingConfig(
+    ue_config2 = UserTopicEmbedderConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
-        embedding_source="static",
         topic_embedding="nrms",
         topic_pref_values=[4, 5],
     )
     e_topic_positive = builder.add_component(
         "user-embedder2",
-        UserOnboardingEmbedder,
+        StaticDefinitionUserTopicEmbedder,
         ue_config2,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
@@ -62,23 +68,22 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Embed the user2 (topics)
-    ue_config3 = UserOnboardingConfig(
+    ue_config3 = UserTopicEmbedderConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
-        embedding_source="static",
         topic_embedding="nrms",
         topic_pref_values=[1, 2],
     )
     e_topic_negative = builder.add_component(
         "user-embedder3",
-        UserOnboardingEmbedder,
+        StaticDefinitionUserTopicEmbedder,
         ue_config3,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
         interest_profile=i_profile,
     )
 
-    # Embed the user (topics)
+    # Embed the user (feedbacks)
     ue_config4 = UserArticleFeedbackConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
@@ -89,11 +94,11 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         UserArticleFeedbackEmbedder,
         ue_config4,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 
-    # Embed the user2 (topics)
+    # Embed the user2 (feedbacks)
     ue_config5 = UserArticleFeedbackConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
@@ -104,7 +109,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         UserArticleFeedbackEmbedder,
         ue_config5,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 

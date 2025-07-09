@@ -65,8 +65,8 @@ stages:
     deps:
     - path: ../outputs/mind-subset-profile-metrics.csv.gz
       hash: md5
-      md5: 4e7c1e9a8a6653386163667ed1522dfb
-      size: 263556
+      md5: 34344a75ce7746973f4a511e47666076
+      size: 266045
     - path: basic-eval-template.ipynb
       hash: md5
       md5: d7a609cac9a5ed5ae8606ea5dd2ee28a
@@ -74,5 +74,37 @@ stages:
     outs:
     - path: mind-subset.ipynb
       hash: md5
-      md5: be7bd0844f888acc9f8f75497ed866a1
-      size: 206665
+      md5: ac35b1100b7099243c45e3c4d1dab241
+      size: 235647
+  basic-results@mind-small:
+    cmd: papermill -p EVAL_NAME mind-small basic-eval-template.ipynb mind-small.ipynb
+    deps:
+    - path: ../outputs/mind-small-profile-metrics.csv.gz
+      hash: md5
+      md5: 0b8bd43e69cf15b58a9a67240014266e
+      size: 19010804
+    - path: basic-eval-template.ipynb
+      hash: md5
+      md5: d7a609cac9a5ed5ae8606ea5dd2ee28a
+      size: 6716
+    outs:
+    - path: mind-small.ipynb
+      hash: md5
+      md5: f6f4ea6df309981b1b249bd0e7e84f00
+      size: 244159
+  basic-results@mind-val:
+    cmd: papermill -p EVAL_NAME mind-val basic-eval-template.ipynb mind-val.ipynb
+    deps:
+    - path: ../outputs/mind-val-profile-metrics.csv.gz
+      hash: md5
+      md5: 54491f4d7ef159e3c08bc12332871fbe
+      size: 97116713
+    - path: basic-eval-template.ipynb
+      hash: md5
+      md5: d7a609cac9a5ed5ae8606ea5dd2ee28a
+      size: 6716
+    outs:
+    - path: mind-val.ipynb
+      hash: md5
+      md5: f2ec5ada5dd1480c4225e94236ce056d
+      size: 243213

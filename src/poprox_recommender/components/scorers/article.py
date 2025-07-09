@@ -22,5 +22,4 @@ class ArticleScorer(Component):
         else:
             with_scores.scores = None
 
-        # breakpoint()
         return with_scores

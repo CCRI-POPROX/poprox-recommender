@@ -61,16 +61,45 @@ for reproducibly running the recommender code with all dependencies on Linux and
 macOS (we use the devcontainer for development support on Windows).
 
 [uv]: https://docs.astral.sh/uv
+[uv-inst]: https://docs.astral.sh/uv/getting-started/installation/
 [dvc]: https://dvc.org
 
-The devcontainer automatically installs the development environment; if you want
-to manually install it, you can run:
+The devcontainer automatically installs the development environment. If you want to manually
+install the software, first install `uv` (see the [install instructions][uv-inst]), then run:
 
 ```console
-uv sync --extra cpu
+$ uv sync --extra cpu
+Resolved 304 packages in 10ms
+      Built poprox-recommender @ file:///Users/mde48/POPROX/poprox-recommender
+      Built poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git@d0e27c90f6eddcc4f041e5d871ff4a13c2ec70f7
+      Built antlr4-python3-runtime==4.9.3
+      Built pylatex==1.4.2
+Prepared 223 packages in 19.45s
+Installed 278 packages in 1.80s
 ```
 
-The dev container environment already has the environment active.
+> [!NOTE]
+>
+> If you have a CUDA-enabled Linux system, you can use the `cuda` extra to get
+> CUDA-enabled PyTorch for POPROX batch inference and model training.  To
+> install this, run:
+>
+> ```console
+> $ uv sync --extra cuda
+> ```
+
+The dev container also automatically activates the environment in its terminal.
+To activate manually, run the following in each shell session:
+
+```console
+$ . .venv/bin/activate
+```
+
+You can also run things from inside the environment with `uv run`:
+
+```console
+$ uv run dvc pull
+```
 
 A few useful commands for the terminal:
 
@@ -79,16 +108,6 @@ A few useful commands for the terminal:
     ```console
     $ pytest tests
     ```
-
-> [!NOTE]
->
-> If you have a CUDA-enabled Linux system, you can use the `cuda` extra to get
-> CUDA-enabled PyTorch for POPROX batch inference.  To install this, run:
->
-> ```console
-> $ uv sync --extra cuda
-> ```
-
 
 ## Data and Model Access
 
@@ -120,7 +139,15 @@ The default setup for this package is CPU-only, which works for basic testing
 and for deployment, but is very inefficient for evaluation.  The current set of
 models work on both CUDA (on Linux with NVidia cards) and MPS (macOS on Apple
 Silicon).  To make use of a GPU, install with the `cuda` extra (and the `eval` group,
-which is included by default).
+which is included by default).  Run the evaluation with `dvc`:
+
+```console
+$ dvc repro measure-mind-small
+```
+
+You can also run `measure-mind-val` or `measure-mind-subset`.
+
+### Evaluation Timing
 
 Timing information for generating recommendations with the MIND validation set:
 
@@ -141,6 +168,26 @@ Footnotes:
 2. Using 8 worker processes
 3. Estimated based on early progress, not run to completion.
 
+## Training Models
+
+Model training is also orchestrated by DVC, along with its preprocessing stages.
+To avoid accidentally retraining models, the model training stages are *frozen*,
+and we un-freeze them when we need to re-train.
+
+To re-train the model, run:
+
+```console
+$ dvc pull
+$ dvc unfreeze models/dvc.yaml:train-nrms-mind
+Modifying stage 'train-nrms-mind' in 'models/dvc.yaml'
+$ dvc repro models/dvc.yaml:train-nrms-mind
+$ dvc freeze models/dvc.yaml:train-nrms-mind
+Modifying stage 'train-nrms-mind' in 'models/dvc.yaml'
+$ git add models
+$ git commit
+$ dvc push
+$ git push
+```
 
 ## Additional Software Environment Notes
 
@@ -157,16 +204,16 @@ pre-commit install
 
 If you update the dependencies in poprox-recommender, or add code that requires
 a newer version of `poprox-concepts`, you need to regenerate the lock file with
-`pixi update`.  To update just `poprox-concepts`, run:
+`uv sync`.  To update just `poprox-concepts`, run:
 
 ```console
-pixi update poprox_concepts
+$ uv sync -P poprox-concepts
 ```
 
 To update all dependencies, run:
 
 ```console
-pixi update
+$ uv sync -U
 ```
 
 ### Editor Setup

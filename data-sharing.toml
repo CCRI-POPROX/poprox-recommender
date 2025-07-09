@@ -1,0 +1,25 @@
+# PORPOX data sharing
+# NOTE TO REVIEWERS: carefully check that any new lines are setting
+# appropriate sharing permissions.
+
+# Patterns in here are extended glob patterns supported by the wcmatch library.
+
+# PUBLIC data — accessible without authentication
+[data.public]
+patterns = [
+  # test request data
+  "tests/request_data/**",
+  # our model checkpionts, trained on MIND
+  "models/*-mind",
+  # recommendation outputs *except* full text
+  "outputs/mind-*/*/*.parquet",
+  "outputs/mind-*/*/*.csv.gz",
+  "outputs/mind-*/*/*-task.json",
+]
+
+# SHARED data — accessible by researchers with credentialls
+[data.shared]
+patterns = [
+  # full recommendation output
+  "outputs/mind-*/",
+]
