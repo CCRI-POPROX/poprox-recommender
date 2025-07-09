@@ -20,7 +20,7 @@ class LLMRewriterConfig(BaseModel):
     Configuration for the LLM-powered rewriter.
     """
 
-    model: str = "gpt-4.1"
+    model: str = "gpt-4.1-2025-04-14"
     openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
 
 
