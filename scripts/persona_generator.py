@@ -1,5 +1,4 @@
 import json
-from copy import deepcopy
 from uuid import uuid4
 
 from poprox_concepts import AccountInterest, InterestProfile
@@ -28,4 +27,3 @@ for persona in topics:
             AccountInterest(entity_id=topic["entity_id"], entity_name=topic["entity_name"], preference=preference)
         )
     single_topic_personas[persona["entity_name"]] = topic_profile
-

@@ -2,9 +2,23 @@ import json
 from collections import defaultdict
 
 import pandas as pd
+from testArticleEmb import embed_article, load_news_encoder
 
 from poprox_concepts import Article, Entity, Mention
+from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
 from poprox_recommender.paths import project_root
+
+news_encoder, tokenizer = load_news_encoder()
+
+
+def convert_topic_des_to_topical_articles(topic_descriptions: dict) -> dict:
+    topical_articles = defaultdict(list)
+
+    for topic, description in topic_descriptions.items():
+        topical_article = {"headline": description, "mentions": [topic]}
+        topical_articles[topic].append(topical_article)
+
+    return topical_articles
 
 
 def mention_included_historical_article_generator(mentions_df, history_df):
@@ -57,10 +71,10 @@ def n_tagged_article_generator(topic_names, article_by_tag_counts, threshold, mn
     return topical_articles
 
 
-def print_articles(topical_articles):
+def n_tagged_article_emb_generator(topical_articles):
     for topic, articles in topical_articles.items():
         for article in articles:
-            print(f"{topic} -> {article['headline']} mentions {article['mentions']}")
+            article["embedding"] = embed_article(article["headline"], news_encoder, tokenizer)
 
 
 with open(project_root() / "tests/request_data/onboarding.json", "r") as req_file:
@@ -93,7 +107,9 @@ for article in interacted_articles:
             max_tag_count = tag_counts
 
 
-no_article_per_tag_count = 1
+no_article_per_tag_count = 5
+
+topic_des_as_articles = convert_topic_des_to_topical_articles(TOPIC_DESCRIPTIONS)
 
 single_topical_articles = n_tagged_article_generator(
     topic_names, article_by_tag_counts, threshold=no_article_per_tag_count, mn=1, mx=2
@@ -103,7 +119,18 @@ multi_topical_articles = n_tagged_article_generator(
     topic_names, article_by_tag_counts, threshold=no_article_per_tag_count, mn=2, mx=max_tag_count
 )
 
+n_tagged_article_emb_generator(topic_des_as_articles)
 
-# print_articles(single_topical_articles)
-# print("break ---------------------- break ---------------------- break")
-# print_articles(multi_topical_articles)
+n_tagged_article_emb_generator(single_topical_articles)
+
+n_tagged_article_emb_generator(multi_topical_articles)
+
+# for topic, articles in single_topical_articles.items():
+#     for article in articles:
+#         print(f'{article["headline"]} || {topic}')
+
+# print("-----------------------------------------------------------------")
+
+# for topic, articles in multi_topical_articles.items():
+#     for article in articles:
+#         print(f'{article["headline"]} || {topic}')
