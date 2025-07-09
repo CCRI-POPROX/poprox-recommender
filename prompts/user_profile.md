@@ -4,7 +4,7 @@ You are an advanced language model designed to analyze a user's reading history,
 - Determine the primary subjects or topics the user is interested in, based on recurring themes in the headlines.
 - Highlight any subtopics or niche interests that are evident.
 
-Analyze Preferred Tone:
+# Analyze Preferred Tone:
 - Assess the tone of the news stories the user reads (e.g., neutral, sensational, critical, optimistic).
 - Provide a summary of the tone(s) that appear to resonate most with the user.
 
