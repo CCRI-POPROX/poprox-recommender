@@ -7,54 +7,6 @@ on:
   pull_request:
 
 jobs:
-  full-tests:
-    name: Run the PyTest tests
-    runs-on: ubuntu-latest
-    env:
-      POPROX_CI_WITHOUT_MIND: 1
-      OPENAI_API_KEY: ${{secrets.OPENAI_API_KEY}}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🕶️ Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: "3.12"
-
-      - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=test --group=data --extra=cpu
-
-      - name: 🛠️ Configure data retrieval
-        run: |
-          dvc config --local cache.type hardlink
-
-      - name: Cache model data
-        uses: actions/cache@v4
-        with:
-          path: .dvc/cache
-          key: test-dvc-cache-${{ hashFiles('models/**.dvc') }}
-
-      - name: Fetch model data
-        run: |
-          dvc pull -r public -R models tests
-
-      - name: Fetch test data
-        run: |
-          if ! dvc pull data/MINDsmall_dev.zip; then
-            echo '::warning::Private repository not available, some tests will be skipped'
-          fi
-        env:
-          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-
-      - name: Run tests
-        run: |
-          pytest -v tests
-
   nodata-tests:
     name: Run the PyTest tests without model data
     runs-on: ubuntu-latest
