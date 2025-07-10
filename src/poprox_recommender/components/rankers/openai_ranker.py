@@ -110,7 +110,7 @@ Headlines of articles the user has clicked on (most recent first):
 
     def __call__(
         self, candidate_articles: CandidateSet, interest_profile: InterestProfile, articles_clicked: CandidateSet
-    ) -> RecommendationList:
+    ) -> tuple[RecommendationList, str]:
         with open("prompts/rank.txt", "r") as f:
             prompt = f.read()
 
@@ -141,7 +141,7 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
 
         response = response.output_parsed
         selected = [candidate_articles.articles[i] for i in response.recommended_article_ids]
-        return RecommendationList(articles=selected)
+        return RecommendationList(articles=selected), user_model
 
 
 # TODOs
