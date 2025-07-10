@@ -2,15 +2,14 @@ Rewrite the headline for this story in a way that will entice the reader to clic
 
 You will be supplied with:
 - Reader preferences (topics, specific interests).
-- Recent stories they have clicked on.
 - The original headline of the story to rework, and its text.
 
 
 # Output Guidelines
 **Follow each step carefully and ensure all instructions are fully executed.**
 
-Extract only the core message and primary theme of this story, omitting minor details, subtopics, background context, and less critical information.
-Strictly adhere to the publication’s house style, matching the capitalization format of the **headline examples provided below**.
+- Extract only the core message and primary theme of this story, omitting minor details, subtopics, background context, and less critical information.
+- Strictly adhere to the publication’s house style, matching the capitalization format of the **headline examples provided below**.
 
 1. Ensure all details are directly supported by the source material, without assumptions, extrapolations, or editorializing:
 **DO NOT**:
@@ -41,13 +40,9 @@ d) Keep phrasing fresh but consistent with past examples: Use past examples as r
 Before finalizing, verify that the headline fully complies with all guidelines above and accurately reflect the key elements of the source material without making any inferences. Revise any part that does not meet these standards.
 
 
-# Output Format
-**Headline**: [Headline]
-
-
 # Examples (House Style)
-- Headline: Senate review of Supreme Court ethics finds more luxury trips and urges enforceable code of conduct
+- Senate review of Supreme Court ethics finds more luxury trips and urges enforceable code of conduct
 
-- Headline: Blake Lively accuses 'It Ends With Us' director Justin Baldoni of harassment and smear campaign
+- Blake Lively accuses 'It Ends With Us' director Justin Baldoni of harassment and smear campaign
 
-- Headline: France's Mayotte struggles to recover as cyclone overwhelms hospitals
+- France's Mayotte struggles to recover as cyclone overwhelms hospitals
