@@ -111,7 +111,7 @@ Headlines of articles the user has clicked on (most recent first):
     def __call__(
         self, candidate_articles: CandidateSet, interest_profile: InterestProfile, articles_clicked: CandidateSet
     ) -> tuple[RecommendationList, str]:
-        with open("prompts/rank.txt", "r") as f:
+        with open("prompts/rank.md", "r") as f:
             prompt = f.read()
 
         client = openai.OpenAI(api_key=self.config.openai_api_key)
