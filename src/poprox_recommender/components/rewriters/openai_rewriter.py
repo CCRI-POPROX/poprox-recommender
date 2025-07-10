@@ -38,8 +38,11 @@ class LLMRewriter(Component):
             input_txt = f"""User interest profile:
 {user_model}
 
-Headline to rewrite: {art.headline}
-Article text: {art.body}
+Headline to rewrite:
+{art.headline}
+
+Article text:
+{art.body}
 """
 
             response = client.responses.parse(
