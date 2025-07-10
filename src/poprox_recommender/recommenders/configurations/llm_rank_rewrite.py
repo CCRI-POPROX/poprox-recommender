@@ -18,7 +18,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     # LLM-based ranking
     rank_cfg = LLMRankerConfig(num_slots=num_slots)
     ranked = builder.add_component(
-        "ranker", LLMRanker, rank_cfg, candidate_articles=i_candidates, interest_profile=i_profile
+        "ranker", LLMRanker, rank_cfg, candidate_articles=i_candidates, interest_profile=i_profile, clicked=i_clicked
     )
 
     # LLM-based rewriting

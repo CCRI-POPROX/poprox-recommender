@@ -4,7 +4,6 @@ from typing import Any
 from lenskit.pipeline import PipelineState
 
 from poprox_concepts import CandidateSet, InterestProfile
-from poprox_concepts.domain import RecommendationList
 
 from .load import (
     PipelineLoadError,
