@@ -126,10 +126,8 @@ Headlines of articles the user has clicked on (most recent first):
         for i, art in enumerate(candidate_articles.articles):
             items.append(f"{i}: {art.headline} - {art.subhead}")
 
-        input_txt = f"""User model:
+        input_txt = f"""User interest profile:
 {user_model}
-
-{profile_str}
 
 Candidate articles:
 {", ".join(items)}
@@ -150,3 +148,4 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
 # - Updated prompt to reflect input data
 # - Pass through to rewriter
 # - Updated rewriter prompt to reflect input data
+# - System diagram
