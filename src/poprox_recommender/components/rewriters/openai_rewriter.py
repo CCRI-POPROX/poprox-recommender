@@ -27,7 +27,7 @@ class LLMRewriter(Component):
     config: LLMRewriterConfig
 
     def __call__(self, recommendations: RecommendationList, user_model: str) -> RecommendationList:
-        with open("prompts/rewrite.txt", "r") as f:
+        with open("prompts/rewrite.md", "r") as f:
             prompt = f.read()
 
         client = openai.OpenAI(api_key=self.config.openai_api_key)
