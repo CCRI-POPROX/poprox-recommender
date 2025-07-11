@@ -36,6 +36,8 @@ dependencies = [
 
 [project.optional-dependencies]
 deploy = ["awslambdaric ~=2.2"]
+# S3 persistence support
+s3 = ["boto3 >=1.26.0"]
 # declare extras for Torch install
 cpu = ["torch~=2.2"]
 cuda = ["torch~=2.2"]
