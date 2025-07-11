@@ -12,7 +12,7 @@ from poprox_recommender.components.rewriters.openai_rewriter import LLMRewriter,
 def configure(builder: PipelineBuilder, num_slots: int, device: str):
     # Define inputs
     i_candidates = builder.create_input("candidate", CandidateSet)
-    i_clicked = builder.create_input("clicked", CandidateSet)
+    i_clicked = builder.create_input("articles_clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
 
     # LLM-based ranking
@@ -32,8 +32,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         "recommender",
         LLMRewriter,
         rewrite_cfg,
-        recommendations=ranker_output[0],
-        user_model=ranker_output[1],
+        ranker_output=ranker_output,
     )
 
     # Remove RecommenderInfo usage

@@ -26,7 +26,9 @@ class LLMRewriterConfig(BaseModel):
 class LLMRewriter(Component):
     config: LLMRewriterConfig
 
-    def __call__(self, recommendations: RecommendationList, user_model: str) -> RecommendationList:
+    def __call__(self, ranker_output: tuple[RecommendationList, str]) -> RecommendationList:
+        recommendations, user_model = ranker_output
+
         with open("prompts/rewrite.md", "r") as f:
             prompt = f.read()
 
