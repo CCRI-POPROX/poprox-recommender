@@ -14,6 +14,8 @@ provider:
   architecture: x86_64
   environment:
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    PERSISTENCE_BUCKET: ${self:custom.pipelineBucket}
+    PERSISTENCE_PREFIX: pipeline-outputs/
 
   iam:
     role:
@@ -23,6 +25,15 @@ provider:
           Action:
             - "logs:*"
           Resource: "*"
+        - Effect: Allow
+          Action:
+            - "s3:GetObject"
+            - "s3:PutObject"
+            - "s3:DeleteObject"
+            - "s3:ListBucket"
+          Resource:
+            - "arn:aws:s3:::${self:custom.pipelineBucket}"
+            - "arn:aws:s3:::${self:custom.pipelineBucket}/*"
 
   ecr:
     # Using the pre-built image from ECR instead of building locally
@@ -52,3 +63,33 @@ functions:
       - httpApi:
           path: /
           method: post
+
+custom:
+  pipelineBucket: ${self:service}-pipeline-data-${self:provider.stage}
+
+resources:
+  Resources:
+    PipelineDataBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.pipelineBucket}
+        VersioningConfiguration:
+          Status: Enabled
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteOldPipelineData
+              Status: Enabled
+              ExpirationInDays: 90  # Keep pipeline data for 90 days
+              NoncurrentVersionExpirationInDays: 30
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+  Outputs:
+    PipelineDataBucketName:
+      Description: "S3 bucket for storing pipeline data"
+      Value: ${self:custom.pipelineBucket}
+      Export:
+        Name: ${self:service}-${self:provider.stage}-pipeline-bucket
