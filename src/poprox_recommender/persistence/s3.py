@@ -85,7 +85,7 @@ class S3PersistenceManager(PersistenceManager):
             full_metadata = {
                 "request_id": request_id,
                 "session_id": session_id,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": current_time.isoformat(),
                 "user_model_length": len(user_model),
                 "num_articles": len(original_recommendations.articles),
                 "pipeline_type": "llm_rank_rewrite",
