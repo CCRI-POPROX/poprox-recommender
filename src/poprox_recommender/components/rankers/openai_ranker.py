@@ -121,7 +121,7 @@ Headlines of articles the user has clicked on (most recent first):
         articles_clicked: Optional[CandidateSet] = None,
     ) -> tuple[RecommendationList, str, str]:
         # Generate a request ID for this pipeline run
-        self.request_id = interest_profile.profile_id
+        self.request_id = str(interest_profile.profile_id)
 
         with open("prompts/rank.md", "r") as f:
             prompt = f.read()
