@@ -10,7 +10,7 @@ provider:
   region: ${opt:region, "us-east-1"}
   stage: ${opt:stage, "local"}
   memorySize: 2048 # 2gb
-  timeout: 60
+  timeout: 30
   architecture: x86_64
   environment:
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
