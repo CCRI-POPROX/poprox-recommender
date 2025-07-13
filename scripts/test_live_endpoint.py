@@ -69,7 +69,7 @@ class LiveEndpointTester:
         response.raise_for_status()
 
         result = response.json()
-        logger.info(f"Received response with {len(result.get('recommendations', []))} recommendations")
+        logger.info(f"Received response with {len(result['recommendations']['articles'])} recommendations")
         return result
 
     def extract_session_id_from_response(self, response: Dict[str, Any]) -> str | None:
