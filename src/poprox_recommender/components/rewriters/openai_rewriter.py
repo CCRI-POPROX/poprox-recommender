@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -37,10 +38,10 @@ class LLMRewriter(Component):
         with open("prompts/rewrite.md", "r") as f:
             prompt = f.read()
 
-        client = openai.OpenAI(api_key=self.config.openai_api_key)
+        client = openai.AsyncOpenAI(api_key=self.config.openai_api_key)
 
-        # rewrite article headlines
-        for art in recommendations.articles:
+        # rewrite article headlines in parallel
+        async def rewrite_article(art):
             # build prompt using the user_model from LLMRanker
             input_txt = f"""User interest profile:
 {user_model}
@@ -52,7 +53,7 @@ Article text:
 {art.body}
 """
 
-            response = client.responses.parse(
+            response = await client.responses.parse(
                 model=self.config.model,
                 instructions=prompt,
                 input=input_txt,
@@ -61,6 +62,12 @@ Article text:
             )
             # Update the article headline with the rewritten one
             art.headline = response.output_parsed.headline
+
+        async def rewrite_all():
+            tasks = [rewrite_article(art) for art in recommendations.articles]
+            await asyncio.gather(*tasks)
+
+        asyncio.run(rewrite_all())
 
         # Persist pipeline data after rewriting is complete
         try:
