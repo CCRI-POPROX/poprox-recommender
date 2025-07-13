@@ -23,7 +23,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         rank_cfg,
         candidate_articles=i_candidates,
         interest_profile=i_profile,
-        clicked=i_clicked,
+        articles_clicked=i_clicked,
     )
 
     # LLM-based rewriting
