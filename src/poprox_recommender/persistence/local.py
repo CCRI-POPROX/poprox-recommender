@@ -2,7 +2,7 @@ import json
 import pickle
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from poprox_concepts.domain import RecommendationList
 

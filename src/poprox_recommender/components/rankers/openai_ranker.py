@@ -1,6 +1,5 @@
 import os
-import time
-from typing import Optional
+from typing import Optional, Union
 
 import openai
 from dotenv import load_dotenv
@@ -42,13 +41,13 @@ class RankedIndices(BaseModel):
 
 class LLMRanker(Component):
     config: LLMRankerConfig
-    
+
     def __init__(self, config: LLMRankerConfig):
         self.config = config
-        # Generate a request ID for this pipeline run
-        self.request_id = f"rank_{int(time.time() * 1000)}"
 
-    def _structure_interest_profile(self, interest_profile: InterestProfile, articles_clicked: CandidateSet) -> str:
+    def _structure_interest_profile(
+        self, interest_profile: InterestProfile, articles_clicked: Union[CandidateSet, None]
+    ) -> str:
         """
         Structure the interest profile for the prompt.
         """
@@ -121,6 +120,9 @@ Headlines of articles the user has clicked on (most recent first):
         interest_profile: InterestProfile,
         articles_clicked: Optional[CandidateSet] = None,
     ) -> tuple[RecommendationList, str, str]:
+        # Generate a request ID for this pipeline run
+        self.request_id = interest_profile.profile_id
+
         with open("prompts/rank.md", "r") as f:
             prompt = f.read()
 
@@ -152,7 +154,7 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
         response = response.output_parsed
         selected = [candidate_articles.articles[i] for i in response.recommended_article_ids]
         original_recommendations = RecommendationList(articles=selected)
-        
+
         # Return tuple with request_id for persistence in rewriter
         return (original_recommendations, user_model, self.request_id)
 

@@ -1,7 +1,7 @@
 import json
 import pickle
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 try:
     import boto3
@@ -18,7 +18,7 @@ from .base import PersistenceManager
 class S3PersistenceManager(PersistenceManager):
     """
     S3-based persistence manager for AWS Lambda and production environments.
-    
+
     Stores pipeline data in S3 with the following structure:
     - {prefix}{session_id}/user_model.txt
     - {prefix}{session_id}/original_recommendations.pkl
@@ -29,17 +29,17 @@ class S3PersistenceManager(PersistenceManager):
     def __init__(self, bucket_name: str, prefix: str = "pipeline-outputs/"):
         """
         Initialize S3 persistence manager.
-        
+
         Args:
             bucket_name: S3 bucket name for storing data
             prefix: Key prefix for organizing data in bucket
-            
+
         Raises:
             ImportError: If boto3 is not available
         """
         if boto3 is None:
             raise ImportError("boto3 is required for S3PersistenceManager. Install with: pip install boto3")
-        
+
         self.s3 = boto3.client("s3")
         self.bucket = bucket_name
         self.prefix = prefix
@@ -85,7 +85,7 @@ class S3PersistenceManager(PersistenceManager):
             full_metadata = {
                 "request_id": request_id,
                 "session_id": session_id,
-                "timestamp": current_time.isoformat(),
+                "timestamp": datetime.now().isoformat(),
                 "user_model_length": len(user_model),
                 "num_articles": len(original_recommendations.articles),
                 "pipeline_type": "llm_rank_rewrite",
@@ -109,9 +109,7 @@ class S3PersistenceManager(PersistenceManager):
         """Load pipeline data from S3."""
         try:
             # Load user model
-            response = self.s3.get_object(
-                Bucket=self.bucket, Key=f"{self.prefix}{session_id}/user_model.txt"
-            )
+            response = self.s3.get_object(Bucket=self.bucket, Key=f"{self.prefix}{session_id}/user_model.txt")
             user_model = response["Body"].read().decode("utf-8")
 
             # Load original recommendations
@@ -127,9 +125,7 @@ class S3PersistenceManager(PersistenceManager):
             rewritten_recommendations = pickle.loads(response["Body"].read())
 
             # Load metadata
-            response = self.s3.get_object(
-                Bucket=self.bucket, Key=f"{self.prefix}{session_id}/metadata.json"
-            )
+            response = self.s3.get_object(Bucket=self.bucket, Key=f"{self.prefix}{session_id}/metadata.json")
             metadata = json.loads(response["Body"].read().decode("utf-8"))
 
             return {
@@ -156,7 +152,7 @@ class S3PersistenceManager(PersistenceManager):
                     session_path = prefix_info["Prefix"]
                     # Extract session_id from path: "pipeline-outputs/session_id/"
                     session_id = session_path[len(self.prefix) :].rstrip("/")
-                    
+
                     if request_id_prefix is None or session_id.startswith(request_id_prefix):
                         sessions.append(session_id)
 

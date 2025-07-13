@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 
 import openai
 from dotenv import load_dotenv
@@ -30,7 +30,7 @@ class LLMRewriter(Component):
 
     def __call__(self, ranker_output: tuple[RecommendationList, str, str]) -> RecommendationList:
         recommendations, user_model, request_id = ranker_output
-        
+
         # Create a copy of the original recommendations for persistence
         original_recommendations = RecommendationList(articles=recommendations.articles.copy())
 
@@ -73,7 +73,7 @@ Article text:
                 metadata={
                     "pipeline_type": "llm_rank_rewrite",
                     "rewriter_model": self.config.model,
-                }
+                },
             )
             logging.info(f"Pipeline data saved with session_id: {session_id}")
         except Exception as e:
