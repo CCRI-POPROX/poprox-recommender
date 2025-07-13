@@ -10,7 +10,7 @@ provider:
   region: ${opt:region, "us-east-1"}
   stage: ${opt:stage, "local"}
   memorySize: 2048 # 2gb
-  timeout: 25
+  timeout: 60
   architecture: x86_64
   environment:
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
@@ -79,7 +79,7 @@ resources:
           Rules:
             - Id: DeleteOldPipelineData
               Status: Enabled
-              ExpirationInDays: 90  # Keep pipeline data for 90 days
+              ExpirationInDays: 90 # Keep pipeline data for 90 days
               NoncurrentVersionExpirationInDays: 30
         PublicAccessBlockConfiguration:
           BlockPublicAcls: true
