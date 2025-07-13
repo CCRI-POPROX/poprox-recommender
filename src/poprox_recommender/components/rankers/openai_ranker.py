@@ -157,7 +157,3 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
 
         # Return tuple with request_id for persistence in rewriter
         return (original_recommendations, user_model, self.request_id)
-
-
-# TODOs
-# - Updated rewriter prompt to reflect input data
