@@ -72,9 +72,16 @@ class ArtifactComparator:
 
     def structure_interest_profile_from_original(self, original_profile: Dict[str, Any]) -> str:
         """Structure the interest profile using the exact same logic as _structure_interest_profile in the ranker."""
-        interest_profile = original_profile.get("interest_profile", {})
+        click_history = original_profile.get("articles", [])
+        if click_history:
+            clicked_stories = sorted(
+                [(art["headline"], art["published_at"]) for art in click_history], key=lambda x: x[1], reverse=True
+            )
+            clicked_headlines = [headline for headline, _ in clicked_stories]
+        else:
+            clicked_headlines = []
 
-        clicked_headlines = []  # We don't have headlines in the original profile data
+        interest_profile = original_profile.get("interest_profile", {})
 
         # Mirror the exact logic from _structure_interest_profile
         clean_profile = {
@@ -87,7 +94,7 @@ class ArtifactComparator:
             ],
             "click_topic_counts": interest_profile.get("click_topic_counts"),
             "click_locality_counts": interest_profile.get("click_locality_counts"),
-            "click_history": clicked_headlines,  # Empty since we don't have headlines
+            "click_history": clicked_headlines,
         }
 
         # Sort the click counts from most clicked to least clicked (exact logic from ranker)
