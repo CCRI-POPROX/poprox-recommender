@@ -9,8 +9,8 @@ Usage:
     python scripts/compare_artifacts.py [--input-dir DIR] [--output-file FILE] [--model MODEL]
 
 Args:
-    --input-dir: Directory containing profile artifacts (default: evaluation_data/)
-    --output-file: JSON file to save comparison results (default: comparison_results.json)
+    --input-dir: Directory containing profile artifacts (default: testing_data/evals/)
+    --output-file: JSON file to save comparison results (default: testing_data/comparison_results.json)
     --model: LLM model to use for comparisons (default: gpt-4.1)
 """
 
@@ -391,9 +391,9 @@ Look for alignment, relevance, and how well the rewritten headlines capture the 
 
 def main():
     parser = argparse.ArgumentParser(description="Compare artifacts and make LLM comparisons")
-    parser.add_argument("--input-dir", default="evaluation_data", help="Input directory with profile artifacts")
-    parser.add_argument("--output-file", default="comparison_results.json", help="Output file for results")
-    parser.add_argument("--model", default="gpt-4", help="LLM model to use for comparisons")
+    parser.add_argument("--input-dir", default="testing_data/evals", help="Input directory with profile artifacts")
+    parser.add_argument("--output-file", default="testing_data/comparison_results.json", help="Output file for results")
+    parser.add_argument("--model", default="gpt-4.1", help="LLM model to use for comparisons")
 
     args = parser.parse_args()
 
