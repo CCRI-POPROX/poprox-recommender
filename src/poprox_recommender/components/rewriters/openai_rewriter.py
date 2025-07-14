@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import logging
 import os
 
@@ -32,8 +33,8 @@ class LLMRewriter(Component):
     def __call__(self, ranker_output: tuple[RecommendationList, str, str]) -> RecommendationList:
         recommendations, user_model, request_id = ranker_output
 
-        # Create a copy of the original recommendations for persistence
-        original_recommendations = RecommendationList(articles=recommendations.articles.copy())
+        # Create a deep copy of the original recommendations for persistence
+        original_recommendations = RecommendationList(articles=copy.deepcopy(recommendations.articles))
 
         with open("prompts/rewrite.md", "r") as f:
             prompt = f.read()
