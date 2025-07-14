@@ -25,7 +25,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     # Embed candidate and clicked articles
     ae_config = MinerArticleEmbedderConfig(
         #change model path
-        model_path=model_file_path("bert/"), device=device
+        model_path=model_file_path("distilbert-base-uncased/"), device=device
     )
     e_candidates = builder.add_component("candidate-embedder", MinerArticleEmbedder, ae_config, article_set=i_candidates)
     e_clicked = builder.add_component(
