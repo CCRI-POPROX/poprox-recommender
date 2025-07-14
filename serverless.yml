@@ -1,6 +1,6 @@
 useDotenv: true
 
-service: poprox-default-recommender
+service: poprox-recommender-image-personalization
 frameworkVersion: "3"
 
 provider:
