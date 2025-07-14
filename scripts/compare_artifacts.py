@@ -11,7 +11,7 @@ Usage:
 Args:
     --input-dir: Directory containing profile artifacts (default: evaluation_data/)
     --output-file: JSON file to save comparison results (default: comparison_results.json)
-    --model: LLM model to use for comparisons (default: gpt-4)
+    --model: LLM model to use for comparisons (default: gpt-4.1)
 """
 
 import argparse
@@ -23,10 +23,44 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import openai
+from pydantic import BaseModel
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+
+# response models
+class ProfileUserModelComparison(BaseModel):
+    user_model_diverges: bool
+    explanation: str
+
+
+class MissingArticle(BaseModel):
+    headline: str
+    explanation: str
+
+
+class UserModelCandidatePoolComparison(BaseModel):
+    missing_articles: list[MissingArticle]
+
+
+class RankingComparison(BaseModel):
+    misranked_articles: list[MissingArticle]
+
+
+class AccuracyViolation(BaseModel):
+    violation: str
+    explanation: str
+
+
+class AccuracyComparison(BaseModel):
+    accuracy_violations: list[AccuracyViolation]
+
+
+class SalienceComparison(BaseModel):
+    salience_issues: list[str]
+    explanation: str
 
 
 class ArtifactComparator:
@@ -125,85 +159,153 @@ Headlines of articles the user has clicked on (most recent first):
 
         return profile_str
 
-    def make_llm_comparison(self, prompt: str, data1: str, data2: str) -> str:
-        """Make an LLM call to compare two pieces of data."""
-        full_prompt = f"""
-{prompt}
-
-Data 1:
-{data1}
-
-Data 2:
-{data2}
-
-Please provide your analysis:
-"""
-
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert at analyzing recommendation system data and user profiles.",
-                    },
-                    {"role": "user", "content": full_prompt},
-                ],
-                temperature=0.1,
-            )
-            return response.choices[0].message.content or "No response content"
-        except Exception as e:
-            logger.error(f"Error making LLM call: {e}")
-            return f"Error: {str(e)}"
-
-    def compare_formatted_input_and_user_model(self, formatted_input: str, user_model: str) -> str:
-        """Compare formatted input data and user model."""
+    def compare_profile_to_user_model(self, profile: Dict, user_model: str) -> ProfileUserModelComparison:
+        """Compare the structured interest profile to the user model."""
+        profile_str = self.structure_interest_profile_from_original(profile)
         prompt = """
-Please compare the formatted input profile data with the generated user model.
-Analyze:
-1. How well the user model captures the interests expressed in the input
-2. Any gaps or discrepancies between input and model
-3. The quality and completeness of the user model representation
+You are evaluating a colleague's description of a user based on a profile of their interactions and interests.
+1. Compare the structured interest profile with the user model.
+2. Identify any discrepancies or missing elements in the user model.
+3. Provide a detailed explanation of how well the user model captures the user's interests.
 
-PLACEHOLDER: Customize this prompt for your specific analysis needs.
+Discrepancies should include:
+- Missing topics or interests that are present in the profile
+- Inaccurate representation of the user's click history
+- Elevated or diminished importance of certain topics
+- Any other notable differences
 """
-        return self.make_llm_comparison(prompt, formatted_input, user_model)
-
-    def compare_user_model_and_original_recommendations(self, user_model: str, original_recs: Any) -> str:
-        """Compare user model and original recommendations."""
-        # Convert recommendations to string format for comparison
-        recs_str = json.dumps(original_recs, indent=2, default=str) if original_recs else "No recommendations found"
-
-        prompt = """
-Please compare the user model with the original recommendations.
-Analyze:
-1. How well the recommendations align with the user model preferences
-2. The relevance and quality of recommended articles
-3. Any mismatches between user interests and recommendations
-
-PLACEHOLDER: Customize this prompt for your specific analysis needs.
-"""
-        return self.make_llm_comparison(prompt, user_model, recs_str)
-
-    def compare_user_model_and_rewritten_recommendations(self, user_model: str, rewritten_recs: Any) -> str:
-        """Compare user model and rewritten recommendations (with updated headlines)."""
-        # Convert recommendations to string format for comparison
-        recs_str = (
-            json.dumps(rewritten_recs, indent=2, default=str)
-            if rewritten_recs
-            else "No rewritten recommendations found"
+        resp = self.client.responses.parse(
+            model=self.model,
+            instructions=prompt,
+            input=f"Profile:\n{profile_str}\n\nUser Model:\n{user_model}",
+            temperature=0.5,
+            text_format=ProfileUserModelComparison,
         )
 
-        prompt = """
-Please compare the user model with the rewritten recommendations (with updated headlines).
-Analyze:
-1. How the headline rewrites affect recommendation relevance
-2. Whether rewritten headlines better match user interests
-3. The impact of headline changes on overall recommendation quality
+        return resp.output_parsed
 
-PLACEHOLDER: Customize this prompt for your specific analysis needs.
+    def compare_user_model_to_ranking(
+        self, user_model: str, original_recs, profile
+    ) -> tuple[UserModelCandidatePoolComparison, RankingComparison]:
+        """Compare the user model to the ranking of articles."""
+        candidate_pool = profile["candidates"]["articles"]
+        candidate_pool_str = "\n".join([art["headline"] for art in candidate_pool])
+
+        original_recs_headlines = [(rank + 1, i.headline) for rank, i in enumerate(original_recs.articles)]
+        original_recs_str = "\n".join([f"{rank}. {headline}" for rank, headline in original_recs_headlines])
+
+        prompt_pool = """
+You are evaluating the outputs of a recommendation system.
+Your task is to assess how well the selected articles align with the user's interests as described in the user model.
+
+Keep in mind that the recommendation system is designed to balance relevance, diversity, and importance of articles, so not all selected articles will perfectly match the user model.
+
+1. Compare the user model with the recommendations.
+2. Identify any articles from the candidate pool that should have been recommended.
+3. Provide a detailed explanation of the alignment between the user model and the recommendations.
+
 """
-        return self.make_llm_comparison(prompt, user_model, recs_str)
+
+        prompt_faithfulness = """
+You are evaluating the outputs of a recommendation system.
+Your task is to assess how well the ranking of the selected articles aligns with the user's interests as described in the user model.
+Keep in mind that the recommendation system is designed to balance relevance, diversity, and importance of articles, so not all selected articles will perfectly match the user model.
+
+1. Compare the user model with the original recommendations.
+2. Flag any articles that should have been ranked higher or lower based on the user model.
+3. Provide a detailed explanation of the alignment between the user model and the recommendations.
+"""
+
+        response_pool = self.client.responses.parse(
+            model=self.model,
+            instructions=prompt_pool,
+            input=f"User Model:\n{user_model}\n\nCandidate Pool:\n{candidate_pool_str}\n\nOriginal Recommendations:\n{original_recs_str}",
+            temperature=0.5,
+            text_format=UserModelCandidatePoolComparison,
+        )
+
+        response_faithfulness = self.client.responses.parse(
+            model=self.model,
+            instructions=prompt_faithfulness,
+            input=f"User Model:\n{user_model}\n\nOriginal Recommendations:\n{original_recs_str}",
+            temperature=0.5,
+            text_format=RankingComparison,
+        )
+
+        return (
+            response_pool.output_parsed,
+            response_faithfulness.output_parsed,
+        )
+
+    def compare_user_model_to_rewritten_recommendations(
+        self, profile: Dict, user_model: str, original_recs: Any, rewritten_recs: Any
+    ) -> tuple[AccuracyComparison, SalienceComparison]:
+        """Compare the user model to the rewritten recommendations."""
+        article_ids = [str(i.article_id) for i in original_recs.articles]
+        article_objects = []
+        for i in article_ids:
+            article_object = {}
+            article_object["article_id"] = i
+            article_object["headline_original"] = next(
+                (art.headline for art in original_recs.articles if str(art.article_id) == i), ""
+            )
+            article_object["headline_rewritten"] = next(
+                (art.headline for art in rewritten_recs.articles if str(art.article_id) == i), ""
+            )
+            article_object["body"] = next(
+                (art["body"] for art in profile["candidates"]["articles"] if str(art["article_id"]) == i), ""
+            )
+            article_objects.append(article_object)
+
+        accuracy_input = "\n\n".join(
+            [f"Headline: {art['headline_rewritten']}\nArticle text: {art['body']}" for art in article_objects]
+        )
+
+        faithfulness_input = "\n\n".join(
+            [
+                f"Original Headline: {art['headline_original']}\nRewritten Headline: {art['headline_rewritten']}"
+                for art in article_objects
+            ]
+        )
+        faithfulness_input = f"User Model:\n{user_model}\n\n{faithfulness_input}"
+
+        prompt_accuracy = """
+You are an editor in a newsroom. Your job is to evaluate the accuracy of a headline based on the article text.
+
+Look for inaccuracies, misleading statements, or any discrepancies between the headline and the article content.
+
+1. For each rewritten headline, determine if it accurately reflects the content of the article.
+2. Provide a detailed explanation of your assessment.
+"""
+
+        prompt_faithfulness = """
+You are an audience engagement specialist. Your job is to evaluate how well the rewritten headlines align with the user's preferred tone and style as described in the user model.
+Look for alignment, relevance, and how well the rewritten headlines capture the essence of the article.
+
+1. For each rewritten headline, determine if it aligns with the user's interests as described in the user model.
+2. Provide a detailed explanation of your assessment.
+"""
+
+        response_accuracy = self.client.responses.parse(
+            model=self.model,
+            instructions=prompt_accuracy,
+            input=accuracy_input,
+            temperature=0.5,
+            text_format=AccuracyComparison,
+        )
+
+        response_faithfulness = self.client.responses.parse(
+            model=self.model,
+            instructions=prompt_faithfulness,
+            input=faithfulness_input,
+            temperature=0.5,
+            text_format=SalienceComparison,
+        )
+
+        return (
+            response_accuracy.output_parsed,
+            response_faithfulness.output_parsed,
+        )
 
     def process_profile(self, profile_dir: Path) -> Optional[Dict[str, Any]]:
         """Process a single profile and perform all comparisons."""
@@ -217,37 +319,39 @@ PLACEHOLDER: Customize this prompt for your specific analysis needs.
             logger.warning(f"No artifacts found for profile {profile_name}")
             return None
 
-        results = {"profile_name": profile_name, "timestamp": datetime.now().isoformat(), "comparisons": {}}
+        user_model_assessment = self.compare_profile_to_user_model(
+            artifacts.get("original_profile", {}), artifacts.get("user_model", "")
+        )
 
-        # Extract formatted input data using the exact same logic as the ranker
-        formatted_input = ""
-        if "original_profile" in artifacts:
-            formatted_input = self.structure_interest_profile_from_original(artifacts["original_profile"])
+        ranking_assessment_pool, ranking_assessment_faithfulness = self.compare_user_model_to_ranking(
+            artifacts.get("user_model", ""),
+            artifacts.get("original_recommendations", None),
+            artifacts.get("original_profile", {}),
+        )
 
-        # Comparison 1: Formatted input data vs User model
-        if formatted_input and "user_model" in artifacts:
-            logger.info(f"Comparing formatted input and user model for {profile_name}")
-            results["comparisons"]["formatted_input_vs_user_model"] = self.compare_formatted_input_and_user_model(
-                formatted_input, artifacts["user_model"]
+        rewrite_assessment_accuracy, rewrite_assessment_faithfulness = (
+            self.compare_user_model_to_rewritten_recommendations(
+                artifacts.get("original_profile", {}),
+                artifacts.get("user_model", ""),
+                artifacts.get("original_recommendations", None),
+                artifacts.get("rewritten_recommendations", None),
             )
+        )
 
-        # Comparison 2: User model vs Original recommendations
-        if "user_model" in artifacts and "original_recommendations" in artifacts:
-            logger.info(f"Comparing user model and original recommendations for {profile_name}")
-            results["comparisons"]["user_model_vs_original_recs"] = (
-                self.compare_user_model_and_original_recommendations(
-                    artifacts["user_model"], artifacts["original_recommendations"]
-                )
-            )
-
-        # Comparison 3: User model vs Rewritten recommendations
-        if "user_model" in artifacts and "rewritten_recommendations" in artifacts:
-            logger.info(f"Comparing user model and rewritten recommendations for {profile_name}")
-            results["comparisons"]["user_model_vs_rewritten_recs"] = (
-                self.compare_user_model_and_rewritten_recommendations(
-                    artifacts["user_model"], artifacts["rewritten_recommendations"]
-                )
-            )
+        # Compile results
+        results = {
+            "profile_name": profile_name,
+            "user_model": artifacts.get("user_model", ""),
+            "ranked_headlines": "\n".join([art.headline for art in artifacts.get("original_recommendations").articles]),
+            "rewritten_headlines": "\n".join(
+                [art.headline for art in artifacts.get("rewritten_recommendations").articles]
+            ),
+            "user_model_assessment": user_model_assessment.model_dump(),
+            "ranking_assessment_pool": ranking_assessment_pool.model_dump(),
+            "ranking_assessment_faithfulness": ranking_assessment_faithfulness.model_dump(),
+            "rewrite_assessment_accuracy": rewrite_assessment_accuracy.model_dump(),
+            "rewrite_assessment_faithfulness": rewrite_assessment_faithfulness.model_dump(),
+        }
 
         return results
 
