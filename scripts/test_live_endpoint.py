@@ -178,8 +178,34 @@ class LiveEndpointTester:
         else:
             logger.warning(f"Could not find session ID for {profile_name}")
 
+    def warmup_endpoint(self):
+        """Make a GET request to the /warmup endpoint with retry logic."""
+        warmup_url = f"{self.endpoint_url.rstrip('/')}/warmup"
+        
+        if self.dry_run:
+            logger.info(f"[DRY RUN] Would send warmup request to {warmup_url}")
+            return
+        
+        for attempt in range(2):  # 1 retry (2 attempts total)
+            try:
+                logger.info(f"Sending warmup request to {warmup_url} (attempt {attempt + 1})")
+                response = requests.get(warmup_url, timeout=30)
+                response.raise_for_status()
+                logger.info("Warmup request successful")
+                return
+            except requests.exceptions.RequestException as e:
+                if attempt == 0:  # First attempt failed, retry once
+                    logger.warning(f"Warmup attempt {attempt + 1} failed: {e}, retrying...")
+                    continue
+                else:  # Second attempt failed
+                    logger.error(f"Warmup failed after 2 attempts: {e}")
+                    raise
+
     def run(self):
         """Run the testing script for all profiles."""
+        # Warmup the endpoint before processing profiles
+        self.warmup_endpoint()
+        
         profile_files = self.get_profile_files()
         logger.info(f"Found {len(profile_files)} profile files")
 
