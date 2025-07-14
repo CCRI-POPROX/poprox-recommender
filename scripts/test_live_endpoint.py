@@ -180,12 +180,12 @@ class LiveEndpointTester:
 
     def warmup_endpoint(self):
         """Make a GET request to the /warmup endpoint with retry logic."""
-        warmup_url = f"{self.endpoint_url.rstrip('/')}/warmup"
-        
+        warmup_url = f"{self.endpoint_url.split('/?')[0]}/warmup"
+
         if self.dry_run:
             logger.info(f"[DRY RUN] Would send warmup request to {warmup_url}")
             return
-        
+
         for attempt in range(2):  # 1 retry (2 attempts total)
             try:
                 logger.info(f"Sending warmup request to {warmup_url} (attempt {attempt + 1})")
@@ -205,7 +205,7 @@ class LiveEndpointTester:
         """Run the testing script for all profiles."""
         # Warmup the endpoint before processing profiles
         self.warmup_endpoint()
-        
+
         profile_files = self.get_profile_files()
         logger.info(f"Found {len(profile_files)} profile files")
 
