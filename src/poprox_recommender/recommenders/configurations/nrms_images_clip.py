@@ -59,4 +59,5 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         image_selector,
         recommendations=n_fill,
         interest_profile=e_user,
+        interacted_articles=i_clicked,
     )
