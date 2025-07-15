@@ -15,6 +15,7 @@ Args:
 """
 
 import argparse
+import csv
 import json
 import logging
 import pickle
@@ -72,6 +73,13 @@ class ArtifactComparator:
 
         if not self.input_dir.exists():
             raise FileNotFoundError(f"Input directory not found: {self.input_dir}")
+
+    def create_headline_pairs_string(self, original_recs, rewritten_recs) -> str:
+        """Create a string blob of original/rewritten headline pairs."""
+        pairs = []
+        for orig_art, rewritten_art in zip(original_recs.articles, rewritten_recs.articles):
+            pairs.append(f"Original: {orig_art.headline} | Rewritten: {rewritten_art.headline}")
+        return " ;; ".join(pairs)
 
     def load_profile_artifacts(self, profile_dir: Path) -> Dict[str, Any]:
         """Load all artifacts for a single profile."""
@@ -340,10 +348,17 @@ Look for alignment, relevance, and how well the rewritten headlines capture the 
             )
         )
 
+        # Create headline pairs string
+        headline_pairs = self.create_headline_pairs_string(
+            artifacts.get("original_recommendations"),
+            artifacts.get("rewritten_recommendations")
+        )
+
         # Compile results
         results = {
             "profile_name": profile_name,
             "user_model": artifacts.get("user_model", ""),
+            "headline_pairs": headline_pairs,
             "ranked_headlines": "\n".join([art.headline for art in artifacts.get("original_recommendations").articles]),
             "rewritten_headlines": "\n".join(
                 [art.headline for art in artifacts.get("rewritten_recommendations").articles]
@@ -374,7 +389,7 @@ Look for alignment, relevance, and how well the rewritten headlines capture the 
                 logger.error(f"Error processing {profile_dir}: {e}")
                 continue
 
-        # Save results
+        # Save JSON results
         output_data = {
             "metadata": {
                 "timestamp": datetime.now().isoformat(),
@@ -387,7 +402,23 @@ Look for alignment, relevance, and how well the rewritten headlines capture the 
         with open(self.output_file, "w") as f:
             json.dump(output_data, f, indent=2)
 
+        # Save CSV results
+        csv_file = self.output_file.with_suffix('.csv')
+        with open(csv_file, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['profile_name', 'user_model', 'headline_pairs'])
+            
+            for result in all_results:
+                # Clean user model for CSV (remove newlines)
+                clean_user_model = result['user_model'].replace('\n', ' ').replace('\r', '')
+                writer.writerow([
+                    result['profile_name'],
+                    clean_user_model,
+                    result['headline_pairs']
+                ])
+
         logger.info(f"Comparison results saved to {self.output_file}")
+        logger.info(f"CSV results saved to {csv_file}")
         logger.info(f"Processed {len(all_results)} profiles successfully")
 
 
