@@ -2,7 +2,7 @@ import json
 from collections import defaultdict
 
 import pandas as pd
-from testArticleEmb import embed_article, load_news_encoder
+from local_article_emb import embed_article, load_news_encoder
 
 from poprox_concepts import Article, Entity, Mention
 from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS

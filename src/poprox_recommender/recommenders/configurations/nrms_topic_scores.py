@@ -5,7 +5,7 @@ from lenskit.pipeline import PipelineBuilder
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
-from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
+from poprox_recommender.components.embedders.user import NRMSSingleVectorUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.components.embedders.user_topic_prefs import (
     StaticDefinitionUserTopicEmbedder,
     UserTopicEmbedderConfig,
@@ -39,10 +39,10 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     ue_config = NRMSUserEmbedderConfig(model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device=device)
     e_user = builder.add_component(
         "user-embedder",
-        NRMSUserEmbedder,
+        NRMSSingleVectorUserEmbedder,
         ue_config,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 
@@ -59,7 +59,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         StaticDefinitionUserTopicEmbedder,
         ue_config4,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 

@@ -16,15 +16,12 @@ if __name__ == "__main__":
 
     event_nrms_with_ate = {
         "body": raw_json,
-        "queryStringParameters": {"pipeline": "nrms_feedback_filter"},
+        "queryStringParameters": {"pipeline": "fm_nrms"},
         "isBase64Encoded": False,
     }
 
-    response_nrms = root(req.model_dump(), pipeline="nrms_feedback_filter")
+    response_nrms = root(req.model_dump(), pipeline="fm_nrms")
     response_nrms = RecommendationResponseV2.model_validate(response_nrms)
-
-    print("\n")
-    print(f"{event_nrms_with_ate['queryStringParameters']['pipeline']}")
 
     for idx, (article, score) in enumerate(
         zip(response_nrms.recommendations.articles, response_nrms.recommendations.scores)

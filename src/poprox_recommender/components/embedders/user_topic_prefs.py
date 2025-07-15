@@ -6,7 +6,8 @@ from uuid import uuid4
 import torch as th
 
 from poprox_concepts import Article, CandidateSet, Click, InterestProfile
-from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder, NRMSUserEmbedderConfig
+from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedderConfig
+from poprox_recommender.components.embedders.user import NRMSSingleVectorUserEmbedder
 from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
@@ -86,7 +87,7 @@ class UserTopicEmbedderConfig(NRMSUserEmbedderConfig):
     topic_pref_values: list | None = None
 
 
-class UserTopicEmbedder(NRMSUserEmbedder, ABC):
+class UserTopicEmbedder(NRMSSingleVectorUserEmbedder, ABC):
     # ignore type because we are overriding a read-only property
     config: UserTopicEmbedderConfig  # type: ignore
 
@@ -101,7 +102,7 @@ class UserTopicEmbedder(NRMSUserEmbedder, ABC):
 
     @torch_inference
     def __call__(
-        self, candidate_articles: CandidateSet, clicked_articles: CandidateSet, interest_profile: InterestProfile
+        self, candidate_articles: CandidateSet, interacted_articles: CandidateSet, interest_profile: InterestProfile
     ) -> InterestProfile:
         if self.embedded_topic_articles is None:
             self.embedded_topic_articles = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
@@ -113,11 +114,11 @@ class UserTopicEmbedder(NRMSUserEmbedder, ABC):
         else:
             topic_clicks = virtual_clicks(interest_profile.onboarding_topics, TOPIC_ARTICLES)
 
-        topic_embeddings_by_uuid = self.compute_topic_embeddings(candidate_articles, clicked_articles)
+        topic_embeddings_by_uuid = self.compute_topic_embeddings(candidate_articles, interacted_articles)
 
         if self.config.scorer_source == "TopicalArticleScorer":
             click_history, topic_lookup, embedding_lookup = self.build_article_click_lookups(
-                clicked_articles, interest_profile, topic_embeddings_by_uuid
+                interacted_articles, interest_profile, topic_embeddings_by_uuid
             )
         elif self.config.scorer_source == "ArticleScorer":
             click_history, topic_lookup, embedding_lookup = self.build_virtual_click_lookups(
@@ -131,15 +132,15 @@ class UserTopicEmbedder(NRMSUserEmbedder, ABC):
         )
 
     @abstractmethod
-    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+    def compute_topic_embeddings(self, candidate_articles, interacted_articles):
         return {}
 
-    def build_article_click_lookups(self, clicked_articles, interest_profile, topic_embeddings_by_uuid):
+    def build_article_click_lookups(self, interacted_articles, interest_profile, topic_embeddings_by_uuid):
         topic_lookup = {topic_uuid: emb for topic_uuid, emb in topic_embeddings_by_uuid.items()}
 
         # Use article clicks and virtual topic clicks
         click_history = interest_profile.click_history
-        embedding_lookup = self.build_article_lookup(clicked_articles)
+        embedding_lookup = self.build_article_lookup(interacted_articles)
 
         embedding_lookup["PADDED_NEWS"] = th.zeros(list(embedding_lookup.values())[0].size(), device=self.config.device)
         return click_history, topic_lookup, embedding_lookup
@@ -263,13 +264,13 @@ class UserTopicEmbedder(NRMSUserEmbedder, ABC):
 
 
 class StaticDefinitionUserTopicEmbedder(UserTopicEmbedder):
-    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+    def compute_topic_embeddings(self, candidate_articles, interacted_articles):
         topic_embeddings_by_uuid = self.build_embeddings_from_definitions()
         return topic_embeddings_by_uuid
 
 
 class CandidateArticleUserTopicEmbedder(UserTopicEmbedder):
-    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+    def compute_topic_embeddings(self, candidate_articles, interacted_articles):
         embeddings_from_definitions = self.build_embeddings_from_definitions()
         embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
         topic_embeddings_by_uuid = {**embeddings_from_definitions, **embeddings_from_candidates}
@@ -277,10 +278,10 @@ class CandidateArticleUserTopicEmbedder(UserTopicEmbedder):
 
 
 class ClickedArticleUserTopicEmbedder(UserTopicEmbedder):
-    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+    def compute_topic_embeddings(self, candidate_articles, interacted_articles):
         embeddings_from_definitions = self.build_embeddings_from_definitions()
         embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
-        embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
+        embeddings_from_clicked = self.build_embeddings_from_articles(interacted_articles, TOPIC_ARTICLES)
 
         topic_embeddings_by_uuid = {
             **embeddings_from_definitions,
@@ -291,10 +292,10 @@ class ClickedArticleUserTopicEmbedder(UserTopicEmbedder):
 
 
 class HybridUserTopicEmbedder(UserTopicEmbedder):
-    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+    def compute_topic_embeddings(self, candidate_articles, interacted_articles):
         embeddings_from_definitions = self.build_embeddings_from_definitions()
         embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
-        embeddings_from_clicked = self.build_embeddings_from_articles(clicked_articles, TOPIC_ARTICLES)
+        embeddings_from_clicked = self.build_embeddings_from_articles(interacted_articles, TOPIC_ARTICLES)
 
         all_topic_uuids = (
             set(embeddings_from_definitions) | set(embeddings_from_candidates) | set(embeddings_from_clicked)

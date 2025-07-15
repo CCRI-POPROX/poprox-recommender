@@ -44,7 +44,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         StaticDefinitionUserTopicEmbedder,
         ue_config,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 

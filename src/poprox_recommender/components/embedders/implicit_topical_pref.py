@@ -9,10 +9,7 @@ import torch.nn.functional as F
 
 from poprox_concepts import AccountInterest, Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
-from poprox_recommender.components.embedders.multiple_users import (
-    NRMSMultipleUserEmbedder,
-    NRMSMultipleUserEmbedderConfig,
-)
+from poprox_recommender.components.embedders.user import NRMSMultiVectorUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
@@ -65,12 +62,12 @@ def virtual_clicks_for_implicit_topical_freq(onboarding_topics, topic_articles):
 
 
 @dataclass
-class UserImplicitTopicalEmbedderConfig(NRMSMultipleUserEmbedderConfig):
+class UserImplicitTopicalEmbedderConfig(NRMSUserEmbedderConfig):
     max_clicked_articles: int = 50
     max_clicks_per_user: int = 56
 
 
-class UserImplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
+class UserImplicitTopicalEmbedder(NRMSMultiVectorUserEmbedder):
     config: UserImplicitTopicalEmbedderConfig
 
     article_embedder: NRMSArticleEmbedder
@@ -84,7 +81,7 @@ class UserImplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
 
     @torch_inference
     def __call__(
-        self, candidate_articles: CandidateSet, clicked_articles: CandidateSet, interest_profile: InterestProfile
+        self, candidate_articles: CandidateSet, interacted_articles: CandidateSet, interest_profile: InterestProfile
     ) -> InterestProfile:
         interest_profile = interest_profile.model_copy()
 
@@ -95,7 +92,7 @@ class UserImplicitTopicalEmbedder(NRMSMultipleUserEmbedder):
             # 02: if there is any click then find the topics of the clicked article
             clicked_article_from_history = []
             for click in interest_profile.click_history[-self.config.max_clicked_articles :]:
-                for clicked_article in clicked_articles.articles:
+                for clicked_article in interacted_articles.articles:
                     if click.article_id == clicked_article.article_id:
                         clicked_article_from_history.append(clicked_article)
 

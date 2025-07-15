@@ -105,5 +105,3 @@ for persona in topics:
             )
 
         at_least_one_news_per_topic_personas[persona["entity_name"]] = topic_profile
-
-# breakpoint()

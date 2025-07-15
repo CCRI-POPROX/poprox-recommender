@@ -4,7 +4,8 @@ from dataclasses import dataclass
 import torch as th
 
 from poprox_concepts import CandidateSet, Click, InterestProfile
-from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder, NRMSUserEmbedderConfig
+from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedderConfig
+from poprox_recommender.components.embedders.user import NRMSSingleVectorUserEmbedder
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
 
@@ -16,7 +17,7 @@ class UserArticleFeedbackConfig(NRMSUserEmbedderConfig):
     feedback_type: bool | None = None
 
 
-class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
+class UserArticleFeedbackEmbedder(NRMSSingleVectorUserEmbedder):
     config: UserArticleFeedbackConfig  # type: ignore
 
     article_embedder: NRMSArticleEmbedder
@@ -46,18 +47,14 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
 
             logger.info(f"{len(filtered_feedback)} filtered article feedbacks of type {self.config.feedback_type}")
 
-            # Make a list of the articles with feedback and embed them
-            feedbacked_articles = [
-                article for article in interacted_articles.articles if article.article_id in filtered_feedback.keys()
-            ]
+            # Turn the whole interacted article into them into a UUID -> embedding dictionary
+            embedding_lookup = {}
 
-            embedded_feedbacked_articles = self.article_embedder(CandidateSet(articles=feedbacked_articles))
-
-            # Turn the list of embedded articles into a UUID -> embedding dictionary
-            embedding_lookup = {
-                article.article_id: embedding
-                for article, embedding in zip(feedbacked_articles, embedded_feedbacked_articles.embeddings)
-            }
+            for article, article_vector in zip(
+                interacted_articles.articles, interacted_articles.embeddings, strict=True
+            ):
+                if article.article_id not in embedding_lookup:
+                    embedding_lookup[article.article_id] = article_vector
 
             # Turn the dictionary of embedded articles into a list of clicks
             feedback_clicks = [Click(article_id=article_id) for article_id in embedding_lookup.keys()]
@@ -69,6 +66,7 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
 
                 interest_profile.click_history = feedback_clicks
 
+                # The function will filter out the embedding only for click_histoty eventually no need for double filtering
                 interest_profile.embedding = self.build_user_embedding(feedback_clicks, embedding_lookup)
             else:
                 interest_profile.embedding = None
@@ -83,6 +81,8 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
 
         article_ids = ["PADDED_NEWS"] * padded_positions + article_ids
         default = article_embeddings["PADDED_NEWS"]
+
+        # filtering out the necessary embedding-> clicked articles
         clicked_article_embeddings = [
             article_embeddings.get(clicked_article, default).squeeze().to(self.config.device)
             for clicked_article in article_ids

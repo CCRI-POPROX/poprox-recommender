@@ -5,21 +5,16 @@ from lenskit.pipeline import PipelineBuilder
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
-from poprox_recommender.components.embedders.explicit_topical_pref import (
+from poprox_recommender.components.embedders.fm_style_topic_pref import (
     UserExplicitTopicalEmbedder,
     UserExplicitTopicalEmbedderConfig,
-)
-from poprox_recommender.components.embedders.implicit_topical_pref import (
     UserImplicitTopicalEmbedder,
     UserImplicitTopicalEmbedderConfig,
-)
-from poprox_recommender.components.embedders.multiple_users import (
-    NRMSMultipleUserEmbedder,
-    NRMSMultipleUserEmbedderConfig,
 )
 from poprox_recommender.components.embedders.topic_infused_article import (
     FMStyleArticleEmbedder,
 )
+from poprox_recommender.components.embedders.user import NRMSMultiVectorUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.components.joiners.feature_combiner import FeatureCombiner
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.scorers.fm import FMScorer
@@ -44,15 +39,13 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Embed the user
-    ue_config = NRMSMultipleUserEmbedderConfig(
-        model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device=device
-    )
+    ue_config = NRMSUserEmbedderConfig(model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device=device)
     e_user_history = builder.add_component(
         "user-embedder",
-        NRMSMultipleUserEmbedder,
+        NRMSMultiVectorUserEmbedder,
         ue_config,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 
@@ -66,7 +59,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         UserExplicitTopicalEmbedder,
         ue_config2,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 
@@ -80,7 +73,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         UserImplicitTopicalEmbedder,
         ue_config3,
         candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
+        interacted_articles=e_clicked,
         interest_profile=i_profile,
     )
 
@@ -88,7 +81,6 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     e_user_combined_interest_profile = builder.add_component(
         "user-combined-embedder",
         FeatureCombiner,
-        None,
         profiles_1=e_user_history,
         profiles_2=e_user_topic_explicit,
         profiles_3=e_user_topic_implicit,
