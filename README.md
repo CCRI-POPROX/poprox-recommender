@@ -68,7 +68,7 @@ The devcontainer automatically installs the development environment. If you want
 install the software, first install `uv` (see the [install instructions][uv-inst]), then run:
 
 ```console
-$ uv sync --extra cpu
+$ uv sync --group cpu
 Resolved 304 packages in 10ms
       Built poprox-recommender @ file:///Users/mde48/POPROX/poprox-recommender
       Built poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git@d0e27c90f6eddcc4f041e5d871ff4a13c2ec70f7
@@ -85,7 +85,7 @@ Installed 278 packages in 1.80s
 > install this, run:
 >
 > ```console
-> $ uv sync --extra cuda
+> $ uv sync --group cuda
 > ```
 
 The dev container also automatically activates the environment in its terminal.

@@ -33,9 +33,6 @@ dependencies = [
 
 [project.optional-dependencies]
 deploy = ["awslambdaric ~=2.2"]
-# declare extras for Torch install
-cpu = ["torch~=2.2"]
-cuda = ["torch~=2.2"]
 
 [project.urls]
 Homepage = "https://docs.poprox.ai"
@@ -84,32 +81,41 @@ data = [
   "zstandard ~=0.23",
   "wcmatch>=10.0",
 ]
+# declare extras for Torch install
+cpu = ["torch~=2.2"]
+cuda = ["torch~=2.2"]
 
 ## UV index setup for PyTorch
 [tool.uv]
-conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+conflicts = [[{ group = "cpu" }, { group = "cuda" }]]
+# theoretically, our indices should keep us from needing this, but unfortunately not
+index-strategy = "unsafe-first-match"
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cpu", extra = "cpu" },
-  { index = "pytorch-cu124", extra = "cuda" },
+  { index = "pytorch-cpu", group = "cpu" },
+  { index = "pytorch-cuda", group = "cuda" },
 ]
 # following can be uncommented when temporarily using a git checkout
 # lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
 
+# pre-release version of LensKit
 [[tool.uv.index]]
 name = "lenskit-dev"
 url = "https://pypi.lenskit.org/lenskit-dev/"
 
+# PyPI index providing CPU-only PyTorch *without* clobbering unrelated PyPI
+# packages.  Enabled by default, so we default to CPU-only Torch.
 [[tool.uv.index]]
 name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
+url = "https://pypi.lenskit.org/torch/cpu/"
 
+# PyPI index providing GPU-enabled PyTorch *without* clobbering unrelated PyPI
+# packages.  Also enabled (for transitive nvidia deps, "explicit" only works for
+# direct dependencies), but lower-priority than CPU.
 [[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
-explicit = true
+name = "pytorch-cuda"
+url = "https://pypi.lenskit.org/torch/cu128/"
 
 ###### build and environment configurations ######
 # basic hatch config
