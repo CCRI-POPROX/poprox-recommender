@@ -35,7 +35,7 @@ jobs:
 
       - name: 📦 Set up dependencies
         run: |
-          uv sync --extra=cpu --no-dev --group=eval
+          uv sync --group=cpu --no-dev --group=eval
           echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Fetch pipeline data
