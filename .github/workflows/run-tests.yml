@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
 
       - name: 📦 Set up dependencies
-        run: uv sync --no-default-groups --group=test --group=data --extra=cpu
+        run: uv sync --no-default-groups --group=test --group=data --group=cpu
 
       - name: Cache model data
         uses: actions/cache@v4

@@ -25,7 +25,7 @@ jobs:
 
       - name: 📦 Set up dependencies
         run: |
-          uv sync --extra=cpu --no-default-groups --group=data
+          uv sync --group=cpu --no-default-groups --group=data
           echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Configure sharing
