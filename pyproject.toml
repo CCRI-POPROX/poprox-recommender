@@ -88,6 +88,8 @@ cuda = ["torch~=2.2"]
 ## UV index setup for PyTorch
 [tool.uv]
 conflicts = [[{ group = "cpu" }, { group = "cuda" }]]
+# theoretically, our indices should keep us from needing this, but unfortunately not
+index-strategy = "unsafe-first-match"
 
 [tool.uv.sources]
 torch = [
@@ -109,10 +111,11 @@ name = "pytorch-cpu"
 url = "https://pypi.lenskit.org/torch/cpu/"
 
 # PyPI index providing GPU-enabled PyTorch *without* clobbering unrelated PyPI
-# packages.  Also enabled, but lower-priority than CPU to prefer that build.
+# packages.  Also enabled (for transitive nvidia deps, "explicit" only works for
+# direct dependencies), but lower-priority than CPU.
 [[tool.uv.index]]
 name = "pytorch-cuda"
-url = "https://pypi.lenskit.org/torch/cu128"
+url = "https://pypi.lenskit.org/torch/cu128/"
 
 ###### build and environment configurations ######
 # basic hatch config
