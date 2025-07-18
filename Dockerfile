@@ -17,7 +17,7 @@ ENV UV_PROJECT_ENVIRONMENT=/opt/poprox
 ENV UV_PYTHON=3.12
 ENV UV_LOCKED=TRUE
 RUN uv venv
-RUN uv sync --no-editable --no-default-groups --extra cpu --extra deploy
+RUN uv sync --no-editable --no-default-groups --group cpu --extra deploy
 
 FROM public.ecr.aws/lambda/provided:al2023
 ARG LOG_LEVEL=INFO

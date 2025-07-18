@@ -6,7 +6,7 @@ git config --global --add safe.directory $PWD
 
 # install the development environment
 uv venv
-uv sync --extra cpu
+uv sync --group cpu
 
 # get pre-commit wired up and ready
 uv run pre-commit install
