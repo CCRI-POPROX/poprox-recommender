@@ -6,7 +6,7 @@ from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user_topic_prefs import (
-    StaticDefinitionUserTopicEmbedder,
+    CandidateArticleUserTopicEmbedder,
     UserTopicEmbedderConfig,
 )
 from poprox_recommender.components.filters.topic import TopicFilter
@@ -41,7 +41,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
     e_user = builder.add_component(
         "user-embedder",
-        StaticDefinitionUserTopicEmbedder,
+        CandidateArticleUserTopicEmbedder,
         ue_config,
         candidate_articles=e_candidates,
         interacted_articles=e_clicked,

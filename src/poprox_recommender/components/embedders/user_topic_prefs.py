@@ -4,29 +4,32 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 import torch as th
+from safetensors import safe_open
 
 from poprox_concepts import Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSSingleVectorUserEmbedder
-from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
 
-TOPIC_ARTICLES = [
-    Article(
-        article_id=uuid4(),
-        headline=description,
-        subhead=None,
-        url=None,
-        preview_image_id=None,
-        published_at=datetime.now(timezone.utc),  # Set current time for simplicity
-        mentions=[],
-        source="topic",
-        external_id=topic,
-        raw_data={},
-    )
-    for topic, description in TOPIC_DESCRIPTIONS.items()
-]
+TOPIC_ARTICLES = []
+TOPIC_EMBEDDINGS = {}
+with safe_open(model_file_path("topic_embeddings_def.safetensors"), framework="pt", device="cpu") as f:
+    for topic_name in f.keys():
+        article = Article(
+            article_id=uuid4(),
+            headline="",
+            subhead=None,
+            url=None,
+            preview_image_id=None,
+            published_at=datetime.now(timezone.utc),  # Set current time for simplicity
+            mentions=[],
+            source="topic",
+            external_id=topic_name,
+            raw_data={},
+        )
+        TOPIC_ARTICLES.append(article)
+        TOPIC_EMBEDDINGS[article.article_id] = f.get_tensor(topic_name)
 
 
 def virtual_clicks(onboarding_topics, topic_articles):
@@ -92,7 +95,6 @@ class UserTopicEmbedder(NRMSSingleVectorUserEmbedder, ABC):
     config: UserTopicEmbedderConfig  # type: ignore
 
     article_embedder: NRMSArticleEmbedder
-    embedded_topic_articles: CandidateSet | None = None
 
     def __init__(self, config: UserTopicEmbedderConfig | None = None, **kwargs):
         super().__init__(config, **kwargs)
@@ -104,9 +106,6 @@ class UserTopicEmbedder(NRMSSingleVectorUserEmbedder, ABC):
     def __call__(
         self, candidate_articles: CandidateSet, interacted_articles: CandidateSet, interest_profile: InterestProfile
     ) -> InterestProfile:
-        if self.embedded_topic_articles is None:
-            self.embedded_topic_articles = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
-
         if self.config.topic_pref_values is not None:
             topic_clicks = virtual_pn_clicks(
                 interest_profile.onboarding_topics, TOPIC_ARTICLES, self.config.topic_pref_values
@@ -126,7 +125,7 @@ class UserTopicEmbedder(NRMSSingleVectorUserEmbedder, ABC):
             )
         else:
             raise ValueError(f"Unknown scorer_source value: {self.config.scorer_source}")
-
+        
         return self.update_interest_profile(
             interest_profile, topic_lookup, click_history, embedding_lookup, TOPIC_ARTICLES
         )
@@ -176,12 +175,13 @@ class UserTopicEmbedder(NRMSSingleVectorUserEmbedder, ABC):
 
     def build_embeddings_from_articles(self, articles: CandidateSet, topic_articles: list[Article]):
         topic_uuids_by_name = {article.external_id: article.article_id for article in topic_articles}
-
+        article_id_to_external = {v: k for k, v in topic_uuids_by_name.items()}
+        embedding_lookup = self.build_article_lookup(articles)
+        embedding_lookup["PADDED_NEWS"] = th.zeros([768], device=self.config.device)
+        
         topic_embeddings_by_uuid = {}
-        for topic_name in TOPIC_DESCRIPTIONS.keys():
-            embedding_lookup = self.build_article_lookup(articles)
-
-            embedding_lookup["PADDED_NEWS"] = th.zeros([768], device=self.config.device)
+        for topic_name in TOPIC_EMBEDDINGS.keys(): 
+            topic_name = article_id_to_external.get(topic_name)
             relevant_articles = self.find_topical_articles(topic_name, articles.articles)
             article_clicks = [Click(article_id=article.article_id) for article in relevant_articles]
 
@@ -193,6 +193,7 @@ class UserTopicEmbedder(NRMSSingleVectorUserEmbedder, ABC):
             if any(topic_embedding.squeeze() != embedding_lookup["PADDED_NEWS"]):
                 topic_uuid = topic_uuids_by_name[topic_name]
                 topic_embeddings_by_uuid[topic_uuid] = topic_embedding
+              
         return topic_embeddings_by_uuid
 
     def find_topical_articles(self, topic: str, articles: list[Article]) -> list[Article]:
@@ -204,13 +205,7 @@ class UserTopicEmbedder(NRMSSingleVectorUserEmbedder, ABC):
         return topical_articles
 
     def build_embeddings_from_definitions(self):
-        topic_article_set = self.article_embedder(CandidateSet(articles=TOPIC_ARTICLES))
-
-        topic_embeddings_by_uuid = {
-            article.article_id: embedding for article, embedding in zip(TOPIC_ARTICLES, topic_article_set.embeddings)
-        }
-
-        return topic_embeddings_by_uuid
+        return TOPIC_EMBEDDINGS
 
     def build_user_embedding(self, click_history: list[Click], article_embeddings):
         article_ids = [click.article_id for click in click_history][-self.config.max_clicks_per_user :]
@@ -274,6 +269,7 @@ class CandidateArticleUserTopicEmbedder(UserTopicEmbedder):
         embeddings_from_definitions = self.build_embeddings_from_definitions()
         embeddings_from_candidates = self.build_embeddings_from_articles(candidate_articles, TOPIC_ARTICLES)
         topic_embeddings_by_uuid = {**embeddings_from_definitions, **embeddings_from_candidates}
+        # breakpoint()
         return topic_embeddings_by_uuid
 
 
