@@ -3,13 +3,9 @@ Test basic request by initializing test data.
 """
 
 import logging
-import warnings
 
-from pydantic import ValidationError
-from pytest import mark, skip
+from pytest import mark
 
-from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationResponse
-from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.recommenders import discover_pipelines
 from poprox_recommender.testing import RequestGenerator, mind_data
 from poprox_recommender.testing import auto_service as service
@@ -41,10 +37,11 @@ def test_basic_request(service, mind_data, pipeline):  # noqa: F811
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     # do we have recommendations?
-    recs = response.recommendations.articles
+    sections = response.recommendations
+    recs = sections[0].recommendations.impressions
     assert len(recs) > 0
     # do we have the correct number of recommendations
     assert len(recs) == request_generator.num_recs
     # are all recommendations unique?
-    article_ids = [article.article_id for article in recs]
+    article_ids = [impression.article.article_id for impression in recs]
     assert len(article_ids) == len(set(article_ids))
