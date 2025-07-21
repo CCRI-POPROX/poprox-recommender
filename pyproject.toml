@@ -149,7 +149,7 @@ known-first-party = ["poprox_*"]
 ban-relative-imports = "all"
 
 [tool.pyright]
-exclude = [".venv/", ".pixi/", "node_modules"]
+exclude = [".venv/", ".pixi/", "node_modules/"]
 
 # Component's interface creates a lot of noise with this check
 reportIncompatibleMethodOverride = false
