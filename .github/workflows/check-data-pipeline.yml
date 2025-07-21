@@ -29,9 +29,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🕶️ Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: 3.12
+        uses: astral-sh/setup-uv@v6
 
       - name: 📦 Set up dependencies
         run: |
@@ -48,7 +46,7 @@ jobs:
 
       - name: Check pipeline status
         run: |
-          /bin/bash scripts/check-dvc-status.sh
+          ./scripts/check-dvc-status.sh
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'
@@ -62,7 +60,6 @@ jobs:
         run: |
           dvc repro -f measure-mind-subset@nrms
         env:
-          # POPROX_REC_DEVICE: mps
           LK_NUM_PROCS: 4
           LK_NUM_THREADS: 2
           LK_NUM_BACKEND_THREADS: 2

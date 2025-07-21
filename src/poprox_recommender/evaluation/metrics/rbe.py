@@ -18,7 +18,7 @@ def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.85, eval_da
         mentions = article.mentions
         if not mentions and eval_data is not None:
             if not mentions:
-                return np.NaN
+                return np.nan
 
         for mention in mentions:
             topic = mention.entity.name

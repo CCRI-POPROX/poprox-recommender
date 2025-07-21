@@ -23,12 +23,9 @@ jobs:
           fetch-depth: 0
 
       - name: 🕶️ Install uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v5
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version-file: ".python-version"
+          activate-environment: true
 
       - name: 📦 Set up dependencies
         run: uv sync --no-default-groups --group=data
@@ -45,9 +42,8 @@ jobs:
 
       - name: Fetch model data
         run: |
-          uv run dvc pull -r "$DVC_REMOTE" -R models
+          dvc pull -r "$DVC_REMOTE" -R models
         env:
-          UV_NO_SYNC: y
           # can change the remote name here if needed
           # external researchers: you can deploy from 'public' with our pre-trained models,
           # we don't do that to avoid dependency ordering problems in our infrastructure.

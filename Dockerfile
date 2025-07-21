@@ -6,7 +6,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 # Copy the soure code into the image to install it and create the environment
 # TODO do we want to copy the sdist or wheel instead?
-COPY pyproject.toml uv.lock README.md LICENSE.md .python-version /src/poprox-recommender/
+COPY pyproject.toml uv.lock README.md LICENSE.md /src/poprox-recommender/
 COPY src/ /src/poprox-recommender/src/
 WORKDIR /src/poprox-recommender
 RUN mkdir build

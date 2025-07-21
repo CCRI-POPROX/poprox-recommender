@@ -10,7 +10,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
 ]
-requires-python = ">= 3.12"
+requires-python = "~=3.12.0"
 readme = "README.md"
 license = { file = "LICENSE.md" }
 dynamic = ["version"]
@@ -21,14 +21,11 @@ dependencies = [
   "uvicorn~=0.34.0",
   "lenskit>=2025.3.0a4.dev145",
   "nltk>=3.8,<4",
-  "numpy>=1.26,<2",
   "torch~=2.2",
   "smart_open==7.*",
   "safetensors>=0.4,<1",
   "transformers[torch]>=4.41,<5",
-  "rich ~=13.9",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
-  "scikit-learn>=1.3,<2",
 ]
 
 [project.optional-dependencies]
@@ -152,7 +149,7 @@ known-first-party = ["poprox_*"]
 ban-relative-imports = "all"
 
 [tool.pyright]
-exclude = [".venv/", ".pixi/", "node_modules"]
+exclude = [".venv/", ".pixi/", "node_modules/"]
 
 # Component's interface creates a lot of noise with this check
 reportIncompatibleMethodOverride = false
