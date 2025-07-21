@@ -2,13 +2,16 @@ import torch
 from torch import nn
 from transformers import AutoConfig, AutoModel
 
+from poprox_recommender.paths import model_file_path
+
 from ..general.attention.additive import AdditiveAttention
 
 
 class NewsEncoder(torch.nn.Module):
-    def __init__(self, model_path, num_attention_heads, additive_attn_hidden_dim):
+    def __init__(self, model_name, num_attention_heads, additive_attn_hidden_dim):
         super(NewsEncoder, self).__init__()
 
+        model_path = model_file_path(model_name)
         self.plm_config = AutoConfig.from_pretrained(model_path, cache_dir="/tmp/")
         self.plm = AutoModel.from_config(self.plm_config)
         self.plm.requires_grad_(False)

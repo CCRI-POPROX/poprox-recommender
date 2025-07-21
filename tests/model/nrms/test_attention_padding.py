@@ -14,7 +14,7 @@ def test_masked_padding_with_real_model():
         checkpoint = load_file(model_file_path("nrms-mind/news_encoder.safetensors"))
         model_cfg = ModelConfig()
         news_encoder = NewsEncoder(
-            model_file_path("distilbert-base-uncased/"),
+            "distilbert-base-uncased",
             model_cfg.num_attention_heads,
             model_cfg.additive_attn_hidden_dim,
         )
