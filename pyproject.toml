@@ -21,14 +21,11 @@ dependencies = [
   "uvicorn~=0.34.0",
   "lenskit>=2025.3.0a4.dev145",
   "nltk>=3.8,<4",
-  "numpy>=1.26,<2",
   "torch~=2.2",
   "smart_open==7.*",
   "safetensors>=0.4,<1",
   "transformers[torch]>=4.41,<5",
-  "rich ~=13.9",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
-  "scikit-learn>=1.3,<2",
 ]
 
 [project.optional-dependencies]
