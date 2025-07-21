@@ -1,14 +1,10 @@
 vars:
   - pipelines:
       - nrms
-      - mmr
-      - pfar
       - softmax
-      - topic_cali
       - nrms_rrf_static_user
       - nrms_topic_scores
       - nrms_topics_static
-      - nrms_images
 
 stages:
   # these are *foreach stages*: they have multiple versions, one for each pipeline.
