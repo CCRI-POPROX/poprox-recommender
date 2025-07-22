@@ -52,10 +52,15 @@ class ParquetBatchedWriter:
     def write_frame(self, df: pd.DataFrame | pa.Table):
         if isinstance(df, pd.DataFrame):
             df = pa.Table.from_pandas(df)
+        if df.num_rows == 0:
+            logger.debug("%s: skipping empty frame", self.path)
+            return
 
         if self.writer is None:
             logger.info("opening output file %s", self.path)
             self.writer = ParquetWriter(fspath(self.path), df.schema, **self._writer_args)
+
+        logger.debug("%s: adding frame of %d rows", self.path, len(df))
 
         self._batch.append(df)
         self._batch_rows += df.num_rows
@@ -65,17 +70,18 @@ class ParquetBatchedWriter:
     def _write_batch(self, force: bool):
         assert self.writer is not None
 
-        if self._batch_rows < TARGET_BATCH_ROWS and not force:
+        if self._batch_rows == 0 or (self._batch_rows < TARGET_BATCH_ROWS and not force):
             return
 
         logger.debug("%s: writing batch of %d rows", self.path, self._batch_rows)
-        all_tbl = pa.concat_tables(self._batch)
+        all_tbl = pa.concat_tables(self._batch, promote_options="default")
         self.writer.write(all_tbl)
         self._batch = []
         self._batch_rows = 0
 
     def close(self):
         if self.writer is not None:
+            logger.info("closing output file %s", self.path)
             self._write_batch(force=True)
             self.writer.close()
             self.writer = None

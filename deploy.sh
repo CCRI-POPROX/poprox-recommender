@@ -20,4 +20,4 @@ echo "Region: $region"
 # uv run dvc pull -R models
 
 # Build container and deploy functions
-npx serverless deploy --stage "${env}" --region "${region}"
+npx serverless deploy --stage "${env}" --region "${region}" || exit 3

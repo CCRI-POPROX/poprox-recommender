@@ -1,0 +1,5 @@
+/recommendations.parquet
+/recommendations.ndjson.zst
+/embeddings.parquet
+/generate-task.json
+/profile-metrics.csv.gz

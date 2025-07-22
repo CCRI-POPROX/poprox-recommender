@@ -7,6 +7,44 @@ on:
   pull_request:
 
 jobs:
+  full-tests:
+    name: Run the PyTest tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🕶️ Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          activate-environment: true
+
+      - name: 📦 Set up dependencies
+        run: uv sync --no-default-groups --group=test --group=data --group=cpu
+
+      - name: Cache model data
+        uses: actions/cache@v4
+        with:
+          path: .dvc/cache
+          key: test-dvc-cache-${{ hashFiles('models/**.dvc') }}
+
+      - name: Fetch model and test data
+        run: ./scripts/fetch-shared-data.sh
+        env:
+          GH_EVT: ${{github.event_name}}
+          GH_REPO: ${{github.repository}}
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+
+      - name: Run tests
+        run: |
+          pytest -v tests
+        env:
+          POPROX_CI_WITHOUT_MIND: 1
+
   nodata-tests:
     name: Run the PyTest tests without model data
     runs-on: ubuntu-latest
@@ -18,9 +56,9 @@ jobs:
           fetch-depth: 0
 
       - name: 🕶️ Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.12"
+          activate-environment: true
 
       - name: 📦 Set up dependencies
         run: uv sync --no-default-groups --group=test --group=data

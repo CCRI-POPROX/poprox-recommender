@@ -87,6 +87,7 @@ celerybeat.pid
 # Environments
 .env
 .envrc
+*.local.toml
 .venv
 env/
 venv/

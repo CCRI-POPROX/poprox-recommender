@@ -125,3 +125,25 @@ def test_overlapped_articleset_avg():
     output_1 = fusion(candidates1=n_scorer, candidates2=n_scorer2)
 
     assert output_1.scores == [0.1, 0.3, 0.25]
+
+
+def test_positive_negative_score():
+    article1 = Article(headline="A")
+    article2 = Article(headline="B")
+    article3 = Article(headline="C")
+
+    article_list_1 = [article1, article2]
+    score_list_1 = [0.2, 0.3]
+
+    article_list_2 = [article2, article3]
+    score_list_2 = [0.3, 0.5]
+
+    n_scorer = CandidateSet(articles=article_list_1, scores=score_list_1)
+    n_scorer2 = CandidateSet(articles=article_list_2, scores=score_list_2)
+
+    config = ScoreFusionConfig(combiner="sub")
+    fusion = ScoreFusion(config)
+
+    output_1 = fusion(candidates1=n_scorer, candidates2=n_scorer2)
+
+    assert output_1.scores == [0.2, 0, -0.5]

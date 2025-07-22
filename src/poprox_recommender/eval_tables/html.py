@@ -27,14 +27,17 @@ def write_html(cols, rows, sys_label, scale):
                 file=out,
             )
 
-        w = SparkKDEImageWriter(row.kde, scale=scale)
-        w.begin(3)
-        w.point(np.mean(row.data))
-        w.render_kde()
-        w.end()
+        if row.kde is not None:
+            w = SparkKDEImageWriter(row.kde, scale=scale)
+            w.begin(3)
+            w.point(np.mean(row.data))
+            w.render_kde()
+            w.end()
 
-        ibs = w.get_content()
-        print('<td><img src="data:image/png;base64,{}"></td>'.format(b64encode(ibs).decode("ascii")), file=out)
+            ibs = w.get_content()
+            print('<td><img src="data:image/png;base64,{}"></td>'.format(b64encode(ibs).decode("ascii")), file=out)
+        else:
+            print("<td></td>", file=out)
 
         print("</tr>", file=out)
 
