@@ -87,7 +87,7 @@ TOPIC_DESCRIPTIONS = {
 TOPIC_ARTICLES = [
     Article(
         article_id=uuid4(),
-        headline=description,
+        headline=f"{topic}: {description}",
         subhead=None,
         url=None,
         preview_image_id=None,
