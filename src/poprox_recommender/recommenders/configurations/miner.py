@@ -12,7 +12,7 @@ from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.fill import FillRecs
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.samplers.uniform import UniformSampler
-from poprox_recommender.components.scorers.article import ArticleScorer
+from poprox_recommender.components.scorers.miner import MinerArticleScorer
 from poprox_recommender.paths import model_file_path
 
 
@@ -23,31 +23,31 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_profile = builder.create_input("profile", InterestProfile)
 
     # Embed candidate and clicked articles
-    ae_config = MinerArticleEmbedderConfig(
-        #change model path
-        model_path=model_file_path("distilbert-base-uncased/"), device=device
-    )
-    e_candidates = builder.add_component("candidate-embedder", MinerArticleEmbedder, ae_config, article_set=i_candidates)
-    e_clicked = builder.add_component(
-        #make sure this "history-MinerArticleEmbedder" is right
-        "history-MinerArticleEmbedder", MinerArticleEmbedder, ae_config, article_set=i_clicked
-    )
+    # ae_config = MinerArticleEmbedderConfig(
+    #     #change model path
+    #     model_path=model_file_path("distilbert-base-uncased/"), device=device
+    # )
+    # e_candidates = builder.add_component("candidate-embedder", MinerArticleEmbedder, ae_config, article_set=i_candidates)
+    # e_clicked = builder.add_component(
+    #     #make sure this "history-MinerArticleEmbedder" is right
+    #     "history-MinerArticleEmbedder", MinerArticleEmbedder, ae_config, article_set=i_clicked
+    # )
 
     # Embed the user
     #change model path
-    ue_config = MinerUserEmbedderConfig(model_path=model_file_path("miner/user_encoder.safetensors"), device=device)
-    e_user = builder.add_component(
-        "user-embedder",
-        MinerUserEmbedder,
-        ue_config,
-        candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
-        interest_profile=i_profile,
-    )
+    # ue_config = MinerUserEmbedderConfig(model_path=model_file_path("miner/user_encoder.safetensors"), device=device)
+    # e_user = builder.add_component(
+    #     "user-embedder",
+    #     MinerUserEmbedder,
+    #     ue_config,
+    #     candidate_articles=e_candidates,
+    #     clicked_articles=e_clicked,
+    #     interest_profile=i_profile,
+    # )
 
     # Score and rank articles
-    n_scorer = builder.add_component("scorer", ArticleScorer, candidate_articles=e_candidates, interest_profile=e_user)
-    n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
+    miner_scorer = builder.add_component("scorer", MinerArticleScorer, candidate_articles=i_candidates, clicked_articles=i_clicked, interest_profile=i_profile)
+    n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=miner_scorer)
 
     # Fallback: sample from user topic interests
     n_topic_filter = builder.add_component(
