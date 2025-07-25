@@ -80,17 +80,7 @@ class NRMSArticleEmbedder(Component):
         if uncached:
             logger.debug("need to embed %d of %d articles", len(uncached), len(cached))
             # Step 3: tokenize the uncached articles
-            uc_title_tokens = th.stack(
-                [
-                    th.tensor(
-                        self.tokenizer.encode(
-                            article.headline, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
-                        ),
-                        dtype=th.int32,
-                    ).to(self.config.device)
-                    for article in uncached
-                ]
-            )
+            uc_title_tokens = self._tokenize_articles(uncached)
             assert_tensor_size(uc_title_tokens, len(uncached), TITLE_LENGTH_LIMIT, label="uncached title tokens")
 
             # Step 4: embed the uncached articles
@@ -124,6 +114,19 @@ class NRMSArticleEmbedder(Component):
         article_set.embeddings = embed_tensor  # type: ignore
 
         return article_set
+
+    def _tokenize_articles(self, uncached):
+        return th.stack(
+                [
+                    th.tensor(
+                        self.tokenizer.encode(
+                            article.headline, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
+                        ),
+                        dtype=th.int32,
+                    ).to(self.config.device)
+                    for article in uncached
+                ]
+            )
 
 
 class EmbeddingCopier(Component):

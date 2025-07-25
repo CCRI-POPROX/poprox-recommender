@@ -3,8 +3,8 @@
 from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts import CandidateSet, InterestProfile
-from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
+from poprox_recommender.components.embedders.article_topic import NRMSArticleTopicEmbedder
 from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.joiners.score import ScoreFusion
@@ -27,9 +27,11 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     ae_config = NRMSArticleEmbedderConfig(
         model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
     )
-    e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=i_candidates)
+    e_candidates = builder.add_component(
+        "candidate-embedder", NRMSArticleTopicEmbedder, ae_config, article_set=i_candidates
+    )
     e_clicked = builder.add_component(
-        "history-NRMSArticleEmbedder", NRMSArticleEmbedder, ae_config, article_set=i_clicked
+        "history-NRMSArticleEmbedder", NRMSArticleTopicEmbedder, ae_config, article_set=i_clicked
     )
 
     # Embed the user (historical clicks)
