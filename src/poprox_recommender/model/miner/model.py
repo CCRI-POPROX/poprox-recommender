@@ -5,8 +5,8 @@ from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as torch_f
 
-from news_encoder import NewsEncoder
-from utils import pairwise_cosine_similarity
+from .news_encoder import NewsEncoder
+from .utils import pairwise_cosine_similarity
 
 
 class Miner(nn.Module):
