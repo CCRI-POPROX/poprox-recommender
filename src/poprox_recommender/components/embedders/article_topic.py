@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class NRMSArticleTopicEmbedder(NRMSArticleEmbedder):
-
     def _tokenize_articles(self, articles):
         tokenized = [
             th.tensor(
@@ -17,7 +16,7 @@ class NRMSArticleTopicEmbedder(NRMSArticleEmbedder):
                     f"{', '.join([mention.entity.name for mention in article.mentions])}: {article.headline}",
                     padding="max_length",
                     max_length=TITLE_LENGTH_LIMIT,
-                    truncation=True
+                    truncation=True,
                 ),
                 dtype=th.int32,
             ).to(self.config.device)

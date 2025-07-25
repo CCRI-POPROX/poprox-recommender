@@ -117,16 +117,16 @@ class NRMSArticleEmbedder(Component):
 
     def _tokenize_articles(self, uncached):
         return th.stack(
-                [
-                    th.tensor(
-                        self.tokenizer.encode(
-                            article.headline, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
-                        ),
-                        dtype=th.int32,
-                    ).to(self.config.device)
-                    for article in uncached
-                ]
-            )
+            [
+                th.tensor(
+                    self.tokenizer.encode(
+                        article.headline, padding="max_length", max_length=TITLE_LENGTH_LIMIT, truncation=True
+                    ),
+                    dtype=th.int32,
+                ).to(self.config.device)
+                for article in uncached
+            ]
+        )
 
 
 class EmbeddingCopier(Component):
