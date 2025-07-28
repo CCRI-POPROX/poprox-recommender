@@ -13,7 +13,7 @@ WORKDIR /src/poprox-recommender
 ENV UV_PROJECT_ENVIRONMENT=${LAMBDA_TASK_ROOT}
 ENV UV_PYTHON=3.12
 ENV UV_LOCKED=TRUE
-RUN uv sync --no-editable --no-default-groups --extra cpu --extra deploy --extra s3
+RUN uv sync --no-editable --no-dev --extra cpu --extra deploy --extra s3
 # Install the local package properly
 RUN uv pip install --system .
 
