@@ -21,10 +21,9 @@ dependencies = [
   "uvicorn~=0.34.0",
   "lenskit>=2025.3.0a4.dev145",
   "nltk>=3.8,<4",
-  "torch~=2.2",
   "smart_open==7.*",
   "safetensors>=0.4,<1",
-  "transformers[torch]>=4.41,<5",
+  "transformers>=4.41,<5",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
   "openai>=1.76.0",
   "python-dotenv>=1.1.0",
@@ -87,10 +86,6 @@ conflicts = [[{ group = "cpu" }, { group = "cuda" }]]
 index-strategy = "unsafe-first-match"
 
 [tool.uv.sources]
-torch = [
-  { index = "pytorch-cpu", group = "cpu" },
-  { index = "pytorch-cuda", group = "cuda" },
-]
 # following can be uncommented when temporarily using a git checkout
 # lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
 
