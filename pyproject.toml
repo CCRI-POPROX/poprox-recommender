@@ -42,6 +42,7 @@ test = [
   "requests >=2.31,<3",
   "coverage >=6.5",
   "pytest >=8",
+  "pytest-benchmark >=5",
   "scikit-learn>=1.3,<2",
 ]
 eval = [
@@ -166,3 +167,6 @@ tests = ["tests"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+
+[tool.pytest.ini_options]
+addopts = "--benchmark-skip"
