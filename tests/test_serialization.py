@@ -12,6 +12,7 @@ import orjson
 import zstandard
 from humanize import naturalsize
 from pytest import fixture, mark
+from rich import box
 from rich.console import Console
 from rich.table import Table
 
@@ -67,7 +68,7 @@ def test_orjson_basic(basic_request, benchmark):
     benchmark(serialize)
 
 
-@mark.benchmark(group="basic")
+@mark.benchmark(group="embeddings")
 def test_orjson(enhanced_request, benchmark):
     def serialize():
         _serialized_req = orjson.dumps(enhanced_request, option=orjson.OPT_SERIALIZE_NUMPY | orjson.OPT_NON_STR_KEYS)
@@ -75,7 +76,7 @@ def test_orjson(enhanced_request, benchmark):
     benchmark(serialize)
 
 
-@mark.benchmark(group="basic")
+@mark.benchmark(group="embeddings")
 def test_orjson_gzip(enhanced_request, benchmark):
     def serialize():
         serialized_req = orjson.dumps(enhanced_request, option=orjson.OPT_SERIALIZE_NUMPY | orjson.OPT_NON_STR_KEYS)
@@ -84,7 +85,7 @@ def test_orjson_gzip(enhanced_request, benchmark):
     benchmark(serialize)
 
 
-@mark.benchmark(group="basic")
+@mark.benchmark(group="embeddings")
 def test_orjson_zstd(enhanced_request, benchmark):
     def serialize():
         serialized_req = orjson.dumps(enhanced_request, option=orjson.OPT_SERIALIZE_NUMPY | orjson.OPT_NON_STR_KEYS)
@@ -103,7 +104,7 @@ def dump_size_versions():
     er_gzip = gzip.compress(er_json)
     er_zstd = zstandard.compress(er_json, level=1)
 
-    table = Table("Method", "Size", "Increase", title="Serialization Sizes")
+    table = Table("Method", "Size", "Increase", title="Serialization Sizes", box=box.ASCII2)
 
     table.add_row("Baseline", naturalsize(len(br_json)))
     table.add_section()
