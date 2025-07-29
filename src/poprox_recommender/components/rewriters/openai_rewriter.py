@@ -40,11 +40,10 @@ class LLMRewriter(Component):
         with open("prompts/rewrite.md", "r") as f:
             prompt = f.read()
 
-        client = openai.AsyncOpenAI(api_key=self.config.openai_api_key)
         rewriter_metrics = []
 
         # rewrite article headlines in parallel
-        async def rewrite_article(art):
+        async def rewrite_article(art, client):
             # build prompt using the user_model from LLMRanker
             input_txt = f"""User interest profile:
 {user_model}
@@ -65,27 +64,28 @@ Article text:
                 text_format=LlmResponse,
             )
             end_time = time.time()
-            
+
             rewriter_metrics.append({
                 "article_id": str(art.article_id),
                 "input_tokens": response.usage.input_tokens,
                 "output_tokens": response.usage.output_tokens,
                 "duration_seconds": end_time - start_time,
             })
-            
+
             # Update the article headline with the rewritten one
             art.headline = response.output_parsed.headline
 
         async def rewrite_all():
-            tasks = [rewrite_article(art) for art in recommendations.articles]
-            await asyncio.gather(*tasks)
+            async with openai.AsyncOpenAI(api_key=self.config.openai_api_key) as client:
+                tasks = [rewrite_article(art, client) for art in recommendations.articles]
+                await asyncio.gather(*tasks)
 
         asyncio.run(rewrite_all())
 
         # Persist pipeline data after rewriting is complete
         try:
             persistence = get_persistence_manager()
-            
+
             # Combine all metrics
             combined_metrics = {
                 "pipeline_type": "llm_rank_rewrite",
@@ -95,7 +95,7 @@ Article text:
                     "rewriter": rewriter_metrics,
                 }
             }
-            
+
             session_id = persistence.save_pipeline_data(
                 request_id=request_id,
                 user_model=user_model,
