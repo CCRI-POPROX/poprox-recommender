@@ -2,6 +2,7 @@ import asyncio
 import copy
 import logging
 import os
+import time
 
 import openai
 from dotenv import load_dotenv
@@ -30,8 +31,8 @@ class LLMRewriterConfig(BaseModel):
 class LLMRewriter(Component):
     config: LLMRewriterConfig
 
-    def __call__(self, ranker_output: tuple[RecommendationList, str, str]) -> RecommendationList:
-        recommendations, user_model, request_id = ranker_output
+    def __call__(self, ranker_output: tuple[RecommendationList, str, str, dict]) -> RecommendationList:
+        recommendations, user_model, request_id, ranker_metrics = ranker_output
 
         # Create a deep copy of the original recommendations for persistence
         original_recommendations = RecommendationList(articles=copy.deepcopy(recommendations.articles))
@@ -40,6 +41,7 @@ class LLMRewriter(Component):
             prompt = f.read()
 
         client = openai.AsyncOpenAI(api_key=self.config.openai_api_key)
+        rewriter_metrics = []
 
         # rewrite article headlines in parallel
         async def rewrite_article(art):
@@ -54,6 +56,7 @@ Article text:
 {art.body}
 """
 
+            start_time = time.time()
             response = await client.responses.parse(
                 model=self.config.model,
                 instructions=prompt,
@@ -61,6 +64,15 @@ Article text:
                 temperature=0.5,
                 text_format=LlmResponse,
             )
+            end_time = time.time()
+            
+            rewriter_metrics.append({
+                "article_id": str(art.article_id),
+                "input_tokens": response.usage.input_tokens,
+                "output_tokens": response.usage.output_tokens,
+                "duration_seconds": end_time - start_time,
+            })
+            
             # Update the article headline with the rewritten one
             art.headline = response.output_parsed.headline
 
@@ -73,15 +85,23 @@ Article text:
         # Persist pipeline data after rewriting is complete
         try:
             persistence = get_persistence_manager()
+            
+            # Combine all metrics
+            combined_metrics = {
+                "pipeline_type": "llm_rank_rewrite",
+                "rewriter_model": self.config.model,
+                "llm_metrics": {
+                    "ranker": ranker_metrics,
+                    "rewriter": rewriter_metrics,
+                }
+            }
+            
             session_id = persistence.save_pipeline_data(
                 request_id=request_id,
                 user_model=user_model,
                 original_recommendations=original_recommendations,
                 rewritten_recommendations=recommendations,
-                metadata={
-                    "pipeline_type": "llm_rank_rewrite",
-                    "rewriter_model": self.config.model,
-                },
+                metadata=combined_metrics,
             )
             logging.info(f"Pipeline data saved with session_id: {session_id}")
         except Exception as e:
