@@ -33,6 +33,13 @@ def warmup(response: Response):
     return list(available_recommenders.keys())
 
 
+@app.get("/embed")
+def embed(response: Response):
+    # TODO: Move the code from the test that computes embeddings into this route
+    # dict[UUID, dict[str, embedding]]
+    return {}
+
+
 @app.post("/")
 def root(
     body: Annotated[dict[str, Any], Body()],
