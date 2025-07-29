@@ -60,5 +60,5 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # # Combinei primary ranker and fallback
     # builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
-    
+
     builder.add_component("recommender", TopkRanker, {"num_slots": num_slots}, candidate_articles=n_scorer)
