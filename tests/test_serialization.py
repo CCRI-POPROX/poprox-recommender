@@ -60,6 +60,15 @@ def test_pydantic_basic(basic_request, benchmark):
 
 
 @mark.benchmark(group="basic")
+def test_pydantic_basic_gzip(basic_request, benchmark):
+    def serialize():
+        serialized_req = basic_request.model_dump_json()
+        _gzip_req = gzip.compress(serialized_req.encode("utf-8"))
+
+    benchmark(serialize)
+
+
+@mark.benchmark(group="basic")
 def test_orjson_basic(basic_request, benchmark):
     def serialize():
         br = basic_request.model_dump()
