@@ -12,7 +12,12 @@ def intralist_similarity(final_recs: CandidateSet, k: int):
 
     if n <= 1:
         return 1.0
-    similarity_matrix = cosine_similarity(top_k_embeddings.cpu().numpy())
+    if hasattr(top_k_embeddings, "cpu"):
+        embeddings_np = top_k_embeddings.cpu().numpy()
+    else:
+        embeddings_np = np.asarray(top_k_embeddings)
+
+    similarity_matrix = cosine_similarity(embeddings_np)
     intralist_similarity_score = np.sum(np.triu(similarity_matrix, 1)) / (n * (n - 1) / 2)
 
     return float(intralist_similarity_score)
