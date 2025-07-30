@@ -27,7 +27,6 @@ def load_embeddings_cache():
         try:
             possible_paths = [
                 "outputs/mind-subset/nrms_topic_scores/embeddings.parquet",  # This one works
-                "outputs/mind-subset/nrms_topic_mmr/embeddings.parquet",
                 "outputs/mind-subset/embeddings.parquet",
             ]
 
