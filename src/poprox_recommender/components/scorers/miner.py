@@ -11,6 +11,10 @@ from poprox_recommender.model.miner.model import Miner
 from poprox_recommender.model.miner.news_encoder import NewsEncoder
 from transformers import RobertaConfig
 
+from safetensors.torch import load_model
+from transformers import RobertaConfig
+
+
 @dataclass
 class MinerArticleScorerConfig:
     model_path: PathLike
@@ -21,32 +25,21 @@ class MinerArticleScorer(Component):
     config: MinerArticleScorerConfig
 
     def __init__(self, config: MinerArticleScorerConfig | None = None, **kwargs):
-        super().__init__(config, **kwargs)
-        checkpoint = load_file(self.config.model_path)
+    #     super().__init__(config, **kwargs)
+    #     checkpoint = load_file(self.config.model_path)
 
-        roberta_config = RobertaConfig.from_pretrained("FacebookAI/roberta-base")
+        config = RobertaConfig.from_pretrained("FacebookAI/roberta-base")
 
-        newsEncoder = NewsEncoder(roberta_config,
-    apply_reduce_dim: bool,
-    use_sapo: bool,
-    dropout: float,
-    freeze_transformer: bool,)
+        news_encoder = NewsEncoder.from_pretrained("FacebookAI/roberta-base", config=config,
+            apply_reduce_dim=True, use_sapo=True,
+            dropout=0.2, freeze_transformer=True,
+            word_embed_dim=256, combine_type="linear")
 
-        self.model = Miner(newsEncoder,
-    use_category_bias: bool,
-    num_context_codes: int,
-    context_code_dim: int,
-    score_type: str,
-    dropout: float,
-    num_category: int | None = None,
-    category_embed_dim: int | None = None,
-    category_pad_token_id: int | None = None,
-    category_embed: Any | None = None)
+        model = Miner(news_encoder=news_encoder, use_category_bias=False, num_context_codes=32, context_code_dim=200, score_type="weighted", dropout=0.2)
 
-        #model_cfg = ModelConfig()
-        #self.user_encoder = UserEncoder(model_cfg.hidden_size, model_cfg.num_attention_heads)
-        #self.user_encoder.load_state_dict(checkpoint)
-        #self.user_encoder.to(self.config.device)
+        print("Loading model weights...")
+        loaded = load_model(model, "miner_2025-07-18.safetensors")
+        print("Done")
 
     @torch_inference
     def __call__(self, candidate_articles: CandidateSet, clicked_articles: CandidateSet, interest_profile: InterestProfile, ) -> CandidateSet:
