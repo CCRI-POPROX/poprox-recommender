@@ -128,8 +128,8 @@ def generate_user_recs(data: EvalData, pipe_names: list[str] | None = None, n_us
 
     timer = Stopwatch()
     with make_progress(logger, "recommend", total=data.n_profiles * 4) as pb:
-        for request in user_iter:  # one by one
-            logger.debug("recommending for user %s", request.interest_profile.profile_id)
+        for (request), newsletter_id in user_iter:  # one by one
+            logger.info("recommending for user %s", request.interest_profile.profile_id)
             if request.num_recs != TEST_REC_COUNT:
                 logger.warn(
                     "request for %s had unexpected recommendation count %d",
@@ -150,6 +150,8 @@ def generate_user_recs(data: EvalData, pipe_names: list[str] | None = None, n_us
                 user_df = extract_recs(name, request, outputs)
                 user_df["recommender"] = pd.Categorical(user_df["recommender"], categories=pipe_names)
                 user_df["stage"] = pd.Categorical(user_df["stage"].astype("category"), categories=STAGES)
+                user_df["profile_id"] = str(request.interest_profile.profile_id)
+                user_df["newsletter_id"] = str(newsletter_id)
                 user_recs.append(user_df)
             pb.update()
 

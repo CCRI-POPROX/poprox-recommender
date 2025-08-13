@@ -79,8 +79,8 @@ def _finish_worker():
         return None
 
 
-def _generate_for_request(request: RecommendationRequestV2) -> UUID | None:
-    return _generate_for_hyperparamter_request((request, (None, None)))
+def _generate_for_request(request: Tuple[RecommendationRequestV2, str]) -> UUID | None:
+    return _generate_for_hyperparamter_request((request[0], (None, None), request[1]))
 
 
 def _generate_for_hyperparamter_request_threshold(
@@ -144,12 +144,13 @@ def _generate_for_hyperparamter_request_threshold(
 
 
 def _generate_for_hyperparamter_request(
-    request_with_thetas: Tuple[RecommendationRequestV2, Tuple[float | None, float | None]],
+    request_with_thetas: Tuple[RecommendationRequestV2, Tuple[float | None, float | None], str],
 ) -> UUID | None:
     global _emb_seen
 
     request = request_with_thetas[0]
     thetas = request_with_thetas[1]
+    newsletter_id = request_with_thetas[2]
 
     logger.debug("recommending for profile %s", request.interest_profile.profile_id)
     if request.num_recs != TEST_REC_COUNT:
@@ -188,6 +189,7 @@ def _generate_for_hyperparamter_request(
         rec_df["similarity_threshold"] = ContextGeneratorConfig().similarity_threshold
         rec_df["theta_topic"] = thetas[0]
         rec_df["theta_locality"] = thetas[1]
+        rec_df["newsletter_id"] = newsletter_id
         _worker_out.rec_writer.write_frame(rec_df)
 
         # find any embeddings not yet written

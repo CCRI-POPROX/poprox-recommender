@@ -172,7 +172,7 @@ class ContextGeneratorConfig(BaseModel):
 class ContextGenerator(Component):
     config: ContextGeneratorConfig
 
-    def __init__(self, time_decay=True, is_gpt_live=True):
+    def __init__(self, time_decay=True, is_gpt_live=False):
         self.time_decay = time_decay
         self.is_gpt_live = is_gpt_live
 

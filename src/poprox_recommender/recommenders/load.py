@@ -106,4 +106,5 @@ def load_all_pipelines(device: str | None = None, num_slots: int = 10) -> dict[s
     logger.debug("loading all pipelines")
 
     names = discover_pipelines()
+    logger.info("discovered pipelines", count=len(names), names=names)
     return {n: get_pipeline(n, device, num_slots) for n in names}
