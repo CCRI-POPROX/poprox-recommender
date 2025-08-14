@@ -306,9 +306,7 @@ def load_poprox_frames(archive: str = "POPROX", start_date: datetime | None = No
     data = project_root() / "data"
     logger.info("loading POPROX data from %s", archive)
 
-    newsletters_df = pd.read_parquet(
-        data / "POPROX" / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1" / "newsletters_20250717-194301.parquet"
-    )
+    newsletters_df = pd.read_parquet(data / archive / "newsletters.parquet")
     newsletters_df["created_at_date"] = pd.to_datetime(newsletters_df["created_at"])
 
     if start_date:
@@ -318,49 +316,17 @@ def load_poprox_frames(archive: str = "POPROX", start_date: datetime | None = No
         logger.info("loading newsleters before %s", end_date)
         newsletters_df = newsletters_df[newsletters_df["created_at_date"] < end_date]
 
-    articles_df = pd.read_parquet(
-        data
-        / "POPROX"
-        / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1"
-        / "candidate"
-        / "articles_20250717-194309.parquet"
-    )
-    mentions_df = pd.read_parquet(
-        data
-        / "POPROX"
-        / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1"
-        / "candidate"
-        / "article_mentions_20250717-194310.parquet"
-    )
+    articles_df = pd.read_parquet(data / archive / "candidate" / "articles.parquet")
+    mentions_df = pd.read_parquet(data / archive / "candidate" / "article_mentions.parquet")
 
-    clicks_df = pd.read_parquet(
-        data / "POPROX" / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1" / "clicks_20250717-194312.parquet"
-    )
-    clicked_articles_df = pd.read_parquet(
-        data
-        / "POPROX"
-        / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1"
-        / "clicked"
-        / "articles_20250717-194314.parquet"
-    )
-    clicked_mentions_df = pd.read_parquet(
-        data
-        / "POPROX"
-        / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1"
-        / "clicked"
-        / "article_mentions_20250717-194315.parquet"
-    )
+    clicks_df = pd.read_parquet(data / archive / "clicks.parquet")
+    clicked_articles_df = pd.read_parquet(data / archive / "clicked" / "articles.parquet")
+    clicked_mentions_df = pd.read_parquet(data / archive / "clicked" / "article_mentions.parquet")
 
-    interests_df = pd.read_parquet(
-        data / "POPROX" / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1" / "interests_20250717-194159.parquet"
-    )
+    interests_df = pd.read_parquet(data / archive / "interests.parquet")
 
-    experiment_df = pd.read_parquet(
-        data / "POPROX" / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1" / "experiment_20250717-194157.parquet"
-    )
-    assignments_df = pd.read_parquet(
-        data / "POPROX" / "experiment-0fc61eca-fca7-4914-9ea0-bc29ed2e0ad1" / "assignments_20250717-194157.parquet"
-    )
+    experiment_df = pd.read_parquet(data / archive / "experiment.parquet")
+    assignments_df = pd.read_parquet(data / archive / "assignments.parquet")
 
     return (
         articles_df,
