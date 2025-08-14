@@ -207,25 +207,26 @@ class PoproxData(EvalData):
             profile_clicks_df = self.clicks_df.loc[self.clicks_df["profile_id"] == profile_id]
             logger.info(profile_clicks_df.columns)
             filtered_clicks_df = profile_clicks_df[profile_clicks_df["clicked_at"] < newsletter_created_at]
-            if len(filtered_clicks_df) == 0:
-                logger.warning(f"No clicks for profile {profile_id} before newsletter {newsletter_id}")
-                continue
+            # if len(filtered_clicks_df) == 0:
+            #     logger.warning(f"No clicks for profile {profile_id} before newsletter {newsletter_id}")
+            #     continue
 
             # Create Article and Click objects from dataframe rows
             clicks = []
             past_articles = []
-            for article_row in filtered_clicks_df.itertuples():
-                article = self.lookup_clicked_article(article_row.article_id)
-                if article:
-                    past_articles.append(article)
+            if len(filtered_clicks_df) > 0:
+                for article_row in filtered_clicks_df.itertuples():
+                    article = self.lookup_clicked_article(article_row.article_id)
+                    if article:
+                        past_articles.append(article)
 
-                    clicks.append(
-                        Click(
-                            article_id=article_row.article_id,
-                            newsletter_id=article_row.newsletter_id,
-                            timestamp=article_row.clicked_at,
+                        clicks.append(
+                            Click(
+                                article_id=article_row.article_id,
+                                newsletter_id=article_row.newsletter_id,
+                                timestamp=article_row.clicked_at,
+                            )
                         )
-                    )
 
             interests = self.interests_df.loc[self.interests_df["account_id"] == profile_id]
             topics = []
