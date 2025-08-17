@@ -106,7 +106,7 @@ url = "https://pypi.lenskit.org/torch/cpu/"
 # direct dependencies), but lower-priority than CPU.
 [[tool.uv.index]]
 name = "pytorch-cuda"
-url = "https://pypi.lenskit.org/torch/cu128/"
+url = "https://download.pytorch.org/whl/cu121"
 
 ###### build and environment configurations ######
 # basic hatch config

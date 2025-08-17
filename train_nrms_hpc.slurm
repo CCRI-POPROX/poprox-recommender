@@ -26,10 +26,6 @@ echo "Job ID: $SLURM_JOB_ID"
 echo "Running on node: $SLURM_NODELIST"
 echo "GPU: $CUDA_VISIBLE_DEVICES"
 
-# Install CUDA-enabled PyTorch if not already installed
-echo "Installing CUDA-enabled PyTorch..."
-uv pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-
 echo "CUDA available: $(uv run python -c 'import torch; print(torch.cuda.is_available())')"
 echo "CUDA device count: $(uv run python -c 'import torch; print(torch.cuda.device_count())')"
 
