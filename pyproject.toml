@@ -29,6 +29,7 @@ dependencies = [
   "python-dotenv>=1.1.0",
   "pydantic>=2.7.4",
   "scikit-learn>=1.6.1",
+  "accelerate>=0.26.0",
 ]
 
 [project.optional-dependencies]
