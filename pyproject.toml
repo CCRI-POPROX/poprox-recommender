@@ -75,9 +75,9 @@ data = [
 ]
 
 # ---- Choose your Torch build at sync time (exactly one) ----
-torch-cpu = ["torch==2.8.*+cpu"]
+torch-cpu = ["torch==2.8.0+cpu"]
 # If you really want CUDA 12.8 wheels (as your previous error shows):
-torch-cuda = ["torch==2.8.*+cu128"]
+torch-cuda = ["torch==2.8.0+cu128"]
 
 ## UV resolver/setup for PyTorch
 [tool.uv]
@@ -86,8 +86,8 @@ conflicts = [[{ group = "torch-cpu" }, { group = "torch-cuda" }]]
 # Use default index strategy (do NOT set unsafe-first-match)
 
 [tool.uv.sources]
-# Default Torch index is CPU-only; CUDA is only used when requested explicitly
-torch = { index = "pytorch-cpu" }
+# Use CUDA index for torch when available
+torch = { index = "pytorch-cuda" }
 
 # pre-release version of LensKit
 [[tool.uv.index]]
