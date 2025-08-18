@@ -31,6 +31,6 @@ echo "CUDA device count: $(uv run python -c 'import torch; print(torch.cuda.devi
 
 # Run the training
 cd models
-uv run python -m poprox_recommender.training.train --load_checkpoint=True
+uv run python -m poprox_recommender.training.train
 
 echo "Training completed at $(date)"
