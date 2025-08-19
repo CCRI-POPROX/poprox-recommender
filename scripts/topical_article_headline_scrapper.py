@@ -45,6 +45,7 @@ def unique_topic_mentions(article):
             out.append(name)
     return out
 
+
 # fetching article and mention data
 data = project_root() / "data" / "Test"
 articles_df = pd.read_parquet(data / "articles.parquet")
