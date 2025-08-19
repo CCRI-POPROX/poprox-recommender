@@ -83,7 +83,7 @@ topic_names = set()
 for article in candidate_article:
     for mention in article.get("mentions", []):
         entity = mention.get("entity")
-        topic_names.add(entity["name"])   #considering all the available topics in the candidate articles
+        topic_names.add(entity["name"])  # considering all the available topics in the candidate articles
 topic_to_idx = {t: i for i, t in enumerate(topic_names)}
 
 
