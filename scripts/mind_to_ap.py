@@ -17,4 +17,3 @@
 # 3. union with support (if multiple articles (>K) have that topic)
 # 4. union with weighted support (how close the article to the topic or frequency)
 # 5. curate the corpass with numbers topics
-
