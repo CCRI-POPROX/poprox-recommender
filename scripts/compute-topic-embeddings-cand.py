@@ -78,11 +78,12 @@ candidate_article = [a.model_dump(mode="json", exclude_none=True) for a in candi
 # breakpoint()
 
 topic_names = set()
+# topic_names = TOPIC_DESCRIPTIONS.keys()
 
 for article in candidate_article:
     for mention in article.get("mentions", []):
         entity = mention.get("entity")
-        topic_names.add(entity["name"])
+        topic_names.add(entity["name"])   #considering all the available topics in the candidate articles
 topic_to_idx = {t: i for i, t in enumerate(topic_names)}
 
 

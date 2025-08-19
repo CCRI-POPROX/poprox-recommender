@@ -9,6 +9,10 @@ def init_weights(m: nn.Module) -> None:
             nn.init.zeros_(m.bias)
 
 
+# TODO: 1. remove the last Linear layer
+# 2. add input to the forward ---> tensor in: (batch_size, hidden_dim, 1)
+
+
 class AdditiveAttention(nn.Module):
     def __init__(self, input_dim: int, hidden_dim: int) -> None:
         super().__init__()
@@ -25,7 +29,9 @@ class AdditiveAttention(nn.Module):
         self.attention.apply(init_weights)
 
     def forward(
-        self, input: torch.Tensor, padding_mask: torch.Tensor | None = None
+        self,
+        input: torch.Tensor,
+        padding_mask: torch.Tensor | None = None,  # no of article and dim of tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         softmax_input = self.attention(input)
 
