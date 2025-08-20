@@ -1,20 +1,17 @@
 import logging
 import os
+from io import BytesIO
 from typing import Annotated, Any
-import numpy as np
-import torch
+
 import clip
-import requests
 import numpy as np
+import requests
 import structlog
 import torch
-import clip
-from PIL import Image
-import requests
-from io import BytesIO
 from fastapi import Body, FastAPI
 from fastapi.responses import ORJSONResponse, Response
 from mangum import Mangum
+from PIL import Image
 
 from poprox_concepts import Article
 from poprox_concepts.api.recommendations.v3 import ProtocolModelV3_0, RecommendationRequestV3, RecommendationResponseV3
@@ -34,6 +31,7 @@ logger = logging.getLogger(__name__)
 _clip_model = None
 _clip_preprocess = None
 
+
 def get_clip_model():
     """Get cached CLIP model or load it if not cached"""
     global _clip_model, _clip_preprocess
@@ -44,18 +42,19 @@ def get_clip_model():
         logger.info("CLIP model loaded successfully")
     return _clip_model, _clip_preprocess
 
+
 def generate_clip_embedding(image):
-    """Generate CLIP embedding for a single image """
+    """Generate CLIP embedding for a single image"""
     model, preprocess = get_clip_model()
     device = default_device()
 
     # Download and process image
-    if not (hasattr(image, 'url') and image.url):
+    if not (hasattr(image, "url") and image.url):
         raise ValueError(f"No URL found for image {image.image_id}")
 
     response = requests.get(image.url, timeout=10)
     response.raise_for_status()
-    pil_image = Image.open(BytesIO(response.content)).convert('RGB')
+    pil_image = Image.open(BytesIO(response.content)).convert("RGB")
 
     # Preprocess and encode
     image_tensor = preprocess(pil_image).unsqueeze(0).to(device)
@@ -70,6 +69,7 @@ def generate_clip_embedding(image):
     logger.debug(f"Generated embedding of dimension {len(embedding)} for image {image.image_id}")
 
     return embedding
+
 
 @app.get("/warmup")
 def warmup(response: Response):
@@ -88,13 +88,14 @@ def warmup(response: Response):
 
     return list(available_recommenders.keys())
 
+
 # Article -> dict[UUID, dict[str, np.array]]
 @app.post("/embed")
 def embed(
     body: Annotated[dict[str, Any], Body()],
     pipeline: str | None = None,
 ):
-    logger.info(f"Embedding request received")
+    logger.info("Embedding request received")
 
     article = Article.model_validate(body)
     embeddings = {}
@@ -112,6 +113,7 @@ def embed(
 
     logger.info(f"Generated embeddings for {len(embeddings)} images")
     return ORJSONResponse(embeddings)
+
 
 @app.post("/")
 def root(
@@ -155,6 +157,7 @@ def root(
 
     logger.info(f"Response body: {resp_body}")
     return resp_body.model_dump()
+
 
 handler = Mangum(app)
 

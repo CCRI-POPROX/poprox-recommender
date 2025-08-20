@@ -72,7 +72,6 @@ class GenericImageSelector(Component):
 
         return user_embedding
 
-
     def _select_best_image(self, image_embeddings: torch.Tensor, user_embedding: torch.Tensor, images: list):
         """Select the best image using cosine similarity."""
         if len(images) == 0:
