@@ -32,7 +32,7 @@ dependencies = [
   "rich ~=13.9",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
   "scikit-learn>=1.3,<2",
-  "clip-by-openai~=1.0",
+  "clip @ git+https://github.com/openai/CLIP.git",
 ]
 
 [project.optional-dependencies]
