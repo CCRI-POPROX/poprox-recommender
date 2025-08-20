@@ -1,10 +1,13 @@
+from uuid import UUID
+
+import numpy as np
 from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedderConfig
-from poprox_recommender.components.filters.image_selector_clip import ClipImageSelector
+from poprox_recommender.components.filters.image_selector_clip import GenericImageSelector
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.fill import FillRecs
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -18,6 +21,8 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_candidates = builder.create_input("candidate", CandidateSet)
     i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
+    # Pre-computed embeddings from V3 API
+    embedding_lookup_table = builder.create_input("embedding_lookup", dict[UUID, dict[str, np.ndarray]])
 
     # Embed candidate and clicked articles
     ae_config = NRMSArticleEmbedderConfig(
@@ -52,12 +57,13 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     # Combine primary ranker and fallback
     n_fill = builder.add_component("fill", FillRecs, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_sampler)
 
-    # Image selection
-    image_selector = ClipImageSelector(device="cpu")
+    # Image selection with pre-computed embeddings
+    # Final output component that selects personalized images
     builder.add_component(
         "recommender",
-        image_selector,
+        GenericImageSelector,
         recommendations=n_fill,
         interest_profile=e_user,
         interacted_articles=i_clicked,
+        embedding_lookup=embedding_lookup_table,
     )

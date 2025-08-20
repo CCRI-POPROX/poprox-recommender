@@ -1,70 +1,70 @@
 import logging
-from io import BytesIO
+from uuid import UUID
 
-import requests
+import numpy as np
 import torch
-from PIL import Image as PILImage
-from torchvision import transforms
-from transformers import CLIPModel, CLIPProcessor
+from lenskit import Component
 
 from poprox_concepts.domain import CandidateSet, InterestProfile, RecommendationList
 
 logger = logging.getLogger(__name__)
 
 
-class ClipImageSelector:
-    def __init__(self, model_name: str = "openai/clip-vit-base-patch32", device: str = "cpu"):
-        self.model_name = model_name
-        self.device = device
-        self.clip_model = CLIPModel.from_pretrained(model_name).vision_model.to(device)
-        self.processor = CLIPProcessor.from_pretrained(model_name, use_fast=True)
-        self.transform = transforms.Compose(
-            [
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26130258, 0.26130258, 0.27577711]
-                ),
-            ]
-        )
-        self.dim = 768
+class GenericImageSelector(Component):
+    config: None
 
     def __call__(
         self,
         recommendations: RecommendationList,
         interest_profile: InterestProfile,
         interacted_articles: CandidateSet,
-        **kwargs,
+        embedding_lookup: dict[UUID, dict[str, np.ndarray]],
+        **kwargs: object,
     ) -> RecommendationList:
-        # Generate user embedding from clicked article images
-        clip_user_embedding = self._generate_user_embedding(interacted_articles)
+        # Generating user embedding from clicked article images (only preview images)
+        clip_user_embedding = self._generate_user_embedding(interacted_articles, embedding_lookup)
         if clip_user_embedding is None:
             logger.warning("No valid user embedding generated. Skipping image selection.")
             return recommendations
 
-        # Embed images for each article in the recommendation list and select the best one
+        # Selecting best image for each article in the recommendation list
         for article in recommendations.articles:
             if not article.images:
                 continue
 
-            image_urls = [img.url for img in article.images if img.url]
-            if not image_urls:
-                continue
+            # Get valid embeddings and corresponding images
+            valid_embeddings = []
+            valid_images = []
 
-            # Embed images and select the best one based on dot product with user embedding
-            image_embeddings = self.embed_images(image_urls)
-            if image_embeddings is not None:
-                best_image = self._select_best_image(image_embeddings, clip_user_embedding, article.images)
+            for img in article.images:
+                if img.image_id and img.image_id in embedding_lookup:
+                    if "image" in embedding_lookup[img.image_id]:
+                        embedding_data = embedding_lookup[img.image_id]["image"]
+
+                        # Convert to tensor - ensuring it's always 1D
+                        if isinstance(embedding_data, (list, np.ndarray)) and len(embedding_data) > 0:
+                            embedding_tensor = torch.tensor(embedding_data, dtype=torch.float32).flatten()
+
+                            # Checking if embedding is not all zeros
+                            if torch.sum(torch.abs(embedding_tensor)) > 0:
+                                valid_embeddings.append(embedding_tensor)
+                                valid_images.append(img)
+
+            # Only proceed if we have valid embeddings
+            if valid_embeddings:
+                image_embeddings = torch.stack(valid_embeddings)  # Shape: [n_images, embedding_dim]
+                best_image = self._select_best_image(image_embeddings, clip_user_embedding, valid_images)
                 if best_image:
                     article.preview_image_id = best_image.image_id
+                    logger.debug(f"Selected image {best_image.image_id} for article {article.article_id}")
 
-        # Store user embedding in interest profile
+        # Storing user embedding in interest profile
         interest_profile.embedding = clip_user_embedding
 
         return recommendations
 
-    def _generate_user_embedding(self, interacted_articles: CandidateSet) -> torch.Tensor:
-        """Generate user embedding by averaging embeddings of images from the last 50 clicked articles."""
+    def _generate_user_embedding(self, interacted_articles: CandidateSet, embedding_lookup) -> torch.Tensor:
+        """Generate user embedding by averaging embeddings of ONLY preview images from the last 50 clicked articles."""
         # Limit to the last 50 articles
         recent_articles = (
             interacted_articles.articles[-50:]
@@ -72,22 +72,29 @@ class ClipImageSelector:
             else interacted_articles.articles
         )
 
-        image_urls = []
+        # Get only valid preview image embeddings
+        valid_embeddings = []
+
         for article in recent_articles:
-            if article.images:
-                image_urls.extend([img.url for img in article.images if img.url])
+            if article.preview_image_id and article.preview_image_id in embedding_lookup:
+                if "image" in embedding_lookup[article.preview_image_id]:
+                    embedding_data = embedding_lookup[article.preview_image_id]["image"]
 
-        if not image_urls:
-            logger.warning("No valid image URLs found in the last 50 interacted articles.")
+                    # Converting to tensor - ensure it's always 1D
+                    if isinstance(embedding_data, (list, np.ndarray)) and len(embedding_data) > 0:
+                        embedding_tensor = torch.tensor(embedding_data, dtype=torch.float32).flatten()
+
+                        # Checking if embedding is not all zeros
+                        if torch.sum(torch.abs(embedding_tensor)) > 0:
+                            valid_embeddings.append(embedding_tensor)
+
+        if not valid_embeddings:
+            logger.warning("No valid preview image embeddings found in the interacted articles.")
             return None
 
-        # Embed images from clicked articles
-        image_embeddings = self.embed_images(image_urls)
-        if image_embeddings is None:
-            return None
-
-        # Average the embeddings to create user embedding
-        user_embedding = torch.mean(image_embeddings, dim=0)
+        # Averaging the embeddings to create user embedding - result is always 1D
+        user_embedding = torch.mean(torch.stack(valid_embeddings), dim=0)  # Shape: [embedding_dim]
+        logger.info(f"Generated user embedding from {len(valid_embeddings)} preview image embeddings")
         return user_embedding
 
     def _select_best_image(self, image_embeddings: torch.Tensor, user_embedding: torch.Tensor, images: list) -> any:
@@ -96,37 +103,17 @@ class ClipImageSelector:
             logger.error("Mismatch between image embeddings and images list.")
             return None
 
-        # Compute dot product scores
+        if image_embeddings.shape[0] == 0:
+            return None
+
+        # Simple dot product - both tensors are guaranteed to be the right shape
+        # image_embeddings: [n_images, embedding_dim]
+        # user_embedding: [embedding_dim]
+        # Result should be: [n_images]
         scores = torch.matmul(image_embeddings, user_embedding)
+
         best_index = torch.argmax(scores).item()
+        best_score = scores[best_index].item()
+
+        logger.debug(f"Selected image with score: {best_score:.4f}")
         return images[best_index]
-
-    def embed_images(self, image_urls: list) -> torch.Tensor:
-        """Generate CLIP embeddings for a list of image URLs."""
-        image_tensors = []
-        for url in image_urls:
-            img_tensor = self._load_image_from_url(url)
-            if img_tensor is not None:
-                image_tensors.append(img_tensor)
-
-        if not image_tensors:
-            logger.warning("No valid images loaded for embedding.")
-            return None
-
-        image_tensors = torch.stack(image_tensors).to(self.device)
-        with torch.no_grad():
-            image_features = self.clip_model(pixel_values=image_tensors).last_hidden_state
-            image_embeddings = image_features[:, 0, :]  # Use CLS token embedding
-
-        return image_embeddings
-
-    def _load_image_from_url(self, image_url: str) -> torch.Tensor:
-        """Load and preprocess an image from a URL."""
-        try:
-            response = requests.get(image_url, timeout=5)
-            response.raise_for_status()
-            img = PILImage.open(BytesIO(response.content)).convert("RGB")
-            return self.transform(img).to(self.device)
-        except Exception as e:
-            logger.warning(f"Could not download or process image {image_url}: {e}")
-            return None
