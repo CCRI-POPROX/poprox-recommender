@@ -1,6 +1,8 @@
 import logging
 from typing import Any
+from uuid import UUID
 
+import numpy as np
 from lenskit.pipeline import PipelineState
 
 from poprox_concepts import CandidateSet, InterestProfile
@@ -30,7 +32,8 @@ def select_articles(
     candidate_articles: CandidateSet,
     clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
-    pipeline_params: dict[str, Any] | None = None,
+    embedding_lookup: dict[UUID, dict[str, np.ndarray]],
+    pipeline_params: dict[str, Any] = {},
 ) -> PipelineState:
     """
     Select articles with default recommender configuration.  It returns a
@@ -52,4 +55,11 @@ def select_articles(
     else:
         wanted = (topk, recs)
 
-    return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
+    return pipeline.run_all(
+        *wanted,
+        candidate=candidate_articles,
+        clicked=clicked_articles,
+        profile=interest_profile,
+        embedding_lookup=embedding_lookup,
+        **pipeline_params,
+    )
