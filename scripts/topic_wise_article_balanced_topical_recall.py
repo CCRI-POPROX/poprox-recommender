@@ -76,9 +76,17 @@ def full_request_generator(persona_profile, interacted_articles_dict, candidate_
 
 
 def store_rec_recall_as_csv(sorted_persona_wise_rec_recall, pipeline, variation, def_pref):
-    csv_rows = [("Topic", "Avg_Precision", "Avg_Recall")]
+    csv_rows = [("Topic", "Precision", "Recall", "Topical_Count", "Candidate_Count")]
     for persona, values in sorted_persona_wise_rec_recall.items():
-        csv_rows.append((persona, f"{values['avg_precision']:.5f}", f"{values['avg_recall']:.5f}"))
+        csv_rows.append(
+            (
+                persona,
+                f"{values['precision']:.5f}",
+                f"{values['recall']:.5f}",
+                f"{values['topical_count']}",
+                f"{values['candidate_count']}",
+            )  # type: ignore  # noqa: E501
+        )
 
     with open(data / f"{pipeline}_{variation}_{def_pref}.csv", "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
@@ -234,7 +242,7 @@ def daily_persona_wise_recall_calculator(candidate_articles, persona_topic, resp
 
     recall = topical_count / candidate_count if candidate_count else float("nan")
     precision = topical_count / 10
-    return recall, precision
+    return recall, precision, topical_count, candidate_count
 
 
 def avg_persona_wise_rec_recall_over_days_calculator(persona_wise_rec_recall):
@@ -269,7 +277,7 @@ all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 # print(len(all_dates))
 
 history_dates = all_dates[-60:-30]
-cadidate_dates = all_dates[-30:]
+cadidate_dates = all_dates[-45:-30]
 
 
 # preparing interacted article
@@ -284,7 +292,7 @@ interacted_articles_dict = {a.article_id: a for a in interacted_articles}
 
 
 # preparing resulting dict
-persona_wise_rec_recall = defaultdict(lambda: {"daily_scores": []})
+persona_wise_rec_recall = {}
 
 
 # setting parameters for different condition
@@ -297,40 +305,55 @@ def_pref = 3
 # synthetic data generation
 synthetic_personas = synthetic_personas_generator(def_pref, variation, interacted_articles)
 
+
 # day to day caddidate article
+num_of_articles_topic_wise = defaultdict(int)
+balanced_by_topic = {t: [] for t in TOPIC_TO_UUID.keys()}
+balanced_candidate_articles = []
+
 for day in tqdm(cadidate_dates):
     day_df = articles_df[articles_df["published_at"].dt.normalize() == day]
 
     candidate_articles = []
+
     for row in day_df.itertuples():
         article = complete_article_generator(row, mentions_df)
         candidate_articles.append(article)
+        article_topics = {m.entity.name for m in article.mentions if m.entity is not None}
+        for entity in article_topics:
+            if entity in TOPIC_TO_UUID.keys():
+                num_of_articles_topic_wise[entity] += 1
+                if len(balanced_by_topic[entity]) < 20:
+                    balanced_by_topic[entity].append(article)
+                    balanced_candidate_articles.append(article)
 
-    if len(candidate_articles) < static_num_recs:
-        continue
-
-    # taking each persona and generating full recommendation request based on topical preference
-    # and interacted article as well as passing all the candidate articles for that day.
-    # finally passing the pipeline and generating recommendation response.
-    for persona_topic, persona_profile in synthetic_personas.items():
-        req = full_request_generator(persona_profile, interacted_articles_dict, candidate_articles, static_num_recs)
-
-        response = root(req.model_dump(), pipeline=pipeline)
-        response = RecommendationResponseV2.model_validate(response)
-        response = response.model_dump()
-
-        # calculating the daily recall and precision for each persona
-        recall, precision = daily_persona_wise_recall_calculator(candidate_articles, persona_topic, response)
-
-        persona_wise_rec_recall[persona_topic]["daily_scores"].append((day, precision, recall))
+# print(num_of_articles_topic_wise)
 
 
-# calculating persona wise avg recall over days
-avg_persona_wise_rec_recall = avg_persona_wise_rec_recall_over_days_calculator(persona_wise_rec_recall)
+# taking each persona and generating full recommendation request based on topical preference
+# and interacted article as well as passing all the candidate articles for that day.
+# finally passing the pipeline and generating recommendation response.
+for persona_topic, persona_profile in synthetic_personas.items():
+    req = full_request_generator(
+        persona_profile, interacted_articles_dict, balanced_candidate_articles, static_num_recs
+    )  # noqa: E501
+
+    response = root(req.model_dump(), pipeline=pipeline)
+    response = RecommendationResponseV2.model_validate(response)
+    response = response.model_dump()
+
+    # calculating the daily recall and precision for each persona
+    recall, precision, topical_count, candidate_count = daily_persona_wise_recall_calculator(
+        balanced_candidate_articles, persona_topic, response
+    )  # noqa: E501
+
+    persona_wise_rec_recall[persona_topic] = {
+        "precision": precision,
+        "recall": recall,
+        "topical_count": topical_count,
+        "candidate_count": candidate_count,
+    }
+
 
 # store result in CSV
-store_rec_recall_as_csv(avg_persona_wise_rec_recall, pipeline, variation, def_pref)
-
-
-# for persona, values in avg_persona_wise_rec_recall.items():
-#     print(f"\nTopic: {persona}|| Precision: {values["avg_precision"]:.5f}|| Recall: {values["avg_recall"]:.5f}")
+store_rec_recall_as_csv(persona_wise_rec_recall, pipeline, variation, def_pref)
