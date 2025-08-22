@@ -400,7 +400,9 @@ class PreLearnedCandidateArticleUserTopicEmbedder(UserTopicEmbedder):
         super().__init__(config, **kwargs)
 
         if not type(self).TOPIC_ARTICLES:
-            with safe_open(model_file_path("topic_embeddings_cand_30.safetensors"), framework="pt", device="cpu") as f:
+            with safe_open(
+                model_file_path("topic_embeddings_cand_15_15.safetensors"), framework="pt", device="cpu"
+            ) as f:
                 for topic_name in f.keys():
                     article = Article(
                         article_id=uuid4(),

@@ -55,7 +55,7 @@ mentions_df = pd.read_parquet(data / "mentions.parquet")
 all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 # print(len(all_dates))
 
-history_dates = all_dates[-60:-45]
+history_dates = all_dates[-60:-30]
 
 
 # preparing interacted article
