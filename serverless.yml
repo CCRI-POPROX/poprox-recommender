@@ -1,6 +1,6 @@
 useDotenv: true
 
-service: poprox-recommender-image-personalization
+service: poprox-rec-images-kluv
 frameworkVersion: "3"
 
 provider:
@@ -25,7 +25,7 @@ provider:
   ecr:
     # In this section you can define images that will be built locally and uploaded to ECR
     images:
-      poprox-recommender:
+      poprox-rec-images-kluv:
         path: "./"
         platform: linux/amd64
 
@@ -39,9 +39,9 @@ package:
     - "**.html"
 
 functions:
-  generateRecommendations:
+  generateImageRec:
     image:
-      name: poprox-recommender
+      name: poprox-rec-images-kluv
     memorySize: 4096
     ephemeralStorageSize: 2048
     events:
@@ -50,4 +50,7 @@ functions:
           method: get
       - httpApi:
           path: /
+          method: post
+      - httpApi:
+          path: /embed
           method: post

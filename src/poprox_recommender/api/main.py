@@ -1,9 +1,9 @@
-import logging
+import logging  # noqa: I001
 import os
 from io import BytesIO
 from typing import Annotated, Any
 
-import clip
+from transformers import CLIPModel, CLIPProcessor
 import numpy as np
 import requests
 import structlog
@@ -17,15 +17,19 @@ from poprox_concepts import Article
 from poprox_concepts.api.recommendations.v3 import ProtocolModelV3_0, RecommendationRequestV3, RecommendationResponseV3
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
+from poprox_recommender.paths import model_file_path
 from poprox_recommender.recommenders import load_all_pipelines, select_articles
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+
 app.router.route_class = GzipRoute
 
 logger = logging.getLogger(__name__)
+
 
 # Global CLIP model cache
 _clip_model = None
@@ -38,7 +42,10 @@ def get_clip_model():
     if _clip_model is None:
         device = default_device()
         logger.info(f"Loading CLIP model on device: {device}")
-        _clip_model, _clip_preprocess = clip.load("ViT-L/14", device=device)  # 768 dimensions
+        # _clip_model, _clip_preprocess = clip.load("ViT-L/14", device=device)
+        model_path = model_file_path("openai/clip-vit-base-patch32")  # 768 dimensions
+        _clip_model = CLIPModel.from_pretrained(model_path).vision_model.to(device)
+        _clip_preprocess = CLIPProcessor.from_pretrained(model_path, use_fast=True)
         logger.info("CLIP model loaded successfully")
     return _clip_model, _clip_preprocess
 
