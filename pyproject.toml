@@ -22,11 +22,10 @@ dependencies = [
   "lenskit>=2025.3.0a4.dev145",
   "nltk>=3.8,<4",
   "numpy>=1.26,<2",
-  "torch~=2.2",
   "smart_open==7.*",
   "safetensors>=0.4,<1",
   "transformers[torch]>=4.41,<5",
-  "torchvision",
+  # "torchvision",
   "pillow==10.3.0",
   "requests==2.31.0",
   "rich ~=13.9",
@@ -38,8 +37,8 @@ dependencies = [
 [project.optional-dependencies]
 deploy = ["awslambdaric ~=2.2"]
 # declare extras for Torch install
-cpu = ["torch~=2.2"]
-cuda = ["torch~=2.2"]
+cpu = ["torch~=2.2", "torchvision"]
+cuda = ["torch~=2.2", "torchvision"]
 
 [project.urls]
 Homepage = "https://docs.poprox.ai"
@@ -95,6 +94,10 @@ conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
 
 [tool.uv.sources]
 torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu124", extra = "cuda" },
+]
+torchvision = [
   { index = "pytorch-cpu", extra = "cpu" },
   { index = "pytorch-cu124", extra = "cuda" },
 ]
