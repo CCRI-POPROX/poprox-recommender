@@ -146,10 +146,10 @@ unfixable = [
 # tests can have unused imports (for pytest fixtures)
 "tests/**/*" = ["F401"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["poprox_*"]
 
-[tool.ruff.flake8-tidy-imports]
+[tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
 
 [tool.pyright]
