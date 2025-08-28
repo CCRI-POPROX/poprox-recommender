@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 class PersonaScorer(Component):
     """Score candidate articles based on user persona similarity."""
     
+    config: None
+    
     def __init__(self, alpha: float = 0.7, beta: float = 0.3):
         """
         Initialize PersonaScorer.

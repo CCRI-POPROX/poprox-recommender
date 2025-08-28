@@ -42,6 +42,8 @@ class UserPersonaConfig:
 
 class UserPersonaEmbedder(Component):
     """Generate user persona from click history and match with candidate articles."""
+    
+    config: UserPersonaConfig
 
     def __init__(self, config: UserPersonaConfig):
         super().__init__()
