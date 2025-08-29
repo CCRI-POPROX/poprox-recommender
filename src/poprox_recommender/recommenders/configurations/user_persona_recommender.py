@@ -23,10 +23,12 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         num_slots: Number of recommendations to return
         device: Device to run on ('cpu' or 'cuda')
     """
-    # Define pipeline inputs (same as other recommenders)
+    # Define pipeline inputs (extended for persona analysis)
     i_candidates = builder.create_input("candidate", CandidateSet)
     i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
+    # New input for historical newsletter data
+    i_historical = builder.create_input("historical_newsletters", CandidateSet, required=False)
 
     # Embed candidate articles using NRMS embedder (compatible with existing models)
     ae_config = NRMSArticleEmbedderConfig(
@@ -56,13 +58,30 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         persona_dimensions=128
     )
     
+    # Embed historical newsletter articles if provided
+    e_historical = None
+    if i_historical is not None:
+        e_historical = builder.add_component(
+            "historical-embedder",
+            NRMSArticleEmbedder,
+            ae_config,
+            article_set=i_historical
+        )
+
+    # Generate user persona from engagement and disengagement patterns
+    persona_inputs = {
+        "candidate_articles": e_candidates,
+        "clicked_articles": e_clicked,
+        "interest_profile": i_profile
+    }
+    if e_historical is not None:
+        persona_inputs["historical_newsletters"] = e_historical
+    
     e_persona = builder.add_component(
         "persona-embedder",
         UserPersonaEmbedder,
         persona_config,
-        candidate_articles=e_candidates,
-        clicked_articles=e_clicked,
-        interest_profile=i_profile
+        **persona_inputs
     )
 
     # Score articles based on persona similarity
