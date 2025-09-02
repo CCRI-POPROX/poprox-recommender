@@ -1,7 +1,7 @@
 ##TODO::
-1. save embeddings of AP article in a parquet file
+1. save article_id, headline, topics(all of the mentions instead of 14) and the embeddings of AP article in a parquet file
        a. pass the headline of article through news encoder to get the embedings ✅
-2. save embeddings of Mind article in a parquet file
+2. save article_id, headline and the embeddings of Mind article in a parquet file
        a. pass the headline of article through news encoder to get the embedings ✅
 3. for each Mind article,
        a. calculate it's distance with all the AP articles
@@ -16,3 +16,18 @@ how to assign topics???
     3. union with support (if multiple articles (>K) have that topic)
     4. union with weighted support (how close the article to the topic or frequency)
     5. curate the corpass with numbers topics
+
+
+Option #1: K= threshold or the cos_sim>=K
+AP news topics intersection onboardings topics -> Mind category
+AP news topics negation onboardings topics     -> Mind Subcategory
+
+
+Option #2:
+AP news topics intersection onboardings topics -> Mind category
+AP news topics for the closest aricle (only 1) negation onboardings topics -> Mind Subcategory
+
+
+Option #3:
+AP news topics intersection onboardings topics -> Mind category
+AP news topics negation onboardings topics. Map (HOW????) every subcatory to the article headline embeddings and pick the closest. -> Mind Subcategory
