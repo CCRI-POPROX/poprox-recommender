@@ -368,7 +368,7 @@ class PreLearnedStaticDefinitionUserTopicEmbedder(UserTopicEmbedder):
         super().__init__(config, **kwargs)
 
         if not type(self).TOPIC_ARTICLES:
-            with safe_open(model_file_path("topic_embeddings_def.safetensors"), framework="pt", device="cpu") as f:
+            with safe_open(model_file_path("topic_embeddings_def_llm.safetensors"), framework="pt", device="cpu") as f:
                 for topic_name in f.keys():
                     article = Article(
                         article_id=uuid4(),
@@ -401,7 +401,7 @@ class PreLearnedCandidateArticleUserTopicEmbedder(UserTopicEmbedder):
 
         if not type(self).TOPIC_ARTICLES:
             with safe_open(
-                model_file_path("topic_embeddings_cand_15_15.safetensors"), framework="pt", device="cpu"
+                model_file_path("topic_embeddings_cand_11_months.safetensors"), framework="pt", device="cpu"
             ) as f:
                 for topic_name in f.keys():
                     article = Article(

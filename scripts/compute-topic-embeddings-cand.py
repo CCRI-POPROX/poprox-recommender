@@ -53,7 +53,7 @@ set_seed(42)
 device = th.device("cuda" if th.cuda.is_available() else "cpu")
 
 # fetching article and mention data
-data = project_root() / "data" / "Test"
+data = project_root() / "data" / "Test_Large"
 articles_df = pd.read_parquet(data / "articles.parquet")
 mentions_df = pd.read_parquet(data / "mentions.parquet")
 
@@ -62,6 +62,9 @@ mentions_df = pd.read_parquet(data / "mentions.parquet")
 all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 # print(len(all_dates))
 
+# history_dates = all_dates[:-30]
+# history_dates = all_dates[-60:-30]
+# history_dates = all_dates[-45:-30]
 history_dates = all_dates[-60:-45]
 
 
@@ -168,4 +171,4 @@ article_embeddings_by_id: dict[str, th.Tensor] = {aid: article_emb[i].detach() f
 # breakpoint()
 
 # Write them to a safetensors file
-save_file(topic_embeddings_by_name, "topic_embeddings_cand_15_15.safetensors")
+save_file(topic_embeddings_by_name, "topic_embeddings_cand_15_15_days.safetensors")

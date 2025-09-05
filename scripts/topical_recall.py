@@ -75,12 +75,12 @@ def full_request_generator(persona_profile, interacted_articles_dict, candidate_
     return RecommendationRequestV2.model_validate(full_request)
 
 
-def store_rec_recall_as_csv(sorted_persona_wise_rec_recall, pipeline, variation, def_pref):
+def store_rec_recall_as_csv(sorted_persona_wise_rec_recall, variation, time_frame):
     csv_rows = [("Topic", "Avg_Precision", "Avg_Recall")]
     for persona, values in sorted_persona_wise_rec_recall.items():
         csv_rows.append((persona, f"{values['avg_precision']:.5f}", f"{values['avg_recall']:.5f}"))
 
-    with open(data / f"{pipeline}_{variation}_{def_pref}.csv", "w", newline="") as csvfile:
+    with open(data / f"{variation}_{time_frame}.csv", "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
 
@@ -256,7 +256,7 @@ def avg_persona_wise_rec_recall_over_days_calculator(persona_wise_rec_recall):
 
 
 # fetching article and mention data
-data = project_root() / "data" / "Test"
+data = project_root() / "data" / "Test_Large"
 articles_df = pd.read_parquet(data / "articles.parquet")
 mentions_df = pd.read_parquet(data / "mentions.parquet")
 
@@ -268,7 +268,7 @@ mentions_df = pd.read_parquet(data / "mentions.parquet")
 all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 # print(len(all_dates))
 
-history_dates = all_dates[-60:-30]
+history_dates = all_dates[:-30]
 cadidate_dates = all_dates[-30:]
 
 
@@ -290,9 +290,14 @@ persona_wise_rec_recall = defaultdict(lambda: {"daily_scores": []})
 # setting parameters for different condition
 static_num_recs = 10
 # topical_pref_only || clicked_topic_personas || topical_click_only
+
 variation = "topical_pref_only"
 pipeline = "nrms_topic_scores"
 def_pref = 3
+
+# topic_embeddings_cand_11_months || topic_embeddings_cand_15_15_days ||
+# topic_embeddings_cand_15_days   || topic_embeddings_cand_30_days
+time_frame = "topic_embeddings_def_llm"
 
 # synthetic data generation
 synthetic_personas = synthetic_personas_generator(def_pref, variation, interacted_articles)
@@ -329,8 +334,8 @@ for day in tqdm(cadidate_dates):
 avg_persona_wise_rec_recall = avg_persona_wise_rec_recall_over_days_calculator(persona_wise_rec_recall)
 
 # store result in CSV
-store_rec_recall_as_csv(avg_persona_wise_rec_recall, pipeline, variation, def_pref)
+store_rec_recall_as_csv(avg_persona_wise_rec_recall, variation, time_frame)
 
 
 # for persona, values in avg_persona_wise_rec_recall.items():
-#     print(f"\nTopic: {persona}|| Precision: {values["avg_precision"]:.5f}|| Recall: {values["avg_recall"]:.5f}")
+#     print(f"\nTopic: {persona}|| Precision: {values['avg_precision']:.5f}|| Recall: {values['avg_recall']:.5f}")
