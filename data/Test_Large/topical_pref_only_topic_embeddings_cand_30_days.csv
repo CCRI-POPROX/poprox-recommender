@@ -1,0 +1,15 @@
+Topic,Avg_Precision,Avg_Recall
+Business,0.52333,0.30614
+Climate and environment,0.20333,0.42432
+Education,0.05000,0.19686
+Entertainment,0.42333,0.54505
+Health,0.22000,0.42223
+Lifestyle,0.12000,0.43424
+Oddities,0.03667,0.34286
+Politics,0.60667,0.24051
+Religion,0.10333,0.30000
+Science,0.10333,0.32842
+Sports,0.81000,0.33295
+Technology,0.13667,0.35178
+U.S. news,0.54333,0.16405
+World news,0.80000,0.26989
