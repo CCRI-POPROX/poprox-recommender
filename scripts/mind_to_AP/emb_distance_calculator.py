@@ -11,8 +11,8 @@ from poprox_recommender.paths import model_file_path, project_root
 def sim_score(m_emb, a_emb):
     m_emb = th.as_tensor(m_emb, dtype=th.float32)
     a_emb = th.as_tensor(a_emb, dtype=th.float32)
-    m_emb = m_emb / m_emb.norm()
-    a_emb = a_emb / a_emb.norm()
+    # m_emb = m_emb / m_emb.norm()
+    # a_emb = a_emb / a_emb.norm()
     cos_sim = th.dot(m_emb, a_emb)
     return cos_sim.item()
 

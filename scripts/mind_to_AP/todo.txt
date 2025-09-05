@@ -31,3 +31,12 @@ AP news topics for the closest aricle (only 1) negation onboardings topics -> Mi
 Option #3:
 AP news topics intersection onboardings topics -> Mind category
 AP news topics negation onboardings topics. Map (HOW????) every subcatory to the article headline embeddings and pick the closest. -> Mind Subcategory
+
+
+#checking the union and intersection
+#vectorizing the data
+#use neighborhood sizes 3/5/7 -> how many topics we are getting for each neighborhood sizes?????
+#take some article, and look for what topics are getting for each thresshold and check relevence and sanity checking.
+#checking the topics of Mind and AP topics comparison (cross tabulation for Mind and AP, looking for correlation).
+#try out union first then intersection
+#make spreadsheet for union and intersection (for neighborhood size 3/5/7) maybe more too>>>>>>
