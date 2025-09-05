@@ -9,11 +9,14 @@ from __future__ import annotations
 
 import logging
 import zipfile
+from os import fspath
+from pathlib import Path
 from typing import Generator, cast
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 import numpy as np
 import pandas as pd
+from duckdb import DuckDBPyConnection
 
 from poprox_concepts import Article, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -183,3 +186,90 @@ def _read_zipped_tsv(zf: zipfile.ZipFile, name: str, columns: list[str]) -> pd.D
             usecols=range(len(columns)),
             names=columns,
         )
+
+
+def _raw_impressions(db: DuckDBPyConnection, archive: str):
+    """
+    Create a DuckDB view that will read from the raw impression table.
+    """
+    behavior = Path("data") / archive / "behaviors.tsv"
+    db.read_csv(
+        fspath(behavior),
+        header=False,
+        delimiter="\t",
+        columns={
+            "impression_id": "INTEGER",
+            "user_id": "VARCHAR",
+            "time": "VARCHAR",
+            "clicked_news": "VARCHAR",
+            "impression_news": "VARCHAR",
+        },
+    ).create_view("raw_impressions")
+
+
+def _transform_impressions(db: DuckDBPyConnection):
+    """
+    Transform the impressions from their raw form into a structured DuckDB
+    table.
+    """
+    # define the impression table. at this point, imp_articles will contain the
+    # impressed article IDs only, not their clicks!
+    db.execute(
+        """
+        CREATE TABLE impressions (
+            imp_id VARCHAR NOT NULL PRIMARY KEY,
+            user_id VARCHAR NOT NULL,
+            imp_time TIMESTAMP NOT NULL,
+            -- Julian day number for each impression to put in days.
+            imp_day INTEGER NOT NULL,
+            clicked_articles VARCHAR[] NOT NULL,
+            imp_articles VARCHAR[] NOT NULL,
+        )
+        """
+    )
+    # populate the impression table
+    db.execute(
+        """
+        INSERT INTO impressions (imp_id, user_id, imp_time, imp_day, clicked_articles, imp_articles)
+        SELECT
+            impression_id,
+            user_id,
+            strptime(time, '%m/%d/%Y %H:%M:%S %p'),
+            CAST(julian(strptime(time, '%m/%d/%Y %H:%M:%S %p')) AS INTEGER),
+            -- split apart news
+            string_split_regex(clicked_news, '\\s+'),
+            -- strip response signals + split apart impressed articles
+            string_split_regex(regexp_replace(impression_news, '-[01]', '', 'g'), '\\s+')
+        """
+    )
+
+
+def _extract_impressed_articles(db: DuckDBPyConnection):
+    """
+    Process the impression articles, extracting the first and last day in which
+    each was displayed.
+    """
+    # create a table of articles with first and last days, sorted for fast lookup.
+    db.execute(
+        """
+        CREATE TABLE impressed_articles AS
+        SELECT article_id, MIN(imp_day) AS first_day, MAX(imp_day) AS last_day
+        FROM (
+            SELECT UNNEST(imp_articles) AS article_id, imp_day
+            FROM impressions
+        )
+        GROUP BY article_id
+        ORDER BY first_day
+        """
+    )
+    # index the first and last day columns for fast lookup.
+    db.execute(
+        """
+        CREATE INDEX imp_article_first_idx ON impressed_articles (first_day)
+        """
+    )
+    db.execute(
+        """
+        CREATE INDEX imp_article_last_idx ON impressed_articles (last_day)
+        """
+    )
