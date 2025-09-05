@@ -2,11 +2,10 @@ stages:
   train-nrms-mind:
     cmd: python -m poprox_recommender.training.train
     deps:
-    - ../data/MINDlarge_dev
-    - ../data/MINDlarge_post_dev
-    - ../data/MINDlarge_post_test
-    - ../data/MINDlarge_post_train
-    - ../src/poprox_recommender/training/train.py
+      - ../data/MINDlarge_dev
+      - ../data/MINDlarge_post_dev
+      - ../data/MINDlarge_post_train
+      - ../src/poprox_recommender/training/train.py
     outs:
-    - nrms-mind
+      - nrms-mind
     frozen: true
