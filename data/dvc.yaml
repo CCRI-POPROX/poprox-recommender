@@ -2,7 +2,6 @@ stages:
   unzip:
     foreach:
       - MINDlarge_dev
-      - MINDlarge_test
       - MINDlarge_train
       - MINDsmall_dev
       - MINDsmall_train
@@ -19,8 +18,6 @@ stages:
       - ../src/poprox_recommender/training/preprocess.py
       - MINDlarge_train
       - MINDlarge_dev
-      - MINDlarge_test
     outs:
       - MINDlarge_post_train
       - MINDlarge_post_dev
-      - MINDlarge_post_test
