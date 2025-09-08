@@ -70,6 +70,8 @@ class MindData(EvalData):
         if not self.behavior_df.index.unique:
             logger.warning("behavior data has non-unique index")
 
+        self._open_behavior_db()
+
         # set up bidirectional maps for news IDs
         self.news_id_map = dict(zip(self.news_df["uuid"], self.news_df.index))
         self.news_id_rmap = dict(zip(self.news_df.index, self.news_df["uuid"]))
@@ -126,9 +128,12 @@ class MindData(EvalData):
     def iter_profiles(self) -> Generator[RecommendationRequest]:
         assert self.duck is not None
         # collect the with larger impression sets
-        self.duck.execute(
+        logger.info("querying for test articles")
+        rel = self.duck.query(
             """
-            SELECT imp_uuid, clicked_articles,
+            SELECT imp_uuid,
+                -- there will only be one unique clicked_articles, because imp_uuid is unique
+                COALESCE(ANY_VALUE(clicked_articles), []) AS clicked_articles,
                 array_agg(article_id) AS candidate_articles
             FROM impressions, impressed_articles
             WHERE first_day <= imp_day
@@ -138,7 +143,8 @@ class MindData(EvalData):
         )
 
         # loop over the results and yield the recommendations
-        while row := self.duck.fetchone():
+        logger.info("iterating test articles")
+        while row := rel.fetchone():
             imp_uuid, clicked, candidates = row
 
             # convert clicked articles into list
@@ -147,6 +153,7 @@ class MindData(EvalData):
 
             today = [self.lookup_article(id=aid) for aid in candidates]
 
+            # FIXME the profile ID should probably be the user ID
             profile = InterestProfile(profile_id=imp_uuid, click_history=clicks, onboarding_topics=[])
             yield RecommendationRequest(
                 todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
@@ -258,12 +265,12 @@ def _transform_impressions(db: DuckDBPyConnection):
         """
         CREATE TABLE impressions (
             imp_id VARCHAR NOT NULL PRIMARY KEY,
-            imp_uuid UUID NOT NULL,
+            imp_uuid UUID NOT NULL UNIQUE,
             user_id VARCHAR NOT NULL,
             imp_time TIMESTAMP NOT NULL,
             -- Julian day number for each impression to put in days.
             imp_day INTEGER NOT NULL,
-            clicked_articles VARCHAR[] NOT NULL,
+            clicked_articles VARCHAR[],
             imp_articles VARCHAR[] NOT NULL,
         )
         """
@@ -274,7 +281,7 @@ def _transform_impressions(db: DuckDBPyConnection):
         INSERT INTO impressions (imp_id, imp_uuid, user_id, imp_time, imp_day, clicked_articles, imp_articles)
         SELECT
             impression_id,
-            impression_uuid(impression_id)
+            impression_uuid(CAST(impression_id AS VARCHAR)),
             user_id,
             strptime(time, '%m/%d/%Y %H:%M:%S %p'),
             CAST(julian(strptime(time, '%m/%d/%Y %H:%M:%S %p')) AS INTEGER),
@@ -282,6 +289,7 @@ def _transform_impressions(db: DuckDBPyConnection):
             string_split_regex(clicked_news, '\\s+'),
             -- strip response signals + split apart impressed articles
             string_split_regex(regexp_replace(impression_news, '-[01]', '', 'g'), '\\s+')
+        FROM raw_impressions
         """
     )
 
