@@ -70,8 +70,6 @@ class MindData(EvalData):
         if not self.behavior_df.index.unique:
             logger.warning("behavior data has non-unique index")
 
-        self._open_behavior_db()
-
         # set up bidirectional maps for news IDs
         self.news_id_map = dict(zip(self.news_df["uuid"], self.news_df.index))
         self.news_id_rmap = dict(zip(self.news_df.index, self.news_df["uuid"]))
@@ -126,7 +124,10 @@ class MindData(EvalData):
         return truth
 
     def iter_profiles(self) -> Generator[RecommendationRequest]:
-        assert self.duck is not None
+        if self.duck is None:
+            self._open_behavior_db()
+            assert self.duck is not None
+
         # collect the with larger impression sets
         logger.info("querying for test articles")
         rel = self.duck.query(
