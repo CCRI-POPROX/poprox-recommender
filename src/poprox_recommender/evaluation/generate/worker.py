@@ -7,7 +7,7 @@ import torch
 from humanize import naturaldelta
 from lenskit.logging import Progress, Task, get_logger, item_progress
 from lenskit.parallel.config import ParallelConfig, get_parallel_config, subprocess_config
-from lenskit.parallel.ray import init_cluster
+from lenskit.parallel.ray import TaskLimiter, init_cluster
 from lenskit.pipeline import PipelineState
 
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -101,38 +101,21 @@ def cluster_recommend(
     ]
 
     rec_batch = dynamic_remote(recommend_batch)
+    limit = TaskLimiter(pc.processes)
 
-    tasks = []
     writes = []
-    for batch in it.batched(profiles, BATCH_SIZE):
-        # backpressure
-        while len(tasks) >= pc.processes:
-            logger.debug("waiting for workers to finish")
-            done, tasks = ray.wait(tasks)
-            # update # of finished items
-            for rh in done:
-                n, btask, bwrites = ray.get(rh)
-                pb.update(n)
-                task.add_subtask(btask)
-                writes += bwrites
+    for n, btask, bwrites in limit.imap(
+        lambda batch: rec_batch.remote(pipeline, batch, writers), it.batched(profiles, BATCH_SIZE)
+    ):
+        pb.update(n)
+        task.add_subtask(btask)
+        writes += bwrites
 
-        # clear pending writes
+        # wait for pending writes
         while len(writes) >= 50:
             done, writes = ray.wait(writes)
             for rh in done:
                 ray.get(rh)
-
-        tasks.append(rec_batch.remote(pipeline, batch, writers))
-
-    logger.debug("waiting for remaining actors")
-    while tasks:
-        done, tasks = ray.wait(tasks)
-        for rh in done:
-            for rh in done:
-                n, btask, bwrites = ray.get(rh)
-                pb.update(n)
-                task.add_subtask(btask)
-                writes += bwrites
 
     logger.debug("waiting for remaining writes")
     # clear pending writes
