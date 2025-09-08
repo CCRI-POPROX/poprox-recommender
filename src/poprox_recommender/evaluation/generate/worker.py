@@ -6,7 +6,7 @@ import ray
 import torch
 from humanize import naturaldelta
 from lenskit.logging import Progress, Task, get_logger, item_progress
-from lenskit.parallel.config import ParallelConfig, get_parallel_config
+from lenskit.parallel.config import ParallelConfig, get_parallel_config, subprocess_config
 from lenskit.parallel.ray import init_cluster
 from lenskit.pipeline import PipelineState
 
@@ -200,7 +200,8 @@ def dynamic_remote(task_or_actor):
     Dynamically configure the resource requirements of a task or actor based on
     CUDA availability and parallelism configuration.
     """
-    pc = get_parallel_config()
+    pc = subprocess_config()
+    logger.debug("worker parallel config: %s", pc)
     if torch.cuda.is_available():
         _cuda_props = torch.cuda.get_device_properties()
         # Let's take a wild guess that 20 MP units are enough per worker, so a
