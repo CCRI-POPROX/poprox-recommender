@@ -105,7 +105,7 @@ def cluster_recommend(
 
     writes = []
     for n, btask, bwrites in limit.imap(
-        lambda batch: rec_batch.remote(pipeline, batch, writers), it.batched(profiles, BATCH_SIZE)
+        lambda batch: rec_batch.remote(pipeline, batch, writers), it.batched(profiles, BATCH_SIZE), ordered=False
     ):
         pb.update(n)
         task.add_subtask(btask)
