@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Generator, cast
 from uuid import NAMESPACE_URL, UUID, uuid5
 
+import duckdb
+import duckdb.typing as dt
 import numpy as np
 import pandas as pd
 from duckdb import DuckDBPyConnection
@@ -25,6 +27,8 @@ from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
+NAMESPACE_ARTICLE = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
+NAMESPACE_IMPRESSION = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/impression/")
 
 
 class MindData(EvalData):
@@ -33,33 +37,44 @@ class MindData(EvalData):
     """
 
     name: str
+    "Name of the MIND dataset."
+    path: Path
+    "Path to the unzipped MIND dataset."
+    duck: DuckDBPyConnection | None = None
+    "DuckDB connection."
+
     news_df: pd.DataFrame
+    "Data frame of news articles."
     news_id_map: dict[UUID, str]
+    "Mapping from POPROX UUIDs to MIND article IDs."
     news_id_rmap: dict[str, UUID]
+    "Mapping from MIND article IDs to POPROX UUIDs."
     behavior_df: pd.DataFrame
+    "Data frame of interaction behavior."
     behavior_id_map: dict[UUID, str]
+    "Mapping from POPROX impression UUIDs to MIND article IDs."
 
     def __init__(self, archive: str = "MINDsmall_dev"):
         self.name = archive
-        news_df, behavior_df = load_mind_frames(archive)
+        self.path = project_root() / "data" / archive
+
+        news_df = self._load_news_df()
         # index data frames for quick lookup of users & articles
         self.news_df = news_df.set_index("id")
         if not self.news_df.index.unique:
             logger.warning("news data has non-unique index")
 
+        # TODO: only do this when we don't also load duck, or just use duck
+        behavior_df = self._load_behavior_df()
         self.behavior_df = behavior_df.set_index("impression_id")
         if not self.behavior_df.index.unique:
             logger.warning("behavior data has non-unique index")
 
-        # add and reverse-index the UUIDs
-        ns_article = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
-        self.news_df["uuid"] = [uuid5(ns_article, aid) for aid in self.news_df.index.values]
         # set up bidirectional maps for news IDs
         self.news_id_map = dict(zip(self.news_df["uuid"], self.news_df.index))
         self.news_id_rmap = dict(zip(self.news_df.index, self.news_df["uuid"]))
 
-        ns_impression = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/impression/")
-        self.behavior_df["uuid"] = [uuid5(ns_impression, str(iid)) for iid in self.behavior_df.index.values]
+        # set up quick mapping for behavior IDs
         self.behavior_id_map = dict(zip(self.behavior_df["uuid"], self.behavior_df.index))
 
     def news_id_for_uuid(self, uuid: UUID) -> str:
@@ -109,22 +124,30 @@ class MindData(EvalData):
         return truth
 
     def iter_profiles(self) -> Generator[RecommendationRequest]:
-        for row in self.behavior_df.itertuples():
-            clicked_ids: list[str] = row.clicked_news.split()  # type: ignore
-            cand_pairs: list[str] = row.impressions.split()  # type: ignore
+        assert self.duck is not None
+        # collect the with larger impression sets
+        self.duck.execute(
+            """
+            SELECT imp_uuid, clicked_articles,
+                array_agg(article_id) AS candidate_articles
+            FROM impressions, impressed_articles
+            WHERE first_day <= imp_day
+            AND last_day > imp_day - 7
+            GROUP BY imp_uuid
+            """
+        )
 
-            clicks = [Click(article_id=self.news_uuid_for_id(aid)) for aid in clicked_ids]
-            past = []
-            for aid in clicked_ids:
-                past.append(self.lookup_article(id=aid))
+        # loop over the results and yield the recommendations
+        while row := self.duck.fetchone():
+            imp_uuid, clicked, candidates = row
 
-            today = []
-            for pair in cand_pairs:
-                aid, _clicked = pair.split("-")
-                today.append(self.lookup_article(id=aid))
+            # convert clicked articles into list
+            clicks = [Click(article_id=self.news_uuid_for_id(aid)) for aid in clicked]
+            past = [self.lookup_article(id=aid) for aid in clicked]
 
-            clicks = [Click(article_id=self.news_uuid_for_id(aid)) for aid in clicked_ids]
-            profile = InterestProfile(profile_id=cast(UUID, row.uuid), click_history=clicks, onboarding_topics=[])
+            today = [self.lookup_article(id=aid) for aid in candidates]
+
+            profile = InterestProfile(profile_id=imp_uuid, click_history=clicks, onboarding_topics=[])
             yield RecommendationRequest(
                 todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
             )
@@ -149,25 +172,41 @@ class MindData(EvalData):
         )
         return article
 
+    def _load_news_df(self) -> pd.DataFrame:
+        logger.info("loading MIND news from %s", self.name)
 
-def load_mind_frames(archive: str = "MINDsmall_dev") -> tuple[pd.DataFrame, pd.DataFrame]:
-    data = project_root() / "data"
-    logger.info("loading MIND data from %s", archive)
-    with zipfile.ZipFile(data / f"{archive}.zip") as zf:
-        behavior_df = _read_zipped_tsv(
-            zf, "behaviors.tsv", ["impression_id", "user", "time", "clicked_news", "impressions"]
+        news_df = pd.read_table(
+            self.path / "news.tsv", header=None, usecols=range(4), names=["id", "category", "subcategory", "title"]
         )
-        size = behavior_df.memory_usage(deep=True).sum()
-        logger.info("loaded %d impressions from %s (%.1f MiB)", len(behavior_df), archive, size / (1024 * 1024))
-
-        # FIXME: don't blanket fillna
-        behavior_df.fillna("", inplace=True)
-
-        news_df = _read_zipped_tsv(zf, "news.tsv", ["id", "category", "subcategory", "title"])
+        news_df["uuid"] = [uuid5(NAMESPACE_ARTICLE, aid) for aid in news_df.index.values]
         size = news_df.memory_usage(deep=True).sum()
-        logger.info("loaded %d articles from %s (%.1f MiB)", len(news_df), archive, size / (1024 * 1024))
+        logger.info("loaded %d articles from %s (%.1f MiB)", len(news_df), self.name, size / (1024 * 1024))
 
-    return news_df, behavior_df
+        return news_df
+
+    def _load_behavior_df(self) -> pd.DataFrame:
+        logger.info("loading MIND behavior from %s", self.name)
+
+        behavior_df = pd.read_table(
+            self.path / "behaviors.tsv",
+            header=None,
+            usecols=range(5),
+            names=["impression_id", "user", "time", "clicked_news", "impressions"],
+        )
+        behavior_df["uuid"] = [uuid5(NAMESPACE_IMPRESSION, str(iid)) for iid in behavior_df.index.values]
+        size = behavior_df.memory_usage(deep=True).sum()
+        logger.info("loaded %d impressions from %s (%.1f MiB)", len(behavior_df), self.name, size / (1024 * 1024))
+
+        return behavior_df
+
+    def _open_behavior_db(self):
+        logger.info("loading MIND data into DuckDB")
+        # create an *in-memory* DuckDB connection
+        self.duck = duckdb.connect()
+        _bind_raw_impressions(self.duck, self.path / "behaviors.tsv")
+        _transform_impressions(self.duck)
+        _extract_impressed_articles(self.duck)
+        logger.info("database prepared")
 
 
 def _read_zipped_tsv(zf: zipfile.ZipFile, name: str, columns: list[str]) -> pd.DataFrame:
@@ -188,13 +227,12 @@ def _read_zipped_tsv(zf: zipfile.ZipFile, name: str, columns: list[str]) -> pd.D
         )
 
 
-def _raw_impressions(db: DuckDBPyConnection, archive: str):
+def _bind_raw_impressions(db: DuckDBPyConnection, path: Path):
     """
     Create a DuckDB view that will read from the raw impression table.
     """
-    behavior = Path("data") / archive / "behaviors.tsv"
     db.read_csv(
-        fspath(behavior),
+        fspath(path),
         header=False,
         delimiter="\t",
         columns={
@@ -212,12 +250,15 @@ def _transform_impressions(db: DuckDBPyConnection):
     Transform the impressions from their raw form into a structured DuckDB
     table.
     """
+    # custom function for impression UUID conversion
+    db.create_function("impression_uuid", _impression_uuid, [dt.VARCHAR], dt.UUID)  # type: ignore
     # define the impression table. at this point, imp_articles will contain the
     # impressed article IDs only, not their clicks!
     db.execute(
         """
         CREATE TABLE impressions (
             imp_id VARCHAR NOT NULL PRIMARY KEY,
+            imp_uuid UUID NOT NULL,
             user_id VARCHAR NOT NULL,
             imp_time TIMESTAMP NOT NULL,
             -- Julian day number for each impression to put in days.
@@ -230,9 +271,10 @@ def _transform_impressions(db: DuckDBPyConnection):
     # populate the impression table
     db.execute(
         """
-        INSERT INTO impressions (imp_id, user_id, imp_time, imp_day, clicked_articles, imp_articles)
+        INSERT INTO impressions (imp_id, imp_uuid, user_id, imp_time, imp_day, clicked_articles, imp_articles)
         SELECT
             impression_id,
+            impression_uuid(impression_id)
             user_id,
             strptime(time, '%m/%d/%Y %H:%M:%S %p'),
             CAST(julian(strptime(time, '%m/%d/%Y %H:%M:%S %p')) AS INTEGER),
@@ -249,7 +291,7 @@ def _extract_impressed_articles(db: DuckDBPyConnection):
     Process the impression articles, extracting the first and last day in which
     each was displayed.
     """
-    # create a table of articles with first and last days, sorted for fast lookup.
+    # create a table of unique impressed articles with first and last days, sorted for fast lookup.
     db.execute(
         """
         CREATE TABLE impressed_articles AS
@@ -273,3 +315,7 @@ def _extract_impressed_articles(db: DuckDBPyConnection):
         CREATE INDEX imp_article_last_idx ON impressed_articles (last_day)
         """
     )
+
+
+def _impression_uuid(mind_id: str) -> UUID:
+    return uuid5(NAMESPACE_IMPRESSION, mind_id)
