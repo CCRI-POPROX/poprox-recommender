@@ -91,7 +91,7 @@ def cluster_recommend(
     task: Task,
     pb: Progress,
 ):
-    logger.info("starting evaluation with %d workers", pc.processes)
+    logger.info("starting parallel evaluation with task limit of %d", pc.processes)
     init_cluster(global_logging=True)
 
     writers = [
