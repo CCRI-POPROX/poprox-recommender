@@ -16,7 +16,7 @@ stages:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
         - models/nrms-mind/
-        - data/MINDlarge_dev.zip
+        - data/MINDlarge_dev
       outs:
         - outputs/mind-val/${item}/recommendations.parquet
         - outputs/mind-val/${item}/recommendations.ndjson.zst
@@ -30,7 +30,7 @@ stages:
       deps:
         - src/poprox_recommender/evaluation/evaluate.py
         - src/poprox_recommender/evaluation/metrics/
-        - data/MINDlarge_dev.zip
+        - data/MINDlarge_dev
         - outputs/mind-val/${item}/recommendations.parquet
       outs:
         - outputs/mind-val/${item}/profile-metrics.csv.gz
@@ -46,7 +46,7 @@ stages:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
         - models/nrms-mind/
-        - data/MINDsmall_dev.zip
+        - data/MINDsmall_dev
       outs:
         - outputs/mind-small/${item}/recommendations.parquet
         - outputs/mind-small/${item}/recommendations.ndjson.zst
@@ -60,7 +60,7 @@ stages:
       deps:
         - src/poprox_recommender/evaluation/evaluate.py
         - src/poprox_recommender/evaluation/metrics/
-        - data/MINDlarge_dev.zip
+        - data/MINDlarge_dev
         - outputs/mind-small/${item}/recommendations.parquet
       outs:
         - outputs/mind-small/${item}/profile-metrics.csv.gz
@@ -77,7 +77,7 @@ stages:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
         - models/nrms-mind/
-        - data/MINDsmall_dev.zip
+        - data/MINDsmall_dev
       outs:
         - outputs/mind-subset/${item}/recommendations.parquet
         - outputs/mind-subset/${item}/recommendations.ndjson.zst
@@ -91,7 +91,7 @@ stages:
       deps:
         - src/poprox_recommender/evaluation/evaluate.py
         - src/poprox_recommender/evaluation/metrics/
-        - data/MINDlarge_dev.zip
+        - data/MINDlarge_dev
         - outputs/mind-subset/${item}/recommendations.parquet
       outs:
         - outputs/mind-subset/${item}/profile-metrics.csv.gz
