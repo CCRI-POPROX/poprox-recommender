@@ -55,6 +55,7 @@ dev = [
   "hatch ~=1.13",
   "ipython >=8",
   "notebook >=7.2",
+  "py-spy>=0.4.1",
   "pyarrow-stubs ~=17.11",
   { include-group = "lint" },
   { include-group = "test" },
