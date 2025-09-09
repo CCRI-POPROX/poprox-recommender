@@ -23,6 +23,7 @@ import re
 from pathlib import Path
 from uuid import NAMESPACE_URL, UUID, uuid5
 
+import duckdb.typing as dt
 from docopt import ParsedOptions, docopt
 from duckdb import DuckDBPyConnection, Statement, StatementType, connect, extract_statements
 from lenskit.logging import LoggingConfig, get_logger
@@ -43,7 +44,7 @@ def main(options: ParsedOptions):
 
     logger.info("opening database %s", path)
     with connect(path) as db:
-        db.create_function("sha_uuid", sha_uuid)  # type: ignore
+        db.create_function("sha_uuid", sha_uuid, [dt.VARCHAR, dt.VARCHAR], dt.UUID)  # type: ignore
 
         for var in options["--define"]:
             name, value = var.split("=", 1)
@@ -94,15 +95,14 @@ def _pretty_query(stmt: Statement) -> str:
     return pretty
 
 
-def sha_uuid(ns: str | UUID, data: str) -> UUID:
+def sha_uuid(ns: str, data: str) -> UUID:
     """
     Compute a V5 (SHA) UUID from a namespace and URL / data key.
 
     This is registered as the DuckDB function ``sha_uuid``.
     """
-    if not isinstance(ns, UUID):
-        ns = uuid5(NAMESPACE_URL, ns)
-    return uuid5(ns, data)
+    ns_uuid = uuid5(NAMESPACE_URL, ns)
+    return uuid5(ns_uuid, data)
 
 
 if __name__ == "__main__":

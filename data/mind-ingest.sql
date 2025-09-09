@@ -50,7 +50,7 @@ FROM raw_news;
 CREATE TEMPORARY TABLE parsed_impressions AS
 SELECT
     impression_id AS imp_id,
-    sha_uuid('https://data.poprox.io/mind/impression/', impression_id),
+    sha_uuid('https://data.poprox.io/mind/impression/', CAST(impression_id AS VARCHAR)) AS imp_uuid,
     CAST(user_id[2:] AS INTEGER) user_id,
     strptime(time, '%m/%d/%Y %H:%M:%S %p') AS imp_time,
     string_split_regex(clicked_news, '\s+') AS clicked_news,

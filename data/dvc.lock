@@ -104,8 +104,8 @@ stages:
       nfiles: 4
     - path: mind-ingest.sql
       hash: md5
-      md5: 076378ae94fe79edee6d79463f279c19
-      size: 2889
+      md5: 97b670b02dd01a312718a70be7024b93
+      size: 2936
     - path: mind-schema.sql
       hash: md5
       md5: 98914a015e756977ad8897d7ff19bf44
@@ -113,8 +113,8 @@ stages:
     outs:
     - path: MINDsmall_dev.db
       hash: md5
-      md5: a5a6f61158b608f1c97ce92345cc4fd6
-      size: 115093504
+      md5: 8ee2e9407f9c6812a0f60235cb567f77
+      size: 109850624
   ingest-mind@MINDlarge_dev:
     cmd: python -m poprox_recommender.data.duckscript -D mind_path=MINDlarge_dev
       MINDlarge_dev.db mind-schema.sql mind-ingest.sql
