@@ -31,6 +31,7 @@ from itertools import batched
 from typing import Any, Iterator
 from uuid import UUID
 
+import lenskit
 import pandas as pd
 import ray
 from docopt import docopt
@@ -90,6 +91,7 @@ def main():
     if options["--log-file"]:
         log_cfg.set_log_file(options["--log-file"])
     log_cfg.apply()
+    lenskit.configure(cfg_dir=project_root())
 
     global eval_data
 
