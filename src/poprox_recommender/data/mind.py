@@ -175,13 +175,9 @@ class MindData(EvalData):
             self.duck.execute(
                 """
                 SELECT article_uuid, category, subcategory, title
-                FROM impressions
-                JOIN impression_articles USING (imp_id)
-                JOIN impression_article_summaries USING (article_id)
+                FROM impression_expanded_candidates
                 JOIN articles USING (article_id)
                 WHERE imp_id = ?
-                AND first_day <= imp_day
-                AND last_day > imp_day - 7
                 """,
                 [imp_id],
             )

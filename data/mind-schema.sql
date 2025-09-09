@@ -55,3 +55,12 @@ CREATE TABLE impression_article_summaries (
     num_clicks INTEGER NOT NULL,
 );
 CREATE INDEX impression_summary_idx ON impression_article_summaries (article_id);
+
+-- View for expanded candidate sets.
+-- DO NOT USE - these are broken
+CREATE VIEW impression_expanded_candidates AS
+SELECT imp_id, article_id
+FROM impressions, impression_article_summaries
+WHERE first_day <= imp_day
+AND last_day > imp_day - 7
+ORDER BY imp_id;
