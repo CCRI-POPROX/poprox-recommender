@@ -93,10 +93,10 @@ def cluster_recommend(
     logger.info("starting parallel evaluation with task limit of %d", pc.processes)
     init_cluster(global_logging=True)
 
-    writers = [
-        ParquetRecommendationWriter.make_actor().remote(outs),
-        JSONRecommendationWriter.make_actor().remote(outs),
-        EmbeddingWriter.make_actor().remote(outs),
+    writers: list[RecommendationWriter] = [
+        ParquetRecommendationWriter.create_remote(outs),
+        JSONRecommendationWriter.create_remote(outs),
+        EmbeddingWriter.create_remote(outs),
     ]
 
     profiles = dataset.iter_profile_ids(limit=max_profiles)
@@ -128,7 +128,7 @@ def cluster_recommend(
             ray.get(rh)
 
     logger.info("closing writers")
-    close = [w.close.remote() for w in writers]
+    close = [w.close() for w in writers]
     for cr in close:
         wt = ray.get(cr)
         task.add_subtask(wt)
@@ -184,8 +184,7 @@ def recommend_batch(
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
             outputs.append((request, state))
 
-        outputs = ray.put(outputs)
-        writes = [w.write_recommendation_batch.remote(outputs) for w in writers]
+        writes = [w.write_recommendation_batch(outputs) for w in writers]
 
     return len(batch), task, writes
 
