@@ -8,14 +8,11 @@ Support for loading MIND_ data for evaluation.
 from __future__ import annotations
 
 import logging
-import zipfile
-from os import fspath
 from pathlib import Path
-from typing import Generator, Literal, cast
+from typing import Generator, Literal
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 import duckdb
-import duckdb.typing as dt
 import pandas as pd
 from duckdb import DuckDBPyConnection
 
@@ -28,18 +25,6 @@ logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
 NAMESPACE_ARTICLE = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
 NAMESPACE_IMPRESSION = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/impression/")
-
-CLI_SPEC = """
-Preprocess MIND data into DuckDB for evaluation.
-
-Usage:
-    poprox_recommender.data.mind [-v] NAME
-
-Options:
-    -v, --verbose
-            Enable verbose log output.
-    NAME    The name of the MIND data set to process.
-"""
 
 
 class MindData(EvalData):
@@ -72,17 +57,11 @@ class MindData(EvalData):
         (n,) = self.duck.fetchone() or (0,)
         self._article_count = n
 
-    def news_id_for_uuid(self, uuid: UUID) -> str:
-        return self.news_id_map[uuid]
-
     def news_uuid_for_id(self, id: str) -> UUID:
-        return self.news_id_rmap[id]
-
-    def behavior_id_for_uuid(self, uuid: UUID) -> str:
-        return self.behavior_id_map[uuid]
+        return uuid5(NAMESPACE_ARTICLE, id)
 
     def behavior_uuid_for_id(self, id: str) -> UUID:
-        return cast(UUID, self.behavior_df.loc[id, "uuid"])
+        return uuid5(NAMESPACE_IMPRESSION, id)
 
     @property
     def n_profiles(self) -> int:
@@ -214,152 +193,3 @@ class MindData(EvalData):
             headline=title,
             mentions=[Mention(source="MIND", relevance=1, entity=entity) for entity in [category, subcategory]],
         )
-
-    def _load_news_df(self) -> pd.DataFrame:
-        logger.info("loading MIND news from %s", self.name)
-
-        news_df = pd.read_table(
-            self.path / "news.tsv", header=None, usecols=range(4), names=["id", "category", "subcategory", "title"]
-        )
-        news_df["uuid"] = [uuid5(NAMESPACE_ARTICLE, aid) for aid in news_df.index.values]
-        size = news_df.memory_usage(deep=True).sum()
-        logger.info("loaded %d articles from %s (%.1f MiB)", len(news_df), self.name, size / (1024 * 1024))
-
-        return news_df
-
-    def _load_behavior_df(self) -> pd.DataFrame:
-        logger.info("loading MIND behavior from %s", self.name)
-
-        behavior_df = pd.read_table(
-            self.path / "behaviors.tsv",
-            header=None,
-            usecols=range(5),
-            names=["impression_id", "user", "time", "clicked_news", "impressions"],
-        )
-        behavior_df["uuid"] = [uuid5(NAMESPACE_IMPRESSION, str(iid)) for iid in behavior_df.index.values]
-        size = behavior_df.memory_usage(deep=True).sum()
-        logger.info("loaded %d impressions from %s (%.1f MiB)", len(behavior_df), self.name, size / (1024 * 1024))
-
-        return behavior_df
-
-    def _open_behavior_db(self):
-        logger.info("loading MIND data into DuckDB")
-        # create an *in-memory* DuckDB connection
-        self.duck = duckdb.connect()
-        _bind_raw_impressions(self.duck, self.path / "behaviors.tsv")
-        _transform_impressions(self.duck)
-        _extract_impressed_articles(self.duck)
-        logger.info("database prepared")
-
-
-def _read_zipped_tsv(zf: zipfile.ZipFile, name: str, columns: list[str]) -> pd.DataFrame:
-    """
-    Read a TSV file from the compressed MIND data as a Pandas data frame.
-
-    Args:
-        zf: The zip file, opened for reading.
-        name: The name of the file to read within the zip file (e.g. ``news.tsv``).
-        columns: The column names for this zip file.
-    """
-    with zf.open(name, "r") as content:
-        return pd.read_table(
-            content,
-            header=None,
-            usecols=range(len(columns)),
-            names=columns,
-        )
-
-
-def _bind_raw_impressions(db: DuckDBPyConnection, path: Path):
-    """
-    Create a DuckDB view that will read from the raw impression table.
-    """
-    db.read_csv(
-        fspath(path),
-        header=False,
-        delimiter="\t",
-        columns={
-            "impression_id": "INTEGER",
-            "user_id": "VARCHAR",
-            "time": "VARCHAR",
-            "clicked_news": "VARCHAR",
-            "impression_news": "VARCHAR",
-        },
-    ).create_view("raw_impressions")
-
-
-def _transform_impressions(db: DuckDBPyConnection):
-    """
-    Transform the impressions from their raw form into a structured DuckDB
-    table.
-    """
-    # custom function for impression UUID conversion
-    db.create_function("impression_uuid", _impression_uuid, [dt.VARCHAR], dt.UUID)  # type: ignore
-    # define the impression table. at this point, imp_articles will contain the
-    # impressed article IDs only, not their clicks!
-    db.execute(
-        """
-        CREATE TABLE impressions (
-            imp_id VARCHAR NOT NULL PRIMARY KEY,
-            imp_uuid UUID NOT NULL UNIQUE,
-            user_id VARCHAR NOT NULL,
-            imp_time TIMESTAMP NOT NULL,
-            -- Julian day number for each impression to put in days.
-            imp_day INTEGER NOT NULL,
-            clicked_articles VARCHAR[],
-            imp_articles VARCHAR[] NOT NULL,
-        )
-        """
-    )
-    # populate the impression table
-    db.execute(
-        """
-        INSERT INTO impressions (imp_id, imp_uuid, user_id, imp_time, imp_day, clicked_articles, imp_articles)
-        SELECT
-            impression_id,
-            impression_uuid(CAST(impression_id AS VARCHAR)),
-            user_id,
-            strptime(time, '%m/%d/%Y %H:%M:%S %p'),
-            CAST(julian(strptime(time, '%m/%d/%Y %H:%M:%S %p')) AS INTEGER),
-            -- split apart news
-            string_split_regex(clicked_news, '\\s+'),
-            -- strip response signals + split apart impressed articles
-            string_split_regex(regexp_replace(impression_news, '-[01]', '', 'g'), '\\s+')
-        FROM raw_impressions
-        """
-    )
-
-
-def _extract_impressed_articles(db: DuckDBPyConnection):
-    """
-    Process the impression articles, extracting the first and last day in which
-    each was displayed.
-    """
-    # create a table of unique impressed articles with first and last days, sorted for fast lookup.
-    db.execute(
-        """
-        CREATE TABLE impressed_articles AS
-        SELECT article_id, MIN(imp_day) AS first_day, MAX(imp_day) AS last_day
-        FROM (
-            SELECT UNNEST(imp_articles) AS article_id, imp_day
-            FROM impression
-        )
-        GROUP BY article_id
-        ORDER BY first_day
-        """
-    )
-    # index the first and last day columns for fast lookup.
-    db.execute(
-        """
-        CREATE INDEX imp_article_first_idx ON impressed_articles (first_day)
-        """
-    )
-    db.execute(
-        """
-        CREATE INDEX imp_article_last_idx ON impressed_articles (last_day)
-        """
-    )
-
-
-def _impression_uuid(mind_id: str) -> UUID:
-    return uuid5(NAMESPACE_IMPRESSION, mind_id)
