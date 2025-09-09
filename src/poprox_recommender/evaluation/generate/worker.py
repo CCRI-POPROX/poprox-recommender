@@ -190,16 +190,19 @@ def dynamic_remote(task_or_actor):
         # Let's take a wild guess that 20 MP units are enough per worker, so a
         # 80-MP A40 can theoretically run 4 workers.  If we do not request GPUs,
         # Ray will keep us from accessing them.
+        #
+        # We also hard-code 2 CPUs per worker, because CUDA-powered eval doesn't
+        # use any other parallelism at this time.
         gpu_frac = 20 / _cuda_props.multi_processor_count
-        logger.debug("setting up GPU task with %d CPU, %.3f GPU", pc.backend_threads, gpu_frac)
+        logger.debug("setting up GPU task with %d CPU, %.3f GPU", 2, gpu_frac)
         remote = ray.remote(
-            num_cpus=pc.backend_threads,
+            num_cpus=2,
             num_gpus=gpu_frac,
             # reuse worker processes between batches
             max_calls=0,
         )
     else:
-        # if we don't have CUDA, don't request GPU
+        # if we don't have CUDA, don't request GPU, and we'll need CPU threads
         logger.debug("setting up remote CPU-only task with %d threads", pc.total_threads)
         remote = ray.remote(
             num_cpus=pc.total_threads,
