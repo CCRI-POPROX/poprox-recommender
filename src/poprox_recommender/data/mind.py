@@ -11,12 +11,11 @@ import logging
 import zipfile
 from os import fspath
 from pathlib import Path
-from typing import Generator, cast
+from typing import Generator, Literal, cast
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 import duckdb
 import duckdb.typing as dt
-import numpy as np
 import pandas as pd
 from duckdb import DuckDBPyConnection
 
@@ -30,6 +29,18 @@ TEST_REC_COUNT = 10
 NAMESPACE_ARTICLE = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
 NAMESPACE_IMPRESSION = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/impression/")
 
+CLI_SPEC = """
+Preprocess MIND data into DuckDB for evaluation.
+
+Usage:
+    poprox_recommender.data.mind [-v] NAME
+
+Options:
+    -v, --verbose
+            Enable verbose log output.
+    NAME    The name of the MIND data set to process.
+"""
+
 
 class MindData(EvalData):
     """
@@ -39,43 +50,27 @@ class MindData(EvalData):
     name: str
     "Name of the MIND dataset."
     path: Path
-    "Path to the unzipped MIND dataset."
-    duck: DuckDBPyConnection | None = None
+    "Path to the MIND database."
+    duck: DuckDBPyConnection
     "DuckDB connection."
 
-    news_df: pd.DataFrame
-    "Data frame of news articles."
-    news_id_map: dict[UUID, str]
-    "Mapping from POPROX UUIDs to MIND article IDs."
-    news_id_rmap: dict[str, UUID]
-    "Mapping from MIND article IDs to POPROX UUIDs."
-    behavior_df: pd.DataFrame
-    "Data frame of interaction behavior."
-    behavior_id_map: dict[UUID, str]
-    "Mapping from POPROX impression UUIDs to MIND article IDs."
+    _article_count: int
+    _impression_count: int
 
     def __init__(self, archive: str = "MINDsmall_dev"):
         self.name = archive
-        self.path = project_root() / "data" / archive
+        self.path = project_root() / "data" / f"{archive}.db"
 
-        news_df = self._load_news_df()
-        # index data frames for quick lookup of users & articles
-        self.news_df = news_df.set_index("id")
-        if not self.news_df.index.unique:
-            logger.warning("news data has non-unique index")
+        self.duck = duckdb.connect(self.path, read_only=True)
 
-        # TODO: only do this when we don't also load duck, or just use duck
-        behavior_df = self._load_behavior_df()
-        self.behavior_df = behavior_df.set_index("impression_id")
-        if not self.behavior_df.index.unique:
-            logger.warning("behavior data has non-unique index")
+        # pre-fetch counts
+        self.duck.execute("SELECT COUNT(*) FROM impressions")
+        (n,) = self.duck.fetchone() or (0,)
+        self._impression_count = n
 
-        # set up bidirectional maps for news IDs
-        self.news_id_map = dict(zip(self.news_df["uuid"], self.news_df.index))
-        self.news_id_rmap = dict(zip(self.news_df.index, self.news_df["uuid"]))
-
-        # set up quick mapping for behavior IDs
-        self.behavior_id_map = dict(zip(self.behavior_df["uuid"], self.behavior_df.index))
+        self.duck.execute("SELECT COUNT(*) FROM articles")
+        (n,) = self.duck.fetchone() or (0,)
+        self._article_count = n
 
     def news_id_for_uuid(self, uuid: UUID) -> str:
         return self.news_id_map[uuid]
@@ -91,94 +86,134 @@ class MindData(EvalData):
 
     @property
     def n_profiles(self) -> int:
-        return self.behavior_df.shape[0]
+        return self._impression_count
 
     @property
     def n_articles(self) -> int:
-        return self.news_df.shape[0]
+        return self._article_count
 
     def profile_truth(self, user: UUID) -> pd.DataFrame | None:
         """
         Look up the ground-truth data for a particular user profile,
         in LensKit format with item UUIDs for item IDs.
         """
-        try:
-            uid = self.behavior_id_for_uuid(user)
-            imp_log = str(self.behavior_df.loc[uid, "impressions"])
-        except KeyError:
-            raise ValueError(f"unknown user {user}")
 
-        # helper generator to only split articles once
-        def split_records():
-            for article in imp_log.split():
-                iid, rv = article.split("-")
-                yield iid, int(rv)
-
-        truth = pd.DataFrame.from_records(
-            split_records(),
-            columns=["mind_item_id", "rating"],
+        self.duck.execute(
+            """
+            SELECT article_uuid AS item_id,
+                'N' || article_id AS mind_item_id,
+                CAST(clicked AS INT2) AS rating
+            FROM impressions
+            JOIN impression_articles USING (imp_id)
+            JOIN articles USING (article_id)
+            WHERE imp_uuid = ?
+            """,
+            [user],
         )
-        ids = np.array([self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]])
-        truth = truth.set_index(ids)
-        truth.index.name = "item_id"
-        return truth
+        truth = self.duck.fetch_df()
+        return truth.set_index("item_id")
 
     def iter_profiles(self) -> Generator[RecommendationRequest]:
-        if self.duck is None:
-            self._open_behavior_db()
-            assert self.duck is not None
-
         # collect the with larger impression sets
         logger.info("querying for test articles")
-        rel = self.duck.query(
-            """
-            SELECT imp_uuid,
-                -- there will only be one unique clicked_articles, because imp_uuid is unique
-                COALESCE(ANY_VALUE(clicked_articles), []) AS clicked_articles,
-                array_agg(article_id) AS candidate_articles
-            FROM impressions, impressed_articles
-            WHERE first_day <= imp_day
-            AND last_day > imp_day - 7
-            GROUP BY imp_uuid
-            """
-        )
 
-        # loop over the results and yield the recommendations
-        logger.info("iterating test articles")
-        while row := rel.fetchone():
-            imp_uuid, clicked, candidates = row
+        # we use 2 queries: an outer query to list the impression IDs, and inner
+        # queries to get the articles and article data.  outer query is in a cloned
+        # connection so that they don't interfere with each other.
+        with self.duck.cursor() as clone:
+            clone.execute("SELECT imp_id, imp_uuid FROM impressions")
 
-            # convert clicked articles into list
-            clicks = [Click(article_id=self.news_uuid_for_id(aid)) for aid in clicked]
-            past = [self.lookup_article(id=aid) for aid in clicked]
+            # loop over the results and yield the recommendations
+            logger.info("iterating test articles")
+            while row := clone.fetchone():
+                imp_id, imp_uuid = row
 
-            today = [self.lookup_article(id=aid) for aid in candidates]
+                # get the historical articles and click list
+                past = self.lookup_articles(imp_id, relation="history")
+                clicks = [Click(article_id=a.article_id) for a in past]
 
-            # FIXME the profile ID should probably be the user ID
-            profile = InterestProfile(profile_id=imp_uuid, click_history=clicks, onboarding_topics=[])
-            yield RecommendationRequest(
-                todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
+                # get the candidate articles
+                today = self.lookup_articles(imp_id, relation="candidate")
+
+                # FIXME the profile ID should probably be the user ID
+                profile = InterestProfile(profile_id=imp_uuid, click_history=clicks, onboarding_topics=[])
+                yield RecommendationRequest(
+                    todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
+                )
+
+    def lookup_articles(self, imp_id: int, *, relation: Literal["history", "candidate"]) -> list[Article]:
+        # run the query for the articles we're looking for
+        if relation == "history":
+            self.duck.execute(
+                """
+                SELECT article_uuid, category, subcategory, title
+                FROM impression_history
+                JOIN articles USING (article_id)
+                WHERE imp_id = ?
+                """,
+                [imp_id],
+            )
+        elif relation == "candidate":
+            self.duck.execute(
+                """
+                SELECT article_uuid, category, subcategory, title
+                FROM impressions
+                JOIN impression_articles USING (imp_id)
+                JOIN impression_article_summaries USING (article_id)
+                JOIN articles USING (article_id)
+                WHERE imp_id = ?
+                AND first_day <= imp_day
+                AND last_day > imp_day - 7
+                """,
+                [imp_id],
             )
 
+        articles = []
+        while row := self.duck.fetchone():
+            articles.append(self._make_article(*row))
+
+        return articles
+
     def lookup_article(self, *, id: str | None = None, uuid: UUID | None = None):
-        if uuid is None:
-            if id:
-                uuid = self.news_uuid_for_id(id)
-            else:
-                raise ValueError("must provide one of uuid, id")
-        elif id is None:
-            id = self.news_id_for_uuid(uuid)
+        if uuid is not None:
+            self.duck.execute(
+                """
+                SELECT article_uuid, category, subcategory, title
+                FROM articles
+                WHERE article_uuid = ?
+                """,
+                [uuid],
+            )
+        elif id is not None:
+            assert id[0] == "N"
+            id_num = int(id[1:])
+            self.duck.execute(
+                """
+                SELECT article_uuid, category, subcategory, title
+                FROM articles
+                WHERE article_id = ?
+                """,
+                [id_num],
+            )
+        else:
+            raise ValueError("must provide one of uuid or id")
 
-        category = Entity(name=str(self.news_df.loc[id, "category"]), entity_type="category", source="MIND")
-        subcategory = Entity(name=str(self.news_df.loc[id, "subcategory"]), entity_type="subcategory", source="MIND")
+        row = self.duck.fetchone()
+        if row:
+            return self._make_article(*row)
+        else:
+            raise KeyError(uuid or id)
 
-        article = Article(
+    def _make_article(self, uuid, category, subcategory, title) -> Article:
+        category = Entity(name=category, entity_type="category", source="MIND")
+        subcategory = Entity(name=subcategory, entity_type="subcategory", source="MIND")
+
+        return Article(
             article_id=uuid,
             url=f"urn:uuid:{uuid}",
-            headline=str(self.news_df.loc[id, "title"]),
+            headline=title,
             mentions=[Mention(source="MIND", relevance=1, entity=entity) for entity in [category, subcategory]],
         )
-        return article
 
     def _load_news_df(self) -> pd.DataFrame:
         logger.info("loading MIND news from %s", self.name)
@@ -307,7 +342,7 @@ def _extract_impressed_articles(db: DuckDBPyConnection):
         SELECT article_id, MIN(imp_day) AS first_day, MAX(imp_day) AS last_day
         FROM (
             SELECT UNNEST(imp_articles) AS article_id, imp_day
-            FROM impressions
+            FROM impression
         )
         GROUP BY article_id
         ORDER BY first_day

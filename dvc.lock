@@ -453,8 +453,8 @@ stages:
       nfiles: 3
     - path: src/poprox_recommender/evaluation/generate/
       hash: md5
-      md5: 6f003454826ff84f33424fc586a36eb3.dir
-      size: 19190
+      md5: 9d144946ec991d328f5b4f92fcf1ce06.dir
+      size: 18675
       nfiles: 4
     - path: src/poprox_recommender/recommenders/configurations/nrms.py
       hash: md5
@@ -463,20 +463,20 @@ stages:
     outs:
     - path: outputs/mind-subset/nrms/embeddings.parquet
       hash: md5
-      md5: e6dfcfb6ca36bfa9830f64423aa38e7a
-      size: 17324340
+      md5: b939382e766fcc9a8f329c04bda9be75
+      size: 5528813
     - path: outputs/mind-subset/nrms/generate-task.json
       hash: md5
-      md5: 0196cb095fdb84c802935732463d600e
-      size: 19577
+      md5: b0992578ce315ec98c57ca6480811026
+      size: 19676
     - path: outputs/mind-subset/nrms/recommendations.ndjson.zst
       hash: md5
-      md5: d531404df7c68831a9d44f74bd09b7dd
-      size: 362061057
+      md5: 8e0e27c1341a8ef552dd9d0de4493c3b
+      size: 4168599
     - path: outputs/mind-subset/nrms/recommendations.parquet
       hash: md5
-      md5: d4c5fcfb5096430fe486a210f30cee8d
-      size: 105096
+      md5: 21507d44cd378a9b37b2b825ce0303a6
+      size: 94443
   recommend-mind-subset@nrms_rrf_static_user:
     cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
       --subset=1000 -o outputs/mind-subset/nrms_rrf_static_user
