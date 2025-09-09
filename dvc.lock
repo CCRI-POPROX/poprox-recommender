@@ -552,19 +552,18 @@ stages:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
       mind-subset nrms
     deps:
-    - path: data/MINDlarge_dev
+    - path: data/MINDsmall_dev.db
       hash: md5
-      md5: a90bc1810ca5c0c4c4ef4320474cb67f.dir
-      size: 322720668
-      nfiles: 5
+      md5: 8ee2e9407f9c6812a0f60235cb567f77
+      size: 109850624
     - path: outputs/mind-subset/nrms/recommendations.parquet
       hash: md5
-      md5: d4c5fcfb5096430fe486a210f30cee8d
-      size: 105096
+      md5: dad2c0134e083a7c635de762657f15d6
+      size: 94440
     - path: src/poprox_recommender/evaluation/evaluate.py
       hash: md5
-      md5: 88c41f1becd783712adebc97ddb5fd06
-      size: 5555
+      md5: d76923eb302aa4f825e7bcb2ab815f1a
+      size: 5133
       isexec: true
     - path: src/poprox_recommender/evaluation/metrics/
       hash: md5
@@ -574,12 +573,12 @@ stages:
     outs:
     - path: outputs/mind-subset/nrms/metrics.json
       hash: md5
-      md5: ebcd18d636f1d9d085e4a8d632454749
+      md5: 103502101ab328646d05f8c7b87669ae
       size: 170
     - path: outputs/mind-subset/nrms/profile-metrics.csv.gz
       hash: md5
-      md5: 37b05c7313296a4d17036f3ee7e57278
-      size: 25554
+      md5: 93cc4154b8ef57df9983f64f8f2a58a4
+      size: 28269
   measure-mind-subset@nrms_topic_scores:
     cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
       mind-subset nrms_topic_scores
