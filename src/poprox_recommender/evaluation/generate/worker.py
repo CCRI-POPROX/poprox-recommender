@@ -6,8 +6,8 @@ import ray
 import torch
 from humanize import naturaldelta
 from lenskit.logging import Progress, Task, get_logger, item_progress
-from lenskit.parallel.config import ParallelConfig, get_parallel_config
-from lenskit.parallel.ray import init_cluster
+from lenskit.parallel.config import ParallelConfig, get_parallel_config, subprocess_config
+from lenskit.parallel.ray import TaskLimiter, init_cluster
 from lenskit.pipeline import PipelineState
 
 from poprox_concepts.api.recommendations import RecommendationRequest
@@ -91,7 +91,7 @@ def cluster_recommend(
     task: Task,
     pb: Progress,
 ):
-    logger.info("starting evaluation with %d workers", pc.processes)
+    logger.info("starting parallel evaluation with task limit of %d", pc.processes)
     init_cluster(global_logging=True)
 
     writers = [
@@ -101,38 +101,21 @@ def cluster_recommend(
     ]
 
     rec_batch = dynamic_remote(recommend_batch)
+    limit = TaskLimiter(pc.processes)
 
-    tasks = []
     writes = []
-    for batch in it.batched(profiles, BATCH_SIZE):
-        # backpressure
-        while len(tasks) >= pc.processes:
-            logger.debug("waiting for workers to finish")
-            done, tasks = ray.wait(tasks)
-            # update # of finished items
-            for rh in done:
-                n, btask, bwrites = ray.get(rh)
-                pb.update(n)
-                task.add_subtask(btask)
-                writes += bwrites
+    for n, btask, bwrites in limit.imap(
+        lambda batch: rec_batch.remote(pipeline, batch, writers), it.batched(profiles, BATCH_SIZE), ordered=False
+    ):
+        pb.update(n)
+        task.add_subtask(btask)
+        writes += bwrites
 
-        # clear pending writes
+        # wait for pending writes
         while len(writes) >= 50:
             done, writes = ray.wait(writes)
             for rh in done:
                 ray.get(rh)
-
-        tasks.append(rec_batch.remote(pipeline, batch, writers))
-
-    logger.debug("waiting for remaining actors")
-    while tasks:
-        done, tasks = ray.wait(tasks)
-        for rh in done:
-            for rh in done:
-                n, btask, bwrites = ray.get(rh)
-                pb.update(n)
-                task.add_subtask(btask)
-                writes += bwrites
 
     logger.debug("waiting for remaining writes")
     # clear pending writes
@@ -200,7 +183,8 @@ def dynamic_remote(task_or_actor):
     Dynamically configure the resource requirements of a task or actor based on
     CUDA availability and parallelism configuration.
     """
-    pc = get_parallel_config()
+    pc = subprocess_config()
+    logger.debug("worker parallel config: %s", pc)
     if torch.cuda.is_available():
         _cuda_props = torch.cuda.get_device_properties()
         # Let's take a wild guess that 20 MP units are enough per worker, so a
