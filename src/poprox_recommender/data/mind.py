@@ -151,7 +151,7 @@ class MindData(EvalData):
         clicks = [Click(article_id=a.article_id) for a in past]
 
         # get the candidate articles
-        today = self.lookup_articles(id, relation="candidate")
+        today = self.lookup_articles(id, relation="candidates")
 
         # FIXME the profile ID should probably be the user ID
         profile = InterestProfile(profile_id=uuid, click_history=clicks, onboarding_topics=[])
@@ -159,7 +159,9 @@ class MindData(EvalData):
             todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
         )
 
-    def lookup_articles(self, imp_id: int, *, relation: Literal["history", "candidate"]) -> list[Article]:
+    def lookup_articles(
+        self, imp_id: int, *, relation: Literal["history", "candidates", "expanded-candidates"]
+    ) -> list[Article]:
         # run the query for the articles we're looking for
         if relation == "history":
             self.duck.execute(
@@ -171,7 +173,17 @@ class MindData(EvalData):
                 """,
                 [imp_id],
             )
-        elif relation == "candidate":
+        elif relation == "candidates":
+            self.duck.execute(
+                """
+                SELECT article_uuid, category, subcategory, title
+                FROM impression_articles
+                JOIN articles USING (article_id)
+                WHERE imp_id = ?
+                """,
+                [imp_id],
+            )
+        elif relation == "expanded-candidates":
             self.duck.execute(
                 """
                 SELECT article_uuid, category, subcategory, title
