@@ -199,13 +199,13 @@ def dynamic_remote(task_or_actor):
     logger.debug("worker parallel config: %s", pc)
     if torch.cuda.is_available():
         _cuda_props = torch.cuda.get_device_properties()
-        # Let's take a wild guess that 10 MP units are enough per worker, so a
+        # Let's take a wild guess that 20 MP units are enough per worker, so a
         # 80-MP A40 can theoretically run 8 workers.  If we do not request GPUs,
         # Ray will keep us from accessing them.
         #
         # We also hard-code 2 CPUs per worker, because CUDA-powered eval doesn't
         # use any other parallelism at this time.
-        gpu_frac = 10 / _cuda_props.multi_processor_count
+        gpu_frac = 20 / _cuda_props.multi_processor_count
         logger.debug("setting up GPU task with %d CPU, %.3f GPU", 2, gpu_frac)
         remote = ray.remote(
             num_cpus=2,
