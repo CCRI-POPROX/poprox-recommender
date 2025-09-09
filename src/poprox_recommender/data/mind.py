@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Generator, Literal, overload
+from typing import Generator, Literal
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 import duckdb
@@ -57,7 +57,9 @@ class MindData(EvalData):
         (n,) = self.duck.fetchone() or (0,)
         self._article_count = n
 
-    def news_uuid_for_id(self, id: str) -> UUID:
+    def news_uuid_for_id(self, id: str | int) -> UUID:
+        if isinstance(id, int):
+            id = f"N{id}"
         return uuid5(NAMESPACE_ARTICLE, id)
 
     def behavior_uuid_for_id(self, id: str) -> UUID:
@@ -128,30 +130,26 @@ class MindData(EvalData):
 
                 yield imp_id
 
-    @overload
-    def lookup_request(self, *, id: int) -> RecommendationRequest: ...
-    @overload
-    def lookup_request(self, *, uuid: UUID) -> RecommendationRequest: ...
-    def lookup_request(self, *, id: int | None = None, uuid: UUID | None = None) -> RecommendationRequest:
-        assert id or uuid
-        if uuid is None:
-            uuid = self.behavior_uuid_for_id(str(id))
-
-        if id is None:
+    def lookup_request(self, id: int | UUID) -> RecommendationRequest:
+        if isinstance(id, UUID):
+            uuid = id
             self.duck.execute("SELECT imp_id FROM impressions WHERE imp_uuid = ?", [uuid])
             if row := self.duck.fetchone():
-                (id,) = row
+                (imp_id,) = row
             else:
                 raise KeyError(f"unknown impression {uuid}")
+        else:
+            imp_id = id
+            uuid = self.news_uuid_for_id(id)
 
         assert id is not None
 
         # get the historical articles and click list
-        past = self.lookup_articles(id, relation="history")
+        past = self.lookup_articles(imp_id, relation="history")
         clicks = [Click(article_id=a.article_id) for a in past]
 
         # get the candidate articles
-        today = self.lookup_articles(id, relation="candidates")
+        today = self.lookup_articles(imp_id, relation="candidates")
 
         # FIXME the profile ID should probably be the user ID
         profile = InterestProfile(profile_id=uuid, click_history=clicks, onboarding_topics=[])
