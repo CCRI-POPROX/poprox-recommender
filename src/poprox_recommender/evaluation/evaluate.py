@@ -60,6 +60,8 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[Pr
         assert truth is not None
         if len(truth) > 0:
             yield ProfileRecs(profile_id, recs.copy(), truth)
+        else:
+            logger.warning("profile %s has no truth", profile_id)
 
 
 def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[dict[str, Any]]:
@@ -120,6 +122,7 @@ def main():
             pb.update()
 
     metrics = pd.DataFrame.from_records(records)
+    print(metrics)
     logger.info("measured recs for %d profiles", metrics["profile_id"].nunique())
 
     profile_out_fn = project_root() / "outputs" / eval_name / pipe_name / "profile-metrics.csv.gz"
@@ -139,11 +142,10 @@ def main():
 
 
 @ray.remote(num_cpus=1)
-def measure_batch(profiles: Sequence[ProfileRecs], eval_data_ref) -> list[dict[str, Any]]:
+def measure_batch(profiles: Sequence[ProfileRecs], eval_data) -> list[dict[str, Any]]:
     """
     Measure a batch of profile recommendations.
     """
-    eval_data = eval_data_ref
     return [measure_profile_recs(profile, eval_data) for profile in profiles]
 
 

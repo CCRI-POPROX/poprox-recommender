@@ -62,8 +62,8 @@ class MindData(EvalData):
             id = f"N{id}"
         return uuid5(NAMESPACE_ARTICLE, id)
 
-    def behavior_uuid_for_id(self, id: str) -> UUID:
-        return uuid5(NAMESPACE_IMPRESSION, id)
+    def behavior_uuid_for_id(self, id: str | int) -> UUID:
+        return uuid5(NAMESPACE_IMPRESSION, str(id))
 
     @property
     def n_profiles(self) -> int:
@@ -81,17 +81,16 @@ class MindData(EvalData):
 
         self.duck.execute(
             """
-            SELECT article_uuid AS item_id,
-                'N' || article_id AS mind_item_id,
+            SELECT article_id AS mind_item_id,
                 CAST(clicked AS INT2) AS rating
             FROM impressions
             JOIN impression_articles USING (imp_id)
-            JOIN articles USING (article_id)
             WHERE imp_uuid = ?
             """,
             [user],
         )
         truth = self.duck.fetch_df()
+        truth["item_id"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
         return truth.set_index("item_id")
 
     def iter_profiles(self, *, limit: int | None = None) -> Generator[RecommendationRequest]:
@@ -140,7 +139,7 @@ class MindData(EvalData):
                 raise KeyError(f"unknown impression {uuid}")
         else:
             imp_id = id
-            uuid = self.news_uuid_for_id(id)
+            uuid = self.behavior_uuid_for_id(id)
 
         assert id is not None
 
