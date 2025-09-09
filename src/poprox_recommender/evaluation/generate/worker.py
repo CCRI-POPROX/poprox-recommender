@@ -4,7 +4,7 @@ from collections.abc import Iterator
 
 import ray
 import torch
-from humanize import naturaldelta
+from humanize import metric, naturaldelta
 from lenskit.logging import Progress, Task, get_logger, item_progress
 from lenskit.parallel.config import ParallelConfig, get_parallel_config, subprocess_config
 from lenskit.parallel.ray import TaskLimiter, init_cluster
@@ -60,6 +60,8 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
     cpu = task.total_cpu()
     if cpu:
         logger.info("recommendation took %s CPU", pretty_time(cpu))
+    if task.system_power:
+        logger.info("recommendation took %s", metric(task.system_power, "J"))
 
 
 def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
