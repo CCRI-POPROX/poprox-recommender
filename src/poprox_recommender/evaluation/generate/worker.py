@@ -128,9 +128,8 @@ def cluster_recommend(
             ray.get(rh)
 
     logger.info("closing writers")
-    close = [w.close() for w in writers]
-    for cr in close:
-        wt = ray.get(cr)
+    for w in writers:
+        wt = w.close()
         task.add_subtask(wt)
 
 
