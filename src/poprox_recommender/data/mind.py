@@ -193,3 +193,11 @@ class MindData(EvalData):
             headline=title,
             mentions=[Mention(source="MIND", relevance=1, entity=entity) for entity in [category, subcategory]],
         )
+
+    # we cannot pickle live DuckDB connections, so drop object + reconnect at startup
+    def __getstate__(self):
+        return {name: val for name, val in self.__dict__.items() if name != "duck"}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.duck = duckdb.connect(self.path, read_only=True)
