@@ -37,8 +37,7 @@ INSERT INTO articles
 SELECT
     -- remove leading char to yield a number
     CAST(article_id[2:] AS INTEGER),
-    -- FIXME: generate deterministic UUID
-    uuid(),
+    sha_uuid('https://data.poprox.io/mind/article/', article_id),
     category,
     subcategory,
     title,
@@ -51,8 +50,7 @@ FROM raw_news;
 CREATE TEMPORARY TABLE parsed_impressions AS
 SELECT
     impression_id AS imp_id,
-    -- FIXME: generate deterministic UUID
-    uuid() AS imp_uuid,
+    sha_uuid('https://data.poprox.io/mind/impression/', impression_id),
     CAST(user_id[2:] AS INTEGER) user_id,
     strptime(time, '%m/%d/%Y %H:%M:%S %p') AS imp_time,
     string_split_regex(clicked_news, '\s+') AS clicked_news,

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from docopt import ParsedOptions, docopt
 from duckdb import DuckDBPyConnection, Statement, StatementType, connect, extract_statements
@@ -42,6 +43,8 @@ def main(options: ParsedOptions):
 
     logger.info("opening database %s", path)
     with connect(path) as db:
+        db.create_function("sha_uuid", sha_uuid)  # type: ignore
+
         for var in options["--define"]:
             name, value = var.split("=", 1)
             logger.debug("setting %s=%s", name, value)
@@ -89,6 +92,17 @@ def _pretty_query(stmt: Statement) -> str:
         pretty = query
     pretty = re.sub(r"\s+", " ", pretty)
     return pretty
+
+
+def sha_uuid(ns: str | UUID, data: str) -> UUID:
+    """
+    Compute a V5 (SHA) UUID from a namespace and URL / data key.
+
+    This is registered as the DuckDB function ``sha_uuid``.
+    """
+    if not isinstance(ns, UUID):
+        ns = uuid5(NAMESPACE_URL, ns)
+    return uuid5(ns, data)
 
 
 if __name__ == "__main__":
