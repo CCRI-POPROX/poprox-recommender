@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Generator, Literal
+from typing import Generator, Literal, overload
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 import duckdb
@@ -92,33 +92,72 @@ class MindData(EvalData):
         truth = self.duck.fetch_df()
         return truth.set_index("item_id")
 
-    def iter_profiles(self) -> Generator[RecommendationRequest]:
-        # collect the with larger impression sets
-        logger.info("querying for test articles")
+    def iter_profiles(self, *, limit: int | None = None) -> Generator[RecommendationRequest]:
+        """
+        Iterate the test profiles.
+
+        Args:
+            ids_only:
+                If ``True``, only yield impression IDs, not entire
+                recommendation requests.
+        """
+        for imp_id in self.iter_profile_ids(limit=limit):
+            yield self.lookup_request(id=imp_id)
+
+    def iter_profile_ids(self, *, limit: int | None = None) -> Generator[int]:
+        """
+        Iterate the identifiers of profiles.
+        """
+        logger.info("querying for test impressions / profiles")
 
         # we use 2 queries: an outer query to list the impression IDs, and inner
         # queries to get the articles and article data.  outer query is in a cloned
         # connection so that they don't interfere with each other.
         with self.duck.cursor() as clone:
-            clone.execute("SELECT imp_id, imp_uuid FROM impressions")
+            query = "SELECT imp_id, imp_uuid FROM impressions"
+            if limit is not None:
+                assert isinstance(limit, int)
+                query += f" LIMIT {limit}"
+
+            clone.execute(query)
 
             # loop over the results and yield the recommendations
             logger.info("iterating test articles")
             while row := clone.fetchone():
                 imp_id, imp_uuid = row
 
-                # get the historical articles and click list
-                past = self.lookup_articles(imp_id, relation="history")
-                clicks = [Click(article_id=a.article_id) for a in past]
+                yield imp_id
 
-                # get the candidate articles
-                today = self.lookup_articles(imp_id, relation="candidate")
+    @overload
+    def lookup_request(self, *, id: int) -> RecommendationRequest: ...
+    @overload
+    def lookup_request(self, *, uuid: UUID) -> RecommendationRequest: ...
+    def lookup_request(self, *, id: int | None = None, uuid: UUID | None = None) -> RecommendationRequest:
+        assert id or uuid
+        if uuid is None:
+            uuid = self.behavior_uuid_for_id(str(id))
 
-                # FIXME the profile ID should probably be the user ID
-                profile = InterestProfile(profile_id=imp_uuid, click_history=clicks, onboarding_topics=[])
-                yield RecommendationRequest(
-                    todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
-                )
+        if id is None:
+            self.duck.execute("SELECT imp_id FROM impressions WHERE imp_uuid = ?", [uuid])
+            if row := self.duck.fetchone():
+                (id,) = row
+            else:
+                raise KeyError(f"unknown impression {uuid}")
+
+        assert id is not None
+
+        # get the historical articles and click list
+        past = self.lookup_articles(id, relation="history")
+        clicks = [Click(article_id=a.article_id) for a in past]
+
+        # get the candidate articles
+        today = self.lookup_articles(id, relation="candidate")
+
+        # FIXME the profile ID should probably be the user ID
+        profile = InterestProfile(profile_id=uuid, click_history=clicks, onboarding_topics=[])
+        return RecommendationRequest(
+            todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
+        )
 
     def lookup_articles(self, imp_id: int, *, relation: Literal["history", "candidate"]) -> list[Article]:
         # run the query for the articles we're looking for
