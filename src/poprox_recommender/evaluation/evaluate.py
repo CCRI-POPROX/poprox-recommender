@@ -74,7 +74,8 @@ def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Ite
         for bres in limit.imap(
             lambda batch: measure_batch.remote(batch, eval_data_ref), batched(profiles, 100), ordered=False
         ):
-            yield from ray.get(bres)
+            assert isinstance(bres, list)
+            yield from bres
 
     else:
         for profile in rec_profiles(eval_data, profile_recs):
