@@ -113,3 +113,5 @@ stages:
         - outputs/${item}-profile-metrics.csv.gz
         - outputs/${item}-metrics.csv:
             cache: false
+        - outputs/${item}-tasks.csv:
+            cache: false
