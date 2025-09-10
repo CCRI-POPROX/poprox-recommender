@@ -76,6 +76,13 @@ class MindData(EvalData):
     def n_articles(self) -> int:
         return self._article_count
 
+    def list_articles(self) -> list[UUID]:
+        """
+        Get the list of all known article UUIDs.
+        """
+        self.duck.execute("SELECT article_uuid FROM articles")
+        return [row[0] for row in self.duck.fetchall()]
+
     def profile_truth(self, user: UUID) -> pd.DataFrame | None:
         """
         Look up the ground-truth data for a particular user profile,
