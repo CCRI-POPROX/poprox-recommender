@@ -1,0 +1,6 @@
+pipeline,Machine,Stage,WallTime,CPUTime,Power,CPUPower,GPUPower
+nrms,,generate,1219.050871658139,4438.0785810000025,,,
+nrms_rrf_static_user,,generate,9209.340145278955,58483.18169499991,,,
+nrms_topic_scores,,generate,9223.636575426906,58457.80822599988,,,
+nrms_topics_static,,generate,9229.476949573029,58615.700737999265,,,
+softmax,,generate,1233.6713961020578,4575.017828999988,,,
