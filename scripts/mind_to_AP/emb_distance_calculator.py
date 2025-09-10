@@ -36,15 +36,21 @@ def assigning_neighbors_topics(top_neighbors, ap_emb):
     score_map = dict(top_neighbors)
     ap_meta["score"] = ap_meta["article_id"].map(score_map)
     ap_meta = ap_meta.sort_values("score", ascending=False, kind="mergesort")
+    # remove the duplicte topic_name
     topics_union = {t for lst in ap_meta["topic_name"] for t in lst}
+    # also calculate the intersection
 
-    return topics_union
+    return topics_union  # topics_intersection make separate function as a flag
 
 
 # data read
 data = project_root() / "models" / "precalculated_model"
 ap_emb = pd.read_parquet(data / "ap_emb.parquet")
 mind_emb = pd.read_parquet(data / "mind_emb.parquet")
+
+# vectorize ap_emb row->ap_artc column->torch
+# vectorize mind_emb row->mind_artc column->torch
+
 
 threshold = 5
 
@@ -65,4 +71,4 @@ for m_article in mind_emb.itertuples():
     topics_union = assigning_neighbors_topics(top_neighbors, ap_emb)
     mind_article_topics[m_id] = [m_headline, topics_union]
 
-breakpoint()
+# save as CSV
