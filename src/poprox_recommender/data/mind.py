@@ -46,6 +46,9 @@ class MindData(EvalData):
         self.name = archive
         self.path = project_root() / "data" / f"{archive}.db"
 
+        if not self.path.exists():
+            raise FileNotFoundError(self.path)
+
         self.duck = duckdb.connect(self.path, read_only=True)
 
         # pre-fetch counts

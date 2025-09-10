@@ -17,6 +17,6 @@ if ! dvc pull -r public -R models tests; then
     fi
 fi
 
-if ! dvc pull data/MINDsmall_dev.zip; then
+if ! dvc pull data/MINDsmall_dev.db; then
     echo '::warning::Private repository not available, some tests will be skipped'
 fi
