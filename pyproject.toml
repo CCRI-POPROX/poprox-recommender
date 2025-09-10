@@ -55,6 +55,7 @@ dev = [
   "hatch ~=1.13",
   "ipython >=8",
   "notebook >=7.2",
+  "py-spy>=0.4.1",
   "pyarrow-stubs ~=17.11",
   { include-group = "lint" },
   { include-group = "test" },
@@ -77,6 +78,7 @@ data = [
   "jq ~=1.8",
   "zstandard ~=0.23",
   "wcmatch>=10.0",
+  "duckdb ~=1.3",
 ]
 # declare extras for Torch install
 cpu = ["torch~=2.2"]

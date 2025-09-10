@@ -68,66 +68,74 @@ class PoproxData(EvalData):
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
-    def iter_profiles(self) -> Generator[RecommendationRequestV2]:
+    def iter_profile_ids(self) -> Generator[UUID]:
         newsletter_ids = self.newsletters_df["newsletter_id"].unique()
+        for id in newsletter_ids:
+            if not isinstance(id, UUID):
+                id = UUID(id)
+            yield id
 
-        for newsletter_id in newsletter_ids:
-            impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]
-            # TODO: Change `account_id` to `profile_id` in the export
-            profile_id = impressions_df.iloc[0]["account_id"]
-            newsletter_created_at = impressions_df.iloc[0]["created_at"]
+    def iter_profiles(self) -> Generator[RecommendationRequestV2]:
+        for newsletter_id in self.iter_profile_ids():
+            yield self.lookup_request(newsletter_id)
 
-            # Filter clicks to those before the newsletter
-            profile_clicks_df = self.clicks_df.loc[self.clicks_df["profile_id"] == profile_id]
-            # TODO: Change `timestamp` to `created_at` in the export
-            filtered_clicks_df = profile_clicks_df[profile_clicks_df["timestamp"] < newsletter_created_at]
+    def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV2:
+        impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]
+        # TODO: Change `account_id` to `profile_id` in the export
+        profile_id = impressions_df.iloc[0]["account_id"]
+        newsletter_created_at = impressions_df.iloc[0]["created_at"]
 
-            # Create Article and Click objects from dataframe rows
-            clicks = []
-            past_articles = []
-            for article_row in filtered_clicks_df.itertuples():
-                article = self.lookup_clicked_article(article_row.article_id)
-                if article:
-                    past_articles.append(article)
+        # Filter clicks to those before the newsletter
+        profile_clicks_df = self.clicks_df.loc[self.clicks_df["profile_id"] == profile_id]
+        # TODO: Change `timestamp` to `created_at` in the export
+        filtered_clicks_df = profile_clicks_df[profile_clicks_df["timestamp"] < newsletter_created_at]
 
-                    clicks.append(
-                        Click(
-                            article_id=article_row.article_id,
-                            newsletter_id=article_row.newsletter_id,
-                            timestamp=article_row.timestamp,
-                        )
-                    )
+        # Create Article and Click objects from dataframe rows
+        clicks = []
+        past_articles = []
+        for article_row in filtered_clicks_df.itertuples():
+            article = self.lookup_clicked_article(article_row.article_id)
+            if article:
+                past_articles.append(article)
 
-            interests = self.interests_df.loc[self.interests_df["account_id"] == profile_id]
-            topics = []
-            for interest in interests.itertuples():
-                topics.append(
-                    AccountInterest(
-                        account_id=profile_id,
-                        entity_id=interest.entity_id,
-                        entity_name=interest.entity_name,
-                        preference=interest.preference,
-                        frequency=interest.frequency if not math.isnan(interest.frequency) else -1,
+                clicks.append(
+                    Click(
+                        article_id=article_row.article_id,
+                        newsletter_id=article_row.newsletter_id,
+                        timestamp=article_row.timestamp,
                     )
                 )
 
-            profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, onboarding_topics=topics)
-
-            # Filter candidate articles to those ingested on the same day as the newsletter (today's articles)
-            candidate_articles = []
-            newsletter_date = newsletter_created_at.date()
-
-            for article_row in self.articles_df[
-                self.articles_df["created_at"].apply(lambda c: c.date()) == newsletter_date
-            ].itertuples():
-                candidate_articles.append(self.lookup_candidate_article(article_row.article_id))
-
-            yield RecommendationRequestV2(
-                candidates=CandidateSet(articles=candidate_articles),
-                interacted=CandidateSet(articles=past_articles),
-                interest_profile=profile,
-                num_recs=TEST_REC_COUNT,
+        interests = self.interests_df.loc[self.interests_df["account_id"] == profile_id]
+        topics = []
+        for interest in interests.itertuples():
+            topics.append(
+                AccountInterest(
+                    account_id=profile_id,
+                    entity_id=interest.entity_id,
+                    entity_name=interest.entity_name,
+                    preference=interest.preference,
+                    frequency=interest.frequency if not math.isnan(interest.frequency) else -1,
+                )
             )
+
+        profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, onboarding_topics=topics)
+
+        # Filter candidate articles to those ingested on the same day as the newsletter (today's articles)
+        candidate_articles = []
+        newsletter_date = newsletter_created_at.date()
+
+        for article_row in self.articles_df[
+            self.articles_df["created_at"].apply(lambda c: c.date()) == newsletter_date
+        ].itertuples():
+            candidate_articles.append(self.lookup_candidate_article(article_row.article_id))
+
+        return RecommendationRequestV2(
+            candidates=CandidateSet(articles=candidate_articles),
+            interacted=CandidateSet(articles=past_articles),
+            interest_profile=profile,
+            num_recs=TEST_REC_COUNT,
+        )
 
     def lookup_candidate_article(self, article_id: UUID):
         article_row = self.articles_df.loc[str(article_id)]

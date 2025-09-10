@@ -12,6 +12,21 @@ stages:
       outs:
         - ${item}
 
+  ingest-mind:
+    foreach:
+      - MINDlarge_train
+      - MINDlarge_dev
+      - MINDsmall_train
+      - MINDsmall_dev
+    do:
+      cmd: python -m poprox_recommender.data.duckscript -D mind_path=${item} ${item}.db mind-schema.sql mind-ingest.sql
+      deps:
+        - mind-schema.sql
+        - mind-ingest.sql
+        - ${item}
+      outs:
+        - ${item}.db
+
   preprocess-training-data:
     cmd: python -m poprox_recommender.training.preprocess
     deps:

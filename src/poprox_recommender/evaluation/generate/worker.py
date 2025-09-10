@@ -4,7 +4,7 @@ from collections.abc import Iterator
 
 import ray
 import torch
-from humanize import naturaldelta
+from humanize import metric, naturaldelta
 from lenskit.logging import Progress, Task, get_logger, item_progress
 from lenskit.parallel.config import ParallelConfig, get_parallel_config, subprocess_config
 from lenskit.parallel.ray import TaskLimiter, init_cluster
@@ -35,16 +35,14 @@ TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
 def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
     logger.info("generating recommendations", dataset=dataset.name)
 
-    profile_iter = dataset.iter_profiles()
-    if n_profiles is None:
-        n_profiles = dataset.n_profiles
-        logger.info("recommending for all %d profiles", n_profiles)
-    else:
-        logger.info("running on subset of %d profiles", n_profiles)
-        profile_iter = it.islice(profile_iter, n_profiles)
+    pc = get_parallel_config()
+    cluster = pc.processes > 1
+
+    count = n_profiles if n_profiles is not None else dataset.n_profiles
+    logger.info("recommending for %d profiles", count)
 
     with (
-        item_progress("recommend", total=n_profiles) as pb,
+        item_progress("recommend", total=count) as pb,
         Task(
             f"generate-{dataset.name}-{pipeline}",
             tags=["poprox", "generate", dataset.name, pipeline],
@@ -52,16 +50,18 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
     ):
         task.save_to_file(outs.base_dir / "generate-task.json")
         pc = get_parallel_config()
-        if pc.processes > 1:
-            cluster_recommend(pipeline, profile_iter, outs, pc, task, pb)
+        if cluster:
+            cluster_recommend(dataset, pipeline, n_profiles, outs, pc, task, pb)
 
         else:
-            serial_recommend(pipeline, profile_iter, outs, pb)
+            serial_recommend(pipeline, dataset.iter_profiles(limit=n_profiles), outs, pb)
 
     logger.info("finished recommending in %s", naturaldelta(task.duration) if task.duration else "unknown time")
     cpu = task.total_cpu()
     if cpu:
         logger.info("recommendation took %s CPU", pretty_time(cpu))
+    if task.system_power:
+        logger.info("recommendation took %s", metric(task.system_power, "J"))
 
 
 def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
@@ -84,8 +84,9 @@ def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], o
 
 
 def cluster_recommend(
+    dataset: MindData,
     pipeline: str,
-    profiles: Iterator[RecommendationRequest],
+    max_profiles: int | None,
     outs: RecOutputs,
     pc: ParallelConfig,
     task: Task,
@@ -94,18 +95,22 @@ def cluster_recommend(
     logger.info("starting parallel evaluation with task limit of %d", pc.processes)
     init_cluster(global_logging=True)
 
-    writers = [
-        ParquetRecommendationWriter.make_actor().remote(outs),
-        JSONRecommendationWriter.make_actor().remote(outs),
-        EmbeddingWriter.make_actor().remote(outs),
+    writers: list[RecommendationWriter] = [
+        ParquetRecommendationWriter.create_remote(outs),
+        JSONRecommendationWriter.create_remote(outs),
+        EmbeddingWriter.create_remote(outs),
     ]
 
+    profiles = dataset.iter_profile_ids(limit=max_profiles)
+    ds_ref = ray.put(dataset)
     rec_batch = dynamic_remote(recommend_batch)
     limit = TaskLimiter(pc.processes)
 
     writes = []
     for n, btask, bwrites in limit.imap(
-        lambda batch: rec_batch.remote(pipeline, batch, writers), it.batched(profiles, BATCH_SIZE), ordered=False
+        lambda batch: rec_batch.remote(pipeline, batch, writers, dataset=ds_ref),
+        it.batched(profiles, BATCH_SIZE),
+        ordered=False,
     ):
         pb.update(n)
         task.add_subtask(btask)
@@ -125,9 +130,8 @@ def cluster_recommend(
             ray.get(rh)
 
     logger.info("closing writers")
-    close = [w.close.remote() for w in writers]
-    for cr in close:
-        wt = ray.get(cr)
+    for w in writers:
+        wt = w.close()
         task.add_subtask(wt)
 
 
@@ -159,7 +163,13 @@ def recommend_for_profile(pipeline: str, request: RecommendationRequest) -> Pipe
         raise e
 
 
-def recommend_batch(pipeline, batch: list[RecommendationRequest], writers: list[RecommendationWriter]):
+def recommend_batch(
+    pipeline,
+    batch: list[RecommendationRequest | int],
+    writers: list[RecommendationWriter],
+    *,
+    dataset: MindData | None = None,
+):
     """
     Batch-recommend function, to be used as a Ray worker task.
     """
@@ -168,12 +178,14 @@ def recommend_batch(pipeline, batch: list[RecommendationRequest], writers: list[
 
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
         for request in batch:
+            if not isinstance(request, RecommendationRequest):
+                assert dataset is not None
+                request = dataset.lookup_request(id=request)
             state = recommend_for_profile(pipeline, request)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
             outputs.append((request, state))
 
-        outputs = ray.put(outputs)
-        writes = [w.write_recommendation_batch.remote(outputs) for w in writers]
+        writes = [w.write_recommendation_batch(outputs) for w in writers]
 
     return len(batch), task, writes
 
@@ -188,18 +200,21 @@ def dynamic_remote(task_or_actor):
     if torch.cuda.is_available():
         _cuda_props = torch.cuda.get_device_properties()
         # Let's take a wild guess that 20 MP units are enough per worker, so a
-        # 80-MP A40 can theoretically run 4 workers.  If we do not request GPUs,
+        # 80-MP A40 can theoretically run 8 workers.  If we do not request GPUs,
         # Ray will keep us from accessing them.
+        #
+        # We also hard-code 2 CPUs per worker, because CUDA-powered eval doesn't
+        # use any other parallelism at this time.
         gpu_frac = 20 / _cuda_props.multi_processor_count
-        logger.debug("setting up GPU task with %d CPU, %.3f GPU", pc.backend_threads, gpu_frac)
+        logger.debug("setting up GPU task with %d CPU, %.3f GPU", 2, gpu_frac)
         remote = ray.remote(
-            num_cpus=pc.backend_threads,
+            num_cpus=2,
             num_gpus=gpu_frac,
             # reuse worker processes between batches
             max_calls=0,
         )
     else:
-        # if we don't have CUDA, don't request GPU
+        # if we don't have CUDA, don't request GPU, and we'll need CPU threads
         logger.debug("setting up remote CPU-only task with %d threads", pc.total_threads)
         remote = ray.remote(
             num_cpus=pc.total_threads,

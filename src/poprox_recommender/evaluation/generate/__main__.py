@@ -25,6 +25,7 @@ import logging
 import os
 from pathlib import Path
 
+import lenskit
 from docopt import docopt
 from lenskit.logging import LoggingConfig
 
@@ -32,6 +33,7 @@ from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.evaluation.generate.worker import generate_profile_recs
+from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.evaluation.generate")
 
@@ -48,6 +50,7 @@ def generate_main():
     if options["--log-file"]:
         log_cfg.set_log_file(options["--log-file"])
     log_cfg.apply()
+    lenskit.configure(cfg_dir=project_root())
 
     out_path = Path(options["--output-path"])
     outputs = RecOutputs(out_path)
