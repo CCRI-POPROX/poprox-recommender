@@ -75,7 +75,7 @@ def full_request_generator(persona_profile, interacted_articles_dict, candidate_
     return RecommendationRequestV2.model_validate(full_request)
 
 
-def store_rec_recall_as_csv(sorted_persona_wise_rec_recall, pipeline, variation, def_pref):
+def store_rec_recall_as_csv(sorted_persona_wise_rec_recall, duration):
     csv_rows = [("Topic", "Precision", "Recall", "Topical_Count", "Candidate_Count")]
     for persona, values in sorted_persona_wise_rec_recall.items():
         csv_rows.append(
@@ -88,7 +88,7 @@ def store_rec_recall_as_csv(sorted_persona_wise_rec_recall, pipeline, variation,
             )  # type: ignore  # noqa: E501
         )
 
-    with open(data / f"{pipeline}_{variation}_{def_pref}.csv", "w", newline="") as csvfile:
+    with open(data / f"{duration}.csv", "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
 
@@ -228,10 +228,13 @@ def synthetic_personas_generator(def_pref, variation, interacted_articles):
 
 def daily_persona_wise_recall_calculator(candidate_articles, persona_topic, response):
     candidate_count = 0
+    seen_headlines = set()
     for article in candidate_articles:
+        article_headline = article.headline
         article_topics = set([m.entity.name for m in article.mentions if m.entity is not None])
-        if persona_topic in article_topics:
+        if persona_topic in article_topics and article_headline not in seen_headlines:
             candidate_count += 1
+            seen_headlines.add(article_headline)
 
     articles = response["recommendations"]["articles"]
     topical_count = 0
@@ -264,7 +267,7 @@ def avg_persona_wise_rec_recall_over_days_calculator(persona_wise_rec_recall):
 
 
 # fetching article and mention data
-data = project_root() / "data" / "Test"
+data = project_root() / "data" / "Test_Large"
 articles_df = pd.read_parquet(data / "articles.parquet")
 mentions_df = pd.read_parquet(data / "mentions.parquet")
 
@@ -277,7 +280,7 @@ all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 # print(len(all_dates))
 
 history_dates = all_dates[-60:-30]
-cadidate_dates = all_dates[-45:-30]
+cadidate_dates = all_dates[-30:]
 
 
 # preparing interacted article
@@ -301,6 +304,7 @@ static_num_recs = 10
 variation = "topical_pref_only"
 pipeline = "nrms_topic_scores"
 def_pref = 3
+duration = "topic_embeddings_def"
 
 # synthetic data generation
 synthetic_personas = synthetic_personas_generator(def_pref, variation, interacted_articles)
@@ -356,4 +360,4 @@ for persona_topic, persona_profile in synthetic_personas.items():
 
 
 # store result in CSV
-store_rec_recall_as_csv(persona_wise_rec_recall, pipeline, variation, def_pref)
+store_rec_recall_as_csv(persona_wise_rec_recall, duration)
