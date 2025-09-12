@@ -156,3 +156,4 @@ $RECYCLE.BIN/
 .pixi
 *.egg-info
 data/Test_Large/articles.parquet
+data/Test_Large/articles.parquet
