@@ -155,3 +155,4 @@ $RECYCLE.BIN/
 # pixi environments
 .pixi
 *.egg-info
+data/Test_Large/articles.parquet
