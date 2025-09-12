@@ -22,7 +22,7 @@ from pathlib import Path
 
 import pandas as pd
 from docopt import docopt
-from lenskit.logging import LoggingConfig, get_logger
+from lenskit.logging import LoggingConfig, Task, get_logger
 
 logger = get_logger("poprox_recommender.evaluation.collect")
 
@@ -52,6 +52,25 @@ def main():
     csv_out = path.parent / f"{name}-metrics.csv"
     logger.info("saving metrics for %d pipelines", len(agg_results), file=str(csv_out))
     rdf.to_csv(csv_out, index=True)
+
+    gen_stats = {}
+    for tf in sorted(path.glob("*/generate-task.json")):
+        task = Task.model_validate_json(tf.read_text())
+        gen_stats[tf.parent.name] = {
+            "Machine": task.machine,
+            "Stage": "generate",
+            "WallTime": task.duration,
+            "CPUTime": task.total_cpu(),
+            "Power": task.system_power,
+            "CPUPower": task.cpu_power,
+            "GPUPower": task.gpu_power,
+        }
+
+    tdf = pd.DataFrame.from_dict(gen_stats, "index")
+    tdf.index.name = "pipeline"
+    csv_out = path.parent / f"{name}-tasks.csv"
+    logger.info("saving task statistics to %s", csv_out)
+    tdf.to_csv(csv_out, index=True)
 
     prof_results = {}
     for mf in sorted(path.glob("*/profile-metrics.csv.gz"), key=lambda p: p.as_posix()):

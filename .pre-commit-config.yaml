@@ -16,9 +16,10 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.1
+    rev: v8.28.0
     hooks:
       - id: gitleaks
+        exclude: notebooks/.*\.ipynb
   # - repo: https://github.com/ComPWA/taplo-pre-commit
   #   rev: v0.9.3
   #   hooks:
