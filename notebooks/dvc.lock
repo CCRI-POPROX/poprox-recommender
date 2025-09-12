@@ -116,28 +116,28 @@ stages:
     deps:
     - path: ../outputs/mind-small-metrics.csv
       hash: md5
-      md5: e7c01e76b5ea059354845643b6d34f9d
-      size: 745
+      md5: 87a0be402dbaf92d36adb9ed42e44565
+      size: 462
     - path: ../outputs/mind-small-tasks.csv
       hash: md5
       md5: 4f1d722aef2a61a1af2270cb3dcd87c2
       size: 601
     - path: ../outputs/mind-subset-metrics.csv
       hash: md5
-      md5: 1d3a95128fa2114258992a3bad029d44
-      size: 738
+      md5: 82ede306356238156f4899f6b1f9501a
+      size: 461
     - path: ../outputs/mind-subset-tasks.csv
       hash: md5
       md5: 78a50f8951efd12cf4c750ef81d2e908
       size: 581
     - path: ../outputs/mind-val-metrics.csv
       hash: md5
-      md5: 7de5e2635b494eb78ef6e75c8bfd8ec8
-      size: 638
+      md5: 9e691c4cfea287a0fb8bab4948484aa0
+      size: 461
     - path: ../outputs/mind-val-tasks.csv
       hash: md5
-      md5: 7f97b34a8736deb6508a123db8eae967
-      size: 383
+      md5: c05e9a3bf9458f13816fbe5d9d01e1dc
+      size: 601
     - path: mind-quick-summary.md
       hash: md5
       md5: 1167b582a6a11c123959902ae4076e42
@@ -145,5 +145,5 @@ stages:
     outs:
     - path: mind-quick-summary.ipynb
       hash: md5
-      md5: 804f78149a0947117eb72cf584045591
-      size: 453993
+      md5: f12ef8cac6dfe4abe65701a2dfe12850
+      size: 442763
