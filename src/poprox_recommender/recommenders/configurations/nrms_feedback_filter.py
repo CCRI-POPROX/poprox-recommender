@@ -8,7 +8,10 @@ from poprox_recommender.components.embedders.user_article_feedback import (
     UserArticleFeedbackConfig,
     UserArticleFeedbackEmbedder,
 )
-from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
+from poprox_recommender.components.embedders.user_topic_prefs import (
+    StaticDefinitionUserTopicEmbedder,
+    UserTopicEmbedderConfig,
+)
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -49,16 +52,15 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Embed the user (topics)
-    ue_config2 = UserOnboardingConfig(
+    ue_config2 = UserTopicEmbedderConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
-        embedding_source="static",
         topic_embedding="nrms",
         topic_pref_values=[4, 5],
     )
     e_topic_positive = builder.add_component(
         "user-embedder2",
-        UserOnboardingEmbedder,
+        StaticDefinitionUserTopicEmbedder,
         ue_config2,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
@@ -66,16 +68,15 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Embed the user2 (topics)
-    ue_config3 = UserOnboardingConfig(
+    ue_config3 = UserTopicEmbedderConfig(
         model_path=model_file_path("nrms-mind/user_encoder.safetensors"),
         device=device,
-        embedding_source="static",
         topic_embedding="nrms",
         topic_pref_values=[1, 2],
     )
     e_topic_negative = builder.add_component(
         "user-embedder3",
-        UserOnboardingEmbedder,
+        StaticDefinitionUserTopicEmbedder,
         ue_config3,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
