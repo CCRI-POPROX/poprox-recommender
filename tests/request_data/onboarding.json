@@ -27,7 +27,7 @@
       {
         "entity_id": "c74a986e-3bd9-4be0-b8c1-bd95e376d064",
         "entity_name": "Education",
-        "preference": 3
+        "preference": 1
       },
       {
         "entity_id": "e531cbd0-d967-4d87-ad13-3649fc00ffb4",
@@ -37,7 +37,7 @@
       {
         "entity_id": "16323227-4b42-4363-b67c-fd2be57c9aa1",
         "entity_name": "Oddities",
-        "preference": 3
+        "preference": 1
       },
       {
         "entity_id": "b822877a-c1e2-44a9-8d6c-4610d8047a9a",
@@ -52,7 +52,7 @@
       {
         "entity_id": "b2bb4e26-6684-4cbd-9fd8-fa98ae87ca57",
         "entity_name": "Religion",
-        "preference": 3
+        "preference": 1
       },
       {
         "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
@@ -62,7 +62,7 @@
       {
         "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
         "entity_name": "U.S. news",
-        "preference": 5
+        "preference": 1
       },
       {
         "entity_id": "1e813fd6-0998-43fb-9839-75fa96b69b32",
@@ -77,7 +77,7 @@
       {
         "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
         "entity_name": "Politics",
-        "preference": 3
+        "preference": 1
       },
       {
         "entity_id": "606afcb8-3fc1-47a7-9da7-3d95115373a3",
@@ -87,12 +87,12 @@
       {
         "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
         "entity_name": "Entertainment",
-        "preference": 3
+        "preference": 1
       },
       {
         "entity_id": "45770171-36d1-4568-a270-bf80d6fe18e7",
         "entity_name": "World news",
-        "preference": 3
+        "preference": 5
       }
     ]
   },
