@@ -12,7 +12,7 @@ WORKDIR /src/poprox-recommender
 # Install directly to the Lambda task root instead of a separate venv
 ENV UV_PROJECT_ENVIRONMENT=${LAMBDA_TASK_ROOT}
 ENV UV_PYTHON=3.12
-RUN uv sync --no-editable --no-dev --extra cpu --extra deploy --extra s3
+RUN uv sync --no-editable --no-dev --group torch-cpu --extra deploy --extra s3
 # Install the local package properly
 RUN uv pip install --system .
 
