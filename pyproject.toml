@@ -86,8 +86,8 @@ conflicts = [[{ group = "torch-cpu" }, { group = "torch-cuda" }]]
 # Use default index strategy (do NOT set unsafe-first-match)
 
 [tool.uv.sources]
-# Use CUDA index for torch when available
-torch = { index = "pytorch-cuda" }
+# Use CPU index for torch when using torch-cpu group, otherwise default to pytorch-cuda
+torch = { index = "pytorch-cpu", marker = "extra == 'group-18-poprox-recommender-torch-cpu'" }
 
 # pre-release version of LensKit
 [[tool.uv.index]]

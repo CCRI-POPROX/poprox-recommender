@@ -26,7 +26,7 @@ class NRMSWithUserModel(Component):
         candidate_articles: CandidateSet,
         interest_profile: InterestProfile,
         articles_clicked: Optional[CandidateSet] = None,
-    ) -> tuple[RecommendationList, str, str]:
+    ) -> tuple[RecommendationList, str, str, dict]:
         # Create an LLMRanker instance just to generate the user model
         llm_ranker = LLMRanker(LLMRankerConfig())
         
@@ -35,8 +35,11 @@ class NRMSWithUserModel(Component):
         user_model = llm_ranker._build_user_model(profile_str)
         request_id = str(interest_profile.profile_id)
         
-        # Return the NRMS ranking with the LLM-generated user model
-        return (nrms_ranking, user_model, request_id)
+        # Get the metrics from the LLMRanker instance (from user model generation)
+        ranker_metrics = llm_ranker.llm_metrics
+        
+        # Return the NRMS ranking with the LLM-generated user model and metrics
+        return (nrms_ranking, user_model, request_id, ranker_metrics)
 
 ##TODO:
 # allow weigths for the scores (1/-1)
