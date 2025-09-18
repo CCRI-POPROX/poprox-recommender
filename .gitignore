@@ -157,6 +157,8 @@ $RECYCLE.BIN/
 *.egg-info
 
 data/*.json
+data/pipeline_outputs/
+data/pipeline_outputs/*
 
 commands.txt
 testing_data/
