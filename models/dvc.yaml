@@ -9,4 +9,4 @@ stages:
     - ../src/poprox_recommender/training/train.py
     outs:
     - nrms-mind
-    frozen: true
+    frozen: false

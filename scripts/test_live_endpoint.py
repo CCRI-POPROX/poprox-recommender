@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """
-Testing script that:
-1. Grabs all profile requests from tests/request_data/profiles/
-2. For each, hits the live endpoint for recommendations
-3. Grabs the corresponding output objects from the run in the S3 bucket
-4. Persists those objects locally in a dir mapped to the profile name
+Comprehensive live endpoint testing script that:
+1. Tests all available pipelines against all profile requests from tests/request_data/profiles/
+2. Runs multiple iterations per pipeline-profile combination for accurate timing data
+3. Records detailed timing statistics and performance metrics
+4. Downloads and saves S3 outputs for each test run
+5. Generates comprehensive timing summaries and aggregated results
 
 Usage:
-    python scripts/test_live_endpoint.py [--endpoint URL] [--output-dir DIR] [--bucket BUCKET] [--dry-run]
+    python scripts/test_live_endpoint.py [--endpoint URL] [--output-dir DIR] [--bucket BUCKET] [--runs N] [--dry-run]
 
 Args:
-    --endpoint: Live endpoint URL (default: auto-detect from serverless config)
+    --endpoint: Live endpoint URL (supports pipeline parameter for different pipelines)
     --output-dir: Local directory to save outputs (default: evaluation_data/)
     --bucket: S3 bucket name (default: from PERSISTENCE_BUCKET env var)
+    --runs: Number of runs per pipeline-profile combination (default: 3)
     --dry-run: Don't actually make requests or download files
 """
 
@@ -21,9 +23,12 @@ import json
 import logging
 import os
 import sys
+import time
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 import boto3
 import requests
@@ -34,11 +39,24 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+def discover_pipelines() -> list[str]:
+    """
+    Discover the list of available pipeline configuration names.
+    """
+    return [
+        "llm_rank_rewrite",
+        "llm_rank_only", 
+        "nrms_baseline",
+        "nrms_baseline_rewrite",
+    ]
+
+
 class LiveEndpointTester:
-    def __init__(self, endpoint_url: str, output_dir: str, bucket_name: str, dry_run: bool = False):
-        self.endpoint_url = endpoint_url
+    def __init__(self, endpoint_url: str, output_dir: str, bucket_name: str, num_runs: int = 3, dry_run: bool = False):
+        self.base_endpoint_url = endpoint_url
         self.output_dir = Path(output_dir)
         self.bucket_name = bucket_name
+        self.num_runs = num_runs
         self.dry_run = dry_run
 
         # Setup S3 client
@@ -52,25 +70,42 @@ class LiveEndpointTester:
         if not self.profiles_dir.exists():
             raise FileNotFoundError(f"Profiles directory not found: {self.profiles_dir}")
 
+        # Storage for all results
+        self.all_results = []
+
     def get_profile_files(self) -> list[Path]:
         """Get all profile JSON files."""
         return list(self.profiles_dir.glob("*.json"))
 
-    def make_recommendation_request(self, profile_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Make a recommendation request to the live endpoint."""
+    def build_pipeline_url(self, pipeline_name: str) -> str:
+        """Build endpoint URL with pipeline parameter."""
+        parsed = urlparse(self.base_endpoint_url)
+        query_params = parse_qs(parsed.query)
+        query_params['pipeline'] = [pipeline_name]
+        
+        new_query = urlencode(query_params, doseq=True)
+        return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+
+    def make_recommendation_request(self, profile_data: Dict[str, Any], pipeline_url: str) -> tuple[Dict[str, Any], float]:
+        """Make a recommendation request to the live endpoint and return response with timing."""
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
 
         if self.dry_run:
-            logger.info(f"[DRY RUN] Would send request to {self.endpoint_url}")
-            return {"session_id": f"dry_run_{datetime.now().isoformat()}", "recommendations": []}
+            logger.info(f"[DRY RUN] Would send request to {pipeline_url}")
+            return {"session_id": f"dry_run_{datetime.now().isoformat()}", "recommendations": {"articles": []}}, 0.1
 
-        logger.info(f"Sending request to {self.endpoint_url}")
-        response = requests.post(self.endpoint_url, json=profile_data, headers=headers, timeout=30)
+        logger.debug(f"Sending request to {pipeline_url}")
+        start_time = time.time()
+        response = requests.post(pipeline_url, json=profile_data, headers=headers, timeout=60)
+        end_time = time.time()
+        
         response.raise_for_status()
+        execution_time = end_time - start_time
 
         result = response.json()
-        logger.info(f"Received response with {len(result['recommendations']['articles'])} recommendations")
-        return result
+        num_recs = len(result.get('recommendations', {}).get('articles', []))
+        logger.debug(f"Received response with {num_recs} recommendations in {execution_time:.3f}s")
+        return result, execution_time
 
     def extract_session_id_from_response(self, response: Dict[str, Any]) -> str | None:
         """Extract session ID from response metadata."""
@@ -139,48 +174,99 @@ class LiveEndpointTester:
                 else:
                     logger.error(f"Error downloading {s3_key}: {e}")
 
-    def process_profile(self, profile_file: Path):
-        """Process a single profile file."""
+    def process_profile_pipeline_combination(self, profile_file: Path, pipeline_name: str, run_number: int):
+        """Process a single profile file with a specific pipeline and run number."""
         profile_name = profile_file.stem
-        logger.info(f"Processing profile: {profile_name}")
+        logger.info(f"Processing {profile_name} with {pipeline_name} (run {run_number}/{self.num_runs})")
 
         # Load profile data
         with open(profile_file, "r") as f:
             profile_data = json.load(f)
 
-        # Extract profile ID for matching
-        profile_id = profile_data.get("interest_profile", {}).get("profile_id", "")
+        # Create unique profile ID for this run to avoid overwrites
+        original_profile_id = profile_data.get("interest_profile", {}).get("profile_id", "")
+        unique_profile_id = str(uuid.uuid4())
+        profile_data["interest_profile"]["profile_id"] = unique_profile_id
 
-        # Make recommendation request
+        # Build pipeline-specific URL
+        pipeline_url = self.build_pipeline_url(pipeline_name)
+
+        # Make recommendation request with timing
         request_time = datetime.now()
         try:
-            response = self.make_recommendation_request(profile_data)
+            response, execution_time = self.make_recommendation_request(profile_data, pipeline_url)
         except Exception as e:
-            logger.error(f"Failed to make request for {profile_name}: {e}")
+            logger.error(f"Failed to make request for {profile_name} with {pipeline_name}: {e}")
             return
-
-        # Save response locally
-        response_file = self.output_dir / profile_name / "response.json"
-        response_file.parent.mkdir(exist_ok=True)
-
-        if not self.dry_run:
-            with open(response_file, "w") as f:
-                json.dump(response, f, indent=2)
 
         # Extract session ID and download S3 outputs
         session_id = self.extract_session_id_from_response(response)
         if not session_id:
-            session_id = self.find_recent_s3_session(profile_id, request_time)
+            session_id = self.find_recent_s3_session(unique_profile_id, request_time)
 
+        # Create run-specific directory
+        run_dir = self.output_dir / f"{profile_name}_{pipeline_name}_run{run_number}"
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save response locally
+        if not self.dry_run:
+            response_file = run_dir / "response.json"
+            with open(response_file, "w") as f:
+                json.dump(response, f, indent=2)
+
+        # Download S3 outputs
         if session_id:
-            logger.info(f"Found session ID: {session_id}")
-            self.download_s3_outputs(session_id, profile_name)
+            logger.debug(f"Found session ID: {session_id}")
+            self.download_s3_outputs(session_id, f"{profile_name}_{pipeline_name}_run{run_number}")
         else:
-            logger.warning(f"Could not find session ID for {profile_name}")
+            logger.warning(f"Could not find session ID for {profile_name} with {pipeline_name}")
+
+        # Create structured result similar to local_req.py
+        candidates = profile_data.get("candidates", {}).get("articles", [])
+        recommendations = response.get("recommendations", {}).get("articles", [])
+        
+        # Map article_id to original headline for quick lookup
+        article_id_to_headline = {article.get("article_id"): article.get("headline") for article in candidates}
+
+        structured_output = {
+            "recommendations": [
+                {
+                    "rank": idx + 1,
+                    "headline": article.get("headline", ""),
+                    "original_headline": article_id_to_headline.get(article.get("article_id"), "Unknown"),
+                    "article_id": article.get("article_id"),
+                }
+                for idx, article in enumerate(recommendations)
+            ],
+            "profile_name": profile_name,
+            "pipeline_name": pipeline_name,
+            "run_number": run_number,
+            "execution_time_seconds": execution_time,
+            "timestamp": time.time(),
+            "request_time": request_time.isoformat(),
+            "session_id": session_id,
+            "original_profile_id": original_profile_id,
+            "unique_profile_id": unique_profile_id,
+            "candidate_pool": [article.get("headline", "") for article in candidates],
+            "num_candidates": len(candidates),
+            "num_recommendations": len(recommendations),
+            "recommender_meta": response.get("recommender", {}),
+        }
+
+        # Save individual run results
+        if not self.dry_run:
+            results_file = run_dir / "structured_results.json"
+            with open(results_file, "w") as f:
+                json.dump(structured_output, f, indent=2)
+
+        # Add to global results
+        self.all_results.append(structured_output)
+
+        logger.info(f"  Completed {profile_name} with {pipeline_name} in {execution_time:.3f}s")
 
     def warmup_endpoint(self):
         """Make a GET request to the /warmup endpoint with retry logic."""
-        warmup_url = f"{self.endpoint_url.split('/?')[0]}/warmup"
+        warmup_url = f"{self.base_endpoint_url.split('/?')[0]}/warmup"
 
         if self.dry_run:
             logger.info(f"[DRY RUN] Would send warmup request to {warmup_url}")
@@ -198,25 +284,122 @@ class LiveEndpointTester:
                     logger.warning(f"Warmup attempt {attempt + 1} failed: {e}, retrying...")
                     continue
                 else:  # Second attempt failed
-                    logger.error(f"Warmup failed after 2 attempts: {e}")
-                    raise
+                    logger.warning(f"Warmup failed after 2 attempts: {e}")
+                    logger.warning("Continuing without warmup...")
+
+    def calculate_timing_statistics(self) -> Dict[str, Dict[str, float]]:
+        """Calculate timing statistics similar to local_req.py."""
+        timing_summary = {}
+        for result in self.all_results:
+            key = (result["profile_name"], result["pipeline_name"])
+            if key not in timing_summary:
+                timing_summary[key] = []
+            timing_summary[key].append(result["execution_time_seconds"])
+
+        # Calculate timing statistics
+        timing_stats = {}
+        for (profile, pipeline), times in timing_summary.items():
+            timing_stats[f"{profile}_{pipeline}"] = {
+                "mean_time": sum(times) / len(times),
+                "min_time": min(times),
+                "max_time": max(times),
+                "runs": len(times),
+                "total_time": sum(times),
+            }
+
+        return timing_stats
+
+    def save_results(self):
+        """Save comprehensive results similar to local_req.py."""
+        if self.dry_run:
+            logger.info("[DRY RUN] Would save results")
+            return
+
+        # Save timing summary
+        timing_stats = self.calculate_timing_statistics()
+        timing_file = self.output_dir / "timing_summary.json"
+        with open(timing_file, "w") as f:
+            json.dump(timing_stats, f, indent=2)
+
+        # Save all results
+        all_results_file = self.output_dir / "all_results.json"
+        with open(all_results_file, "w") as f:
+            json.dump(self.all_results, f, indent=2)
+
+        # Save summary statistics
+        summary = {
+            "total_tests": len(self.all_results),
+            "profiles_tested": len(set(r["profile_name"] for r in self.all_results)),
+            "pipelines_tested": len(set(r["pipeline_name"] for r in self.all_results)),
+            "runs_per_combination": self.num_runs,
+            "total_execution_time": sum(r["execution_time_seconds"] for r in self.all_results),
+            "average_execution_time": sum(r["execution_time_seconds"] for r in self.all_results) / len(self.all_results) if self.all_results else 0,
+        }
+        
+        summary_file = self.output_dir / "test_summary.json" 
+        with open(summary_file, "w") as f:
+            json.dump(summary, f, indent=2)
+
+        logger.info(f"Results saved to {self.output_dir}")
+        logger.info(f"Timing summary: {timing_file}")
+        logger.info(f"All results: {all_results_file}")
+        logger.info(f"Test summary: {summary_file}")
 
     def run(self):
-        """Run the testing script for all profiles."""
-        # Warmup the endpoint before processing profiles
-        self.warmup_endpoint()
+        """Run comprehensive testing for all profiles and pipelines."""
+        # Try to warmup the endpoint before processing profiles (skip if it fails)
+        try:
+            self.warmup_endpoint()
+        except Exception as e:
+            logger.warning(f"Skipping warmup due to error: {e}")
 
         profile_files = self.get_profile_files()
-        logger.info(f"Found {len(profile_files)} profile files")
+        available_pipelines = discover_pipelines()
+        
+        logger.info(f"Starting comprehensive testing:")
+        logger.info(f"  Profiles: {len(profile_files)}")
+        logger.info(f"  Pipelines: {available_pipelines}")
+        logger.info(f"  Runs per combination: {self.num_runs}")
+        logger.info(f"  Total tests: {len(profile_files) * len(available_pipelines) * self.num_runs}")
 
+        total_tests = 0
+        failed_tests = 0
+
+        # Test each profile with each pipeline multiple times
         for profile_file in profile_files:
-            try:
-                self.process_profile(profile_file)
-            except Exception as e:
-                logger.error(f"Error processing {profile_file}: {e}")
-                continue
+            profile_name = profile_file.stem
+            logger.info(f"\nTesting profile: {profile_name}")
+            
+            for pipeline_name in available_pipelines:
+                logger.info(f"  Pipeline: {pipeline_name}")
+                
+                for run_number in range(1, self.num_runs + 1):
+                    total_tests += 1
+                    try:
+                        self.process_profile_pipeline_combination(profile_file, pipeline_name, run_number)
+                    except Exception as e:
+                        failed_tests += 1
+                        logger.error(f"    Error in run {run_number}: {e}")
+                        continue
 
-        logger.info("Testing completed!")
+        # Save all results
+        self.save_results()
+
+        # Print final summary
+        success_rate = (total_tests - failed_tests) / total_tests * 100 if total_tests > 0 else 0
+        logger.info(f"\n=== Testing Completed ===")
+        logger.info(f"Total tests: {total_tests}")
+        logger.info(f"Successful: {total_tests - failed_tests}")
+        logger.info(f"Failed: {failed_tests}")
+        logger.info(f"Success rate: {success_rate:.1f}%")
+        
+        if self.all_results:
+            avg_time = sum(r["execution_time_seconds"] for r in self.all_results) / len(self.all_results)
+            total_time = sum(r["execution_time_seconds"] for r in self.all_results)
+            logger.info(f"Average execution time: {avg_time:.3f}s")
+            logger.info(f"Total execution time: {total_time:.3f}s")
+
+        logger.info(f"Results saved to: {self.output_dir}")
 
 
 def get_endpoint_url_from_serverless() -> str:
@@ -231,10 +414,11 @@ def get_endpoint_url_from_serverless() -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Test live endpoint with profile requests")
-    parser.add_argument("--endpoint", help="Live endpoint URL")
+    parser = argparse.ArgumentParser(description="Comprehensive live endpoint testing for all pipelines and profiles")
+    parser.add_argument("--endpoint", help="Live endpoint URL (supports pipeline parameter)")
     parser.add_argument("--output-dir", default="evaluation_data", help="Output directory")
     parser.add_argument("--bucket", help="S3 bucket name (default: from env)")
+    parser.add_argument("--runs", type=int, default=3, help="Number of runs per pipeline-profile combination")
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
 
     args = parser.parse_args()
@@ -253,7 +437,11 @@ def main():
 
     # Run the tester
     tester = LiveEndpointTester(
-        endpoint_url=endpoint_url, output_dir=args.output_dir, bucket_name=bucket_name, dry_run=args.dry_run
+        endpoint_url=endpoint_url, 
+        output_dir=args.output_dir, 
+        bucket_name=bucket_name, 
+        num_runs=args.runs,
+        dry_run=args.dry_run
     )
 
     tester.run()

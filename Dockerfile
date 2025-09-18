@@ -12,8 +12,7 @@ WORKDIR /src/poprox-recommender
 # Install directly to the Lambda task root instead of a separate venv
 ENV UV_PROJECT_ENVIRONMENT=${LAMBDA_TASK_ROOT}
 ENV UV_PYTHON=3.12
-ENV UV_LOCKED=TRUE
-RUN uv sync --no-editable --no-default-groups --extra cpu --extra deploy --extra s3
+RUN uv sync --no-editable --no-dev --group torch-cpu --extra deploy --extra s3
 # Install the local package properly
 RUN uv pip install --system .
 
@@ -40,9 +39,6 @@ COPY models/ ${LAMBDA_TASK_ROOT}/models/
 
 # Bake the prompts into the image
 COPY prompts/ ${LAMBDA_TASK_ROOT}/prompts/
-
-# Try to import - if this fails, we'll see the debug info above
-# RUN python -c "import poprox_recommender.api.main; print('Import successful')"
 
 # Set the transformers cache to a writeable directory
 ENV TRANSFORMERS_CACHE=/tmp/.transformers

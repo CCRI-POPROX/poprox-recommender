@@ -162,3 +162,5 @@ data/pipeline_outputs/*
 
 commands.txt
 testing_data/
+
+data/pipeline_outputs/
