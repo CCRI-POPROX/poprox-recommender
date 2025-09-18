@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Optional, Union
 
 import openai
@@ -44,6 +45,7 @@ class LLMRanker(Component):
 
     def __init__(self, config: LLMRankerConfig):
         self.config = config
+        self.llm_metrics = {}
 
     def _structure_interest_profile(
         self, interest_profile: InterestProfile, articles_clicked: Union[CandidateSet, None]
@@ -106,11 +108,20 @@ Headlines of articles the user has clicked on (most recent first):
             prompt = f.read()
 
         client = openai.OpenAI(api_key=self.config.openai_api_key)
+
+        start_time = time.time()
         response = client.responses.create(
-            model="gpt-4.1-2025-04-14",
+            model="gpt-4.1-mini-2025-04-14",
             instructions=prompt,
             input=interest_profile_str,
         )
+        end_time = time.time()
+
+        self.llm_metrics["user_profile_generation"] = {
+            "input_tokens": response.usage.input_tokens,
+            "output_tokens": response.usage.output_tokens,
+            "duration_seconds": end_time - start_time,
+        }
 
         return response.output_text
 
@@ -147,13 +158,21 @@ Candidate articles:
 Make sure you select EXACTLY {self.config.num_slots} articles from the candidate pool.
 """
 
+        start_time = time.time()
         response = client.responses.parse(
             model=self.config.model, instructions=prompt, input=input_txt, text_format=LlmResponse, temperature=0.5
         )
+        end_time = time.time()
 
-        response = response.output_parsed
-        selected = [candidate_articles.articles[i] for i in response.recommended_article_ids]
+        self.llm_metrics["article_ranking"] = {
+            "input_tokens": response.usage.input_tokens,
+            "output_tokens": response.usage.output_tokens,
+            "duration_seconds": end_time - start_time,
+        }
+
+        parsed_response = response.output_parsed
+        selected = [candidate_articles.articles[i] for i in parsed_response.recommended_article_ids]
         original_recommendations = RecommendationList(articles=selected)
 
-        # Return tuple with request_id for persistence in rewriter
-        return (original_recommendations, user_model, self.request_id)
+        # Return tuple with request_id and metrics for persistence in rewriter
+        return (original_recommendations, user_model, self.request_id, self.llm_metrics)

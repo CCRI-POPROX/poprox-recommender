@@ -34,9 +34,12 @@ def discover_pipelines() -> list[str]:
     """
     Discover the list of available pipeline configuration names.
     """
-    cfg_dir = Path(__file__).parent / "configurations"
-    names = [p.stem for p in cfg_dir.glob("*.py") if not p.name.startswith("_")]
-    logger.debug("scanned pipeline configurations", path=str(cfg_dir), count=len(names))
+    names = [
+        "llm_rank_rewrite",
+        "llm_rank_only",
+        "nrms_baseline",
+        "nrms_baseline_rewrite",
+    ]
     return names
 
 

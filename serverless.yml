@@ -6,16 +6,21 @@ provider:
   name: aws
   runtime: python3.11
   profile: admin
-  versionFunctions: false
+  # Enable versioning so provisioned concurrency can attach to an alias/version
+  versionFunctions: true
   region: ${opt:region, "us-east-1"}
   stage: ${opt:stage, "local"}
   memorySize: 2048 # 2gb
-  timeout: 60
+  timeout: 30
   architecture: x86_64
   environment:
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
     PERSISTENCE_BUCKET: ${self:custom.pipelineBucket}
     PERSISTENCE_PREFIX: pipeline-outputs/
+    # Keep Hugging Face/Transformers strictly offline at runtime to avoid
+    # network fetch attempts during cold start initialization.
+    TRANSFORMERS_OFFLINE: "1"
+    HF_HOME: /tmp/huggingface
 
   iam:
     role:
@@ -56,6 +61,9 @@ functions:
       name: poprox-recommender
     memorySize: 4096
     ephemeralStorageSize: 2048
+    # Keep at least one initialized execution environment to avoid 30s API GW timeout
+    # on cold starts while large models/pipelines load.
+    provisionedConcurrency: 1
     events:
       - httpApi:
           path: /warmup

@@ -92,6 +92,40 @@ class S3PersistenceManager(PersistenceManager):
                 "storage_location": f"s3://{self.bucket}/{self.prefix}{session_id}/",
                 **(metadata or {}),
             }
+            
+            # Add LLM metrics summary if available
+            if metadata and "llm_metrics" in metadata:
+                llm_metrics = metadata["llm_metrics"]
+                
+                # Calculate total tokens and time across all LLM calls
+                total_input_tokens = 0
+                total_output_tokens = 0
+                total_duration = 0
+                
+                # Add ranker metrics
+                if "ranker" in llm_metrics:
+                    for metrics in llm_metrics["ranker"].values():
+                        total_input_tokens += metrics.get("input_tokens", 0)
+                        total_output_tokens += metrics.get("output_tokens", 0)
+                        total_duration += metrics.get("duration_seconds", 0)
+                
+                # Add rewriter metrics
+                if "rewriter" in llm_metrics:
+                    for article_metrics in llm_metrics["rewriter"]:
+                        total_input_tokens += article_metrics.get("input_tokens", 0)
+                        total_output_tokens += article_metrics.get("output_tokens", 0)
+                        total_duration += article_metrics.get("duration_seconds", 0)
+                
+                full_metadata["llm_summary"] = {
+                    "total_input_tokens": total_input_tokens,
+                    "total_output_tokens": total_output_tokens,
+                    "total_tokens": total_input_tokens + total_output_tokens,
+                    "total_duration_seconds": total_duration,
+                    "num_llm_calls": (
+                        len(llm_metrics.get("ranker", {})) + 
+                        len(llm_metrics.get("rewriter", []))
+                    )
+                }
 
             self.s3.put_object(
                 Bucket=self.bucket,

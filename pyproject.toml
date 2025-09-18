@@ -21,24 +21,21 @@ dependencies = [
   "uvicorn~=0.34.0",
   "lenskit>=2025.3.0a4.dev145",
   "nltk>=3.8,<4",
-  "torch~=2.2",
   "smart_open==7.*",
   "safetensors>=0.4,<1",
-  "transformers[torch]>=4.41,<5",
+  "transformers>=4.41,<5",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
   "openai>=1.76.0",
   "python-dotenv>=1.1.0",
   "pydantic>=2.7.4",
   "scikit-learn>=1.6.1",
+  "accelerate>=0.26.0",
 ]
 
 [project.optional-dependencies]
 deploy = ["awslambdaric ~=2.2"]
 # S3 persistence support
 s3 = ["boto3 >=1.26.0"]
-# declare extras for Torch install
-cpu = ["torch~=2.2"]
-cuda = ["torch~=2.2"]
 
 [project.urls]
 Homepage = "https://docs.poprox.ai"
@@ -76,44 +73,40 @@ data = [
   "zstandard ~=0.23",
   "wcmatch>=10.0",
 ]
-# declare extras for Torch install
-cpu = ["torch~=2.2"]
-cuda = ["torch~=2.2"]
 
-## UV index setup for PyTorch
+# ---- Choose your Torch build at sync time (exactly one) ----
+torch-cpu = ["torch==2.8.0+cpu"]
+# If you really want CUDA 12.8 wheels (as your previous error shows):
+torch-cuda = ["torch==2.8.0+cu128"]
+
+## UV resolver/setup for PyTorch
 [tool.uv]
-conflicts = [[{ group = "cpu" }, { group = "cuda" }]]
-# theoretically, our indices should keep us from needing this, but unfortunately not
-index-strategy = "unsafe-first-match"
+# Ensure the two choices are mutually exclusive
+conflicts = [[{ group = "torch-cpu" }, { group = "torch-cuda" }]]
+# Use default index strategy (do NOT set unsafe-first-match)
 
 [tool.uv.sources]
-torch = [
-  { index = "pytorch-cpu", group = "cpu" },
-  { index = "pytorch-cuda", group = "cuda" },
-]
-# following can be uncommented when temporarily using a git checkout
-# lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
+# Use CPU index for torch when using torch-cpu group, otherwise default to pytorch-cuda
+torch = { index = "pytorch-cpu", marker = "extra == 'group-18-poprox-recommender-torch-cpu'" }
 
 # pre-release version of LensKit
 [[tool.uv.index]]
 name = "lenskit-dev"
 url = "https://pypi.lenskit.org/lenskit-dev/"
 
-# PyPI index providing CPU-only PyTorch *without* clobbering unrelated PyPI
-# packages.  Enabled by default, so we default to CPU-only Torch.
+# PyPI index providing CPU-only PyTorch without clobbering unrelated packages
 [[tool.uv.index]]
 name = "pytorch-cpu"
 url = "https://pypi.lenskit.org/torch/cpu/"
 
-# PyPI index providing GPU-enabled PyTorch *without* clobbering unrelated PyPI
-# packages.  Also enabled (for transitive nvidia deps, "explicit" only works for
-# direct dependencies), but lower-priority than CPU.
+# CUDA-enabled PyTorch wheels — marked explicit so they’re only considered
+# when torch is a direct dependency (i.e., when you include the torch-cuda group).
 [[tool.uv.index]]
 name = "pytorch-cuda"
 url = "https://pypi.lenskit.org/torch/cu128/"
+explicit = true
 
 ###### build and environment configurations ######
-# basic hatch config
 [tool.hatch.metadata]
 allow-direct-references = true
 
@@ -148,9 +141,7 @@ ban-relative-imports = "all"
 
 [tool.pyright]
 exclude = [".venv/", ".pixi/", "node_modules/"]
-
-# Component's interface creates a lot of noise with this check
-reportIncompatibleMethodOverride = false
+reportIncompatibleMethodOverride = false  # Component's interface creates noise with this check
 
 [tool.coverage.run]
 source_pkgs = ["poprox_recommender", "tests"]

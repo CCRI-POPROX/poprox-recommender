@@ -160,3 +160,5 @@ data/*.json
 
 commands.txt
 testing_data/
+
+data/pipeline_outputs/
