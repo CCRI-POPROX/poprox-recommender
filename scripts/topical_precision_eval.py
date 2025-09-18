@@ -71,17 +71,18 @@ def store_rec_article_as_csv(
     # csv_rows.append(("", "", ""))
 
     # Header + recommendations
-    csv_rows.append(("Article_id", "Headline", persona_topic, "Relevance"))
+    csv_rows.append(("Article_id", "Headline", persona_topic, "Relevance", "Source"))
     for article in rec_articles_list:
         article_id = article["id"]
         headline = article["headline"]
         topics = ", ".join(article["topics"])
         has_topic = "Yes" if persona_topic in topics else "No"
         relevance = article.get("relevance", "")
-        csv_rows.append((article_id, headline, has_topic, relevance))
+        source = article.get("source", "")
+        csv_rows.append((article_id, headline, has_topic, relevance, source))
 
     # Candidates not already in recommendations (dedup)
-    csv_rows.append(("", "", "", ""))
+    csv_rows.append(("", "", "", "", ""))
 
     def norm(h):
         return (h or "").strip().casefold()
@@ -100,7 +101,8 @@ def store_rec_article_as_csv(
         topics = ", ".join(article["topics"])
         has_topic = "Yes" if persona_topic in topics else "No"
         relevance = article.get("relevance", "")
-        csv_rows.append((article_id, headline, has_topic, relevance))
+        source = article.get("source", "")
+        csv_rows.append((article_id, headline, has_topic, relevance, source))
 
     with open(data / f"Rec_list_{persona_topic}.csv", "w", newline="", encoding="utf-8-sig") as csvfile:
         writer = csv.writer(csvfile)
@@ -264,12 +266,18 @@ def daily_persona_wise_eval(candidate_articles, persona_topic, response):
         article_topics = set([m.entity.name for m in article.mentions if m.entity is not None])
         if persona_topic in article_topics and article_headline not in seen_headlines:
             candidate_count += 1
-            relevance_score = next(
-                (m.relevance for m in article.mentions if m.entity and m.entity.name == persona_topic),
-                0.0,
+            score, src = next(
+                ((m.relevance, m.source) for m in article.mentions if m.entity and m.entity.name == persona_topic),
+                (0.0, None),
             )
             cand_articles_list.append(
-                {"id": article_id, "headline": article_headline, "relevance": relevance_score, "topics": article_topics}
+                {
+                    "id": article_id,
+                    "headline": article_headline,
+                    "relevance": score,
+                    "source": src,
+                    "topics": article_topics,
+                }
             )
             seen_headlines.add(article_headline)
 
@@ -280,16 +288,22 @@ def daily_persona_wise_eval(candidate_articles, persona_topic, response):
         article_headline = article["headline"]
         article_id = article["article_id"]
         article_topics = set([m["entity"]["name"] for m in article["mentions"] if m["entity"] is not None])
-        relevance_score = next(
+        score, src = next(
             (
-                m["relevance"]
+                (m["relevance"], m["source"])
                 for m in article.get("mentions", [])
                 if m.get("entity") and m["entity"].get("name") == persona_topic
             ),
-            0.0,
+            (0.0, None),
         )
         rec_articles_list.append(
-            {"id": article_id, "headline": article_headline, "relevance": relevance_score, "topics": article_topics}
+            {
+                "id": article_id,
+                "headline": article_headline,
+                "relevance": score,
+                "source": src,
+                "topics": article_topics,
+            }
         )
 
         if persona_topic in article_topics:
