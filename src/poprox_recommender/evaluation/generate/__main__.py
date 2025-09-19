@@ -2,7 +2,7 @@
 Generate recommendations for offline test data.
 
 Usage:
-    poprox_recommender.evaluation.generate [options]
+    poprox_recommender.evaluation.generate [options] PIPELINE
 
 Options:
     -v, --verbose
@@ -17,12 +17,15 @@ Options:
             read POPROX test data DATA
     --subset=N
             test only on the first N test profiles
+    PIPELINE
+            The name of the pipeline to generate from
 """
 
 import logging
 import os
 from pathlib import Path
 
+import lenskit
 from docopt import docopt
 from lenskit.logging import LoggingConfig
 
@@ -30,7 +33,7 @@ from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
 from poprox_recommender.evaluation.generate.worker import generate_profile_recs
-from poprox_recommender.rusage import pretty_time
+from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.evaluation.generate")
 
@@ -47,6 +50,7 @@ def generate_main():
     if options["--log-file"]:
         log_cfg.set_log_file(options["--log-file"])
     log_cfg.apply()
+    lenskit.configure(cfg_dir=project_root())
 
     out_path = Path(options["--output-path"])
     outputs = RecOutputs(out_path)
@@ -60,20 +64,9 @@ def generate_main():
     elif options["--mind-data"]:
         dataset = MindData(options["--mind-data"])
 
-    worker_usage = generate_profile_recs(dataset, outputs, n_profiles)
+    pipe_name = options["PIPELINE"]
 
-    try:
-        import resource
-
-        usage = resource.getrusage(resource.RUSAGE_SELF)
-        cpu = usage.ru_stime + usage.ru_utime
-        logger.info("parent process used %s CPU time", pretty_time(cpu))
-        if worker_usage:
-            child_tot = sum(u.ru_stime + u.ru_utime for u in worker_usage)
-            logger.info("worker processes used a combined %s CPU time", pretty_time(child_tot))
-            logger.info("total CPU time: %s", pretty_time(cpu + child_tot))
-    except ImportError:
-        logger.warning("resource usage only available on Unix")
+    generate_profile_recs(dataset, outputs, pipe_name, n_profiles)
 
 
 if __name__ == "__main__":

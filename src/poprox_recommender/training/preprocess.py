@@ -102,15 +102,12 @@ if __name__ == "__main__":
     root = project_root()
     train_dir = root / "data/MINDlarge_train"
     val_dir = root / "data/MINDlarge_dev"
-    test_dir = root / "data/MINDlarge_test"
 
     post_train_dir = root / "data/MINDlarge_post_train"
     post_val_dir = root / "data/MINDlarge_post_dev"
-    post_test_dir = root / "data/MINDlarge_post_test"
 
     os.makedirs(post_train_dir, exist_ok=True)
     os.makedirs(post_val_dir, exist_ok=True)
-    os.makedirs(post_test_dir, exist_ok=True)
 
     pretrain_tokenizer = (
         "distilbert-base-uncased"  # the model needs to be consistent with the pretrained model during training
@@ -140,14 +137,6 @@ if __name__ == "__main__":
     parse_news(
         path.join(val_dir, "news.tsv"),
         path.join(post_val_dir, "news_parsed.tsv"),
-        pretrained_tokenizer=pretrain_tokenizer,
-        token_length=max_length,
-    )
-
-    print("\nProcess news for Testing")
-    parse_news(
-        path.join(test_dir, "news.tsv"),
-        path.join(post_test_dir, "news_parsed.tsv"),
         pretrained_tokenizer=pretrain_tokenizer,
         token_length=max_length,
     )

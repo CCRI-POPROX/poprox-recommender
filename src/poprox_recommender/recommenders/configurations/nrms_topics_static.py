@@ -5,7 +5,7 @@ from lenskit.pipeline import PipelineBuilder
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
-from poprox_recommender.components.embedders.topic_wise_user import UserOnboardingConfig, UserOnboardingEmbedder
+from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.fill import FillRecs
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -52,7 +52,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # Fallback: sample from user topic interests
     n_topic_filter = builder.add_component(
-        "topic-filter", TopicFilter, candidate=i_candidates, interest_profile=i_profile
+        "topic-filter", TopicFilter, candidates=i_candidates, interest_profile=i_profile
     )
     n_sampler = builder.add_component("sampler", UniformSampler, candidates1=n_topic_filter, candidates2=i_candidates)
 

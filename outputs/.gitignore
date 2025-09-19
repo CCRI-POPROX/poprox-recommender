@@ -5,3 +5,6 @@
 /mind-val-user-metrics.csv.gz
 /mind-small-recommendations.parquet
 /mind-small-user-metrics.csv.gz
+/mind-subset-profile-metrics.csv.gz
+/mind-small-profile-metrics.csv.gz
+/mind-val-profile-metrics.csv.gz

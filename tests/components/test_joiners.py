@@ -15,7 +15,7 @@ def init_builder(total_slots):
     builder = PipelineBuilder(name="random_concat")
     in_cand = builder.create_input("candidate", CandidateSet)
     in_prof = builder.create_input("profile", InterestProfile)
-    tf = builder.add_component("topic-filter", topic_filter, candidate=in_cand, interest_profile=in_prof)
+    tf = builder.add_component("topic-filter", topic_filter, candidates=in_cand, interest_profile=in_prof)
     builder.add_component("sampler", sampler, candidates1=tf, candidates2=in_cand)
 
     return builder
