@@ -90,6 +90,7 @@ def warmup(response: Response):
         # If background warmup failed and fallback also failed, return discovered names
         logger.warning("Failed to load pipelines, returning discovered names only")
         from poprox_recommender.recommenders.load import discover_pipelines
+
         return discover_pipelines()
 
     return list(available_recommenders.keys())
@@ -124,13 +125,15 @@ def root(
     # Otherwise, select_articles will load the pipeline itself
     if cached_pipelines:
         from poprox_recommender.recommenders.load import default_pipeline
+
         pipeline_name = pipeline if pipeline else default_pipeline()
 
         if pipeline_name in cached_pipelines:
             # Use the cached pipeline directly
             selected_pipeline = cached_pipelines[pipeline_name]
             recs_node = selected_pipeline.node("recommender")
-            outputs = recs_node.run(
+            outputs = selected_pipeline.run_all(
+                recs_node,
                 candidate=req.candidates,
                 clicked=req.interacted,
                 profile=profile,
