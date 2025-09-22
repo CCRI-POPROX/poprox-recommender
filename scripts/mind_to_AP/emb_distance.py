@@ -7,15 +7,33 @@ from poprox_recommender.paths import project_root
 device = th.device("cuda" if th.cuda.is_available() else "cpu")
 
 
-def clustering_neighbor_from_AP(similarity, neighbor_count, M_ids, A_ids_arr):
+def clustering_AP_neighbors_for_Mind(similarity, neighbor_count, M_ids, A_ids_arr):
     scores, idxs = th.topk(similarity, k=neighbor_count, dim=1, largest=True, sorted=True)
     scores = scores.cpu().numpy()  # score of top nearest AP neighbors
     idxs = idxs.cpu().numpy()  # id of top nearest AP neighbors
     rows = []
+
     for i, m_id in enumerate(M_ids):
         for ap_idx, sc in zip(idxs[i], scores[i]):
             rows.append((m_id, A_ids_arr[ap_idx], float(sc)))
+
     return pd.DataFrame(rows, columns=["mind_id", "ap_id", "score"])
+
+
+def assigning_AP_topics_on_Mind(mind_neighbors_df, A_topics, topic_assigning_method):
+    mind_topics = mind_neighbors_df.merge(A_topics, on="ap_id", how="left")
+    mind_topics = mind_topics.explode("topic_name", ignore_index=True)
+
+    if topic_assigning_method == "union":
+        agg_fn = lambda s: set(s.dropna())  # noqa: E731
+    elif topic_assigning_method == "intersection":
+        agg_fn = (  # noqa: E731
+            lambda s: set.intersection(*[set([t]) for t in s.dropna()]) if len(s.dropna()) > 0 else set()
+        )
+    else:
+        raise ValueError("topic_assigning_method must be 'union' or 'intersection'")
+
+    return mind_topics.groupby("mind_id")["topic_name"].agg(agg_fn)
 
 
 data_dir = project_root() / "models" / "precalculated_model"
@@ -36,18 +54,20 @@ M_mat = th.stack([th.tensor(x, dtype=th.float32, device=device) for x in mind_em
 similarity = M_mat @ A_mat.T  # matrix multiplication
 
 
-neighbor_count = 5
-mind_neighbors_df = clustering_neighbor_from_AP(similarity, neighbor_count, M_ids, A_ids_arr)
+neighbor_count = 7  # 3 || 5 || 7
+mind_neighbors_df = clustering_AP_neighbors_for_Mind(similarity, neighbor_count, M_ids, A_ids_arr)
 
 
-mind_topics = mind_neighbors_df.merge(A_topics, on="ap_id", how="left")
-mind_topics = mind_topics.explode("topic_name", ignore_index=True)  # to use group by operation
-mind_topic_sets = mind_topics.groupby("mind_id")["topic_name"].agg(lambda s: set(t for t in s.dropna()))
+topic_assigning_method = "intersection"  # union || intersection
+mind_topic_sets = assigning_AP_topics_on_Mind(mind_neighbors_df, A_topics, topic_assigning_method)
+
+
 mind_topics_rows = [
     (m_id, head, ";".join(sorted(list(mind_topic_sets.get(m_id, set()))))) for m_id, head in zip(M_ids, M_heads)
 ]
 mind_topics_df = pd.DataFrame(mind_topics_rows, columns=["mind_id", "headline", "topics"])
 
 
-mind_neighbors_df.to_csv("mind_article_top_neighbors.csv", index=False)
-mind_topics_df.to_csv("mind_article_topics.csv", index=False)
+mind_neighbors_df.to_csv(f"mind_article_top_neighbors_{topic_assigning_method}_{neighbor_count}.csv", index=False)
+
+mind_topics_df.to_csv(f"mind_article_topics_{topic_assigning_method}_{neighbor_count}.csv", index=False)
