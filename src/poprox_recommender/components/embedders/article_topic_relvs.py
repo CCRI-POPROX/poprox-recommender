@@ -18,7 +18,8 @@ def find_topical_text(topic_descriptions, article):
 
     topical_texts = []
     for mention, score in mention_relevance_pairs:
-        if mention in topic_descriptions and score >= 76:
+        # if mention in topic_descriptions and score >= 76:
+        if mention in topic_descriptions:
             topical_texts.append(topic_descriptions[mention])
 
     return topical_texts

@@ -104,7 +104,7 @@ def store_rec_article_as_csv(
         source = article.get("source", "")
         csv_rows.append((article_id, headline, has_topic, relevance, source))
 
-    with open(data / f"Rec_list_{persona_topic}_rel76.csv", "w", newline="", encoding="utf-8-sig") as csvfile:
+    with open(data / f"Rec_list_{persona_topic}_atm.csv", "w", newline="", encoding="utf-8-sig") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(csv_rows)
 
