@@ -1,7 +1,10 @@
 # pyright: basic
 
-from lenskit.pipeline import PipelineBuilder, Component
-from typing import Optional
+import time
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
+
+from lenskit.pipeline import Component, PipelineBuilder
 
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_concepts.domain import RecommendationList
@@ -19,27 +22,57 @@ from poprox_recommender.paths import model_file_path
 
 class NRMSWithUserModel(Component):
     """Component that combines NRMS baseline ranking with LLMRanker user model generation."""
-    
+
     def __call__(
         self,
         nrms_ranking: RecommendationList,
         candidate_articles: CandidateSet,
         interest_profile: InterestProfile,
         articles_clicked: Optional[CandidateSet] = None,
-    ) -> tuple[RecommendationList, str, str, dict]:
-        # Create an LLMRanker instance just to generate the user model
-        llm_ranker = LLMRanker(LLMRankerConfig())
-        
-        # Generate user model using LLMRanker's method
-        profile_str = llm_ranker._structure_interest_profile(interest_profile, articles_clicked)
-        user_model = llm_ranker._build_user_model(profile_str)
-        request_id = str(interest_profile.profile_id)
-        
-        # Get the metrics from the LLMRanker instance (from user model generation)
-        ranker_metrics = llm_ranker.llm_metrics
-        
-        # Return the NRMS ranking with the LLM-generated user model and metrics
-        return (nrms_ranking, user_model, request_id, ranker_metrics)
+    ) -> tuple[RecommendationList, str, str, dict, dict]:
+        component_meta: Dict[str, Any] = {
+            "component": "ranker",
+            "implementation": "nrms_with_user_model",
+            "start_time": datetime.now(timezone.utc).isoformat(),
+            "status": "in_progress",
+        }
+        component_start = time.perf_counter()
+
+        def finalize_component(status: str, exc: Exception | None = None) -> Dict[str, Any]:
+            component_meta["status"] = status
+            if exc is not None:
+                component_meta["error_type"] = type(exc).__name__
+                component_meta["error_message"] = str(exc)
+            component_meta["end_time"] = datetime.now(timezone.utc).isoformat()
+            component_meta["duration_seconds"] = time.perf_counter() - component_start
+            if status == "success":
+                component_meta["error_count"] = 0
+            elif status == "error":
+                component_meta.setdefault("error_count", 1)
+            return component_meta.copy()
+
+        try:
+            # Create an LLMRanker instance just to generate the user model
+            llm_ranker = LLMRanker(LLMRankerConfig())
+
+            # Generate user model using LLMRanker's method
+            profile_str = llm_ranker._structure_interest_profile(interest_profile, articles_clicked)
+            user_model = llm_ranker._build_user_model(profile_str)
+            request_id = str(interest_profile.profile_id)
+
+            component_meta["num_candidates"] = len(candidate_articles.articles)
+            component_meta["num_recommendations"] = len(nrms_ranking.articles)
+
+            # Get the metrics from the LLMRanker instance (from user model generation)
+            ranker_metrics = llm_ranker.llm_metrics
+
+            component_snapshot = finalize_component("success")
+
+            # Return the NRMS ranking with the LLM-generated user model and metrics
+            return (nrms_ranking, user_model, request_id, ranker_metrics, {"ranker": component_snapshot})
+        except Exception as exc:  # pragma: no cover - defensive logging for production observability
+            finalize_component("error", exc)
+            raise
 
 ##TODO:
 # allow weigths for the scores (1/-1)

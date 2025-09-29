@@ -57,6 +57,10 @@ class S3PersistenceManager(PersistenceManager):
         session_id = f"{request_id}_{timestamp}"
 
         try:
+            metadata_payload = dict(metadata or {})
+            component_metrics = metadata_payload.pop("component_metrics", {})
+            issues = metadata_payload.pop("issues", [])
+
             # Save user model
             self.s3.put_object(
                 Bucket=self.bucket,
@@ -90,12 +94,28 @@ class S3PersistenceManager(PersistenceManager):
                 "num_articles": len(original_recommendations.articles),
                 "pipeline_type": "llm_rank_rewrite",
                 "storage_location": f"s3://{self.bucket}/{self.prefix}{session_id}/",
-                **(metadata or {}),
+                **metadata_payload,
             }
-            
+
+            if component_metrics:
+                full_metadata["component_metrics"] = component_metrics
+                full_metadata["component_summary"] = {
+                    name: {
+                        "status": data.get("status"),
+                        "duration_seconds": data.get("duration_seconds"),
+                        "error_count": data.get("error_count", 0),
+                    }
+                    for name, data in component_metrics.items()
+                }
+            else:
+                full_metadata["component_metrics"] = {}
+
+            full_metadata["issues"] = issues
+            full_metadata["issue_count"] = len(issues)
+
             # Add LLM metrics summary if available
-            if metadata and "llm_metrics" in metadata:
-                llm_metrics = metadata["llm_metrics"]
+            if "llm_metrics" in metadata_payload:
+                llm_metrics = metadata_payload["llm_metrics"]
                 
                 # Calculate total tokens and time across all LLM calls
                 total_input_tokens = 0
@@ -174,6 +194,17 @@ class S3PersistenceManager(PersistenceManager):
                 raise FileNotFoundError(f"Session {session_id} not found in S3")
             else:
                 raise RuntimeError(f"Failed to load pipeline data from S3: {e}")
+
+    def load_metadata(self, session_id: str) -> Dict[str, Any]:
+        """Load only the metadata for a session from S3."""
+        try:
+            response = self.s3.get_object(Bucket=self.bucket, Key=f"{self.prefix}{session_id}/metadata.json")
+            return json.loads(response["Body"].read().decode("utf-8"))
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "NoSuchKey":
+                raise FileNotFoundError(f"Session {session_id} not found in S3")
+            else:
+                raise RuntimeError(f"Failed to load metadata from S3: {e}")
 
     def list_sessions(self, request_id_prefix: Optional[str] = None) -> list[str]:
         """List available sessions in S3."""

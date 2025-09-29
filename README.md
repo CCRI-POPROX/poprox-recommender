@@ -6,6 +6,7 @@ trained models.
 
 - [Installation](#installation)
 - [Local Development](#localdevelopment)
+- [Pipeline Dashboard](#pipeline-dashboard)
 - [Editor Setup](#editor-setup)
 - [License](#license)
 
@@ -132,6 +133,37 @@ $ python scripts/send-request.py -p 9000
 ```
 
 Pass the `-h` option to `send-request.py` to see command-line options.
+
+## Pipeline Dashboard
+
+The LLM ranking/rewriting pipeline now records component timings, token usage,
+and any surfaced errors directly into the persisted session metadata. You can
+inspect those runs with a lightweight FastAPI dashboard that reads the saved
+outputs (either from S3 or the local filesystem).
+
+### Running against S3 outputs
+
+```console
+$ export PERSISTENCE_BACKEND=s3
+$ export PERSISTENCE_BUCKET=<your-bucket>
+$ export PERSISTENCE_PREFIX=pipeline-outputs/
+$ uv run uvicorn poprox_recommender.dashboard.app:app --host 127.0.0.1 --port 8000
+```
+
+The app is available at http://127.0.0.1:8000/ and lets you filter sessions by
+request ID and day, inspect component-level timings, review LLM token usage, and
+drill into the original vs. rewritten recommendations. You can also launch it
+via `python -m poprox_recommender.dashboard`, which honours the same
+environment variables plus:
+
+- `POPROX_DASHBOARD_BACKEND` (`auto` | `s3` | `local`, defaults to `auto`)
+- `POPROX_DASHBOARD_HOST` / `POPROX_DASHBOARD_PORT`
+- `POPROX_DASHBOARD_DEFAULT_LIMIT` (max sessions shown per page)
+- `POPROX_DASHBOARD_RELOAD` (`true` to enable auto-reload during development)
+
+To work with locally persisted runs instead, leave `PERSISTENCE_BACKEND`
+unset (or set it to `local`) and configure `PERSISTENCE_PATH` to point at the
+directory containing the saved sessions.
 
 ## Running the Evaluation
 

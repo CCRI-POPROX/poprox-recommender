@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or "POPROX Pipeline Dashboard" }}</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1><a href="/">POPROX Pipeline Dashboard</a></h1>
+    </header>
+    <main class="site-content">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+      <small>Data source: {{ data_source or "configured persistence" }}</small>
+    </footer>
+  </body>
+</html>

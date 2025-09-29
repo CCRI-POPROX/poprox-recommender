@@ -9,9 +9,9 @@ from poprox_recommender.components.rankers.openai_ranker import LLMRanker, LLMRa
 
 class LLMRankOnlyWrapper(Component):
     """Wrapper component that extracts just the RecommendationList from LLMRanker's tuple output."""
-    
-    def __call__(self, ranker_output: tuple[RecommendationList, str, str, dict]) -> RecommendationList:
-        recommendations, user_model, request_id, ranker_metrics = ranker_output
+
+    def __call__(self, ranker_output: tuple[RecommendationList, str, str, dict, dict]) -> RecommendationList:
+        recommendations, _, _, _, _ = ranker_output
         return recommendations
 
 

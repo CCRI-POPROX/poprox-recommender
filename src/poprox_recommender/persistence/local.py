@@ -54,6 +54,10 @@ class LocalPersistenceManager(PersistenceManager):
         with open(session_dir / "rewritten_recommendations.pkl", "wb") as f:
             pickle.dump(rewritten_recommendations, f)
 
+        metadata_payload = dict(metadata or {})
+        component_metrics = metadata_payload.pop("component_metrics", {})
+        issues = metadata_payload.pop("issues", [])
+
         # Save metadata as JSON
         full_metadata = {
             "request_id": request_id,
@@ -62,12 +66,28 @@ class LocalPersistenceManager(PersistenceManager):
             "user_model_length": len(user_model),
             "num_articles": len(original_recommendations.articles),
             "pipeline_type": "llm_rank_rewrite",
-            **(metadata or {}),
+            "storage_location": str(session_dir.resolve()),
+            **metadata_payload,
         }
-        
+        if component_metrics:
+            full_metadata["component_metrics"] = component_metrics
+            full_metadata["component_summary"] = {
+                name: {
+                    "status": data.get("status"),
+                    "duration_seconds": data.get("duration_seconds"),
+                    "error_count": data.get("error_count", 0),
+                }
+                for name, data in component_metrics.items()
+            }
+        else:
+            full_metadata["component_metrics"] = {}
+
+        full_metadata["issues"] = issues
+        full_metadata["issue_count"] = len(issues)
+
         # Add LLM metrics summary if available
-        if metadata and "llm_metrics" in metadata:
-            llm_metrics = metadata["llm_metrics"]
+        if "llm_metrics" in metadata_payload:
+            llm_metrics = metadata_payload["llm_metrics"]
             
             # Calculate total tokens and time across all LLM calls
             total_input_tokens = 0
@@ -131,6 +151,17 @@ class LocalPersistenceManager(PersistenceManager):
             "rewritten_recommendations": rewritten_recommendations,
             "metadata": metadata,
         }
+
+    def load_metadata(self, session_id: str) -> Dict[str, Any]:
+        """Load only the metadata for a session."""
+        session_dir = self.base_path / session_id
+        metadata_path = session_dir / "metadata.json"
+
+        if not metadata_path.exists():
+            raise FileNotFoundError(f"Metadata for session {session_id} not found")
+
+        with metadata_path.open("r", encoding="utf-8") as f:
+            return json.load(f)
 
     def list_sessions(self, request_id_prefix: Optional[str] = None) -> list[str]:
         """List available sessions."""

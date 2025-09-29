@@ -1,6 +1,7 @@
 import os
 import time
-from typing import Optional, Union
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional, Union
 
 import openai
 from dotenv import load_dotenv
@@ -46,6 +47,7 @@ class LLMRanker(Component):
     def __init__(self, config: LLMRankerConfig):
         self.config = config
         self.llm_metrics = {}
+        self.component_metrics: Dict[str, dict] = {}
 
     def _structure_interest_profile(
         self, interest_profile: InterestProfile, articles_clicked: Union[CandidateSet, None]
@@ -130,7 +132,33 @@ Headlines of articles the user has clicked on (most recent first):
         candidate_articles: CandidateSet,
         interest_profile: InterestProfile,
         articles_clicked: Optional[CandidateSet] = None,
-    ) -> tuple[RecommendationList, str, str]:
+    ) -> tuple[RecommendationList, str, str, dict, dict]:
+        # Reset metrics for this invocation
+        self.llm_metrics = {}
+        self.component_metrics = {}
+
+        component_meta: Dict[str, Any] = {
+            "component": "ranker",
+            "start_time": datetime.now(timezone.utc).isoformat(),
+            "status": "in_progress",
+        }
+        component_start = time.perf_counter()
+
+        def finalize_component(status: str, exc: Exception | None = None, *, error_count: int | None = None) -> Dict[str, Any]:
+            component_meta["status"] = status
+            if exc is not None:
+                component_meta["error_type"] = type(exc).__name__
+                component_meta["error_message"] = str(exc)
+            if error_count is not None:
+                component_meta["error_count"] = error_count
+            elif status == "success":
+                component_meta["error_count"] = 0
+            elif status == "error":
+                component_meta.setdefault("error_count", 1)
+            component_meta["end_time"] = datetime.now(timezone.utc).isoformat()
+            component_meta["duration_seconds"] = time.perf_counter() - component_start
+            self.component_metrics["ranker"] = component_meta
+            return component_meta.copy()
         # Generate a request ID for this pipeline run
         self.request_id = str(interest_profile.profile_id)
 
@@ -140,16 +168,18 @@ Headlines of articles the user has clicked on (most recent first):
         client = openai.OpenAI(api_key=self.config.openai_api_key)
 
         # build concise profile for prompt
-        profile_str = self._structure_interest_profile(interest_profile, articles_clicked)
-        # build user model
-        user_model = self._build_user_model(profile_str)
+        try:
+            profile_str = self._structure_interest_profile(interest_profile, articles_clicked)
+            # build user model
+            user_model = self._build_user_model(profile_str)
 
-        # summarize candidates for the prompt
-        items = []
-        for i, art in enumerate(candidate_articles.articles):
-            items.append(f"{i}: {art.headline} - {art.subhead}")
+            # summarize candidates for the prompt
+            items = []
+            for i, art in enumerate(candidate_articles.articles):
+                items.append(f"{i}: {art.headline} - {art.subhead}")
+            component_meta["num_candidates"] = len(candidate_articles.articles)
 
-        input_txt = f"""User interest profile:
+            input_txt = f"""User interest profile:
 {user_model}
 
 Candidate articles:
@@ -157,22 +187,30 @@ Candidate articles:
 
 Make sure you select EXACTLY {self.config.num_slots} articles from the candidate pool.
 """
+            start_time = time.time()
+            response = client.responses.parse(
+                model=self.config.model, instructions=prompt, input=input_txt, text_format=LlmResponse, temperature=0.5
+            )
+            end_time = time.time()
 
-        start_time = time.time()
-        response = client.responses.parse(
-            model=self.config.model, instructions=prompt, input=input_txt, text_format=LlmResponse, temperature=0.5
-        )
-        end_time = time.time()
+            self.llm_metrics["article_ranking"] = {
+                "input_tokens": response.usage.input_tokens,
+                "output_tokens": response.usage.output_tokens,
+                "duration_seconds": end_time - start_time,
+            }
 
-        self.llm_metrics["article_ranking"] = {
-            "input_tokens": response.usage.input_tokens,
-            "output_tokens": response.usage.output_tokens,
-            "duration_seconds": end_time - start_time,
-        }
+            parsed_response = response.output_parsed
+            selected = [candidate_articles.articles[i] for i in parsed_response.recommended_article_ids]
+            original_recommendations = RecommendationList(articles=selected)
 
-        parsed_response = response.output_parsed
-        selected = [candidate_articles.articles[i] for i in parsed_response.recommended_article_ids]
-        original_recommendations = RecommendationList(articles=selected)
-
-        # Return tuple with request_id and metrics for persistence in rewriter
-        return (original_recommendations, user_model, self.request_id, self.llm_metrics)
+            metrics_snapshot = finalize_component("success")
+            return (
+                original_recommendations,
+                user_model,
+                self.request_id,
+                self.llm_metrics,
+                {"ranker": metrics_snapshot},
+            )
+        except Exception as exc:  # pragma: no cover - defensive logging for production observability
+            finalize_component("error", exc, error_count=1)
+            raise

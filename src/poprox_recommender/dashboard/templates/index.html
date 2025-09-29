@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="filters">
+  <form method="get" class="filter-form">
+    <label>
+      Request ID
+      <input type="text" name="request_id" value="{{ selected_request_id }}" placeholder="Exact or prefix" />
+    </label>
+    <label>
+      Date
+      <input type="date" name="date" value="{{ selected_date }}" />
+    </label>
+    <label>
+      Limit
+      <input type="number" name="limit" min="1" max="500" value="{{ limit }}" />
+    </label>
+    <button type="submit">Apply</button>
+    <a class="reset-link" href="/">Reset</a>
+  </form>
+</section>
+
+<section class="session-table">
+  {% if sessions %}
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Request ID</th>
+        <th>Session</th>
+        <th>Articles</th>
+        <th>Ranker</th>
+        <th>Rewriter</th>
+        <th>Issues</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for session in sessions %}
+      {% set ranker = session.component_summary.get('ranker', {}) %}
+      {% set rewriter = session.component_summary.get('rewriter', {}) %}
+      <tr>
+        <td>{{ session.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+        <td>{{ session.request_id }}</td>
+        <td><a href="/sessions/{{ session.session_id }}">{{ session.session_id }}</a></td>
+        <td>{{ session.num_articles }}</td>
+        <td>{{ ranker.get('status', 'n/a') }} {% if ranker.get('duration_seconds') %}<small>({{ '%.2f'|format(ranker['duration_seconds']) }}s)</small>{% endif %}</td>
+        <td>{{ rewriter.get('status', 'n/a') }} {% if rewriter.get('duration_seconds') %}<small>({{ '%.2f'|format(rewriter['duration_seconds']) }}s)</small>{% endif %}</td>
+        <td>{% if session.issue_count %}<span class="issue-count">{{ session.issue_count }}</span>{% else %}0{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No sessions found for the selected filters.</p>
+  {% endif %}
+</section>
+{% endblock %}
