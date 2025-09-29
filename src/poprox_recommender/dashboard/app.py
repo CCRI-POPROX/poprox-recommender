@@ -64,6 +64,7 @@ def create_app(settings: Optional[DashboardSettings] = None) -> FastAPI:
     app.state.dashboard_settings = settings
     app.state.templates = templates
     app.state.data_source_label = _describe_persistence(settings)
+    app.state.current_backend = settings.backend
 
     @app.get("/", response_class=HTMLResponse)
     async def list_sessions_view(
@@ -71,9 +72,18 @@ def create_app(settings: Optional[DashboardSettings] = None) -> FastAPI:
         request_id: Optional[str] = Query(default=None, description="Filter by request ID"),
         date_param: Optional[str] = Query(default=None, alias="date", description="Filter by YYYY-MM-DD date"),
         limit: int = Query(default=settings.default_limit, ge=1, le=500),
+        backend: Optional[str] = Query(default=None, description="Backend to use (local or s3)"),
     ) -> HTMLResponse:
         service: PipelineDashboardService = request.app.state.dashboard_service
         templates: Jinja2Templates = request.app.state.templates
+
+        # Switch backend if requested
+        if backend and backend != request.app.state.current_backend:
+            persistence = _build_persistence_with_backend(backend)
+            service = PipelineDashboardService(persistence)
+            request.app.state.dashboard_service = service
+            request.app.state.current_backend = backend
+            request.app.state.data_source_label = _describe_persistence_backend(backend)
 
         selected_day = _parse_date_param(date_param)
         summaries = service.list_sessions(limit=limit, request_id=request_id, day=selected_day)
@@ -85,6 +95,7 @@ def create_app(settings: Optional[DashboardSettings] = None) -> FastAPI:
             "selected_date": date_param or "",
             "limit": limit,
             "data_source": request.app.state.data_source_label,
+            "current_backend": request.app.state.current_backend,
         }
         return templates.TemplateResponse("index.html", context)
 
@@ -101,6 +112,7 @@ def create_app(settings: Optional[DashboardSettings] = None) -> FastAPI:
             "request": request,
             "session": detail,
             "data_source": request.app.state.data_source_label,
+            "current_backend": request.app.state.current_backend,
         }
         return templates.TemplateResponse("session_detail.html", context)
 
@@ -127,7 +139,7 @@ def _build_persistence(settings: DashboardSettings) -> PersistenceManager:
         except ImportError as exc:  # pragma: no cover - requires optional dependency
             raise RuntimeError("boto3 is required for S3 persistence") from exc
 
-        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-pipeline-data")
+        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-default-recommender-pipeline-data-prod")
         prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
         return S3PersistenceManager(bucket, prefix)
 
@@ -150,12 +162,42 @@ def _parse_date_param(raw: Optional[str]) -> Optional[date]:
 def _describe_persistence(settings: DashboardSettings) -> str:
     backend = settings.backend
     if backend == "s3":
-        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-pipeline-data")
+        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-default-recommender-pipeline-data-prod")
         prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
         return f"S3 ({bucket}/{prefix})"
     if backend == "local":
         return f"Local ({os.getenv('PERSISTENCE_PATH', './data/pipeline_outputs')})"
     return "Auto (environment)"
+
+
+def _describe_persistence_backend(backend: str) -> str:
+    """Describe a specific backend by name."""
+    if backend == "s3":
+        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-default-recommender-pipeline-data-prod")
+        prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
+        return f"S3 ({bucket}/{prefix})"
+    if backend == "local":
+        return f"Local ({os.getenv('PERSISTENCE_PATH', './data/pipeline_outputs')})"
+    return f"Unknown backend ({backend})"
+
+
+def _build_persistence_with_backend(backend: str) -> PersistenceManager:
+    """Build a persistence manager for a specific backend."""
+    if backend not in ("s3", "local"):
+        raise ValueError(f"Unsupported backend: {backend}")
+
+    if backend == "s3":
+        try:
+            from poprox_recommender.persistence.s3 import S3PersistenceManager
+        except ImportError as exc:  # pragma: no cover - requires optional dependency
+            raise RuntimeError("boto3 is required for S3 persistence") from exc
+
+        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-default-recommender-pipeline-data-prod")
+        prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
+        return S3PersistenceManager(bucket, prefix)
+
+    persistence_path = os.getenv("PERSISTENCE_PATH", "./data/pipeline_outputs")
+    return LocalPersistenceManager(persistence_path)
 
 
 app = create_app()

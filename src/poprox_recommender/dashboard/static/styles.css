@@ -16,10 +16,37 @@ body {
   padding: 1rem 2rem;
 }
 
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .site-header h1,
 .site-header a {
   color: #f9fafb;
   text-decoration: none;
+  margin: 0;
+}
+
+.backend-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backend-toggle label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.backend-toggle select {
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.35rem;
+  border: 1px solid #4b5563;
+  background-color: #111827;
+  color: #f9fafb;
+  cursor: pointer;
 }
 
 .site-content {
