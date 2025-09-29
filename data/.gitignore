@@ -14,3 +14,7 @@
 /MINDlarge_post_train
 /MINDlarge_post_dev
 /MINDlarge_post_test
+/MINDsmall_dev.db
+/MINDlarge_dev.db
+/MINDlarge_train.db
+/MINDsmall_train.db

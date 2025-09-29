@@ -204,7 +204,7 @@ class RequestGenerator:
         self.num_recs = num_recs
 
     def add_clicks(self, num_clicks: int, num_days: int | None = None):
-        all_articles = list(self.mind_data.news_df.index)
+        all_articles = self.mind_data.list_articles()
 
         if num_days:
             start_date = datetime.now() - timedelta(days=num_days - 1)
@@ -215,7 +215,7 @@ class RequestGenerator:
         # generate click history
         self.clicks = [
             Click(
-                article_id=self.mind_data.news_uuid_for_id(random.choice(all_articles)),
+                article_id=random.choice(all_articles),
                 newsletter_id=uuid4(),
                 timestamp=timestamps[i],
             )
@@ -237,10 +237,10 @@ class RequestGenerator:
         ]
 
     def add_candidates(self, num_candidates):
-        all_articles = list(self.mind_data.news_df.index)
+        all_articles = self.mind_data.list_articles()
         selected_candidates = random.sample(all_articles, num_candidates)
 
-        self.candidate_articles = [self.mind_data.lookup_article(id=article_id) for article_id in selected_candidates]
+        self.candidate_articles = [self.mind_data.lookup_article(uuid=article_id) for article_id in selected_candidates]
 
     def get_request(self) -> RecommendationRequestV2:
         interest_profile = InterestProfile(

@@ -1,240 +1,234 @@
+import copyreg
 import itertools as it
-import multiprocessing as mp
-from uuid import UUID
+from collections.abc import Iterator
 
-import numpy as np
-import pandas as pd
 import ray
 import torch
-from lenskit.logging import get_logger, item_progress
-from lenskit.parallel import get_parallel_config
-from lenskit.parallel.ray import init_cluster
-from lenskit.pipeline import Pipeline
-from lenskit.pipeline.state import PipelineState
-from lenskit.util import Stopwatch
+from humanize import metric, naturaldelta
+from lenskit.logging import Progress, Task, get_logger, item_progress
+from lenskit.parallel.config import ParallelConfig, get_parallel_config, subprocess_config
+from lenskit.parallel.ray import TaskLimiter, init_cluster
+from lenskit.pipeline import PipelineState
 
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_concepts.domain import CandidateSet, RecommendationList
+from poprox_concepts.domain import CandidateSet
 from poprox_recommender.config import default_device
-from poprox_recommender.data.mind import TEST_REC_COUNT
-from poprox_recommender.evaluation.generate.outputs import EmbeddingWriter, RecOutputs
-from poprox_recommender.recommenders import load_all_pipelines
+from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.evaluation.generate.outputs import (
+    EmbeddingWriter,
+    JSONRecommendationWriter,
+    ParquetRecommendationWriter,
+    RecommendationWriter,
+    RecOutputs,
+)
+from poprox_recommender.recommenders.load import get_pipeline
+from poprox_recommender.rusage import pretty_time
 
 logger = get_logger(__name__)
 
-BATCH_SIZE = 10
+BATCH_SIZE = 25
 STAGES = ["final", "ranked", "reranked"]
+# outputs we want for the result, to pre-filter
+TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
 
 
-class RecGenerator:
-    """
-    Generate recommendations. Can be used as a Ray actor.
-    """
+def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
+    logger.info("generating recommendations", dataset=dataset.name)
 
-    pipelines: dict[str, Pipeline]
-    worker_out: RecOutputs
-    emb_seen: set[UUID]
-    emb_writer: EmbeddingWriter
-
-    def __init__(self, outs: RecOutputs, emb_writer: EmbeddingWriter):
-        proc = mp.current_process()
-        self.pipelines = load_all_pipelines(device=default_device())
-        self.worker_out = outs
-        self.worker_out.open(proc.pid)
-        self.emb_seen = set()
-        self.emb_writer = emb_writer
-
-    def generate(self, request: RecommendationRequest) -> UUID | None:
-        log = logger.bind(profile_id=str(request.interest_profile.profile_id))
-        log.debug("beginning recommendation")
-        if request.num_recs != TEST_REC_COUNT:
-            log.warning(
-                "request for %s had unexpected recommendation count %d",
-                request.interest_profile.profile_id,
-                request.num_recs,
-            )
-
-        pipe_names = list(self.pipelines.keys())
-        inputs = {
-            "candidate": CandidateSet(articles=request.todays_articles),
-            "clicked": CandidateSet(articles=request.past_articles),
-            "profile": request.interest_profile,
-        }
-
-        for name, pipe in self.pipelines.items():
-            try:
-                outputs = pipe.run_all(**inputs)
-            except Exception as e:
-                logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
-                raise e
-
-            rec_df, embeddings = extract_recs(name, request, outputs)
-            rec_df["recommender"] = pd.Categorical(rec_df["recommender"], categories=pipe_names)
-            rec_df["stage"] = pd.Categorical(rec_df["stage"].astype("category"), categories=STAGES)
-            self.worker_out.rec_writer.write_frame(rec_df)
-
-            # find any embeddings we haven't yet written (reduces overhead)
-            # the writer will also deduplicate between workers.
-            emb_to_write = {aid: emb for (aid, emb) in embeddings.items() if aid not in self.emb_seen}
-            # call remote if we have an actor
-            if hasattr(self.emb_writer.write_embeddings, "remote"):
-                ray.get(self.emb_writer.write_embeddings.remote(emb_to_write))
-            else:
-                self.emb_writer.write_embeddings(emb_to_write)
-            self.emb_seen |= embeddings.keys()
-
-        # just return the ID to indicate success
-        return request.interest_profile.profile_id
-
-    def generate_batch(self, batch: list[RecommendationRequest]) -> list[UUID | None]:
-        return [self.generate(req) for req in batch]
-
-    def finish(self):
-        self.worker_out.close()
-
-        try:
-            import resource
-
-            return resource.getrusage(resource.RUSAGE_SELF)
-        except ImportError:
-            return None
-
-
-def dynamic_remote(actor):
     pc = get_parallel_config()
+    cluster = pc.processes > 1
+
+    count = n_profiles if n_profiles is not None else dataset.n_profiles
+    logger.info("recommending for %d profiles", count)
+
+    with (
+        item_progress("recommend", total=count) as pb,
+        Task(
+            f"generate-{dataset.name}-{pipeline}",
+            tags=["poprox", "generate", dataset.name, pipeline],
+        ) as task,
+    ):
+        task.save_to_file(outs.base_dir / "generate-task.json")
+        pc = get_parallel_config()
+        if cluster:
+            cluster_recommend(dataset, pipeline, n_profiles, outs, pc, task, pb)
+
+        else:
+            serial_recommend(pipeline, dataset.iter_profiles(limit=n_profiles), outs, pb)
+
+    logger.info("finished recommending in %s", naturaldelta(task.duration) if task.duration else "unknown time")
+    cpu = task.total_cpu()
+    if cpu:
+        logger.info("recommendation took %s CPU", pretty_time(cpu))
+    if task.system_power:
+        logger.info("recommendation took %s", metric(task.system_power, "J"))
+
+
+def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
+    logger.info("starting serial evaluation")
+    # directly call things in-process
+    writers: list[RecommendationWriter] = [
+        ParquetRecommendationWriter(outs),
+        JSONRecommendationWriter(outs),
+        EmbeddingWriter(outs),
+    ]
+
+    for request in profiles:
+        state = recommend_for_profile(pipeline, request)
+        for w in writers:
+            w.write_recommendations(request, state)
+        pb.update()
+
+    for w in writers:
+        w.close()
+
+
+def cluster_recommend(
+    dataset: MindData,
+    pipeline: str,
+    max_profiles: int | None,
+    outs: RecOutputs,
+    pc: ParallelConfig,
+    task: Task,
+    pb: Progress,
+):
+    logger.info("starting parallel evaluation with task limit of %d", pc.processes)
+    init_cluster(global_logging=True)
+
+    writers: list[RecommendationWriter] = [
+        ParquetRecommendationWriter.create_remote(outs),
+        JSONRecommendationWriter.create_remote(outs),
+        EmbeddingWriter.create_remote(outs),
+    ]
+
+    profiles = dataset.iter_profile_ids(limit=max_profiles)
+    ds_ref = ray.put(dataset)
+    rec_batch = dynamic_remote(recommend_batch)
+    limit = TaskLimiter(pc.processes)
+
+    writes = []
+    for n, btask, bwrites in limit.imap(
+        lambda batch: rec_batch.remote(pipeline, batch, writers, dataset=ds_ref),
+        it.batched(profiles, BATCH_SIZE),
+        ordered=False,
+    ):
+        pb.update(n)
+        task.add_subtask(btask)
+        writes += bwrites
+
+        # wait for pending writes
+        while len(writes) >= 50:
+            done, writes = ray.wait(writes)
+            for rh in done:
+                ray.get(rh)
+
+    logger.debug("waiting for remaining writes")
+    # clear pending writes
+    while writes:
+        done, writes = ray.wait(writes)
+        for rh in done:
+            ray.get(rh)
+
+    logger.info("closing writers")
+    for w in writers:
+        wt = w.close()
+        task.add_subtask(wt)
+
+
+def recommend_for_profile(pipeline: str, request: RecommendationRequest) -> PipelineState:
+    """
+    Generate recommendations for a single request, returning the pipeline state.
+    """
+    # get_pipeline caches, so this will load once per worker
+    pipe = get_pipeline(pipeline, device=default_device())
+    log = logger.bind(profile_id=str(request.interest_profile.profile_id))
+    log.debug("beginning recommendation")
+    if request.num_recs != TEST_REC_COUNT:
+        log.warning(
+            "request for %s had unexpected recommendation count %d",
+            request.interest_profile.profile_id,
+            request.num_recs,
+        )
+
+    inputs = {
+        "candidate": CandidateSet(articles=request.todays_articles),
+        "clicked": CandidateSet(articles=request.past_articles),
+        "profile": request.interest_profile,
+    }
+
+    try:
+        return pipe.run_all(**inputs)
+    except Exception as e:
+        logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
+        raise e
+
+
+def recommend_batch(
+    pipeline,
+    batch: list[RecommendationRequest | int],
+    writers: list[RecommendationWriter],
+    *,
+    dataset: MindData | None = None,
+):
+    """
+    Batch-recommend function, to be used as a Ray worker task.
+    """
+
+    outputs = []
+
+    with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
+        for request in batch:
+            if not isinstance(request, RecommendationRequest):
+                assert dataset is not None
+                request = dataset.lookup_request(id=request)
+            state = recommend_for_profile(pipeline, request)
+            state = {k: v for (k, v) in state.items() if k in TO_SAVE}
+            outputs.append((request, state))
+
+        writes = [w.write_recommendation_batch(outputs) for w in writers]
+
+    return len(batch), task, writes
+
+
+def dynamic_remote(task_or_actor):
+    """
+    Dynamically configure the resource requirements of a task or actor based on
+    CUDA availability and parallelism configuration.
+    """
+    pc = subprocess_config()
+    logger.debug("worker parallel config: %s", pc)
     if torch.cuda.is_available():
         _cuda_props = torch.cuda.get_device_properties()
         # Let's take a wild guess that 20 MP units are enough per worker, so a
-        # 80-MP A40 can theoretically run 4 workers.  Even though we limit
-        # parallelism through an actor pool, if we do not request GPUs, Ray will
-        # keep us from accessing them.
+        # 80-MP A40 can theoretically run 8 workers.  If we do not request GPUs,
+        # Ray will keep us from accessing them.
+        #
+        # We also hard-code 2 CPUs per worker, because CUDA-powered eval doesn't
+        # use any other parallelism at this time.
+        gpu_frac = 20 / _cuda_props.multi_processor_count
+        logger.debug("setting up GPU task with %d CPU, %.3f GPU", 2, gpu_frac)
         remote = ray.remote(
-            num_cpus=pc.backend_threads,
-            num_gpus=20 / _cuda_props.multi_processor_count,
+            num_cpus=2,
+            num_gpus=gpu_frac,
+            # reuse worker processes between batches
+            max_calls=0,
         )
     else:
-        # if we don't have CUDA, don't request GPU
+        # if we don't have CUDA, don't request GPU, and we'll need CPU threads
+        logger.debug("setting up remote CPU-only task with %d threads", pc.total_threads)
         remote = ray.remote(
             num_cpus=pc.total_threads,
             num_gpus=0,
         )
 
-    return remote(actor)
+    return remote(task_or_actor)
 
 
-def extract_recs(
-    name: str,
-    request: RecommendationRequest,
-    pipeline_state: PipelineState,
-) -> tuple[pd.DataFrame, dict[UUID, np.ndarray]]:
-    # recommendations {account id (uuid): LIST[Article]}
-    # use the url of Article
-    profile = request.interest_profile.profile_id
-    assert profile is not None
-
-    # get the different recommendation lists to record
-    recs = pipeline_state["recommender"]
-    rec_lists = [
-        pd.DataFrame(
-            {
-                "recommender": name,
-                "profile_id": str(profile),
-                "stage": "final",
-                "item_id": [str(a.article_id) for a in recs.articles],
-                "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
-            }
-        )
-    ]
-    ranked = pipeline_state.get("ranker", None)
-    if ranked is not None:
-        assert isinstance(ranked, RecommendationList), f"reranked has unexpected type {type(ranked)} in pipeline {name}"
-        rec_lists.append(
-            pd.DataFrame(
-                {
-                    "recommender": name,
-                    "profile_id": str(profile),
-                    "stage": "ranked",
-                    "item_id": [str(a.article_id) for a in ranked.articles],
-                    "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
-                }
-            )
-        )
-    reranked = pipeline_state.get("reranker", None)
-    if reranked is not None:
-        assert isinstance(
-            reranked, RecommendationList
-        ), f"reranked has unexpected type {type(reranked)} in pipeline {name}"
-        rec_lists.append(
-            pd.DataFrame(
-                {
-                    "recommender": name,
-                    "profile_id": str(profile),
-                    "stage": "reranked",
-                    "item_id": [str(a.article_id) for a in reranked.articles],
-                    "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
-                }
-            )
-        )
-    output_df = pd.concat(rec_lists, ignore_index=True)
-
-    # get the embeddings
-    embedded = pipeline_state.get("candidate-embedder", None)
-    embeddings = {}
-    if embedded is not None:
-        assert isinstance(embedded, CandidateSet), f"embedded has unexpected type {type(embedded)} in pipeline {name}"
-        assert hasattr(embedded, "embeddings")
-
-        for idx, article in enumerate(embedded.articles):
-            embeddings[article.article_id] = embedded.embeddings[idx].cpu().numpy()  # type: ignore
-    return output_df, embeddings
+def _pickle_tensor(tensor: torch.Tensor):
+    """
+    Pickle support function to pickle a tensor, transferring to CPU.
+    """
+    return torch.from_numpy, (tensor.cpu().numpy(),)
 
 
-def generate_profile_recs(dataset: str, outs: RecOutputs, n_profiles: int | None = None):
-    logger.info("generating recommendations")
-
-    profile_iter = dataset.iter_profiles()
-    if n_profiles is None:
-        n_profiles = dataset.n_profiles
-        logger.info("recommending for all %d profiles", n_profiles)
-    else:
-        logger.info("running on subset of %d profiles", n_profiles)
-        profile_iter = it.islice(profile_iter, n_profiles)
-
-    timer = Stopwatch()
-    with item_progress("recommend", total=n_profiles) as pb:
-        pc = get_parallel_config()
-        if pc.processes > 1:
-            logger.info("starting evaluation with %d workers", pc.processes)
-            init_cluster(global_logging=True)
-
-            emb_out = ray.remote(EmbeddingWriter).remote(outs)
-
-            gen_actor = dynamic_remote(RecGenerator)
-            actors = [gen_actor.remote(outs, emb_out) for _i in range(pc.processes)]
-            pool = ray.util.ActorPool(actors)
-            batches = it.batched(profile_iter, BATCH_SIZE)
-
-            for rbatch in pool.map_unordered(lambda a, b: a.generate_batch.remote(b), batches):
-                pb.update(len(rbatch))
-
-            logger.info("closing actors")
-            rusage = [ray.get(actor.finish.remote()) for actor in actors]
-            ray.get(emb_out.close.remote())
-
-        else:
-            logger.info("starting serial evaluation")
-            # directly call things in-process
-            emb_out = EmbeddingWriter(outs)
-            gen = RecGenerator(outs, emb_out)
-
-            for request in profile_iter:
-                gen.generate(request)
-                pb.update()
-
-            gen.finish()
-            emb_out.close()
-            rusage = None
-
-    timer.stop()
-    logger.info("finished recommending in %s", timer)
-    return rusage
+copyreg.pickle(torch.Tensor, _pickle_tensor)

@@ -2,7 +2,6 @@ stages:
   unzip:
     foreach:
       - MINDlarge_dev
-      - MINDlarge_test
       - MINDlarge_train
       - MINDsmall_dev
       - MINDsmall_train
@@ -13,14 +12,27 @@ stages:
       outs:
         - ${item}
 
+  ingest-mind:
+    foreach:
+      - MINDlarge_train
+      - MINDlarge_dev
+      - MINDsmall_train
+      - MINDsmall_dev
+    do:
+      cmd: python -m poprox_recommender.data.duckscript -D mind_path=${item} ${item}.db mind-schema.sql mind-ingest.sql
+      deps:
+        - mind-schema.sql
+        - mind-ingest.sql
+        - ${item}
+      outs:
+        - ${item}.db
+
   preprocess-training-data:
     cmd: python -m poprox_recommender.training.preprocess
     deps:
       - ../src/poprox_recommender/training/preprocess.py
       - MINDlarge_train
       - MINDlarge_dev
-      - MINDlarge_test
     outs:
       - MINDlarge_post_train
       - MINDlarge_post_dev
-      - MINDlarge_post_test

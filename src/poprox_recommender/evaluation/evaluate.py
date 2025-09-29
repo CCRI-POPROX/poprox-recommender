@@ -1,40 +1,48 @@
+#!/usr/bin/env python3
 """
 Generate evaluations for offline test data.
 
-For an evaluation run NAME, it reads outputs/NAME-recommendation.parquet and
-produces OUTPUTS/name-profile-eval-metrics.csv.gz and OUTPUTS/name-metrics.json.
+For an evaluation EVAL and PIPELINE, this script reads
+outputs/DATA/PIPELINE/recommendations.parquet and produces
+ouptuts/DATA/PIPELINE/profile-metrics.csv.gz and ouptuts/DATA/PIPELINE/metrics.json.
 
 Usage:
-    poprox_recommender.evaluation.evaluate [options] <name>
+    poprox_recommender.evaluation.evaluate [options] EVAL PIPELINE
 
 Options:
-    -v, --verbose       enable verbose diagnostic logs
-    --log-file=FILE     write log messages to FILE
+    -v, --verbose
+            enable verbose diagnostic logs
+    --log-file=FILE
+            write log messages to FILE
     -M DATA, --mind-data=DATA
             read MIND test data DATA [default: MINDsmall_dev]
     -P DATA, --poprox-data=DATA
             read POPROX test data DATA
-    <name>              the name of the evaluation to measure
+    EVAL    the name of the evaluation to measure
+    PIPELINE
+            the name of the pipeline to measure
 """
 
 # pyright: basic
 import logging
 import os
+from collections.abc import Sequence
 from itertools import batched
 from typing import Any, Iterator
 from uuid import UUID
 
+import lenskit
 import pandas as pd
 import ray
 from docopt import docopt
 from lenskit.logging import LoggingConfig, item_progress
 from lenskit.parallel import get_parallel_config
-from lenskit.parallel.ray import init_cluster
+from lenskit.parallel.ray import TaskLimiter, init_cluster
 
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
-from poprox_recommender.evaluation.metrics import ProfileRecs, measure_batch, measure_profile_recs
+from poprox_recommender.evaluation.metrics import ProfileRecs, measure_profile_recs
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
@@ -52,36 +60,29 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[Pr
         assert truth is not None
         if len(truth) > 0:
             yield ProfileRecs(profile_id, recs.copy(), truth)
+        else:
+            logger.warning("profile %s has no truth", profile_id)
 
 
-def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[list[dict[str, Any]]]:
+def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[dict[str, Any]]:
     pc = get_parallel_config()
     profiles = rec_profiles(eval_data, profile_recs)
     if pc.processes > 1:
-        logger.info("starting parallel measurement with %d workers", pc.processes)
+        logger.info("starting parallel measurement with up to %d tasks", pc.processes)
         init_cluster(global_logging=True)
 
-        # use the batch backpressure mechanism
-        # https://docs.ray.io/en/latest/ray-core/patterns/limit-pending-tasks.html
-        result_refs = []
-        for batch in batched(profiles, 100):
-            if len(result_refs) > pc.processes:
-                # wait for a result, and return it
-                ready_refs, result_refs = ray.wait(result_refs, num_returns=1)
-                for rr in ready_refs:
-                    yield from ray.get(rr)
+        eval_data_ref = ray.put(eval_data)
+        limit = TaskLimiter(pc.processes)
 
-            result_refs.append(measure_batch.remote(batch))
-
-        # yield remaining items
-        while result_refs:
-            ready_refs, result_refs = ray.wait(result_refs, num_returns=1)
-            for rr in ready_refs:
-                yield from ray.get(rr)
+        for bres in limit.imap(
+            lambda batch: measure_batch.remote(batch, eval_data_ref), batched(profiles, 100), ordered=False
+        ):
+            assert isinstance(bres, list)
+            yield from bres
 
     else:
         for profile in rec_profiles(eval_data, profile_recs):
-            yield measure_profile_recs(profile)
+            yield measure_profile_recs(profile, eval_data)
 
 
 def main():
@@ -92,6 +93,7 @@ def main():
     if options["--log-file"]:
         log_cfg.set_log_file(options["--log-file"])
     log_cfg.apply()
+    lenskit.configure(cfg_dir=project_root())
 
     global eval_data
 
@@ -100,9 +102,10 @@ def main():
     else:
         eval_data = MindData(options["--mind-data"])
 
-    eval_name = options["<name>"]
-    logger.info("measuring evaluation %s", eval_name)
-    recs_fn = project_root() / "outputs" / eval_name / "recommendations"
+    eval_name = options["EVAL"]
+    pipe_name = options["PIPELINE"]
+    logger.info("measuring evaluation %s for %s", eval_name, pipe_name)
+    recs_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendations.parquet"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
     n_profiles = recs_df["profile_id"].nunique()
@@ -115,25 +118,35 @@ def main():
         item_progress("evaluate", total=n_profiles) as pb,
     ):
         for profile_rows in profile_eval_results(eval_data, recs_df):
-            records += profile_rows
+            records.append(profile_rows)
             pb.update()
 
     metrics = pd.DataFrame.from_records(records)
+    print(metrics)
     logger.info("measured recs for %d profiles", metrics["profile_id"].nunique())
 
-    profile_out_fn = project_root() / "outputs" / eval_name / "profile-metrics.csv.gz"
+    profile_out_fn = project_root() / "outputs" / eval_name / pipe_name / "profile-metrics.csv.gz"
     logger.info("saving per-profile metrics to %s", profile_out_fn)
     metrics.to_csv(profile_out_fn)
 
-    agg_metrics = metrics.drop(columns=["profile_id", "personalized"]).groupby("recommender").mean()
-    # reciprocal rank means to MRR
-    agg_metrics = agg_metrics.rename(columns={"RR": "MRR"})
+    agg_metrics = metrics.drop(columns=["profile_id", "personalized"]).mean()
+    # reciprocal rank mean to MRR
+    agg_metrics = agg_metrics.rename(index={"RR": "MRR"})
 
     logger.info("aggregate metrics:\n%s", agg_metrics)
 
-    out_fn = project_root() / "outputs" / eval_name / "metrics.csv"
+    out_fn = project_root() / "outputs" / eval_name / pipe_name / "metrics.json"
     logger.info("saving evaluation to %s", out_fn)
-    agg_metrics.to_csv(out_fn)
+    with open(out_fn, "wt") as jsf:
+        print(agg_metrics.to_json(), file=jsf)
+
+
+@ray.remote(num_cpus=1)
+def measure_batch(profiles: Sequence[ProfileRecs], eval_data) -> list[dict[str, Any]]:
+    """
+    Measure a batch of profile recommendations.
+    """
+    return [measure_profile_recs(profile, eval_data) for profile in profiles]
 
 
 if __name__ == "__main__":
