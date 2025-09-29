@@ -1,3 +1,5 @@
+import csv
+
 import numpy as np
 import pandas as pd
 import torch as th
@@ -22,18 +24,30 @@ def clustering_AP_neighbors_for_Mind(similarity, neighbor_count, M_ids, A_ids_ar
 
 def assigning_AP_topics_on_Mind(mind_neighbors_df, A_topics, topic_assigning_method):
     mind_topics = mind_neighbors_df.merge(A_topics, on="ap_id", how="left")
+    mind_topics = mind_topics[mind_topics["mind_id"] != mind_topics["ap_id"]]
     mind_topics = mind_topics.explode("topic_name", ignore_index=True)
 
     if topic_assigning_method == "union":
-        agg_fn = lambda s: set(s.dropna())  # noqa: E731
+        return mind_topics.groupby("mind_id")["topic_name"].agg(lambda s: set(s.dropna()))
+
     elif topic_assigning_method == "intersection":
-        agg_fn = (  # noqa: E731
-            lambda s: set.intersection(*[set([t]) for t in s.dropna()]) if len(s.dropna()) > 0 else set()
+        n_neigh = mind_neighbors_df.groupby("mind_id")["ap_id"].nunique().rename("n_neigh")
+        topic_counts = (
+            mind_topics.dropna(subset=["topic_name"])
+            .drop_duplicates(subset=["mind_id", "ap_id", "topic_name"])
+            .groupby(["mind_id", "topic_name"])
+            .size()
+            .rename("cnt")
+            .reset_index()
         )
+        topic_all = topic_counts.merge(n_neigh, on="mind_id").loc[
+            lambda df: df["cnt"] == df["n_neigh"], ["mind_id", "topic_name"]
+        ]
+
+        return topic_all.groupby("mind_id")["topic_name"].agg(lambda s: set(s))
+
     else:
         raise ValueError("topic_assigning_method must be 'union' or 'intersection'")
-
-    return mind_topics.groupby("mind_id")["topic_name"].agg(agg_fn)
 
 
 data_dir = project_root() / "models" / "precalculated_model"
@@ -54,16 +68,16 @@ M_mat = th.stack([th.tensor(x, dtype=th.float32, device=device) for x in mind_em
 similarity = M_mat @ A_mat.T  # matrix multiplication
 
 
-neighbor_count = 7  # 3 || 5 || 7
+neighbor_count = 3  # 3 || 5 || 7
 mind_neighbors_df = clustering_AP_neighbors_for_Mind(similarity, neighbor_count, M_ids, A_ids_arr)
 
 
-topic_assigning_method = "intersection"  # union || intersection
+topic_assigning_method = "union"  # union || intersection
 mind_topic_sets = assigning_AP_topics_on_Mind(mind_neighbors_df, A_topics, topic_assigning_method)
 
 
 mind_topics_rows = [
-    (m_id, head, ";".join(sorted(list(mind_topic_sets.get(m_id, set()))))) for m_id, head in zip(M_ids, M_heads)
+    (m_id, head, ";".join(sorted(mind_topic_sets.get(m_id, set())))) for m_id, head in zip(M_ids, M_heads)
 ]
 mind_topics_df = pd.DataFrame(mind_topics_rows, columns=["mind_id", "headline", "topics"])
 
