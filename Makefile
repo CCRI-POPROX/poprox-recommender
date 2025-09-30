@@ -1,6 +1,9 @@
 
 .PHONY: auth build-ecr deploy build-local serve-local pull-ecr serve-ecr test-warmup-local test-request-local test-warmup-live test-request-live test-live-eval full-deploy serve-dev test-warmup-dev test-request-dev test-dev-eval
 
+# Default S3 bucket for persistence (defined in src/poprox_recommender/persistence/__init__.py)
+DEFAULT_BUCKET := poprox-default-recommender-pipeline-data-prod
+
 # Development server
 serve-dev:
 	uv run uvicorn poprox_recommender.api.main:app --reload --port 8080
@@ -13,7 +16,7 @@ test-request-dev:
 	curl -X POST -H "Content-Type: application/json" "http://localhost:8080/?pipeline=llm-rank-rewrite" -d @testing_data/request-body.json
 
 test-dev-eval:
-	uv run scripts/test_live_endpoint.py --endpoint "http://localhost:8080/" --output-dir testing_data/evals --bucket poprox-default-recommender-pipeline-data-prod --runs 3
+	uv run scripts/test_live_endpoint.py --endpoint "http://localhost:8080/" --output-dir testing_data/evals --bucket $(DEFAULT_BUCKET) --runs 3
 
 # AWS ECR Authentication
 auth:
@@ -56,7 +59,7 @@ test-request-live:
 	curl -X POST -H "Content-Type: application/json" "https://k8l1uc3s1i.execute-api.us-east-1.amazonaws.com/?pipeline=llm-rank-rewrite" -d @testing_data/request-body.json
 
 test-live-eval:
-	uv run scripts/test_live_endpoint.py --endpoint "https://k8l1uc3s1i.execute-api.us-east-1.amazonaws.com/" --output-dir testing_data/evals --bucket poprox-default-recommender-pipeline-data-prod --runs 3
+	uv run scripts/test_live_endpoint.py --endpoint "https://k8l1uc3s1i.execute-api.us-east-1.amazonaws.com/" --output-dir testing_data/evals --bucket $(DEFAULT_BUCKET) --runs 3
 
 # Compound commands
 full-deploy: auth build-ecr deploy

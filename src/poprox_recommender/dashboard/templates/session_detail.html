@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="session-detail">
+  <header>
+    <h2>Session {{ session.session_id }}</h2>
+    <p class="meta">Request ID: {{ session.request_id }} | Timestamp: {{ session.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</p>
+    <p><a href="/">&larr; Back to sessions</a></p>
+  </header>
+
+  <section class="metadata">
+    <h3>Component Metrics</h3>
+    {% set components = session.metadata.get('component_metrics', {}) %}
+    {% if components %}
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Status</th>
+          <th>Duration (s)</th>
+          <th>Errors</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name, data in components.items() %}
+        <tr>
+          <td>{{ name }}</td>
+          <td>{{ data.get('status', 'unknown') }}</td>
+          <td>{% if data.get('duration_seconds') %}{{ '%.2f'|format(data['duration_seconds']) }}{% else %}-{% endif %}</td>
+          <td>{{ data.get('error_count', 0) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No component metrics recorded.</p>
+    {% endif %}
+  </section>
+
+  <section class="issues">
+    <h3>Issues</h3>
+    {% set issues = session.metadata.get('issues', []) %}
+    {% if issues %}
+    <ul>
+      {% for issue in issues %}
+      <li>
+        <strong>{{ issue.get('component', 'component') }}:</strong>
+        {{ issue.get('error_type', 'Error') }} — {{ issue.get('error_message', 'Details unavailable') }}
+        {% if issue.get('context') %}
+        <small>({{ issue['context'] }})</small>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No issues reported.</p>
+    {% endif %}
+  </section>
+
+  <section class="llm-metrics">
+    <h3>LLM Metrics</h3>
+    {% set llm_summary = session.metadata.get('llm_summary') %}
+    {% if llm_summary %}
+    <p>Total tokens: {{ llm_summary.get('total_tokens') }} | Duration: {{ '%.2f'|format(llm_summary.get('total_duration_seconds', 0.0)) }}s | Calls: {{ llm_summary.get('num_llm_calls') }}</p>
+    {% endif %}
+
+    {% set ranker_metrics = session.metadata.get('llm_metrics', {}).get('ranker', {}) %}
+    {% if ranker_metrics %}
+    <h4>Ranker</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Input Tokens</th>
+          <th>Output Tokens</th>
+          <th>Duration (s)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stage, data in ranker_metrics.items() %}
+        <tr>
+          <td>{{ stage }}</td>
+          <td>{{ data.get('input_tokens', '-') }}</td>
+          <td>{{ data.get('output_tokens', '-') }}</td>
+          <td>{% if data.get('duration_seconds') %}{{ '%.2f'|format(data['duration_seconds']) }}{% else %}-{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    {% set rewriter_metrics = session.metadata.get('llm_metrics', {}).get('rewriter', []) %}
+    {% if rewriter_metrics %}
+    <h4>Rewriter Calls</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Article ID</th>
+          <th>Status</th>
+          <th>Input Tokens</th>
+          <th>Output Tokens</th>
+          <th>Duration (s)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for metric in rewriter_metrics %}
+        <tr>
+          <td>{{ metric.get('article_id', '-') }}</td>
+          <td>{{ metric.get('status', 'unknown') }}</td>
+          <td>{{ metric.get('input_tokens', '-') }}</td>
+          <td>{{ metric.get('output_tokens', '-') }}</td>
+          <td>{% if metric.get('duration_seconds') %}{{ '%.2f'|format(metric['duration_seconds']) }}{% else %}-{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </section>
+
+  <section class="user-model">
+    <h3>User Model</h3>
+    <pre>{{ session.user_model }}</pre>
+  </section>
+
+  <section class="recommendations">
+    <h3>Recommendations</h3>
+    {% if session.articles %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Article ID</th>
+          <th>Original Headline</th>
+          <th>Rewritten Headline</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for article in session.articles %}
+        <tr>
+          <td>{{ article.position }}</td>
+          <td>{{ article.article_id }}</td>
+          <td>{{ article.original_headline }}</td>
+          <td>{{ article.rewritten_headline }}</td>
+          <td>{{ article.rewrite_status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No recommendations persisted for this session.</p>
+    {% endif %}
+  </section>
+</article>
+{% endblock %}

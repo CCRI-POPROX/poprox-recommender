@@ -40,7 +40,7 @@ class PersistenceManager(ABC):
     def load_pipeline_data(self, session_id: str) -> Dict[str, Any]:
         """
         Load previously saved pipeline data.
-        
+
         Args:
             session_id: Session identifier returned from save_pipeline_data
             
@@ -50,10 +50,23 @@ class PersistenceManager(ABC):
         pass
 
     @abstractmethod
+    def load_metadata(self, session_id: str) -> Dict[str, Any]:
+        """
+        Load only the metadata for a persisted session.
+
+        Args:
+            session_id: Session identifier returned from save_pipeline_data
+
+        Returns:
+            Dictionary containing the stored metadata
+        """
+        pass
+
+    @abstractmethod
     def list_sessions(self, request_id_prefix: Optional[str] = None) -> list[str]:
         """
         List available saved sessions.
-        
+
         Args:
             request_id_prefix: Optional prefix to filter sessions
             

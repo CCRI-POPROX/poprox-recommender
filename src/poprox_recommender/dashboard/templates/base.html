@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or "POPROX Pipeline Dashboard" }}</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1><a href="/">POPROX Pipeline Dashboard</a></h1>
+      <div class="backend-toggle">
+        <form method="get" style="display: inline;">
+          <label for="backend-select">Backend:</label>
+          <select id="backend-select" name="backend" onchange="this.form.submit()">
+            <option value="local" {% if current_backend == "local" or (current_backend == "auto" and not data_source.startswith("S3")) %}selected{% endif %}>Local</option>
+            <option value="s3" {% if current_backend == "s3" or (current_backend == "auto" and data_source.startswith("S3")) %}selected{% endif %}>S3</option>
+          </select>
+        </form>
+      </div>
+    </header>
+    <main class="site-content">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+      <small>Data source: {{ data_source or "configured persistence" }}</small>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,135 @@
+:root {
+  color-scheme: light dark;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+.site-header,
+.site-footer {
+  background-color: #1f2937;
+  padding: 1rem 2rem;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.site-header h1,
+.site-header a {
+  color: #f9fafb;
+  text-decoration: none;
+  margin: 0;
+}
+
+.backend-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backend-toggle label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.backend-toggle select {
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.35rem;
+  border: 1px solid #4b5563;
+  background-color: #111827;
+  color: #f9fafb;
+  cursor: pointer;
+}
+
+.site-content {
+  padding: 2rem;
+}
+
+.filter-form {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.filter-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filter-form input {
+  margin-top: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.35rem;
+  border: 1px solid #4b5563;
+  background-color: #111827;
+  color: inherit;
+}
+
+.filter-form button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.35rem;
+  border: none;
+  background-color: #2563eb;
+  color: #f9fafb;
+  cursor: pointer;
+}
+
+.filter-form .reset-link {
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.table,
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+table th,
+table td {
+  border: 1px solid #1f2937;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+table th {
+  background-color: #1f2937;
+}
+
+.issue-count {
+  background-color: #dc2626;
+  color: #f9fafb;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.session-detail section {
+  margin-bottom: 2rem;
+}
+
+.session-detail pre {
+  background-color: #1f2937;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+}
+
+.site-footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
