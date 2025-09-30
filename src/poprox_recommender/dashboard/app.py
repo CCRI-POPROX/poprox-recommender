@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from poprox_recommender.persistence import (
+    DEFAULT_PERSISTENCE_BUCKET,
     LocalPersistenceManager,
     PersistenceManager,
     get_persistence_manager,
@@ -139,7 +140,7 @@ def _build_persistence(settings: DashboardSettings) -> PersistenceManager:
         except ImportError as exc:  # pragma: no cover - requires optional dependency
             raise RuntimeError("boto3 is required for S3 persistence") from exc
 
-        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-default-recommender-pipeline-data-prod")
+        bucket = os.getenv("PERSISTENCE_BUCKET", DEFAULT_PERSISTENCE_BUCKET)
         prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
         return S3PersistenceManager(bucket, prefix)
 
@@ -162,7 +163,7 @@ def _parse_date_param(raw: Optional[str]) -> Optional[date]:
 def _describe_persistence(settings: DashboardSettings) -> str:
     backend = settings.backend
     if backend == "s3":
-        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-default-recommender-pipeline-data-prod")
+        bucket = os.getenv("PERSISTENCE_BUCKET", DEFAULT_PERSISTENCE_BUCKET)
         prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
         return f"S3 ({bucket}/{prefix})"
     if backend == "local":
@@ -173,7 +174,7 @@ def _describe_persistence(settings: DashboardSettings) -> str:
 def _describe_persistence_backend(backend: str) -> str:
     """Describe a specific backend by name."""
     if backend == "s3":
-        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-default-recommender-pipeline-data-prod")
+        bucket = os.getenv("PERSISTENCE_BUCKET", DEFAULT_PERSISTENCE_BUCKET)
         prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
         return f"S3 ({bucket}/{prefix})"
     if backend == "local":
@@ -192,7 +193,7 @@ def _build_persistence_with_backend(backend: str) -> PersistenceManager:
         except ImportError as exc:  # pragma: no cover - requires optional dependency
             raise RuntimeError("boto3 is required for S3 persistence") from exc
 
-        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-default-recommender-pipeline-data-prod")
+        bucket = os.getenv("PERSISTENCE_BUCKET", DEFAULT_PERSISTENCE_BUCKET)
         prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
         return S3PersistenceManager(bucket, prefix)
 

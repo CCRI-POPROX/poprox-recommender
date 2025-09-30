@@ -3,11 +3,14 @@ import os
 from .base import PersistenceManager
 from .local import LocalPersistenceManager
 
+# Default S3 bucket for persistence
+DEFAULT_PERSISTENCE_BUCKET = "poprox-default-recommender-pipeline-data-prod"
+
 
 def get_persistence_manager() -> PersistenceManager:
     """
     Factory function to get the appropriate persistence manager based on environment.
-    
+
     Returns:
         PersistenceManager: LocalPersistenceManager for local dev, S3PersistenceManager for Lambda
     """
@@ -29,7 +32,7 @@ def get_persistence_manager() -> PersistenceManager:
     if use_s3:
         from .s3 import S3PersistenceManager
 
-        bucket = os.getenv("PERSISTENCE_BUCKET", "poprox-pipeline-data")
+        bucket = os.getenv("PERSISTENCE_BUCKET", DEFAULT_PERSISTENCE_BUCKET)
         prefix = os.getenv("PERSISTENCE_PREFIX", "pipeline-outputs/")
         return S3PersistenceManager(bucket, prefix)
 
@@ -37,4 +40,9 @@ def get_persistence_manager() -> PersistenceManager:
     return LocalPersistenceManager(persistence_path)
 
 
-__all__ = ["PersistenceManager", "LocalPersistenceManager", "get_persistence_manager"]
+__all__ = [
+    "PersistenceManager",
+    "LocalPersistenceManager",
+    "get_persistence_manager",
+    "DEFAULT_PERSISTENCE_BUCKET",
+]
