@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_concepts.domain import RecommendationList
+from poprox_recommender.components.rankers.ranking_cache import get_ranking_cache_manager
 
 load_dotenv()
 
@@ -31,6 +32,7 @@ class LLMRankerConfig(BaseModel):
     model: str = "gpt-4.1-mini-2025-04-14"
     num_slots: int = 10
     openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
+    enable_cache: bool = True  # Enable S3-based caching by default
 
 
 class RankedIndices(BaseModel):
@@ -48,6 +50,8 @@ class LLMRanker(Component):
         self.config = config
         self.llm_metrics = {}
         self.component_metrics: Dict[str, dict] = {}
+        # Initialize cache manager if enabled
+        self.cache_manager = get_ranking_cache_manager(config.model) if config.enable_cache else None
 
     def _structure_interest_profile(
         self, interest_profile: InterestProfile, articles_clicked: Union[CandidateSet, None]
@@ -162,6 +166,24 @@ Headlines of articles the user has clicked on (most recent first):
         # Generate a request ID for this pipeline run
         self.request_id = str(interest_profile.profile_id)
 
+        # Check cache first
+        if self.cache_manager:
+            cached_result = self.cache_manager.get_cached_ranking(
+                profile_id=str(interest_profile.profile_id),
+                candidate_articles=candidate_articles,
+                model_version=self.config.model,
+            )
+            if cached_result is not None:
+                # Cache hit - return cached result
+                component_meta["cache_hit"] = True
+                finalize_component("success")
+                # Update the component metrics in the cached result
+                cached_output = list(cached_result)
+                cached_output[4] = {"ranker": component_meta.copy()}
+                return tuple(cached_output)
+            else:
+                component_meta["cache_hit"] = False
+
         with open("prompts/rank.md", "r") as f:
             prompt = f.read()
 
@@ -204,13 +226,24 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
             original_recommendations = RecommendationList(articles=selected)
 
             metrics_snapshot = finalize_component("success")
-            return (
+            ranking_output = (
                 original_recommendations,
                 user_model,
                 self.request_id,
                 self.llm_metrics,
                 {"ranker": metrics_snapshot},
             )
+
+            # Save to cache for future use
+            if self.cache_manager:
+                self.cache_manager.save_ranking(
+                    profile_id=str(interest_profile.profile_id),
+                    candidate_articles=candidate_articles,
+                    ranking_output=ranking_output,
+                    model_version=self.config.model,
+                )
+
+            return ranking_output
         except Exception as exc:  # pragma: no cover - defensive logging for production observability
             finalize_component("error", exc, error_count=1)
             raise

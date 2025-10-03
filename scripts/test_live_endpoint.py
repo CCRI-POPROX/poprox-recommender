@@ -28,7 +28,7 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import boto3
 import requests
@@ -356,7 +356,7 @@ class LiveEndpointTester:
         profile_files = self.get_profile_files()
         available_pipelines = discover_pipelines()
         
-        logger.info(f"Starting comprehensive testing:")
+        logger.info("Starting comprehensive testing:")
         logger.info(f"  Profiles: {len(profile_files)}")
         logger.info(f"  Pipelines: {available_pipelines}")
         logger.info(f"  Runs per combination: {self.num_runs}")
@@ -387,7 +387,7 @@ class LiveEndpointTester:
 
         # Print final summary
         success_rate = (total_tests - failed_tests) / total_tests * 100 if total_tests > 0 else 0
-        logger.info(f"\n=== Testing Completed ===")
+        logger.info("\n=== Testing Completed ===")
         logger.info(f"Total tests: {total_tests}")
         logger.info(f"Successful: {total_tests - failed_tests}")
         logger.info(f"Failed: {failed_tests}")
