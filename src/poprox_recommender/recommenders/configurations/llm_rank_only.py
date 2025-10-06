@@ -22,7 +22,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_profile = builder.create_input("profile", InterestProfile)
 
     # LLM-based ranking only (no rewriting)
-    rank_cfg = LLMRankerConfig(num_slots=num_slots)
+    rank_cfg = LLMRankerConfig(num_slots=num_slots, pipeline_name="llm_rank_only", enable_persistence=True)
     ranker_output = builder.add_component(
         "ranker",
         LLMRanker,

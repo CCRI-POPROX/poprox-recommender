@@ -28,6 +28,7 @@ class LLMRewriterConfig(BaseModel):
 
     model: str = "gpt-4.1-2025-04-14"
     openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
+    pipeline_name: str = Field(default="llm_rank_rewrite", description="Name of the pipeline using this rewriter")
 
 
 class LLMRewriter(Component):
@@ -179,7 +180,7 @@ Article text:
 
             # Combine all metrics
             combined_metrics = {
-                "pipeline_type": "llm_rank_rewrite",
+                "pipeline_type": self.config.pipeline_name,
                 "rewriter_model": self.config.model,
                 "llm_metrics": {
                     "ranker": ranker_metrics,

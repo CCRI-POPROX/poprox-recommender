@@ -184,7 +184,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # LLM-based rewriting
-    rewrite_cfg = LLMRewriterConfig()
+    rewrite_cfg = LLMRewriterConfig(pipeline_name="nrms_baseline_rewrite")
     builder.add_component(
         "recommender",
         LLMRewriter,
