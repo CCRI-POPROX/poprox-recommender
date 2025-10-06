@@ -10,7 +10,7 @@ serve-dev:
 
 # Diagnostics dashboard
 dashboard:
-	uv run python -m poprox_recommender.dashboard
+	aws sso login && uv run python -m poprox_recommender.dashboard
 
 # Development server testing
 test-warmup-dev:
