@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from poprox_concepts.domain import RecommendationList
 from poprox_recommender.persistence import get_persistence_manager
+from poprox_recommender.timing_context import get_timeout_risk_info
 
 load_dotenv()
 
@@ -28,6 +29,7 @@ class LLMRewriterConfig(BaseModel):
 
     model: str = "gpt-4.1-2025-04-14"
     openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
+    pipeline_name: str = Field(default="llm_rank_rewrite", description="Name of the pipeline using this rewriter")
 
 
 class LLMRewriter(Component):
@@ -177,9 +179,12 @@ Article text:
             if component_snapshot is None:  # pragma: no cover - defensive fallback
                 component_snapshot = component_meta.copy()
 
+            # Get timeout risk information
+            timeout_info = get_timeout_risk_info()
+
             # Combine all metrics
             combined_metrics = {
-                "pipeline_type": "llm_rank_rewrite",
+                "pipeline_type": self.config.pipeline_name,
                 "rewriter_model": self.config.model,
                 "llm_metrics": {
                     "ranker": ranker_metrics,
@@ -190,6 +195,7 @@ Article text:
                     "rewriter": component_snapshot,
                 },
                 "issues": component_issues,
+                "timeout_info": timeout_info,
             }
 
             session_id = persistence.save_pipeline_data(

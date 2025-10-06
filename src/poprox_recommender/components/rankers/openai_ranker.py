@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from datetime import datetime, timezone
@@ -11,6 +12,8 @@ from pydantic import BaseModel, Field
 from poprox_concepts import CandidateSet, InterestProfile
 from poprox_concepts.domain import RecommendationList
 from poprox_recommender.components.rankers.ranking_cache import get_ranking_cache_manager
+from poprox_recommender.persistence import get_persistence_manager
+from poprox_recommender.timing_context import get_timeout_risk_info
 
 load_dotenv()
 
@@ -33,6 +36,8 @@ class LLMRankerConfig(BaseModel):
     num_slots: int = 10
     openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
     enable_cache: bool = True  # Enable S3-based caching by default
+    pipeline_name: str = Field(default="llm_rank_only", description="Name of the pipeline using this ranker")
+    enable_persistence: bool = Field(default=False, description="Enable persistence of ranking data")
 
 
 class RankedIndices(BaseModel):
@@ -242,6 +247,40 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
                     ranking_output=ranking_output,
                     model_version=self.config.model,
                 )
+
+            # Persist pipeline data if enabled
+            if self.config.enable_persistence:
+                try:
+                    persistence = get_persistence_manager()
+
+                    # Get timeout risk information
+                    timeout_info = get_timeout_risk_info()
+
+                    # Combine all metrics
+                    combined_metrics = {
+                        "pipeline_type": self.config.pipeline_name,
+                        "ranker_model": self.config.model,
+                        "llm_metrics": {
+                            "ranker": self.llm_metrics,
+                        },
+                        "component_metrics": {
+                            "ranker": metrics_snapshot,
+                        },
+                        "issues": [],
+                        "timeout_info": timeout_info,
+                    }
+
+                    session_id = persistence.save_pipeline_data(
+                        request_id=self.request_id,
+                        user_model=user_model,
+                        original_recommendations=original_recommendations,
+                        rewritten_recommendations=original_recommendations,  # No rewriting in rank-only
+                        metadata=combined_metrics,
+                    )
+                    logging.info(f"Pipeline data saved with session_id: {session_id}")
+                except Exception as e:
+                    # Log the error but don't fail the pipeline
+                    logging.error(f"Failed to persist pipeline data: {e}")
 
             return ranking_output
         except Exception as exc:  # pragma: no cover - defensive logging for production observability
