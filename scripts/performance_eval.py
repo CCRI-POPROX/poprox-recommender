@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+
 import pandas as pd
 
 metadata_files = Path("./data/pipeline_outputs").glob("**/metadata.json")
