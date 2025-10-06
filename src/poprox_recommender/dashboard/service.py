@@ -22,6 +22,7 @@ class SessionSummary:
     storage_location: Optional[str]
     llm_summary: Optional[Dict[str, Any]]
     pipeline: Optional[str]
+    timeout_info: Optional[Dict[str, Any]]
 
     @property
     def day(self) -> date:
@@ -99,6 +100,7 @@ class PipelineDashboardService:
             storage_location = metadata.get("storage_location")
             llm_summary = metadata.get("llm_summary")
             pipeline = metadata.get("pipeline_type")
+            timeout_info = metadata.get("timeout_info")
 
             summaries.append(
                 SessionSummary(
@@ -111,6 +113,7 @@ class PipelineDashboardService:
                     storage_location=storage_location,
                     llm_summary=llm_summary,
                     pipeline=pipeline,
+                    timeout_info=timeout_info,
                 )
             )
 

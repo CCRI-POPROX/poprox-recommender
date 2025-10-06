@@ -13,6 +13,7 @@ from poprox_concepts import CandidateSet, InterestProfile
 from poprox_concepts.domain import RecommendationList
 from poprox_recommender.components.rankers.ranking_cache import get_ranking_cache_manager
 from poprox_recommender.persistence import get_persistence_manager
+from poprox_recommender.timing_context import get_timeout_risk_info
 
 load_dotenv()
 
@@ -252,6 +253,9 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
                 try:
                     persistence = get_persistence_manager()
 
+                    # Get timeout risk information
+                    timeout_info = get_timeout_risk_info()
+
                     # Combine all metrics
                     combined_metrics = {
                         "pipeline_type": self.config.pipeline_name,
@@ -263,6 +267,7 @@ Make sure you select EXACTLY {self.config.num_slots} articles from the candidate
                             "ranker": metrics_snapshot,
                         },
                         "issues": [],
+                        "timeout_info": timeout_info,
                     }
 
                     session_id = persistence.save_pipeline_data(

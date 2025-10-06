@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from poprox_concepts.domain import RecommendationList
 from poprox_recommender.persistence import get_persistence_manager
+from poprox_recommender.timing_context import get_timeout_risk_info
 
 load_dotenv()
 
@@ -178,6 +179,9 @@ Article text:
             if component_snapshot is None:  # pragma: no cover - defensive fallback
                 component_snapshot = component_meta.copy()
 
+            # Get timeout risk information
+            timeout_info = get_timeout_risk_info()
+
             # Combine all metrics
             combined_metrics = {
                 "pipeline_type": self.config.pipeline_name,
@@ -191,6 +195,7 @@ Article text:
                     "rewriter": component_snapshot,
                 },
                 "issues": component_issues,
+                "timeout_info": timeout_info,
             }
 
             session_id = persistence.save_pipeline_data(

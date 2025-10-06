@@ -1,6 +1,7 @@
 import logging
 import os
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Annotated, Any
 
@@ -13,6 +14,7 @@ from poprox_concepts.api.recommendations.v2 import ProtocolModelV2_0, Recommenda
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
 from poprox_recommender.recommenders import load_all_pipelines, select_articles
+from poprox_recommender.timing_context import set_request_start_time, clear_request_context
 from poprox_recommender.topics import user_locality_preference, user_topic_preference
 
 logger = logging.getLogger(__name__)
@@ -101,66 +103,73 @@ def root(
     body: Annotated[dict[str, Any], Body()],
     pipeline: str | None = None,
 ):
-    logger.info(f"Decoded body: {body}")
+    # Set request start time for timeout tracking
+    set_request_start_time(time.time())
 
-    req = RecommendationRequestV2.model_validate(body)
+    try:
+        logger.info(f"Decoded body: {body}")
 
-    candidate_articles = req.candidates.articles
-    num_candidates = len(candidate_articles)
+        req = RecommendationRequestV2.model_validate(body)
 
-    if num_candidates < req.num_recs:
-        msg = f"Received insufficient candidates ({num_candidates}) in a request for {req.num_recs} recommendations."
-        raise ValueError(msg)
+        candidate_articles = req.candidates.articles
+        num_candidates = len(candidate_articles)
 
-    logger.info(f"Selecting articles from {num_candidates} candidates...")
+        if num_candidates < req.num_recs:
+            msg = f"Received insufficient candidates ({num_candidates}) in a request for {req.num_recs} recommendations."
+            raise ValueError(msg)
 
-    profile = req.interest_profile
-    profile.click_topic_counts = user_topic_preference(req.interacted.articles, profile.click_history)
-    profile.click_locality_counts = user_locality_preference(req.interacted.articles, profile.click_history)
+        logger.info(f"Selecting articles from {num_candidates} candidates...")
 
-    # Get cached pipelines to avoid loading during request
-    cached_pipelines = get_cached_pipelines()
+        profile = req.interest_profile
+        profile.click_topic_counts = user_topic_preference(req.interacted.articles, profile.click_history)
+        profile.click_locality_counts = user_locality_preference(req.interacted.articles, profile.click_history)
 
-    # If we have cached pipelines, we can use them directly
-    # Otherwise, select_articles will load the pipeline itself
-    if cached_pipelines:
-        from poprox_recommender.recommenders.load import default_pipeline
+        # Get cached pipelines to avoid loading during request
+        cached_pipelines = get_cached_pipelines()
 
-        pipeline_name = pipeline if pipeline else default_pipeline()
+        # If we have cached pipelines, we can use them directly
+        # Otherwise, select_articles will load the pipeline itself
+        if cached_pipelines:
+            from poprox_recommender.recommenders.load import default_pipeline
 
-        if pipeline_name in cached_pipelines:
-            # Use the cached pipeline directly
-            selected_pipeline = cached_pipelines[pipeline_name]
-            recs_node = selected_pipeline.node("recommender")
-            outputs = selected_pipeline.run_all(
-                recs_node,
-                candidate=req.candidates,
-                clicked=req.interacted,
-                profile=profile,
-            )
+            pipeline_name = pipeline if pipeline else default_pipeline()
+
+            if pipeline_name in cached_pipelines:
+                # Use the cached pipeline directly
+                selected_pipeline = cached_pipelines[pipeline_name]
+                recs_node = selected_pipeline.node("recommender")
+                outputs = selected_pipeline.run_all(
+                    recs_node,
+                    candidate=req.candidates,
+                    clicked=req.interacted,
+                    profile=profile,
+                )
+            else:
+                # Fall back to normal loading if requested pipeline not cached
+                outputs = select_articles(
+                    req.candidates,
+                    req.interacted,
+                    profile,
+                    {"pipeline": pipeline},
+                )
         else:
-            # Fall back to normal loading if requested pipeline not cached
+            # Fall back to normal loading if no cached pipelines
             outputs = select_articles(
                 req.candidates,
                 req.interacted,
                 profile,
                 {"pipeline": pipeline},
             )
-    else:
-        # Fall back to normal loading if no cached pipelines
-        outputs = select_articles(
-            req.candidates,
-            req.interacted,
-            profile,
-            {"pipeline": pipeline},
+
+        resp_body = RecommendationResponseV2.model_validate(
+            {"recommendations": outputs.default, "recommender": outputs.meta.model_dump()}
         )
 
-    resp_body = RecommendationResponseV2.model_validate(
-        {"recommendations": outputs.default, "recommender": outputs.meta.model_dump()}
-    )
-
-    logger.info(f"Response body: {resp_body}")
-    return resp_body.model_dump()
+        logger.info(f"Response body: {resp_body}")
+        return resp_body.model_dump()
+    finally:
+        # Clear timing context after request completes
+        clear_request_context()
 
 
 handler = Mangum(app)
