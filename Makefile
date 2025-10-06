@@ -1,5 +1,5 @@
 
-.PHONY: auth build-ecr deploy build-local serve-local pull-ecr serve-ecr test-warmup-local test-request-local test-warmup-live test-request-live test-live-eval full-deploy serve-dev test-warmup-dev test-request-dev test-dev-eval
+.PHONY: auth build-ecr deploy build-local serve-local pull-ecr serve-ecr test-warmup-local test-request-local test-warmup-live test-request-live test-live-eval full-deploy serve-dev test-warmup-dev test-request-dev test-dev-eval dashboard
 
 # Default S3 bucket for persistence (defined in src/poprox_recommender/persistence/__init__.py)
 DEFAULT_BUCKET := poprox-default-recommender-pipeline-data-prod
@@ -7,6 +7,10 @@ DEFAULT_BUCKET := poprox-default-recommender-pipeline-data-prod
 # Development server
 serve-dev:
 	uv run uvicorn poprox_recommender.api.main:app --reload --port 8080
+
+# Diagnostics dashboard
+dashboard:
+	uv run python -m poprox_recommender.dashboard
 
 # Development server testing
 test-warmup-dev:
