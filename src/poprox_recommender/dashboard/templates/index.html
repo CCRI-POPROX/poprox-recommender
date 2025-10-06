@@ -3,7 +3,7 @@
 <section class="filters">
   <form method="get" class="filter-form">
     <label>
-      Request ID
+      User ID
       <input type="text" name="request_id" value="{{ selected_request_id }}" placeholder="Exact or prefix" />
     </label>
     <label>
@@ -25,8 +25,9 @@
     <thead>
       <tr>
         <th>Timestamp</th>
-        <th>Request ID</th>
+        <th>User ID</th>
         <th>Session</th>
+        <th>Pipeline</th>
         <th>Articles</th>
         <th>Ranker</th>
         <th>Rewriter</th>
@@ -41,6 +42,7 @@
         <td>{{ session.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
         <td>{{ session.request_id }}</td>
         <td><a href="/sessions/{{ session.session_id }}">{{ session.session_id }}</a></td>
+        <td>{{ session.pipeline if session.pipeline else 'n/a' }}</td>
         <td>{{ session.num_articles }}</td>
         <td>{{ ranker.get('status', 'n/a') }} {% if ranker.get('duration_seconds') %}<small>({{ '%.2f'|format(ranker['duration_seconds']) }}s)</small>{% endif %}</td>
         <td>{{ rewriter.get('status', 'n/a') }} {% if rewriter.get('duration_seconds') %}<small>({{ '%.2f'|format(rewriter['duration_seconds']) }}s)</small>{% endif %}</td>
