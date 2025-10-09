@@ -69,7 +69,7 @@ class LLMRanker(Component):
             clicked_stories = sorted(
                 [(art.headline, art.published_at) for art in click_history], key=lambda x: x[1], reverse=True
             )
-            clicked_headlines = [headline for headline, _ in clicked_stories]
+            clicked_headlines = [headline for headline, _ in clicked_stories][:5]  # Take up to 5 most recent
         else:
             clicked_headlines = []
 
@@ -81,18 +81,12 @@ class LLMRanker(Component):
                 )
             ],
             "click_topic_counts": getattr(interest_profile, "click_topic_counts", None),
-            "click_locality_counts": getattr(interest_profile, "click_locality_counts", None),
             "click_history": clicked_headlines,
         }
         # Sort the click counts from most clicked to least clicked
         clean_profile["click_topic_counts"] = (
             [t for t, _ in sorted(clean_profile["click_topic_counts"].items(), key=lambda x: x[1], reverse=True)]
             if clean_profile["click_topic_counts"]
-            else []
-        )
-        clean_profile["click_locality_counts"] = (
-            [t for t, _ in sorted(clean_profile["click_locality_counts"].items(), key=lambda x: x[1], reverse=True)]
-            if clean_profile["click_locality_counts"]
             else []
         )
 
@@ -102,10 +96,7 @@ class LLMRanker(Component):
 Topics the user has clicked on (from most to least):
 {", ".join(clean_profile["click_topic_counts"])}
 
-Localities the user has clicked on (from most to least):
-{", ".join(clean_profile["click_locality_counts"])}
-
-Headlines of articles the user has clicked on (most recent first):
+Headlines of articles the user has clicked on recently:
 {", ".join(cleaned_headline for cleaned_headline in clean_profile["click_history"] if cleaned_headline)}
 """
 
@@ -122,7 +113,7 @@ Headlines of articles the user has clicked on (most recent first):
 
         start_time = time.time()
         response = client.responses.create(
-            model="gpt-4.1-mini-2025-04-14",
+            model="gpt-4.1-nano-2025-04-14",
             instructions=prompt,
             input=interest_profile_str,
         )
@@ -153,7 +144,9 @@ Headlines of articles the user has clicked on (most recent first):
         }
         component_start = time.perf_counter()
 
-        def finalize_component(status: str, exc: Exception | None = None, *, error_count: int | None = None) -> Dict[str, Any]:
+        def finalize_component(
+            status: str, exc: Exception | None = None, *, error_count: int | None = None
+        ) -> Dict[str, Any]:
             component_meta["status"] = status
             if exc is not None:
                 component_meta["error_type"] = type(exc).__name__
@@ -168,6 +161,7 @@ Headlines of articles the user has clicked on (most recent first):
             component_meta["duration_seconds"] = time.perf_counter() - component_start
             self.component_metrics["ranker"] = component_meta
             return component_meta.copy()
+
         # Generate a request ID for this pipeline run
         self.request_id = str(interest_profile.profile_id)
 
