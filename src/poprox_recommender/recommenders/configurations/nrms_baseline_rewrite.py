@@ -52,23 +52,24 @@ class NRMSWithUserModel(Component):
             return component_meta.copy()
 
         try:
-            # Create an LLMRanker instance just to generate the user model
+            # Create an LLMRanker instance just to generate the structured profile
             llm_ranker = LLMRanker(LLMRankerConfig())
 
-            # Generate user model using LLMRanker's method
+            # Generate structured profile using LLMRanker's method (no LLM call)
             profile_str = llm_ranker._structure_interest_profile(interest_profile, articles_clicked)
-            user_model = llm_ranker._build_user_model(profile_str)
+            # Use the structured profile directly as user_model (optimization: no separate LLM call)
+            user_model = profile_str
             request_id = str(interest_profile.profile_id)
 
             component_meta["num_candidates"] = len(candidate_articles.articles)
             component_meta["num_recommendations"] = len(nrms_ranking.articles)
 
-            # Get the metrics from the LLMRanker instance (from user model generation)
-            ranker_metrics = llm_ranker.llm_metrics
+            # No LLM metrics since we're not making any LLM calls
+            ranker_metrics = {}
 
             component_snapshot = finalize_component("success")
 
-            # Return the NRMS ranking with the LLM-generated user model and metrics
+            # Return the NRMS ranking with the structured user profile and metrics
             return (nrms_ranking, user_model, request_id, ranker_metrics, {"ranker": component_snapshot})
         except Exception as exc:  # pragma: no cover - defensive logging for production observability
             finalize_component("error", exc)
