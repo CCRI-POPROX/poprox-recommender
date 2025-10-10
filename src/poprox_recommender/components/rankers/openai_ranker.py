@@ -102,30 +102,6 @@ Headlines of articles the user has clicked on recently:
 
         return profile_str
 
-    def _build_user_model(self, interest_profile_str: str) -> str:
-        """
-        Build a concise user model from the provided interest data.
-        """
-        with open("prompts/user_profile.md", "r") as f:
-            prompt = f.read()
-
-        client = openai.OpenAI(api_key=self.config.openai_api_key)
-
-        start_time = time.time()
-        response = client.responses.create(
-            model="gpt-4.1-nano-2025-04-14",
-            instructions=prompt,
-            input=interest_profile_str,
-        )
-        end_time = time.time()
-
-        self.llm_metrics["user_profile_generation"] = {
-            "input_tokens": response.usage.input_tokens,
-            "output_tokens": response.usage.output_tokens,
-            "duration_seconds": end_time - start_time,
-        }
-
-        return response.output_text
 
     def __call__(
         self,
@@ -191,8 +167,8 @@ Headlines of articles the user has clicked on recently:
         # build concise profile for prompt
         try:
             profile_str = self._structure_interest_profile(interest_profile, articles_clicked)
-            # build user model
-            user_model = self._build_user_model(profile_str)
+            # Use profile_str directly as user_model (no separate LLM call)
+            user_model = profile_str
 
             # summarize candidates for the prompt
             items = []
