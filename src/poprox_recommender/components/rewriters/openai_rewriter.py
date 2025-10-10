@@ -35,6 +35,41 @@ class LLMRewriterConfig(BaseModel):
 class LLMRewriter(Component):
     config: LLMRewriterConfig
 
+    def _extract_user_profile_summary(self, user_model: str) -> str:
+        """
+        Extract a concise summary from the user profile for headline rewriting.
+        Takes the structured interest profile and creates a brief summary.
+        """
+        # Parse the structured profile and create a concise summary
+        lines = user_model.strip().split('\n')
+        topics_line = ""
+        click_topics_line = ""
+
+        for i, line in enumerate(lines):
+            if line.startswith("Topics the user has shown interest in"):
+                # Get the next non-empty line
+                if i + 1 < len(lines):
+                    topics_line = lines[i + 1].strip()
+            elif line.startswith("Topics the user has clicked on"):
+                if i + 1 < len(lines):
+                    click_topics_line = lines[i + 1].strip()
+
+        # Create concise summary
+        summary_parts = []
+        if topics_line:
+            # Take top 5 topics
+            topics = [t.strip() for t in topics_line.split(',')][:5]
+            if topics:
+                summary_parts.append(f"Interests: {', '.join(topics)}")
+
+        if click_topics_line:
+            # Take top 3 clicked topics
+            clicked = [t.strip() for t in click_topics_line.split(',')][:3]
+            if clicked:
+                summary_parts.append(f"Frequently clicks on: {', '.join(clicked)}")
+
+        return ". ".join(summary_parts) + "." if summary_parts else "General news reader."
+
     def __call__(self, ranker_output: tuple[RecommendationList, str, str, dict, dict]) -> RecommendationList:
         (
             recommendations,
@@ -77,11 +112,14 @@ class LLMRewriter(Component):
             component_meta["duration_seconds"] = time.perf_counter() - component_start
             return component_meta.copy()
 
+        # Extract a concise user profile summary for rewriting
+        user_profile_summary = self._extract_user_profile_summary(user_model)
+
         # rewrite article headlines in parallel
         async def rewrite_article(art, client):
-            # build prompt using the user_model from LLMRanker
+            # build prompt using the concise user profile summary
             input_txt = f"""User interest profile:
-{user_model}
+{user_profile_summary}
 
 Headline to rewrite:
 {art.headline}
