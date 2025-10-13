@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -20,6 +20,7 @@ from poprox_recommender.persistence import (
     get_persistence_manager,
 )
 
+from .cloudwatch import BOTO3_AVAILABLE, CloudWatchLogsService, LogEvent
 from .service import PipelineDashboardService
 
 
@@ -116,6 +117,94 @@ def create_app(settings: Optional[DashboardSettings] = None) -> FastAPI:
             "current_backend": request.app.state.current_backend,
         }
         return templates.TemplateResponse("session_detail.html", context)
+
+    @app.get("/api/logs/errors")
+    async def fetch_lambda_errors(
+        date_param: Optional[str] = Query(default=None, alias="date", description="Filter by YYYY-MM-DD date"),
+        limit: int = Query(default=100, ge=1, le=500, description="Maximum number of log events"),
+    ) -> JSONResponse:
+        """Fetch Lambda execution errors from CloudWatch Logs for a specific date."""
+        if not BOTO3_AVAILABLE:
+            raise HTTPException(
+                status_code=503,
+                detail="CloudWatch Logs integration requires boto3 to be installed",
+            )
+
+        # Parse the date parameter
+        target_date = _parse_date_param(date_param)
+        if target_date is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid or missing date parameter. Use format: YYYY-MM-DD",
+            )
+
+        try:
+            # Initialize CloudWatch Logs service
+            logs_service = CloudWatchLogsService()
+
+            # Fetch errors for the specified day
+            log_events = logs_service.fetch_errors_for_day(target_date, limit=limit)
+
+            # Convert to JSON-serializable format
+            events_data = [
+                {
+                    "timestamp": event.timestamp.isoformat(),
+                    "message": event.message,
+                    "log_stream": event.log_stream,
+                    "request_id": event.request_id,
+                }
+                for event in log_events
+            ]
+
+            return JSONResponse(
+                content={
+                    "success": True,
+                    "date": target_date.isoformat(),
+                    "count": len(events_data),
+                    "events": events_data,
+                }
+            )
+
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "success": False,
+                    "error": str(e),
+                },
+            )
+
+    @app.get("/api/logs/test")
+    async def test_cloudwatch_connection() -> JSONResponse:
+        """Test if CloudWatch Logs connection is working."""
+        if not BOTO3_AVAILABLE:
+            return JSONResponse(
+                content={
+                    "available": False,
+                    "error": "boto3 is not installed",
+                }
+            )
+
+        try:
+            logs_service = CloudWatchLogsService()
+            connection_ok = logs_service.test_connection()
+
+            return JSONResponse(
+                content={
+                    "available": True,
+                    "connected": connection_ok,
+                    "log_group": logs_service.log_group,
+                    "region": logs_service.region,
+                }
+            )
+        except Exception as e:
+            return JSONResponse(
+                content={
+                    "available": True,
+                    "connected": False,
+                    "error": str(e),
+                }
+            )
 
     return app
 

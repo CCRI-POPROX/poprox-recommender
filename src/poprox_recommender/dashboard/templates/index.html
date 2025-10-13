@@ -8,7 +8,7 @@
     </label>
     <label>
       Date
-      <input type="date" name="date" value="{{ selected_date }}" />
+      <input type="date" name="date" id="date-filter" value="{{ selected_date }}" />
     </label>
     <label>
       Limit
@@ -17,6 +17,17 @@
     <button type="submit">Apply</button>
     <a class="reset-link" href="/">Reset</a>
   </form>
+  <div class="logs-actions">
+    <button id="fetch-logs-btn" onclick="fetchLambdaLogs()" {% if not selected_date %}disabled{% endif %}>
+      Fetch Lambda Errors
+    </button>
+    <span id="logs-status"></span>
+  </div>
+</section>
+
+<section id="lambda-logs" style="display: none;">
+  <h2>Lambda Execution Errors</h2>
+  <div id="logs-content"></div>
 </section>
 
 <section class="session-table">
@@ -71,4 +82,72 @@
   <p>No sessions found for the selected filters.</p>
   {% endif %}
 </section>
+
+<script>
+async function fetchLambdaLogs() {
+  const dateInput = document.getElementById('date-filter');
+  const selectedDate = dateInput.value;
+
+  if (!selectedDate) {
+    alert('Please select a date first');
+    return;
+  }
+
+  const logsSection = document.getElementById('lambda-logs');
+  const logsContent = document.getElementById('logs-content');
+  const statusSpan = document.getElementById('logs-status');
+  const fetchBtn = document.getElementById('fetch-logs-btn');
+
+  // Show loading state
+  statusSpan.textContent = 'Fetching logs...';
+  fetchBtn.disabled = true;
+  logsContent.innerHTML = '<p>Loading...</p>';
+  logsSection.style.display = 'block';
+
+  try {
+    const response = await fetch(`/api/logs/errors?date=${selectedDate}`);
+    const data = await response.json();
+
+    if (data.success) {
+      statusSpan.textContent = `Found ${data.count} error(s)`;
+
+      if (data.count === 0) {
+        logsContent.innerHTML = '<p>No errors found for this date.</p>';
+      } else {
+        let html = '<div class="logs-list">';
+        data.events.forEach(event => {
+          const timestamp = new Date(event.timestamp).toLocaleString();
+          const requestId = event.request_id || 'N/A';
+          html += `
+            <div class="log-event">
+              <div class="log-header">
+                <span class="log-timestamp">${timestamp}</span>
+                <span class="log-request-id">Request: ${requestId}</span>
+                <span class="log-stream">${event.log_stream}</span>
+              </div>
+              <pre class="log-message">${escapeHtml(event.message)}</pre>
+            </div>
+          `;
+        });
+        html += '</div>';
+        logsContent.innerHTML = html;
+      }
+    } else {
+      statusSpan.textContent = 'Error fetching logs';
+      logsContent.innerHTML = `<p class="error">Error: ${escapeHtml(data.error)}</p>`;
+    }
+  } catch (error) {
+    statusSpan.textContent = 'Failed to fetch logs';
+    logsContent.innerHTML = `<p class="error">Failed to fetch logs: ${escapeHtml(error.message)}</p>`;
+  } finally {
+    fetchBtn.disabled = false;
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+</script>
 {% endblock %}
