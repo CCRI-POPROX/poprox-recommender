@@ -1,4 +1,3 @@
-import copyreg
 import itertools as it
 from collections.abc import Iterator
 
@@ -8,11 +7,13 @@ from humanize import metric, naturaldelta
 from lenskit.logging import Progress, Task, get_logger, item_progress
 from lenskit.parallel.config import ParallelConfig, get_parallel_config, subprocess_config
 from lenskit.parallel.ray import TaskLimiter, init_cluster
-from lenskit.pipeline import PipelineState
+from lenskit.pipeline import Pipeline, PipelineState
+from torch.multiprocessing.reductions import reduce_tensor
 
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import CandidateSet
 from poprox_recommender.config import default_device
+from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
 from poprox_recommender.evaluation.generate.outputs import (
     EmbeddingWriter,
@@ -32,7 +33,7 @@ STAGES = ["final", "ranked", "reranked"]
 TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
 
 
-def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
+def generate_profile_recs(dataset: EvalData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
     logger.info("generating recommendations", dataset=dataset.name)
 
     pc = get_parallel_config()
@@ -65,6 +66,8 @@ def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_
 
 
 def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
+    logger.info("loading pipeline")
+    pipe = get_pipeline(pipeline, device=default_device())
     logger.info("starting serial evaluation")
     # directly call things in-process
     writers: list[RecommendationWriter] = [
@@ -74,7 +77,7 @@ def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], o
     ]
 
     for request in profiles:
-        state = recommend_for_profile(pipeline, request)
+        state = recommend_for_profile(pipe, request)
         for w in writers:
             w.write_recommendations(request, state)
         pb.update()
@@ -84,7 +87,7 @@ def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], o
 
 
 def cluster_recommend(
-    dataset: MindData,
+    dataset: EvalData,
     pipeline: str,
     max_profiles: int | None,
     outs: RecOutputs,
@@ -94,6 +97,16 @@ def cluster_recommend(
 ):
     logger.info("starting parallel evaluation with task limit of %d", pc.processes)
     init_cluster(global_logging=True)
+
+    device = default_device()
+    if torch.device(device).type != "cpu":
+        logger.debug("registering custom serializer for shared tensors")
+        ray.util.register_serializer(torch.Tensor, serializer=_SharedTensor, deserializer=torch.as_tensor)
+
+    logger.info("loading pipeline")
+    pipe = get_pipeline(pipeline, device=default_device())
+    logger.info("sending pipeline to Ray cluster")
+    pipe = ray.put(pipe)
 
     writers: list[RecommendationWriter] = [
         ParquetRecommendationWriter.create_remote(outs),
@@ -108,7 +121,7 @@ def cluster_recommend(
 
     writes = []
     for n, btask, bwrites in limit.imap(
-        lambda batch: rec_batch.remote(pipeline, batch, writers, dataset=ds_ref),
+        lambda batch: rec_batch.remote(pipe, batch, writers, dataset=ds_ref),
         it.batched(profiles, BATCH_SIZE),
         ordered=False,
     ):
@@ -135,12 +148,11 @@ def cluster_recommend(
         task.add_subtask(wt)
 
 
-def recommend_for_profile(pipeline: str, request: RecommendationRequest) -> PipelineState:
+def recommend_for_profile(pipeline: Pipeline, request: RecommendationRequest) -> PipelineState:
     """
     Generate recommendations for a single request, returning the pipeline state.
     """
     # get_pipeline caches, so this will load once per worker
-    pipe = get_pipeline(pipeline, device=default_device())
     log = logger.bind(profile_id=str(request.interest_profile.profile_id))
     log.debug("beginning recommendation")
     if request.num_recs != TEST_REC_COUNT:
@@ -157,14 +169,14 @@ def recommend_for_profile(pipeline: str, request: RecommendationRequest) -> Pipe
     }
 
     try:
-        return pipe.run_all(**inputs)
+        return pipeline.run_all(**inputs)
     except Exception as e:
         logger.error("error recommending for profile %s: %s", request.interest_profile.profile_id, e)
         raise e
 
 
 def recommend_batch(
-    pipeline,
+    pipeline: Pipeline,
     batch: list[RecommendationRequest | int],
     writers: list[RecommendationWriter],
     *,
@@ -224,11 +236,9 @@ def dynamic_remote(task_or_actor):
     return remote(task_or_actor)
 
 
-def _pickle_tensor(tensor: torch.Tensor):
-    """
-    Pickle support function to pickle a tensor, transferring to CPU.
-    """
-    return torch.from_numpy, (tensor.cpu().numpy(),)
+class _SharedTensor:
+    def __init__(self, tensor: torch.Tensor):
+        self.tensor = tensor
 
-
-copyreg.pickle(torch.Tensor, _pickle_tensor)
+    def __reduce__(self):
+        return reduce_tensor(self.tensor)

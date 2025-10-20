@@ -91,6 +91,7 @@ conflicts = [[{ group = "cpu" }, { group = "cuda" }]]
 index-strategy = "unsafe-first-match"
 
 [tool.uv.sources]
+lenskit = { index = "lenskit-dev" }
 torch = [
   { index = "pytorch-cpu", group = "cpu" },
   { index = "pytorch-cuda", group = "cuda" },
@@ -102,6 +103,7 @@ torch = [
 [[tool.uv.index]]
 name = "lenskit-dev"
 url = "https://pypi.lenskit.org/lenskit-dev/"
+explicit = true
 
 # PyPI index providing CPU-only PyTorch *without* clobbering unrelated PyPI
 # packages.  Enabled by default, so we default to CPU-only Torch.
