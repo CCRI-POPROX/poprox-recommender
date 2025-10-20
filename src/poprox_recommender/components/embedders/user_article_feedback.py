@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class UserArticleFeedbackConfig(NRMSUserEmbedderConfig):
+    # True -> positive, False -> negative
     feedback_type: bool | None = None
 
 
