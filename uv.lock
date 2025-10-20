@@ -21,10 +21,10 @@ dependencies = [
     { name = "psutil" },
     { name = "pyyaml" },
     { name = "safetensors" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c4/25/969456a95a90ed38f73f68d0f0915bdf1d76145d05054c59ad587b171150/accelerate-1.9.0.tar.gz", hash = "sha256:0e8c61f81af7bf37195b6175a545ed292617dd90563c88f49020aea5b6a0b47f", size = 383234, upload-time = "2025-07-16T16:24:54.526Z" }
 wheels = [
@@ -1933,10 +1933,10 @@ dependencies = [
     { name = "scipy" },
     { name = "structlog" },
     { name = "threadpoolctl" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
     { name = "typing-extensions" },
     { name = "xopen" },
 ]
@@ -2212,20 +2212,6 @@ wheels = [
 ]
 
 [[package]]
-name = "nixl"
-version = "0.6.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/54/c2/e1679421bed63ba5d59d9573cfa64d64fcc6769e6844f9de5df7f62d4fc0/nixl-0.6.1-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:77eab96bef382bfb91b9d6222e5581e49b193fcf573b38dcaa7a296822a2894e", size = 22292504, upload-time = "2025-10-09T03:05:48.868Z" },
-    { url = "https://files.pythonhosted.org/packages/0a/35/23e3e9ec86fe5512842926a1d6a6c2b9f55b5fc995a516ce215c4da72d72/nixl-0.6.1-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:8507c73d9bc044dd921edbef81ebae3e0750584a70a63ea90e5ade79233535d2", size = 23263501, upload-time = "2025-10-09T05:31:10.067Z" },
-]
-
-[[package]]
 name = "nltk"
 version = "3.9.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2297,92 +2283,78 @@ wheels = [
 
 [[package]]
 name = "nvidia-cublas-cu12"
-version = "12.8.4.1"
+version = "12.8.3.14"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cublas_cu12-12.8.4.1-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cublas_cu12-12.8.3.14-py3-none-manylinux_2_27_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cuda-cupti-cu12"
-version = "12.8.90"
+version = "12.8.57"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cuda_cupti_cu12-12.8.90-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cuda_cupti_cu12-12.8.57-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cuda-nvrtc-cu12"
-version = "12.8.93"
+version = "12.8.61"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cuda_nvrtc_cu12-12.8.61-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cuda-runtime-cu12"
-version = "12.8.90"
+version = "12.8.57"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cuda_runtime_cu12-12.8.90-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cuda_runtime_cu12-12.8.57-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cudnn-cu12"
-version = "9.10.2.21"
+version = "9.7.1.26"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 dependencies = [
     { name = "nvidia-cublas-cu12", marker = "sys_platform != 'darwin'" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cudnn_cu12-9.10.2.21-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cudnn_cu12-9.7.1.26-py3-none-manylinux_2_27_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cufft-cu12"
-version = "11.3.3.83"
+version = "11.3.3.41"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 dependencies = [
     { name = "nvidia-nvjitlink-cu12", marker = "sys_platform != 'darwin'" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cufft_cu12-11.3.3.83-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cufft_cu12-11.3.3.41-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cufile-cu12"
-version = "1.13.1.3"
+version = "1.13.0.11"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux_2_27_aarch64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cufile_cu12-1.13.0.11-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cufile_cu12-1.13.0.11-py3-none-manylinux_2_27_aarch64.whl" },
 ]
 
 [[package]]
 name = "nvidia-curand-cu12"
-version = "10.3.9.90"
+version = "10.3.9.55"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_curand_cu12-10.3.9.90-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_curand_cu12-10.3.9.55-py3-none-manylinux_2_27_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cusolver-cu12"
-version = "11.7.3.90"
+version = "11.7.2.55"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 dependencies = [
     { name = "nvidia-cublas-cu12", marker = "sys_platform != 'darwin'" },
@@ -2390,73 +2362,52 @@ dependencies = [
     { name = "nvidia-nvjitlink-cu12", marker = "sys_platform != 'darwin'" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cusolver_cu12-11.7.3.90-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cusolver_cu12-11.7.2.55-py3-none-manylinux_2_27_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cusparse-cu12"
-version = "12.5.8.93"
+version = "12.5.7.53"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 dependencies = [
     { name = "nvidia-nvjitlink-cu12", marker = "sys_platform != 'darwin'" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cusparse_cu12-12.5.8.93-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_cusparse_cu12-12.5.7.53-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-cusparselt-cu12"
-version = "0.7.1"
-source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
+version = "0.6.3"
+source = { registry = "https://pypi.lenskit.org/torch/cpu/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_cusparselt_cu12-0.7.1-py3-none-win_amd64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_cusparselt_cu12-0.7.1-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/nvidia_cusparselt_cu12-0.6.3-py3-none-manylinux2014_aarch64.whl" },
+    { url = "https://download.pytorch.org/whl/nvidia_cusparselt_cu12-0.6.3-py3-none-manylinux2014_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-nccl-cu12"
-version = "2.27.5"
+version = "2.26.2"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/nvidia_nccl_cu12-2.27.5-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_nccl_cu12-2.27.5-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_nccl_cu12-2.26.2-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_nccl_cu12-2.26.2-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-nvjitlink-cu12"
-version = "12.8.93"
+version = "12.8.61"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_nvjitlink_cu12-12.8.93-py3-none-win_amd64.whl" },
-]
-
-[[package]]
-name = "nvidia-nvshmem-cu12"
-version = "3.3.20"
-source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
-wheels = [
-    { url = "https://download.pytorch.org/whl/nvidia_nvshmem_cu12-3.3.20-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/nvidia_nvshmem_cu12-3.3.20-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_nvjitlink_cu12-12.8.61-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl" },
 ]
 
 [[package]]
 name = "nvidia-nvtx-cu12"
-version = "12.8.90"
+version = "12.8.55"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/nvidia_nvtx_cu12-12.8.90-py3-none-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/nvidia_nvtx_cu12-12.8.55-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
 ]
 
 [[package]]
@@ -2689,10 +2640,10 @@ dependencies = [
     { name = "poprox-concepts" },
     { name = "safetensors" },
     { name = "smart-open" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
     { name = "transformers", extra = ["torch"] },
     { name = "uvicorn" },
 ]
@@ -2704,13 +2655,12 @@ deploy = [
 
 [package.dev-dependencies]
 cpu = [
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
 ]
 cuda = [
-    { name = "nixl" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
 ]
 data = [
     { name = "docopt-ng" },
@@ -2809,10 +2759,7 @@ provides-extras = ["deploy"]
 
 [package.metadata.requires-dev]
 cpu = [{ name = "torch", specifier = "~=2.2", index = "https://pypi.lenskit.org/torch/cpu/", conflict = { package = "poprox-recommender", group = "cpu" } }]
-cuda = [
-    { name = "nixl", specifier = "~=0.6.1" },
-    { name = "torch", specifier = "~=2.2", index = "https://pypi.lenskit.org/torch/cu128/", conflict = { package = "poprox-recommender", group = "cuda" } },
-]
+cuda = [{ name = "torch", specifier = "~=2.2", index = "https://pypi.lenskit.org/torch/cu128/", conflict = { package = "poprox-recommender", group = "cuda" } }]
 data = [
     { name = "docopt-ng", specifier = ">=0.9" },
     { name = "duckdb", specifier = "~=1.3" },
@@ -4035,28 +3982,8 @@ wheels = [
 
 [[package]]
 name = "torch"
-version = "2.9.0"
+version = "2.7.1"
 source = { registry = "https://pypi.lenskit.org/torch/cpu/" }
-resolution-markers = [
-    "sys_platform == 'darwin'",
-]
-dependencies = [
-    { name = "filelock", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "fsspec", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "jinja2", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "networkx", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "setuptools", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "sympy", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "typing-extensions", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-]
-wheels = [
-    { url = "https://download.pytorch.org/whl/cpu/torch-2.9.0-cp312-none-macosx_11_0_arm64.whl" },
-]
-
-[[package]]
-name = "torch"
-version = "2.9.0"
-source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 resolution-markers = [
     "sys_platform == 'darwin'",
 ]
@@ -4070,12 +3997,32 @@ dependencies = [
     { name = "typing-extensions", marker = "sys_platform == 'darwin'" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/cpu/torch-2.9.0-cp312-none-macosx_11_0_arm64.whl" },
+    { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1-cp312-none-macosx_11_0_arm64.whl" },
 ]
 
 [[package]]
 name = "torch"
-version = "2.9.0+cpu"
+version = "2.7.1"
+source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
+resolution-markers = [
+    "sys_platform == 'darwin'",
+]
+dependencies = [
+    { name = "filelock", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "fsspec", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "jinja2", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "networkx", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "setuptools", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "sympy", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "typing-extensions", marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+]
+wheels = [
+    { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1-cp312-none-macosx_11_0_arm64.whl" },
+]
+
+[[package]]
+name = "torch"
+version = "2.7.1+cpu"
 source = { registry = "https://pypi.lenskit.org/torch/cpu/" }
 resolution-markers = [
     "sys_platform != 'darwin'",
@@ -4090,15 +4037,15 @@ dependencies = [
     { name = "typing-extensions", marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/cpu/torch-2.9.0%2Bcpu-cp312-cp312-manylinux_2_28_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cpu/torch-2.9.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/cpu/torch-2.9.0%2Bcpu-cp312-cp312-win_amd64.whl" },
-    { url = "https://download.pytorch.org/whl/cpu/torch-2.9.0%2Bcpu-cp312-cp312-win_arm64.whl" },
+    { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-manylinux_2_28_aarch64.whl" },
+    { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl" },
+    { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp312-cp312-win_arm64.whl" },
 ]
 
 [[package]]
 name = "torch"
-version = "2.9.0+cu128"
+version = "2.7.1+cu128"
 source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
 resolution-markers = [
     "sys_platform != 'darwin'",
@@ -4108,30 +4055,29 @@ dependencies = [
     { name = "fsspec", marker = "sys_platform != 'darwin'" },
     { name = "jinja2", marker = "sys_platform != 'darwin'" },
     { name = "networkx", marker = "sys_platform != 'darwin'" },
-    { name = "nvidia-cublas-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cuda-cupti-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cuda-nvrtc-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cuda-runtime-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cudnn-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cufft-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cufile-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-curand-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cusolver-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cusparse-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-cusparselt-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-nccl-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-nvjitlink-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-nvshmem-cu12", marker = "sys_platform == 'linux'" },
-    { name = "nvidia-nvtx-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cublas-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cuda-cupti-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cuda-nvrtc-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cudnn-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cufft-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cufile-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-curand-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cusolver-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cusparse-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-cusparselt-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-nccl-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-nvjitlink-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "nvidia-nvtx-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "setuptools", marker = "sys_platform != 'darwin'" },
     { name = "sympy", marker = "sys_platform != 'darwin'" },
     { name = "triton", marker = "sys_platform == 'linux'" },
     { name = "typing-extensions", marker = "sys_platform != 'darwin'" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu128/torch-2.9.0%2Bcu128-cp312-cp312-manylinux_2_28_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/torch-2.9.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl" },
-    { url = "https://download.pytorch.org/whl/cu128/torch-2.9.0%2Bcu128-cp312-cp312-win_amd64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/torch-2.7.1%2Bcu128-cp312-cp312-manylinux_2_28_aarch64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/torch-2.7.1%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl" },
+    { url = "https://download.pytorch.org/whl/cu128/torch-2.7.1%2Bcu128-cp312-cp312-win_amd64.whl" },
 ]
 
 [[package]]
@@ -4198,19 +4144,22 @@ wheels = [
 [package.optional-dependencies]
 torch = [
     { name = "accelerate" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
-    { name = "torch", version = "2.9.0+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cpu", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform != 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
+    { name = "torch", version = "2.7.1+cu128", source = { registry = "https://pypi.lenskit.org/torch/cu128/" }, marker = "(sys_platform != 'darwin' and extra != 'group-18-poprox-recommender-cpu') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
 ]
 
 [[package]]
 name = "triton"
-version = "3.5.0"
-source = { registry = "https://pypi.lenskit.org/torch/cu128/" }
+version = "3.3.1"
+source = { registry = "https://pypi.lenskit.org/torch/cpu/" }
+dependencies = [
+    { name = "setuptools", marker = "sys_platform != 'darwin'" },
+]
 wheels = [
-    { url = "https://download.pytorch.org/whl/triton-3.5.0-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl" },
-    { url = "https://download.pytorch.org/whl/triton-3.5.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl" },
+    { url = "https://download.pytorch.org/whl/triton-3.3.1-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl" },
+    { url = "https://download.pytorch.org/whl/triton-3.3.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl" },
 ]
 
 [[package]]
