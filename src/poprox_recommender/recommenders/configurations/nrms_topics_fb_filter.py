@@ -90,7 +90,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         feedback_type=True,
     )
     e_feedback_positive = builder.add_component(
-        "user-embedder4",
+        "user-neg-fb-embedder",
         UserArticleFeedbackEmbedder,
         ue_pos_fb_config,
         candidate_articles=e_candidates,
@@ -105,7 +105,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         feedback_type=False,
     )
     e_feedback_negative = builder.add_component(
-        "user-embedder5",
+        "user-pos-fb-embedder",
         UserArticleFeedbackEmbedder,
         ue_neg_fb_config,
         candidate_articles=e_candidates,
@@ -185,10 +185,26 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         "topic-filter", TopicFilter, candidates=fusion, interest_profile=i_profile
     )
 
-    r_filtered = builder.add_component("filtered-ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)
+    r_filtered = builder.add_component(
+        "filtered-ranker",
+        TopkRanker,
+        {"num_slots": num_slots},
+        candidate_articles=fusion
+    )
 
     # Construct a backup list
-    r_unfiltered = builder.add_component("unfiltered-ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)
+    r_unfiltered = builder.add_component(
+        "unfiltered-ranker",
+        TopkRanker,
+        {"num_slots": num_slots},
+        candidate_articles=fusion
+    )
 
     # Combine primary ranker and fallback
-    builder.add_component("recommender", FillRecs, {"num_slots": num_slots}, recs1=r_filtered, recs2=r_unfiltered)
+    builder.add_component(
+        "recommender",
+        FillRecs,
+        {"num_slots": num_slots},
+        recs1=r_filtered,
+        recs2=r_unfiltered
+    )
