@@ -5,6 +5,7 @@ Support for loading POPROX data for evaluation.
 # pyright: basic
 from __future__ import annotations
 
+import itertools as it
 import json
 import logging
 import math
@@ -24,6 +25,8 @@ TEST_REC_COUNT = 10
 
 
 class PoproxData(EvalData):
+    name = "POPROX"
+
     def __init__(self, archive: str = "POPROX"):
         (
             articles_df,
@@ -75,8 +78,11 @@ class PoproxData(EvalData):
                 id = UUID(id)
             yield id
 
-    def iter_profiles(self) -> Generator[RecommendationRequestV2]:
-        for newsletter_id in self.iter_profile_ids():
+    def iter_profiles(self, *, limit: int | None = None) -> Generator[RecommendationRequestV2]:
+        loop = self.iter_profile_ids()
+        if limit is not None:
+            loop = it.islice(loop, limit)
+        for newsletter_id in loop:
             yield self.lookup_request(newsletter_id)
 
     def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV2:

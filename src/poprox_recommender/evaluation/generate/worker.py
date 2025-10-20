@@ -13,6 +13,7 @@ from lenskit.pipeline import PipelineState
 from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import CandidateSet
 from poprox_recommender.config import default_device
+from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
 from poprox_recommender.evaluation.generate.outputs import (
     EmbeddingWriter,
@@ -32,7 +33,7 @@ STAGES = ["final", "ranked", "reranked"]
 TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
 
 
-def generate_profile_recs(dataset: MindData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
+def generate_profile_recs(dataset: EvalData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
     logger.info("generating recommendations", dataset=dataset.name)
 
     pc = get_parallel_config()
@@ -84,7 +85,7 @@ def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], o
 
 
 def cluster_recommend(
-    dataset: MindData,
+    dataset: EvalData,
     pipeline: str,
     max_profiles: int | None,
     outs: RecOutputs,
