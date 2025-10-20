@@ -24,16 +24,11 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
 
-    # Filter articles based on topic preferences
-    f_candidates = builder.add_component(
-        "topic-filter", TopicFilter, candidates=i_candidates, interest_profile=i_profile
-    )
-
     # Embed candidate and clicked articles
     ae_config = NRMSArticleEmbedderConfig(
         model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
     )
-    e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=f_candidates)
+    e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=i_candidates)
     e_clicked = builder.add_component(
         "history-NRMSArticleEmbedder", NRMSArticleEmbedder, ae_config, article_set=i_clicked
     )
