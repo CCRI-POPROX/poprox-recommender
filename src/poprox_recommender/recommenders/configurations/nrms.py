@@ -25,9 +25,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
     )
     e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=i_candidates)
-    e_clicked = builder.add_component(
-        "history-NRMSArticleEmbedder", NRMSArticleEmbedder, ae_config, article_set=i_clicked
-    )
+    e_clicked = builder.add_component("history-embedder", NRMSArticleEmbedder, ae_config, article_set=i_clicked)
 
     # Embed the user
     ue_config = NRMSUserEmbedderConfig(model_path=model_file_path("nrms-mind/user_encoder.safetensors"), device=device)
