@@ -82,7 +82,10 @@ data = [
 ]
 # declare extras for Torch install
 cpu = ["torch~=2.2"]
-cuda = ["torch~=2.2"]
+cuda = [
+  "nixl ~=0.6.1",
+  "torch ~=2.2",
+]
 
 ## UV index setup for PyTorch
 [tool.uv]
@@ -110,6 +113,7 @@ explicit = true
 [[tool.uv.index]]
 name = "pytorch-cpu"
 url = "https://pypi.lenskit.org/torch/cpu/"
+explicit = true
 
 # PyPI index providing GPU-enabled PyTorch *without* clobbering unrelated PyPI
 # packages.  Also enabled (for transitive nvidia deps, "explicit" only works for

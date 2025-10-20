@@ -42,6 +42,7 @@ class NRMSArticleEmbedder(Component):
 
     model: ArticleEmbeddingModel
     tokenizer: PreTrainedTokenizer | PreTrainedTokenizerFast
+    news_encoder: NewsEncoder
     embedding_cache: dict[UUID, th.Tensor]
 
     def __init__(self, config: NRMSArticleEmbedderConfig | None = None, **kwargs):
