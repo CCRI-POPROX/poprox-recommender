@@ -97,8 +97,11 @@ def cluster_recommend(
 ):
     logger.info("starting parallel evaluation with task limit of %d", pc.processes)
     init_cluster(global_logging=True)
-    logger.debug("registering custom serializer for shared memory")
-    ray.util.register_serializer(torch.Tensor, serializer=_SharedTensor, deserializer=torch.as_tensor)
+
+    device = default_device()
+    if torch.device(device).type != "cpu":
+        logger.debug("registering custom serializer for shared tensors")
+        ray.util.register_serializer(torch.Tensor, serializer=_SharedTensor, deserializer=torch.as_tensor)
 
     logger.info("loading pipeline")
     pipe = get_pipeline(pipeline, device=default_device())
