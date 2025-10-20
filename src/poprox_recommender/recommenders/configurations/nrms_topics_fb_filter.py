@@ -184,7 +184,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         "filtered-ranker",
         TopkRanker,
         {"num_slots": num_slots},
-        candidate_articles=fusion
+        candidate_articles=f_candidates
     )
 
     # Construct a backup list
