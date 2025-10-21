@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 from lenskit.pipeline import Component
 
 from poprox_concepts import CandidateSet, InterestProfile
@@ -22,13 +23,16 @@ class TopicFilter(Component):
         low = {key for key, value in interests.items() if value == 2}
         very_low = {key for key, value in interests.items() if value == 1}
 
-        topical_articles = []
-        for article in candidates.articles:
+        kept_articles = []
+        kept_scores = []
+        for idx, article in enumerate(candidates.articles):
             article_topics = {mention.entity.name for mention in article.mentions}
 
             # Articles with very high interest topics are included in the candidate set
             if overlap(article_topics, very_high):
-                topical_articles.append(article)
+                kept_articles.append(article)
+                if hasattr(candidates, "scores"):
+                    kept_scores.append(candidates.scores[idx])
                 continue
 
             # Remaining articles with a very low interest are excluded from the candidate set
@@ -40,16 +44,22 @@ class TopicFilter(Component):
                 continue
 
             # If none of the above apply, default to including the article
-            topical_articles.append(article)
+            kept_articles.append(article)
+            if hasattr(candidates, "scores"):
+                kept_scores.append(candidates.scores[idx])
 
         logger.debug(
             "topic filter accepted %d of %d articles for user %s",
-            len(topical_articles),
+            len(kept_articles),
             len(candidates.articles),
             interest_profile.profile_id,
         )
 
-        return CandidateSet(articles=topical_articles)
+        filtered = CandidateSet(articles=kept_articles)
+        if kept_scores:
+            filtered.scores = np.array(kept_scores)
+
+        return filtered
 
 
 def overlap(a: set, b: set):
