@@ -15,7 +15,7 @@ from uuid import UUID
 import pandas as pd
 
 from poprox_concepts import AccountInterest, Article, Click, Entity, InterestProfile, Mention
-from poprox_concepts.api.recommendations import RecommendationRequestV2
+from poprox_concepts.api.recommendations import RecommendationRequestV4
 from poprox_concepts.domain import CandidateSet
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
@@ -78,14 +78,14 @@ class PoproxData(EvalData):
                 id = UUID(id)
             yield id
 
-    def iter_profiles(self, *, limit: int | None = None) -> Generator[RecommendationRequestV2]:
+    def iter_profiles(self, *, limit: int | None = None) -> Generator[RecommendationRequestV4]:
         loop = self.iter_profile_ids()
         if limit is not None:
             loop = it.islice(loop, limit)
         for newsletter_id in loop:
             yield self.lookup_request(newsletter_id)
 
-    def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV2:
+    def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV4:
         impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]
         # TODO: Change `account_id` to `profile_id` in the export
         profile_id = impressions_df.iloc[0]["account_id"]
@@ -136,7 +136,7 @@ class PoproxData(EvalData):
         ].itertuples():
             candidate_articles.append(self.lookup_candidate_article(article_row.article_id))
 
-        return RecommendationRequestV2(
+        return RecommendationRequestV4(
             candidates=CandidateSet(articles=candidate_articles),
             interacted=CandidateSet(articles=past_articles),
             interest_profile=profile,
