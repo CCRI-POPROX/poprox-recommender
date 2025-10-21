@@ -7,7 +7,8 @@ import logging
 from pytest import mark
 
 from poprox_recommender.recommenders import discover_pipelines
-from poprox_recommender.testing import RequestGenerator
+from poprox_recommender.testing import RequestGenerator, mind_data  # noqa: F401
+from poprox_recommender.testing import auto_service as service
 
 logger = logging.getLogger(__name__)
 
