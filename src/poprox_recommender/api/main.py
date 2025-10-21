@@ -1,6 +1,5 @@
 import logging
 import os
-from itertools import zip_longest
 from typing import Annotated, Any
 
 import structlog
@@ -9,7 +8,6 @@ from fastapi.responses import Response
 from mangum import Mangum
 
 from poprox_concepts.api.recommendations.v4 import ProtocolModelV4_0, RecommendationRequestV4, RecommendationResponseV4
-from poprox_concepts.domain import Impression
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
 from poprox_recommender.recommenders import load_all_pipelines, select_articles
@@ -57,32 +55,14 @@ def root(
     profile.click_topic_counts = user_topic_preference(req.interacted.articles, profile.click_history)
     profile.click_locality_counts = user_locality_preference(req.interacted.articles, profile.click_history)
 
-    outputs = select_articles(
+    recs, rec_info = select_articles(
         req.candidates,
         req.interacted,
         profile,
         {"pipeline": pipeline},
     )
 
-    from uuid import uuid4
-
-    newsletter_id = uuid4()
-    recommendations = outputs.default
-    impressions = [
-        Impression(
-            newsletter_id=newsletter_id,
-            position=idx + 1,
-            article=article,
-            headline=article.headline,
-            subhead=article.subhead,
-            extra=extra,
-        )
-        for idx, (article, extra) in enumerate(zip_longest(recommendations.articles, recommendations.extras or []))
-    ]
-
-    resp_body = RecommendationResponseV4.model_validate(
-        {"recommendations": impressions, "recommender": outputs.meta.model_dump()}
-    )
+    resp_body = RecommendationResponseV4.model_validate({"recommendations": recs, "recommender": rec_info.model_dump()})
 
     logger.info(f"Response body: {resp_body}")
     return resp_body.model_dump()

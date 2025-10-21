@@ -1,9 +1,11 @@
 import logging
 from typing import Any
 
-from lenskit.pipeline import PipelineState
-
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import (
+    CandidateSet,
+    ImpressedRecommendations,
+    InterestProfile,
+)
 
 from .load import (
     PipelineLoadError,
@@ -31,7 +33,7 @@ def select_articles(
     clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
-) -> PipelineState:
+) -> tuple[ImpressedRecommendations, Any]:
     """
     Select articles with default recommender configuration.  It returns a
     pipeline state whose ``default`` is the final list of recommendations.
@@ -52,4 +54,8 @@ def select_articles(
     else:
         wanted = (topk, recs)
 
-    return pipeline.run_all(*wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile)
+    outputs = pipeline.run_all(
+        *wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile
+    )
+
+    return outputs.default, outputs.meta
