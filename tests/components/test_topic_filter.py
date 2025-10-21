@@ -59,17 +59,17 @@ def test_select_by_topic_filters_articles():
     result = pipeline.run(c_sampler, candidates=CandidateSet(articles=articles), profile=profile)
 
     # there are 2 valid articles that match their preferences (us news & politics)
-    assert len(result.articles) == 2
-    for article in result.articles:
-        topics = [mention.entity.name for mention in article.mentions]
+    assert len(result.impressions) == 2
+    for impression in result.impressions:
+        topics = [mention.entity.name for mention in impression.article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
     sampler.config.num_slots = 3
     result = pipeline.run(c_sampler, candidates=CandidateSet(articles=articles), profile=profile)
 
-    assert len(result.articles) == 3
+    assert len(result.impressions) == 3
 
-    for article in result.articles[:2]:
-        topics = [mention.entity.name for mention in article.mentions]
+    for impression in result.impressions[:2]:
+        topics = [mention.entity.name for mention in impression.article.mentions]
         assert "U.S. News" in topics or "Politics" in topics
