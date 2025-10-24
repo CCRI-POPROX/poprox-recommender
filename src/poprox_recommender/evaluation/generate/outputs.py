@@ -18,7 +18,7 @@ from pydantic import BaseModel
 from typing_extensions import TypeVar
 
 from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_concepts.domain import CandidateSet, RecommendationList
+from poprox_concepts.domain import CandidateSet, ImpressedRecommendations
 from poprox_recommender.evaluation.writer import ParquetBatchedWriter
 
 logger = get_logger(__name__)
@@ -32,9 +32,9 @@ class OfflineRecommendations(BaseModel):
 
 
 class OfflineRecResults(BaseModel, validate_assignment=True):
-    final: RecommendationList
-    ranked: RecommendationList | None = None
-    reranked: RecommendationList | None = None
+    final: ImpressedRecommendations
+    ranked: ImpressedRecommendations | None = None
+    reranked: ImpressedRecommendations | None = None
 
 
 class RecOutputs:
@@ -231,34 +231,34 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
                 {
                     "profile_id": str(profile),
                     "stage": "final",
-                    "item_id": [str(a.article_id) for a in recs.articles],
-                    "rank": np.arange(len(recs.articles), dtype=np.int16) + 1,
+                    "item_id": [str(impression.article.article_id) for impression in recs.impressions],
+                    "rank": np.arange(len(recs.impressions), dtype=np.int16) + 1,
                 }
             )
         ]
         ranked = pipeline_state.get("ranker", None)
         if ranked is not None:
-            assert isinstance(ranked, RecommendationList), f"reranked has unexpected type {type(ranked)}"
+            assert isinstance(ranked, ImpressedRecommendations), f"reranked has unexpected type {type(ranked)}"
             frames.append(
                 pd.DataFrame(
                     {
                         "profile_id": str(profile),
                         "stage": "ranked",
-                        "item_id": [str(a.article_id) for a in ranked.articles],
-                        "rank": np.arange(len(ranked.articles), dtype=np.int16) + 1,
+                        "item_id": [str(impression.article.article_id) for impression in recs.impressions],
+                        "rank": np.arange(len(ranked.impressions), dtype=np.int16) + 1,
                     }
                 )
             )
         reranked = pipeline_state.get("reranker", None)
         if reranked is not None:
-            assert isinstance(reranked, RecommendationList), f"reranked has unexpected type {type(reranked)}"
+            assert isinstance(reranked, ImpressedRecommendations), f"reranked has unexpected type {type(reranked)}"
             frames.append(
                 pd.DataFrame(
                     {
                         "profile_id": str(profile),
                         "stage": "reranked",
-                        "item_id": [str(a.article_id) for a in reranked.articles],
-                        "rank": np.arange(len(reranked.articles), dtype=np.int16) + 1,
+                        "item_id": [str(impression.article.article_id) for impression in recs.impressions],
+                        "rank": np.arange(len(reranked.impressions), dtype=np.int16) + 1,
                     }
                 )
             )
