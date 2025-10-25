@@ -4,7 +4,7 @@ import torch as th
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import Article, CandidateSet, InterestProfile, RecommendationList
+from poprox_concepts.domain import Article, CandidateSet, ImpressedRecommendations, InterestProfile
 from poprox_recommender.pytorch.decorators import torch_inference
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, normalized_category_count
 
@@ -19,7 +19,7 @@ class PFARDiversifier(Component):
     config: PFARConfig
 
     @torch_inference
-    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> RecommendationList:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> ImpressedRecommendations:
         if candidate_articles.scores is None:
             articles = candidate_articles.articles
         else:
@@ -47,7 +47,7 @@ class PFARDiversifier(Component):
 
             articles = [candidate_articles.articles[int(idx)] for idx in article_indices]
 
-        return RecommendationList(articles=articles)
+        return ImpressedRecommendations.from_articles(articles=articles)
 
 
 def pfar_diversification(relevance_scores, articles, topic_preferences, lamb, tau, topk) -> list[Article]:

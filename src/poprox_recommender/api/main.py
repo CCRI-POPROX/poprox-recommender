@@ -7,7 +7,7 @@ from fastapi import Body, FastAPI
 from fastapi.responses import Response
 from mangum import Mangum
 
-from poprox_concepts.api.recommendations.v2 import ProtocolModelV2_0, RecommendationRequestV2, RecommendationResponseV2
+from poprox_concepts.api.recommendations.v4 import ProtocolModelV4_0, RecommendationRequestV4, RecommendationResponseV4
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
 from poprox_recommender.recommenders import load_all_pipelines, select_articles
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 @app.get("/warmup")
 def warmup(response: Response):
     # Headers set on the response param get included in the response wrapped around return val
-    response.headers["poprox-protocol-version"] = ProtocolModelV2_0().protocol_version.value
+    response.headers["poprox-protocol-version"] = ProtocolModelV4_0().protocol_version.value
 
     # Load and cache available recommenders
     available_recommenders = load_all_pipelines(device=default_device())
@@ -40,7 +40,7 @@ def root(
 ):
     logger.info(f"Decoded body: {body}")
 
-    req = RecommendationRequestV2.model_validate(body)
+    req = RecommendationRequestV4.model_validate(body)
 
     candidate_articles = req.candidates.articles
     num_candidates = len(candidate_articles)
@@ -55,16 +55,14 @@ def root(
     profile.click_topic_counts = user_topic_preference(req.interacted.articles, profile.click_history)
     profile.click_locality_counts = user_locality_preference(req.interacted.articles, profile.click_history)
 
-    outputs = select_articles(
+    recs, rec_info = select_articles(
         req.candidates,
         req.interacted,
         profile,
         {"pipeline": pipeline},
     )
 
-    resp_body = RecommendationResponseV2.model_validate(
-        {"recommendations": outputs.default, "recommender": outputs.meta.model_dump()}
-    )
+    resp_body = RecommendationResponseV4.model_validate({"recommendations": recs, "recommender": rec_info.model_dump()})
 
     logger.info(f"Response body: {resp_body}")
     return resp_body.model_dump()

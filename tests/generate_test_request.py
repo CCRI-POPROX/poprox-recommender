@@ -17,7 +17,7 @@ import random
 
 from docopt import docopt
 
-from poprox_concepts.api.recommendations import RecommendationRequestV2
+from poprox_concepts.api.recommendations import RecommendationRequestV4
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.paths import project_root
 
@@ -37,7 +37,7 @@ def get_single_request() -> str:
     if account_id:
         for req in requests:
             if req.interest_profile.profile_id == account_id:
-                request_body = RecommendationRequestV2.model_dump_json(
+                request_body = RecommendationRequestV4.model_dump_json(
                     req,
                     exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},
                 )
@@ -46,7 +46,7 @@ def get_single_request() -> str:
         if with_topics:
             for req in requests:
                 if len(req.interest_profile.click_history) >= int(min_click) and req.interest_profile.onboarding_topics:
-                    request_body = RecommendationRequestV2.model_dump_json(
+                    request_body = RecommendationRequestV4.model_dump_json(
                         req,
                         exclude={
                             "candidates": excluded_fields,
@@ -58,7 +58,7 @@ def get_single_request() -> str:
         else:
             for req in requests:
                 if len(req.interest_profile.click_history) >= int(min_click):
-                    request_body = RecommendationRequestV2.model_dump_json(
+                    request_body = RecommendationRequestV4.model_dump_json(
                         req,
                         exclude={
                             "candidates": excluded_fields,
@@ -70,14 +70,14 @@ def get_single_request() -> str:
     elif with_topics:
         for req in requests:
             if req.interest_profile.onboarding_topics:
-                request_body = RecommendationRequestV2.model_dump_json(
+                request_body = RecommendationRequestV4.model_dump_json(
                     req,
                     exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},
                 )
                 break
     else:
         random_index = random.randint(0, len(requests) - 1)
-        request_body = RecommendationRequestV2.model_dump_json(
+        request_body = RecommendationRequestV4.model_dump_json(
             requests[random_index],
             exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},
         )
