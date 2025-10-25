@@ -244,7 +244,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
                     {
                         "profile_id": str(profile),
                         "stage": "ranked",
-                        "item_id": [str(impression.article.article_id) for impression in recs.impressions],
+                        "item_id": [str(impression.article.article_id) for impression in ranked.impressions],
                         "rank": np.arange(len(ranked.impressions), dtype=np.int16) + 1,
                     }
                 )
@@ -257,7 +257,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
                     {
                         "profile_id": str(profile),
                         "stage": "reranked",
-                        "item_id": [str(impression.article.article_id) for impression in recs.impressions],
+                        "item_id": [str(impression.article.article_id) for impression in reranked.impressions],
                         "rank": np.arange(len(reranked.impressions), dtype=np.int16) + 1,
                     }
                 )
