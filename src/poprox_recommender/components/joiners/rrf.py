@@ -39,4 +39,9 @@ class ReciprocalRankFusion(Component):
             impressions_by_article_id[article_id] for article_id in sorted_article_ids[: self.config.num_slots]
         ]
 
+        position = 1
+        for impression in rrf_impressions:
+            impression.position = position
+            position += 1
+
         return ImpressedRecommendations(impressions=rrf_impressions)

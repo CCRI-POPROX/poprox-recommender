@@ -43,7 +43,7 @@ class FillRecs(Component):
 
         position = 1
         for impression in combined:
-            impression.position = 1
+            impression.position = position
             position += 1
 
         # Return the resulting ImpressedRecommendations, limiting the size to num_slots
