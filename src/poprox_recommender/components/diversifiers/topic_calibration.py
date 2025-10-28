@@ -2,8 +2,7 @@ from collections import defaultdict
 
 import torch as th
 
-from poprox_concepts import CandidateSet, InterestProfile
-from poprox_concepts.domain import ImpressedRecommendations
+from poprox_concepts.domain import CandidateSet, ImpressedRecommendations, InterestProfile
 from poprox_recommender.components.diversifiers.calibration import Calibrator
 from poprox_recommender.topics import extract_general_topics, normalized_category_count
 

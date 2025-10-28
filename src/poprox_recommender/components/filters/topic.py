@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from lenskit.pipeline import Component
 
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import CandidateSet, InterestProfile
 
 logger = logging.getLogger(__name__)
 

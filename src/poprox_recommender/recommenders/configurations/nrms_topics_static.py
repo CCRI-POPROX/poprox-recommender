@@ -2,7 +2,7 @@
 
 from lenskit.pipeline import PipelineBuilder
 
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder

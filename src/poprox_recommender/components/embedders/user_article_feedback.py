@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import torch as th
 
-from poprox_concepts import CandidateSet, Click, InterestProfile
+from poprox_concepts.domain import CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference

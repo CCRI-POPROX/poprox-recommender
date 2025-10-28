@@ -14,9 +14,8 @@ from uuid import UUID
 
 import pandas as pd
 
-from poprox_concepts import AccountInterest, Article, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations import RecommendationRequestV4
-from poprox_concepts.domain import CandidateSet
+from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, Entity, InterestProfile, Mention
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 

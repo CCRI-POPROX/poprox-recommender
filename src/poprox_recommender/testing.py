@@ -23,8 +23,8 @@ import requests
 from pydantic import ValidationError
 from pytest import fixture, skip
 
-from poprox_concepts import AccountInterest, CandidateSet, Click, InterestProfile
 from poprox_concepts.api.recommendations.v4 import RecommendationRequestV4, RecommendationResponseV4
+from poprox_concepts.domain import AccountInterest, CandidateSet, Click, InterestProfile
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.recommenders.load import PipelineLoadError

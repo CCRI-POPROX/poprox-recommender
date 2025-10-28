@@ -4,7 +4,7 @@ from uuid import UUID
 from torch.nn.functional import cosine_similarity
 from transformers import AutoModel, AutoTokenizer
 
-from poprox_concepts import Article, Click
+from poprox_concepts.domain import Article, Click
 from poprox_concepts.domain.topics import GENERAL_TOPICS
 from poprox_recommender.paths import model_file_path
 

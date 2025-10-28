@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import torch as th
 
-from poprox_concepts import Article, CandidateSet, Click, InterestProfile
+from poprox_concepts.domain import Article, CandidateSet, Click, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference

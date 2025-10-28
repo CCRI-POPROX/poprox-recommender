@@ -16,8 +16,8 @@ import duckdb
 import pandas as pd
 from duckdb import DuckDBPyConnection
 
-from poprox_concepts import Article, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.domain import Article, Click, Entity, InterestProfile, Mention
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 

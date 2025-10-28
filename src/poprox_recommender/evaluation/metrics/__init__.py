@@ -7,7 +7,7 @@ from lenskit.data import ItemList
 from lenskit.metrics import call_metric
 from lenskit.metrics.ranking import NDCG, RecipRank
 
-from poprox_concepts import Article, CandidateSet
+from poprox_concepts.domain import Article, CandidateSet
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.evaluation.metrics.ils import intralist_similarity
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
