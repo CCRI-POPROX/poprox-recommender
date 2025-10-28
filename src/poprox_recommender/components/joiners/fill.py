@@ -41,10 +41,5 @@ class FillRecs(Component):
 
             combined.extend(recs2_content.impressions)
 
-        position = 1
-        for impression in combined:
-            impression.position = position
-            position += 1
-
         # Return the resulting ImpressedRecommendations, limiting the size to num_slots
         return ImpressedRecommendations(impressions=combined[: self.config.num_slots])

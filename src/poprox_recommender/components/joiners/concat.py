@@ -21,9 +21,4 @@ class Concatenate(Component):
         impressions = {impression.article.article_id: impression for impression in reverse_impressions}.values()
         unreversed_impressions = list(reversed(impressions))
 
-        position = 1
-        for impression in unreversed_impressions:
-            impression.position = position
-            position += 1
-
         return ImpressedRecommendations(impressions=unreversed_impressions)

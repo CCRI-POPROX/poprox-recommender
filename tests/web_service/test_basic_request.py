@@ -48,6 +48,3 @@ def test_basic_request(service, mind_data, pipeline):  # noqa: F811
     # are all recommended articles unique?
     article_ids = [impression.article.article_id for impression in recs.impressions]
     assert len(article_ids) == len(set(article_ids))
-    # are the impressions numbered correctly?
-    positions = [impression.position for impression in recs.impressions]
-    assert len(positions) == len(set(positions))
