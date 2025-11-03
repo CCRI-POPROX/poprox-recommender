@@ -105,7 +105,7 @@ class MindData(EvalData):
 
     def iter_requests(self, *, limit: int | None = None) -> Generator[RecommendationRequest]:
         """
-        Iterate the test profiles.
+        Iterate the test requests.
 
         Args:
             ids_only:
@@ -117,9 +117,9 @@ class MindData(EvalData):
 
     def iter_recommendation_ids(self, *, limit: int | None = None) -> Generator[int]:
         """
-        Iterate the identifiers of profiles.
+        Iterate the identifiers of recommendations.
         """
-        logger.info("querying for test impressions / profiles")
+        logger.info("querying for test recommendations / impressions")
 
         # we use 2 queries: an outer query to list the impression IDs, and inner
         # queries to get the articles and article data.  outer query is in a cloned
