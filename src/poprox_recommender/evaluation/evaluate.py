@@ -66,7 +66,7 @@ def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[Recs
 
 def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[dict[str, Any]]:
     pc = get_parallel_config()
-    profiles = recs_with_truth(eval_data, recs_df)
+    rwts = recs_with_truth(eval_data, recs_df)
     if pc.processes > 1:
         logger.info("starting parallel measurement with up to %d tasks", pc.processes)
         init_cluster(global_logging=True)
@@ -75,14 +75,14 @@ def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> I
         limit = TaskLimiter(pc.processes)
 
         for bres in limit.imap(
-            lambda batch: measure_batch.remote(batch, eval_data_ref), batched(profiles, 100), ordered=False
+            lambda batch: measure_batch.remote(batch, eval_data_ref), batched(rwts, 100), ordered=False
         ):
             assert isinstance(bres, list)
             yield from bres
 
     else:
-        for profile in recs_with_truth(eval_data, recs_df):
-            yield measure_rec_metrics(profile, eval_data)
+        for rwt in recs_with_truth(eval_data, recs_df):
+            yield measure_rec_metrics(rwt, eval_data)
 
 
 def main():
@@ -142,11 +142,11 @@ def main():
 
 
 @ray.remote(num_cpus=1)
-def measure_batch(profiles: Sequence[RecsWithTruth], eval_data) -> list[dict[str, Any]]:
+def measure_batch(rwts: Sequence[RecsWithTruth], eval_data) -> list[dict[str, Any]]:
     """
     Measure a batch of recommendations.
     """
-    return [measure_rec_metrics(profile, eval_data) for profile in profiles]
+    return [measure_rec_metrics(rwt, eval_data) for rwt in rwts]
 
 
 if __name__ == "__main__":
