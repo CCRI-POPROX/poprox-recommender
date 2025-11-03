@@ -9,7 +9,7 @@ from poprox_recommender.components.embedders import NRMSArticleEmbedder, NRMSArt
 from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
 from poprox_recommender.pytorch.decorators import torch_inference
 
-TITLE_LENGTH_LIMIT = 30
+TITLE_LENGTH_LIMIT = 300
 MAX_ATTRIBUTES = 15
 
 

@@ -62,10 +62,10 @@ mentions_df = pd.read_parquet(data / "mentions.parquet")
 all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 # print(len(all_dates))
 
-# history_dates = all_dates[:-30]
+history_dates = all_dates[:-30]
 # history_dates = all_dates[-60:-30]
 # history_dates = all_dates[-45:-30]
-history_dates = all_dates[-60:-45]
+# history_dates = all_dates[-60:-45]
 
 
 # preparing interacted article
@@ -171,4 +171,4 @@ article_embeddings_by_id: dict[str, th.Tensor] = {aid: article_emb[i].detach() f
 # breakpoint()
 
 # Write them to a safetensors file
-save_file(topic_embeddings_by_name, "topic_embeddings_cand_15_15_days.safetensors")
+save_file(topic_embeddings_by_name, "topic_embeddings_cand_11_months.safetensors")

@@ -368,7 +368,7 @@ class PreLearnedStaticDefinitionUserTopicEmbedder(UserTopicEmbedder):
         super().__init__(config, **kwargs)
 
         if not type(self).TOPIC_ARTICLES:
-            with safe_open(model_file_path("topic_embeddings_def.safetensors"), framework="pt", device="cpu") as f:
+            with safe_open(model_file_path("topic_embeddings_def_llm.safetensors"), framework="pt", device="cpu") as f:
                 for topic_name in f.keys():
                     article = Article(
                         article_id=uuid4(),
@@ -401,7 +401,7 @@ class PreLearnedCandidateArticleUserTopicEmbedder(UserTopicEmbedder):
 
         if not type(self).TOPIC_ARTICLES:
             with safe_open(
-                model_file_path("topic_embeddings_cand_30_days.safetensors"), framework="pt", device="cpu"
+                model_file_path("topic_embeddings_cand_11_months.safetensors"), framework="pt", device="cpu"
             ) as f:
                 for topic_name in f.keys():
                     article = Article(
@@ -423,4 +423,30 @@ class PreLearnedCandidateArticleUserTopicEmbedder(UserTopicEmbedder):
         self.TOPIC_EMBEDDINGS = type(self).TOPIC_EMBEDDINGS  # type: ignore
 
     def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+        return self.TOPIC_EMBEDDINGS
+
+
+class PreLearnedHybridUserTopicEmbedder(UserTopicEmbedder):
+    TOPIC_ARTICLES: list[Article] = []
+    TOPIC_EMBEDDINGS: dict[object, th.Tensor] = {}  # type: ignore
+
+    def __init__(self, config: UserTopicEmbedderConfig | None = None, **kwargs):
+        super().__init__(config, **kwargs)
+        self.Definition_Embedder = PreLearnedStaticDefinitionUserTopicEmbedder(config)
+        self.Candidate_Embedder = PreLearnedCandidateArticleUserTopicEmbedder(config)
+        self.TOPIC_ARTICLES = self.Definition_Embedder.TOPIC_ARTICLES  # type: ignore
+
+    def compute_topic_embeddings(self, candidate_articles, clicked_articles):
+        cand_embs = self.Candidate_Embedder.TOPIC_EMBEDDINGS
+        llm_def_embs = self.Definition_Embedder.TOPIC_EMBEDDINGS
+        # breakpoint()
+
+        all_topic_uuids = set(cand_embs) | set(llm_def_embs)
+        for topic_uuid in all_topic_uuids:
+            def_emb = llm_def_embs.get(topic_uuid, th.zeros(768, device=self.config.device))
+            cand_emb = cand_embs.get(topic_uuid, th.zeros(768, device=self.config.device))
+
+            avg_emb = 0.5 * def_emb + 0.5 * cand_emb  # type: ignore
+            self.TOPIC_EMBEDDINGS[topic_uuid] = avg_emb
+
         return self.TOPIC_EMBEDDINGS

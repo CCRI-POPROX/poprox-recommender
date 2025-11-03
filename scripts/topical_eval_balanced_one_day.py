@@ -248,24 +248,6 @@ def daily_persona_wise_recall_calculator(candidate_articles, persona_topic, resp
     return recall, precision, topical_count, candidate_count
 
 
-def avg_persona_wise_rec_recall_over_days_calculator(persona_wise_rec_recall):
-    for persona, values in persona_wise_rec_recall.items():
-        daily_values = values["daily_scores"]
-        total_precision = 0
-        total_recall = 0
-        total_precison_count = 0
-        total_recall_count = 0
-        for day, precision, recall in daily_values:
-            total_precision += precision
-            total_precison_count += 1
-            if not math.isnan(recall):
-                total_recall += recall
-                total_recall_count += 1
-        values["avg_precision"] = total_precision / total_precison_count
-        values["avg_recall"] = total_recall / total_recall_count
-    return dict(sorted(persona_wise_rec_recall.items(), key=lambda x: x[0]))
-
-
 # fetching article and mention data
 data = project_root() / "data" / "Test_Large"
 articles_df = pd.read_parquet(data / "articles.parquet")
@@ -287,7 +269,7 @@ cadidate_dates = all_dates[-30:]
 history_df = articles_df[articles_df["published_at"].dt.normalize().isin(history_dates)]
 interacted_articles = []
 
-for row in history_df.itertuples():
+for row in tqdm(history_df.itertuples()):
     article = complete_article_generator(row, mentions_df)
     interacted_articles.append(article)
 
@@ -303,8 +285,8 @@ static_num_recs = 10
 # topical_pref_only || clicked_topic_personas || topical_click_only
 variation = "topical_pref_only"
 pipeline = "nrms_topic_scores"
-def_pref = 3
-duration = "topic_embeddings_def"
+def_pref = 1
+duration = "bl_topic_embeddings_hybrid_tc"
 
 # synthetic data generation
 synthetic_personas = synthetic_personas_generator(def_pref, variation, interacted_articles)
@@ -337,7 +319,7 @@ for day in tqdm(cadidate_dates):
 # taking each persona and generating full recommendation request based on topical preference
 # and interacted article as well as passing all the candidate articles for that day.
 # finally passing the pipeline and generating recommendation response.
-for persona_topic, persona_profile in synthetic_personas.items():
+for persona_topic, persona_profile in tqdm(synthetic_personas.items()):
     req = full_request_generator(
         persona_profile, interacted_articles_dict, balanced_candidate_articles, static_num_recs
     )  # noqa: E501
@@ -358,6 +340,7 @@ for persona_topic, persona_profile in synthetic_personas.items():
         "candidate_count": candidate_count,
     }
 
+    persona_wise_rec_recall = dict(sorted(persona_wise_rec_recall.items()))
 
 # store result in CSV
 store_rec_recall_as_csv(persona_wise_rec_recall, duration)

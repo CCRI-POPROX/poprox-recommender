@@ -365,10 +365,10 @@ for day in tqdm(cadidate_dates):
     day_df = articles_df[articles_df["published_at"].dt.normalize() == day]
 
     candidate_articles = []
-
     for row in day_df.itertuples():
         article = complete_article_generator(row, mentions_df)
         candidate_articles.append(article)
+
         article_topics = {m.entity.name for m in article.mentions if m.entity is not None}
         for entity in article_topics:
             if entity in TOPIC_TO_UUID.keys():

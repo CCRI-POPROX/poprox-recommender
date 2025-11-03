@@ -3,16 +3,18 @@
 from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts import CandidateSet, InterestProfile
+from poprox_recommender.components.diversifiers.topic_calibration import TopicCalibrator
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.article_topic_relvs import NRMSArticleTopicEmbedder
 from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.components.embedders.user_topic_prefs import (
     PreLearnedCandidateArticleUserTopicEmbedder,
+    PreLearnedHybridUserTopicEmbedder,
     PreLearnedStaticDefinitionUserTopicEmbedder,
-    StaticDefinitionUserTopicEmbedder,
     UserTopicEmbedderConfig,
 )
+from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
@@ -28,6 +30,11 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_candidates = builder.create_input("candidate", CandidateSet)
     i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
+
+    # Filter articles based on topic preferences
+    # f_candidates = builder.add_component(
+    #     "topic-filter", TopicFilter, candidates=i_candidates, interest_profile=i_profile
+    # )
 
     # Embed candidate and clicked articles
     ae_config = NRMSArticleEmbedderConfig(
@@ -60,7 +67,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
     e_user_positive = builder.add_component(
         "pos-topic-embedder",
-        PreLearnedCandidateArticleUserTopicEmbedder,
+        PreLearnedHybridUserTopicEmbedder,
         ue_config2,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
@@ -76,7 +83,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
     e_user_negative = builder.add_component(
         "neg-topic-embedder",
-        PreLearnedCandidateArticleUserTopicEmbedder,
+        PreLearnedHybridUserTopicEmbedder,
         ue_config3,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
@@ -113,5 +120,8 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     fusion = builder.add_component(
         "fusion", ScoreFusion, {"combiner": "avg"}, candidates1=n_scorer, candidates2=topic_fusion
     )
+
+    # Calibrate articles based on topic preferences
+    # builder.add_component("recommender", TopicCalibrator, candidate_articles=fusion, interest_profile=e_user)
 
     builder.add_component("recommender", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)

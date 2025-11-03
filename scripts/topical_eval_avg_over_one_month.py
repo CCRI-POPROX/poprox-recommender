@@ -268,7 +268,8 @@ mentions_df = pd.read_parquet(data / "mentions.parquet")
 all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 # print(len(all_dates))
 
-history_dates = all_dates[:-30]
+# history_dates = all_dates[-60:-30]
+history_dates = []  # keeping it empty
 cadidate_dates = all_dates[-30:]
 
 
@@ -276,7 +277,7 @@ cadidate_dates = all_dates[-30:]
 history_df = articles_df[articles_df["published_at"].dt.normalize().isin(history_dates)]
 interacted_articles = []
 
-for row in history_df.itertuples():
+for row in tqdm(history_df.itertuples()):
     article = complete_article_generator(row, mentions_df)
     interacted_articles.append(article)
 
@@ -293,11 +294,12 @@ static_num_recs = 10
 
 variation = "topical_pref_only"
 pipeline = "nrms_topic_scores"
-def_pref = 3
+def_pref = 1
 
 # topic_embeddings_cand_11_months || topic_embeddings_cand_15_15_days ||
-# topic_embeddings_cand_15_days   || topic_embeddings_cand_30_days
-time_frame = "topic_embeddings_def_llm"
+# topic_embeddings_cand_15_days   || topic_embeddings_cand_30_days ||
+# topic_embeddings_def_llm || topic_embeddings_hybrid
+time_frame = "topic_embeddings_cand_11_months"
 
 # synthetic data generation
 synthetic_personas = synthetic_personas_generator(def_pref, variation, interacted_articles)
@@ -329,6 +331,8 @@ for day in tqdm(cadidate_dates):
 
         persona_wise_rec_recall[persona_topic]["daily_scores"].append((day, precision, recall))
 
+# with open("persona_wise_rec_recall_cand_11_1.json", "w") as f:
+#     json.dump(persona_wise_rec_recall, f, indent=4, default=str)
 
 # calculating persona wise avg recall over days
 avg_persona_wise_rec_recall = avg_persona_wise_rec_recall_over_days_calculator(persona_wise_rec_recall)
