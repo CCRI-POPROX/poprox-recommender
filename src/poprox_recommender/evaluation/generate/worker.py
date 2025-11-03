@@ -33,14 +33,14 @@ STAGES = ["final", "ranked", "reranked"]
 TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
 
 
-def generate_profile_recs(dataset: EvalData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
+def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: str, n_requests: int | None = None):
     logger.info("generating recommendations", dataset=dataset.name)
 
     pc = get_parallel_config()
     cluster = pc.processes > 1
 
-    count = n_profiles if n_profiles is not None else dataset.n_profiles
-    logger.info("recommending for %d profiles", count)
+    count = n_requests if n_requests is not None else dataset.n_requests
+    logger.info("recommending for %d requests", count)
 
     with (
         item_progress("recommend", total=count) as pb,
@@ -52,10 +52,10 @@ def generate_profile_recs(dataset: EvalData, outs: RecOutputs, pipeline: str, n_
         task.save_to_file(outs.base_dir / "generate-task.json")
         pc = get_parallel_config()
         if cluster:
-            cluster_recommend(dataset, pipeline, n_profiles, outs, pc, task, pb)
+            cluster_recommend(dataset, pipeline, n_requests, outs, pc, task, pb)
 
         else:
-            serial_recommend(pipeline, dataset.iter_profiles(limit=n_profiles), outs, pb)
+            serial_recommend(pipeline, dataset.iter_requests(limit=n_requests), outs, pb)
 
     logger.info("finished recommending in %s", naturaldelta(task.duration) if task.duration else "unknown time")
     cpu = task.total_cpu()
@@ -114,7 +114,7 @@ def cluster_recommend(
         EmbeddingWriter.create_remote(outs),
     ]
 
-    profiles = dataset.iter_profile_ids(limit=max_profiles)
+    profiles = dataset.iter_recommendation_ids(limit=max_profiles)
     ds_ref = ray.put(dataset)
     rec_batch = dynamic_remote(recommend_batch)
     limit = TaskLimiter(pc.processes)

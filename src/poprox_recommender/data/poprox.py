@@ -54,14 +54,14 @@ class PoproxData(EvalData):
         self.interests_df = interests_df
 
     @property
-    def n_profiles(self) -> int:
+    def n_requests(self) -> int:
         return len(self.newsletters_df["newsletter_id"].unique())
 
     @property
     def n_articles(self) -> int:
         return self.articles_df.shape[0]
 
-    def profile_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
+    def recommendation_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
         # Create one row per clicked article with this newsletter_id
         # Returned dataframe must have an "item_id" column containing the clicked article ids
         # and the "item_id" column must be the index of the dataframe
@@ -70,15 +70,15 @@ class PoproxData(EvalData):
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
-    def iter_profile_ids(self) -> Generator[UUID]:
+    def iter_recommendation_ids(self) -> Generator[UUID]:
         newsletter_ids = self.newsletters_df["newsletter_id"].unique()
         for id in newsletter_ids:
             if not isinstance(id, UUID):
                 id = UUID(id)
             yield id
 
-    def iter_profiles(self, *, limit: int | None = None) -> Generator[RecommendationRequestV4]:
-        loop = self.iter_profile_ids()
+    def iter_requests(self, *, limit: int | None = None) -> Generator[RecommendationRequestV4]:
+        loop = self.iter_recommendation_ids()
         if limit is not None:
             loop = it.islice(loop, limit)
         for newsletter_id in loop:

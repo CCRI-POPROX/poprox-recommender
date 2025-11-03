@@ -25,7 +25,7 @@ from poprox_recommender.paths import project_root
 def get_single_request() -> str:
     options = docopt(__doc__)
     eval_data = PoproxData()
-    requests = list(eval_data.iter_profiles())
+    requests = list(eval_data.iter_requests())
     excluded_fields = {"__all__": {"raw_data": True, "images": {"__all__": {"raw_data"}}}}
 
     account_id = options["--account_id"]

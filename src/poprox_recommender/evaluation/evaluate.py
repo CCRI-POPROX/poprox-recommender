@@ -56,7 +56,7 @@ def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[Pr
     """
     for profile_id, recs in profile_recs.groupby("profile_id"):
         profile_id = UUID(str(profile_id))
-        truth = eval_data.profile_truth(profile_id)
+        truth = eval_data.recommendation_truth(profile_id)
         assert truth is not None
         if len(truth) > 0:
             yield ProfileRecs(profile_id, recs.copy(), truth)
@@ -108,14 +108,14 @@ def main():
     recs_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendations.parquet"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
-    n_profiles = recs_df["profile_id"].nunique()
-    logger.info("loaded recommendations for %d profiles", n_profiles)
+    n_recommendations = recs_df["profile_id"].nunique()
+    logger.info("loaded recommendations for %d recommendations", n_recommendations)
 
     logger.info("measuring recommendations")
 
     records = []
     with (
-        item_progress("evaluate", total=n_profiles) as pb,
+        item_progress("evaluate", total=n_recommendations) as pb,
     ):
         for profile_rows in profile_eval_results(eval_data, recs_df):
             records.append(profile_rows)
