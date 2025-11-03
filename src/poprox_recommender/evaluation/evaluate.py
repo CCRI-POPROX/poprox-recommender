@@ -123,13 +123,13 @@ def main():
 
     metrics = pd.DataFrame.from_records(metric_records)
     print(metrics)
-    logger.info("measured recs for %d profiles", metrics["profile_id"].nunique())
+    logger.info("measured metrics for %d recommendations", metrics["recommendation_id"].nunique())
 
     profile_out_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendation-metrics.csv.gz"
     logger.info("saving per-recommendation metrics to %s", profile_out_fn)
     metrics.to_csv(profile_out_fn)
 
-    agg_metrics = metrics.drop(columns=["profile_id", "personalized"]).mean()
+    agg_metrics = metrics.drop(columns=["recommendation_id", "personalized"]).mean()
     # reciprocal rank mean to MRR
     agg_metrics = agg_metrics.rename(index={"RR": "MRR"})
 

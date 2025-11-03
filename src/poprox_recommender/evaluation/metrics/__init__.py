@@ -96,7 +96,7 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     )
 
     return {
-        "profile_id": recommendation_id,
+        "recommendation_id": recommendation_id,
         # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
         # whole function should be revised for generality when we want to support
         # other pipelines.
