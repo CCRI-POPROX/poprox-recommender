@@ -16,7 +16,7 @@ from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 
 __all__ = [
     "rank_biased_overlap",
-    "ProfileRecs",
+    "RecsWithTruth",
     "measure_profile_recs",
     "least_item_promoted",
     "rank_bias_entropy",
@@ -26,12 +26,12 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class ProfileRecs(NamedTuple):
+class RecsWithTruth(NamedTuple):
     """
-    A user profile's recommendations (possibly from multiple algorithms and stages)
+    The recommendation for a specific request (possibly from multiple algorithms and stages)
     """
 
-    profile_id: UUID
+    recommendation_id: UUID
     recs: pd.DataFrame
     truth: pd.DataFrame
 
@@ -43,12 +43,12 @@ def convert_df_to_article_set(rec_df):
     return CandidateSet(articles=articles)
 
 
-def measure_profile_recs(profile: ProfileRecs, eval_data: EvalData | None = None) -> dict[str, Any]:
+def measure_profile_recs(recs_with_truth: RecsWithTruth, eval_data: EvalData | None = None) -> dict[str, Any]:
     """
     Measure a single user profile's recommendations.  Returns the profile ID and
     a dictionary of evaluation metrics.
     """
-    profile_id, recs, truth = profile
+    recommendation_id, recs, truth = recs_with_truth
     truth.index = truth.index.astype(str)
 
     truth = truth.reset_index()
@@ -84,7 +84,7 @@ def measure_profile_recs(profile: ProfileRecs, eval_data: EvalData | None = None
     logger.debug(
         "profile %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
         " LIP=%0.3f, RBE=%0.3f",
-        profile_id,
+        recommendation_id,
         single_ndcg5,
         single_ndcg10,
         single_rr,
@@ -96,7 +96,7 @@ def measure_profile_recs(profile: ProfileRecs, eval_data: EvalData | None = None
     )
 
     return {
-        "profile_id": profile_id,
+        "profile_id": recommendation_id,
         # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
         # whole function should be revised for generality when we want to support
         # other pipelines.

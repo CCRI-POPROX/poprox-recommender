@@ -42,31 +42,31 @@ from lenskit.parallel.ray import TaskLimiter, init_cluster
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
-from poprox_recommender.evaluation.metrics import ProfileRecs, measure_profile_recs
+from poprox_recommender.evaluation.metrics import RecsWithTruth, measure_profile_recs
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 
 
-def rec_profiles(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[ProfileRecs]:
+def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[RecsWithTruth]:
     """
-    Iterate over rec profiles, yielding each recommendation list with its truth and
-    whether the profile is personalized.  This supports parallel computation of the
+    Iterate over recommendations, yielding each recommendation list with its truth and
+    whether the recommendations are personalized.  This supports parallel computation of the
     final metrics.
     """
-    for profile_id, recs in profile_recs.groupby("profile_id"):
-        profile_id = UUID(str(profile_id))
-        truth = eval_data.recommendation_truth(profile_id)
+    for recommendation_id, recs in recs_df.groupby("profile_id"):
+        recommendation_id = UUID(str(recommendation_id))
+        truth = eval_data.recommendation_truth(recommendation_id)
         assert truth is not None
         if len(truth) > 0:
-            yield ProfileRecs(profile_id, recs.copy(), truth)
+            yield RecsWithTruth(recommendation_id, recs.copy(), truth)
         else:
-            logger.warning("profile %s has no truth", profile_id)
+            logger.warning("request %s has no truth", recommendation_id)
 
 
-def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Iterator[dict[str, Any]]:
+def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[dict[str, Any]]:
     pc = get_parallel_config()
-    profiles = rec_profiles(eval_data, profile_recs)
+    profiles = recs_with_truth(eval_data, recs_df)
     if pc.processes > 1:
         logger.info("starting parallel measurement with up to %d tasks", pc.processes)
         init_cluster(global_logging=True)
@@ -81,7 +81,7 @@ def profile_eval_results(eval_data: EvalData, profile_recs: pd.DataFrame) -> Ite
             yield from bres
 
     else:
-        for profile in rec_profiles(eval_data, profile_recs):
+        for profile in recs_with_truth(eval_data, recs_df):
             yield measure_profile_recs(profile, eval_data)
 
 
@@ -113,15 +113,15 @@ def main():
 
     logger.info("measuring recommendations")
 
-    records = []
+    metric_records = []
     with (
         item_progress("evaluate", total=n_recommendations) as pb,
     ):
-        for profile_rows in profile_eval_results(eval_data, recs_df):
-            records.append(profile_rows)
+        for metric_row in recommendation_eval_results(eval_data, recs_df):
+            metric_records.append(metric_row)
             pb.update()
 
-    metrics = pd.DataFrame.from_records(records)
+    metrics = pd.DataFrame.from_records(metric_records)
     print(metrics)
     logger.info("measured recs for %d profiles", metrics["profile_id"].nunique())
 
@@ -142,7 +142,7 @@ def main():
 
 
 @ray.remote(num_cpus=1)
-def measure_batch(profiles: Sequence[ProfileRecs], eval_data) -> list[dict[str, Any]]:
+def measure_batch(profiles: Sequence[RecsWithTruth], eval_data) -> list[dict[str, Any]]:
     """
     Measure a batch of profile recommendations.
     """
