@@ -77,7 +77,7 @@ def serial_recommend(pipeline: str, requests: Iterator[RecommendationRequest], o
     ]
 
     for request in requests:
-        state = recommend_for_profile(pipe, request)
+        state = recommend_for_request(pipe, request)
         for w in writers:
             w.write_recommendations(request, state)
         pb.update()
@@ -89,7 +89,7 @@ def serial_recommend(pipeline: str, requests: Iterator[RecommendationRequest], o
 def cluster_recommend(
     dataset: EvalData,
     pipeline: str,
-    max_profiles: int | None,
+    max_recommendations: int | None,
     outs: RecOutputs,
     pc: ParallelConfig,
     task: Task,
@@ -114,7 +114,7 @@ def cluster_recommend(
         EmbeddingWriter.create_remote(outs),
     ]
 
-    profiles = dataset.iter_recommendation_ids(limit=max_profiles)
+    recommendation_ids = dataset.iter_recommendation_ids(limit=max_recommendations)
     ds_ref = ray.put(dataset)
     rec_batch = dynamic_remote(recommend_batch)
     limit = TaskLimiter(pc.processes)
@@ -122,7 +122,7 @@ def cluster_recommend(
     writes = []
     for n, btask, bwrites in limit.imap(
         lambda batch: rec_batch.remote(pipe, batch, writers, dataset=ds_ref),
-        it.batched(profiles, BATCH_SIZE),
+        it.batched(recommendation_ids, BATCH_SIZE),
         ordered=False,
     ):
         pb.update(n)
@@ -148,7 +148,7 @@ def cluster_recommend(
         task.add_subtask(wt)
 
 
-def recommend_for_profile(pipeline: Pipeline, request: RecommendationRequest) -> PipelineState:
+def recommend_for_request(pipeline: Pipeline, request: RecommendationRequest) -> PipelineState:
     """
     Generate recommendations for a single request, returning the pipeline state.
     """
@@ -193,7 +193,7 @@ def recommend_batch(
             if not isinstance(request, RecommendationRequest):
                 assert dataset is not None
                 request = dataset.lookup_request(id=request)
-            state = recommend_for_profile(pipeline, request)
+            state = recommend_for_request(pipeline, request)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
             outputs.append((request, state))
 
