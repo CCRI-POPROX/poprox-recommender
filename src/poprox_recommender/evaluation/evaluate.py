@@ -42,7 +42,7 @@ from lenskit.parallel.ray import TaskLimiter, init_cluster
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
-from poprox_recommender.evaluation.metrics import RecsWithTruth, measure_profile_recs
+from poprox_recommender.evaluation.metrics import RecsWithTruth, measure_rec_metrics
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> I
 
     else:
         for profile in recs_with_truth(eval_data, recs_df):
-            yield measure_profile_recs(profile, eval_data)
+            yield measure_rec_metrics(profile, eval_data)
 
 
 def main():
@@ -146,7 +146,7 @@ def measure_batch(profiles: Sequence[RecsWithTruth], eval_data) -> list[dict[str
     """
     Measure a batch of profile recommendations.
     """
-    return [measure_profile_recs(profile, eval_data) for profile in profiles]
+    return [measure_rec_metrics(profile, eval_data) for profile in profiles]
 
 
 if __name__ == "__main__":

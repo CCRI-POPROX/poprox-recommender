@@ -17,7 +17,7 @@ from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 __all__ = [
     "rank_biased_overlap",
     "RecsWithTruth",
-    "measure_profile_recs",
+    "measure_rec_metrics",
     "least_item_promoted",
     "rank_bias_entropy",
     "intralist_similarity",
@@ -43,9 +43,9 @@ def convert_df_to_article_set(rec_df):
     return CandidateSet(articles=articles)
 
 
-def measure_profile_recs(recs_with_truth: RecsWithTruth, eval_data: EvalData | None = None) -> dict[str, Any]:
+def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | None = None) -> dict[str, Any]:
     """
-    Measure a single user profile's recommendations.  Returns the profile ID and
+    Measure a single set of recommendations against ground truth.  Returns the recommendation ID and
     a dictionary of evaluation metrics.
     """
     recommendation_id, recs, truth = recs_with_truth
