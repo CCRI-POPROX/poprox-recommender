@@ -4,7 +4,7 @@ Generate evaluations for offline test data.
 
 For an evaluation EVAL and PIPELINE, this script reads
 outputs/DATA/PIPELINE/recommendations.parquet and produces
-ouptuts/DATA/PIPELINE/profile-metrics.csv.gz and ouptuts/DATA/PIPELINE/metrics.json.
+ouptuts/DATA/PIPELINE/recommendation-metrics.csv.gz and ouptuts/DATA/PIPELINE/metrics.json.
 
 Usage:
     poprox_recommender.evaluation.evaluate [options] EVAL PIPELINE
@@ -125,8 +125,8 @@ def main():
     print(metrics)
     logger.info("measured recs for %d profiles", metrics["profile_id"].nunique())
 
-    profile_out_fn = project_root() / "outputs" / eval_name / pipe_name / "profile-metrics.csv.gz"
-    logger.info("saving per-profile metrics to %s", profile_out_fn)
+    profile_out_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendation-metrics.csv.gz"
+    logger.info("saving per-recommendation metrics to %s", profile_out_fn)
     metrics.to_csv(profile_out_fn)
 
     agg_metrics = metrics.drop(columns=["profile_id", "personalized"]).mean()
