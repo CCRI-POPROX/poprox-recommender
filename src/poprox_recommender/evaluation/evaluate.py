@@ -125,9 +125,9 @@ def main():
     print(metrics)
     logger.info("measured metrics for %d recommendations", metrics["recommendation_id"].nunique())
 
-    profile_out_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendation-metrics.csv.gz"
-    logger.info("saving per-recommendation metrics to %s", profile_out_fn)
-    metrics.to_csv(profile_out_fn)
+    metrics_out_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendation-metrics.csv.gz"
+    logger.info("saving per-recommendation metrics to %s", metrics_out_fn)
+    metrics.to_csv(metrics_out_fn)
 
     agg_metrics = metrics.drop(columns=["recommendation_id", "personalized"]).mean()
     # reciprocal rank mean to MRR
@@ -144,7 +144,7 @@ def main():
 @ray.remote(num_cpus=1)
 def measure_batch(profiles: Sequence[RecsWithTruth], eval_data) -> list[dict[str, Any]]:
     """
-    Measure a batch of profile recommendations.
+    Measure a batch of recommendations.
     """
     return [measure_rec_metrics(profile, eval_data) for profile in profiles]
 

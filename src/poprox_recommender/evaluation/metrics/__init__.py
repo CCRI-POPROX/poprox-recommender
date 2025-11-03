@@ -82,7 +82,7 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     ils = intralist_similarity(ranked, k=10)
 
     logger.debug(
-        "profile %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
+        "recommendation %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
         " LIP=%0.3f, RBE=%0.3f",
         recommendation_id,
         single_ndcg5,

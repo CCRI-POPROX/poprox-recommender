@@ -16,7 +16,7 @@ Options:
     -P DATA, --poprox-data=DATA
             read POPROX test data DATA
     --subset=N
-            test only on the first N test profiles
+            test only on the first N test requests
     PIPELINE
             The name of the pipeline to generate from
 """

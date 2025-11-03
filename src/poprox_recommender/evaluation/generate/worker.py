@@ -65,7 +65,7 @@ def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: st
         logger.info("recommendation took %s", metric(task.system_power, "J"))
 
 
-def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
+def serial_recommend(pipeline: str, requests: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
     logger.info("loading pipeline")
     pipe = get_pipeline(pipeline, device=default_device())
     logger.info("starting serial evaluation")
@@ -76,7 +76,7 @@ def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], o
         EmbeddingWriter(outs),
     ]
 
-    for request in profiles:
+    for request in requests:
         state = recommend_for_profile(pipe, request)
         for w in writers:
             w.write_recommendations(request, state)
