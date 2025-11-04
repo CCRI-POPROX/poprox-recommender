@@ -86,14 +86,13 @@ class PoproxData(EvalData):
 
     def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV4:
         impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]
-        # TODO: Change `account_id` to `profile_id` in the export
-        profile_id = impressions_df.iloc[0]["account_id"]
+        account_id = impressions_df.iloc[0]["account_id"]
         newsletter_created_at = impressions_df.iloc[0]["created_at"]
 
         # Filter clicks to those before the newsletter
-        profile_clicks_df = self.clicks_df.loc[self.clicks_df["profile_id"] == profile_id]
+        account_clicks_df = self.clicks_df.loc[self.clicks_df["account_id"] == account_id]
         # TODO: Change `timestamp` to `created_at` in the export
-        filtered_clicks_df = profile_clicks_df[profile_clicks_df["timestamp"] < newsletter_created_at]
+        filtered_clicks_df = account_clicks_df[account_clicks_df["timestamp"] < newsletter_created_at]
 
         # Create Article and Click objects from dataframe rows
         clicks = []
@@ -111,12 +110,12 @@ class PoproxData(EvalData):
                     )
                 )
 
-        interests = self.interests_df.loc[self.interests_df["account_id"] == profile_id]
+        interests = self.interests_df.loc[self.interests_df["account_id"] == account_id]
         topics = []
         for interest in interests.itertuples():
             topics.append(
                 AccountInterest(
-                    account_id=profile_id,
+                    account_id=account_id,
                     entity_id=interest.entity_id,
                     entity_name=interest.entity_name,
                     preference=interest.preference,
