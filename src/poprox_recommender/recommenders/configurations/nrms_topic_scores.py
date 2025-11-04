@@ -67,7 +67,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
     e_user_positive = builder.add_component(
         "pos-topic-embedder",
-        PreLearnedHybridUserTopicEmbedder,
+        PreLearnedStaticDefinitionUserTopicEmbedder,
         ue_config2,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,
@@ -83,7 +83,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
     e_user_negative = builder.add_component(
         "neg-topic-embedder",
-        PreLearnedHybridUserTopicEmbedder,
+        PreLearnedStaticDefinitionUserTopicEmbedder,
         ue_config3,
         candidate_articles=e_candidates,
         clicked_articles=e_clicked,

@@ -8,10 +8,11 @@ import torch.optim as optim
 from safetensors.torch import save_file
 
 from poprox_concepts import Article, CandidateSet, Entity, Mention
-from poprox_recommender.components.embedders import NRMSArticleEmbedder
-from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
 from poprox_recommender.paths import model_file_path, project_root
 
+
+from poprox_recommender.components.embedders import NRMSArticleEmbedder
+from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
 
 def complete_article_generator(row, mentions_df):
     article_mentions_df = mentions_df[mentions_df["article_id"] == row.article_id]
@@ -46,9 +47,7 @@ def set_seed(seed=42):
     th.backends.cudnn.deterministic = True
     th.backends.cudnn.benchmark = False
 
-
 set_seed(42)
-
 
 device = th.device("cuda" if th.cuda.is_available() else "cpu")
 
@@ -63,10 +62,6 @@ all_dates = sorted(articles_df["published_at"].dt.normalize().unique())
 # print(len(all_dates))
 
 history_dates = all_dates[:-30]
-# history_dates = all_dates[-60:-30]
-# history_dates = all_dates[-45:-30]
-# history_dates = all_dates[-60:-45]
-
 
 # preparing interacted article
 history_df = articles_df[articles_df["published_at"].dt.normalize().isin(history_dates)]
@@ -78,7 +73,6 @@ for row in history_df.itertuples():
 
 candidate_article = [a.model_dump(mode="json", exclude_none=True) for a in candidate_article_obj]
 
-# breakpoint()
 
 topic_names = set()
 # topic_names = TOPIC_DESCRIPTIONS.keys()
@@ -88,7 +82,6 @@ for article in candidate_article:
         entity = mention.get("entity")
         topic_names.add(entity["name"])  # considering all the available topics in the candidate articles
 topic_to_idx = {t: i for i, t in enumerate(topic_names)}
-
 
 article_ids = []
 article_to_idx = {}
@@ -116,7 +109,6 @@ num_topics = len(topic_names)
 num_articles = len(article_ids)
 embed_dim = 768
 
-
 M = th.zeros((num_topics, num_articles), dtype=th.float32, device=device)
 M[pos_t_idx, pos_a_idx] = 1.0
 
@@ -128,7 +120,6 @@ article_embedding_set = article_embedder(CandidateSet(articles=candidate_article
 topic_emb = nn.Parameter(th.randn(num_topics, embed_dim, device=device))
 article_emb = nn.Parameter(article_embedding_set.embeddings.clone())
 article_emb.requires_grad = False
-
 
 optimizer = optim.Adam([topic_emb], lr=1e-2)
 loss_fn = nn.BCEWithLogitsLoss()
@@ -144,31 +135,6 @@ for epoch in range(n_epochs):
 
 
 topic_embeddings_by_name: dict[str, th.Tensor] = {topic: topic_emb[i].detach() for topic, i in topic_to_idx.items()}
-article_embeddings_by_id: dict[str, th.Tensor] = {aid: article_emb[i].detach() for aid, i in article_to_idx.items()}
-
-
-# Tech = topic_embeddings_by_name["Climate and environment"]
-# tech_news_rec = {}
-# for article_id, embedding in article_embeddings_by_id.items():
-#     score = th.dot(Tech, embedding)
-#     for cand_art in candidate_article:
-#         if cand_art["article_id"] == article_id:
-#             news_topics = list(
-#                 {
-#                     mention["entity"]["name"]
-#                     for mention in cand_art["mentions"]
-#                     if mention["entity"]["name"] in TOPIC_DESCRIPTIONS.keys()
-#                 }
-#             )
-#             tech_news_rec[cand_art["headline"]] = [score, news_topics]
-
-# sorted_tech_news = dict(sorted(tech_news_rec.items(), key=lambda item: item[1][0], reverse=True))
-
-# for i, (headline, (score, topics)) in enumerate(list(sorted_tech_news.items())[:10], 1):
-#     print(f"{i}. {score:.4f} — {headline}")
-#     print(f"    Topics: {topics}")
-
-# breakpoint()
 
 # Write them to a safetensors file
 save_file(topic_embeddings_by_name, "topic_embeddings_cand_11_months.safetensors")

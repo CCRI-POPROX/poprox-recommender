@@ -16,6 +16,7 @@ from poprox_recommender.paths import project_root
 
 # utility functions for article generator, rec_request generator and result store
 
+
 def complete_article_generator(row, mentions_df):
     article_mentions_df = mentions_df[mentions_df["article_id"] == row.article_id]
     mentions = [
@@ -68,8 +69,8 @@ def store_rec_recall_as_csv(sorted_user_wise_rec_recall, variation, time_frame):
 
 # utility functions for synthetic data generation
 
-def user_profile_generator(user_account_ID, CLK_df, interest_df):
 
+def user_profile_generator(user_account_ID, CLK_df, interest_df):
     user_profile_batch = {}
 
     for uuid in user_account_ID:
@@ -106,6 +107,7 @@ def user_profile_generator(user_account_ID, CLK_df, interest_df):
 
 
 # all the calculation functions
+
 
 def daily_user_wise_JSD(candidate_articles, uuid, response):
     candidate_count = 0
@@ -153,13 +155,13 @@ cadidate_dates = sorted(Cand_articles_df["published_at"].dt.normalize().unique()
 CLK_df = pd.read_parquet(data / "click.parquet")
 CLK_account_ID = CLK_df["profile_id"].unique()
 
-interest_df = pd.read_parquet(data/ "insterests.parquet")
+interest_df = pd.read_parquet(data / "insterests.parquet")
 interest_account_ID = interest_df["account_id"].unique()
 
 user_account_ID = set(CLK_account_ID) | set(interest_account_ID)
 
-Clk_articles_df = pd.read_parquet(data /"clicked" / "articles.parquet")
-Clk_mentions_df = pd.read_parquet(data /"clicked" / "mentions.parquet")
+Clk_articles_df = pd.read_parquet(data / "clicked" / "articles.parquet")
+Clk_mentions_df = pd.read_parquet(data / "clicked" / "mentions.parquet")
 
 
 # preparing interacted article

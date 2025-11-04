@@ -299,7 +299,7 @@ def_pref = 1
 # topic_embeddings_cand_11_months || topic_embeddings_cand_15_15_days ||
 # topic_embeddings_cand_15_days   || topic_embeddings_cand_30_days ||
 # topic_embeddings_def_llm || topic_embeddings_hybrid
-time_frame = "topic_embeddings_cand_11_months"
+time_frame = "topic_embeddings_def_llm"
 
 # synthetic data generation
 synthetic_personas = synthetic_personas_generator(def_pref, variation, interacted_articles)

@@ -17,12 +17,15 @@ class ScoreFusion(Component):
 
     def __call__(self, candidates1: CandidateSet, candidates2: CandidateSet) -> CandidateSet:
         combined_score = defaultdict(float)
+        # combined_score_copy = defaultdict(float)
+
         combined_article = {}
 
         if candidates1.scores is not None:
             for article, score in zip(candidates1.articles, candidates1.scores):
                 article_id = article.article_id
                 combined_score[article_id] += self.config.weight1 * score
+                # combined_score_copy[article_id] += self.config.weight1 * score
                 combined_article[article_id] = article
 
         if candidates2.scores is not None:
@@ -33,6 +36,8 @@ class ScoreFusion(Component):
                 else:
                     combined_score[article_id] += self.config.weight2 * score
                 combined_article[article_id] = article
+
+        # breakpoint()
 
         merged_scores = []
         merged_articles = []

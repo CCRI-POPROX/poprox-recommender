@@ -360,6 +360,9 @@ class HybridUserTopicEmbedder(UserTopicEmbedder):
         return topic_embeddings_by_uuid
 
 
+# Please make sure the the article topic embedder have the same prelearned embedder file as input
+
+
 class PreLearnedStaticDefinitionUserTopicEmbedder(UserTopicEmbedder):
     TOPIC_ARTICLES: list[Article] = []
     TOPIC_EMBEDDINGS: dict[object, th.Tensor] = {}
