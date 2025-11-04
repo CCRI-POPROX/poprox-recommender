@@ -5,12 +5,9 @@ import torch as th
 from safetensors.torch import save_file
 
 from poprox_concepts import Article, CandidateSet
-from poprox_recommender.paths import model_file_path
-
-
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
-from poprox_recommender.components.topical_description_llm import TOPIC_DESCRIPTIONS
-
+from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
+from poprox_recommender.paths import model_file_path
 
 TOPIC_ARTICLES = [
     Article(
@@ -39,4 +36,4 @@ topic_embeddings_by_name: dict[str, th.Tensor] = {
 # breakpoint()
 
 # Write them to a safetensors file
-save_file(topic_embeddings_by_name, "topic_embeddings_def_llm.safetensors")
+save_file(topic_embeddings_by_name, "l30_topic_embeddings_def.safetensors")
