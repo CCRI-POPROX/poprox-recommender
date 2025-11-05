@@ -83,7 +83,7 @@ class MindData(EvalData):
         self.duck.execute("SELECT article_uuid FROM articles")
         return [row[0] for row in self.duck.fetchall()]
 
-    def recommendation_truth(self, user: UUID) -> pd.DataFrame | None:
+    def slate_truth(self, user: UUID) -> pd.DataFrame | None:
         """
         Look up the ground-truth data for a particular user profile,
         in LensKit format with item UUIDs for item IDs.
@@ -103,19 +103,7 @@ class MindData(EvalData):
         truth["item_id"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
         return truth.set_index("item_id")
 
-    def iter_requests(self, *, limit: int | None = None) -> Generator[RecommendationRequest]:
-        """
-        Iterate the test requests.
-
-        Args:
-            ids_only:
-                If ``True``, only yield impression IDs, not entire
-                recommendation requests.
-        """
-        for imp_id in self.iter_recommendation_ids(limit=limit):
-            yield self.lookup_request(id=imp_id)
-
-    def iter_recommendation_ids(self, *, limit: int | None = None) -> Generator[int]:
+    def iter_slate_ids(self, *, limit: int | None = None) -> Generator[int]:
         """
         Iterate the identifiers of recommendations.
         """

@@ -56,7 +56,7 @@ def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[Recs
     """
     for recommendation_id, recs in recs_df.groupby("profile_id"):
         recommendation_id = UUID(str(recommendation_id))
-        truth = eval_data.recommendation_truth(recommendation_id)
+        truth = eval_data.slate_truth(recommendation_id)
         assert truth is not None
         if len(truth) > 0:
             yield RecsWithTruth(recommendation_id, recs.copy(), truth)

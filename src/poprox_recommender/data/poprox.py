@@ -61,7 +61,7 @@ class PoproxData(EvalData):
     def n_articles(self) -> int:
         return self.articles_df.shape[0]
 
-    def recommendation_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
+    def slate_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
         # Create one row per clicked article with this newsletter_id
         # Returned dataframe must have an "item_id" column containing the clicked article ids
         # and the "item_id" column must be the index of the dataframe
@@ -70,19 +70,14 @@ class PoproxData(EvalData):
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
-    def iter_recommendation_ids(self) -> Generator[UUID]:
+    def iter_slate_ids(self, limit: int | None = None) -> Generator[UUID]:
         newsletter_ids = self.newsletters_df["newsletter_id"].unique()
+        if limit is not None:
+            newsletter_ids = it.islice(newsletter_ids, limit)
         for id in newsletter_ids:
             if not isinstance(id, UUID):
                 id = UUID(id)
             yield id
-
-    def iter_requests(self, *, limit: int | None = None) -> Generator[RecommendationRequestV4]:
-        loop = self.iter_recommendation_ids()
-        if limit is not None:
-            loop = it.islice(loop, limit)
-        for newsletter_id in loop:
-            yield self.lookup_request(newsletter_id)
 
     def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV4:
         impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]

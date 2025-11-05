@@ -114,7 +114,7 @@ def cluster_recommend(
         EmbeddingWriter.create_remote(outs),
     ]
 
-    recommendation_ids = dataset.iter_recommendation_ids(limit=max_recommendations)
+    slate_ids = dataset.iter_slate_ids(limit=max_recommendations)
     ds_ref = ray.put(dataset)
     rec_batch = dynamic_remote(recommend_batch)
     limit = TaskLimiter(pc.processes)
@@ -122,7 +122,7 @@ def cluster_recommend(
     writes = []
     for n, btask, bwrites in limit.imap(
         lambda batch: rec_batch.remote(pipe, batch, writers, dataset=ds_ref),
-        it.batched(recommendation_ids, BATCH_SIZE),
+        it.batched(slate_ids, BATCH_SIZE),
         ordered=False,
     ):
         pb.update(n)
