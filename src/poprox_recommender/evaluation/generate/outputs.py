@@ -17,7 +17,7 @@ from lenskit.pipeline import PipelineState
 from pydantic import BaseModel
 from typing_extensions import TypeVar
 
-from poprox_concepts.api.recommendations import RecommendationRequest
+from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationRequestV4
 from poprox_concepts.domain import CandidateSet, ImpressedRecommendations
 from poprox_recommender.evaluation.writer import ParquetBatchedWriter
 
@@ -27,7 +27,7 @@ Package = TypeVar("Package", default=Any)
 
 
 class OfflineRecommendations(BaseModel):
-    request: RecommendationRequest
+    request: RecommendationRequestV4
     results: OfflineRecResults
 
 
