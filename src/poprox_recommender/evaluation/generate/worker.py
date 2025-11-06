@@ -1,4 +1,5 @@
 import itertools as it
+from uuid import UUID
 
 import ray
 import torch
@@ -13,7 +14,7 @@ from poprox_concepts.api.recommendations import RecommendationRequest
 from poprox_concepts.domain import CandidateSet
 from poprox_recommender.config import default_device
 from poprox_recommender.data.eval import EvalData
-from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import (
     EmbeddingWriter,
     JSONRecommendationWriter,
@@ -176,10 +177,9 @@ def recommend_for_request(pipeline: Pipeline, request: RecommendationRequest) ->
 
 def recommend_batch(
     pipeline: Pipeline,
-    batch: list[RecommendationRequest | int],
+    batch: list[UUID | int],
     writers: list[RecommendationWriter],
-    *,
-    dataset: MindData | None = None,
+    dataset: EvalData,
 ):
     """
     Batch-recommend function, to be used as a Ray worker task.
@@ -188,10 +188,8 @@ def recommend_batch(
     outputs = []
 
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
-        for request in batch:
-            if not isinstance(request, RecommendationRequest):
-                assert dataset is not None
-                request = dataset.lookup_request(id=request)
+        for request_id in batch:
+            request = dataset.lookup_request(id=request_id)
             state = recommend_for_request(pipeline, request)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
             outputs.append((request, state))
