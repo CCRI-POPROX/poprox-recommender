@@ -86,7 +86,7 @@ class PoproxData(EvalData):
         # Filter clicks to those before the newsletter
         account_clicks_df = self.clicks_df.loc[self.clicks_df["account_id"] == str(account_id)]
         # TODO: Change `timestamp` to `created_at` in the export
-        filtered_clicks_df = account_clicks_df[account_clicks_df["timestamp"] < newsletter_created_at]
+        filtered_clicks_df = account_clicks_df[account_clicks_df["clicked_at"] < newsletter_created_at]
 
         # Create Article and Click objects from dataframe rows
         clicks = []
@@ -100,7 +100,7 @@ class PoproxData(EvalData):
                     Click(
                         article_id=article_row.article_id,
                         newsletter_id=article_row.newsletter_id,
-                        timestamp=article_row.timestamp,
+                        timestamp=article_row.clicked_at,
                     )
                 )
 
