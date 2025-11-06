@@ -1,5 +1,4 @@
 import itertools as it
-from collections.abc import Iterator
 
 import ray
 import torch
@@ -53,9 +52,8 @@ def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: st
         pc = get_parallel_config()
         if cluster:
             cluster_recommend(dataset, pipeline, n_requests, outs, pc, task, pb)
-
         else:
-            serial_recommend(pipeline, dataset.iter_requests(limit=n_requests), outs, pb)
+            serial_recommend(dataset, pipeline, n_requests, outs, pb)
 
     logger.info("finished recommending in %s", naturaldelta(task.duration) if task.duration else "unknown time")
     cpu = task.total_cpu()
@@ -65,7 +63,7 @@ def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: st
         logger.info("recommendation took %s", metric(task.system_power, "J"))
 
 
-def serial_recommend(pipeline: str, requests: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
+def serial_recommend(dataset: EvalData, pipeline: str, n_requests: int | None, outs: RecOutputs, pb: Progress):
     logger.info("loading pipeline")
     pipe = get_pipeline(pipeline, device=default_device())
     logger.info("starting serial evaluation")
@@ -76,7 +74,8 @@ def serial_recommend(pipeline: str, requests: Iterator[RecommendationRequest], o
         EmbeddingWriter(outs),
     ]
 
-    for request in requests:
+    for slate_id in dataset.iter_slate_ids(limit=n_requests):
+        request = dataset.lookup_request(id=slate_id)
         state = recommend_for_request(pipe, request)
         for w in writers:
             w.write_recommendations(request, state)

@@ -18,13 +18,6 @@ class EvalData:
 
     def lookup_request(self, id: int | UUID) -> RecommendationRequest: ...
 
-    def iter_requests(self, *, limit: int | None = None) -> Generator[RecommendationRequest]:
-        """
-        Iterate the test requests.
-        """
-        for slate_id in self.iter_slate_ids(limit=limit):
-            yield self.lookup_request(id=slate_id)
-
     @property
     def n_requests(self) -> int: ...
 
