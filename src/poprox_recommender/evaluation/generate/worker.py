@@ -189,7 +189,7 @@ def recommend_batch(
 
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
         for request_id in batch:
-            request = dataset.lookup_request(id=request_id)
+            request = dataset.lookup_request(request_id)
             state = recommend_for_request(pipeline, request)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
             outputs.append((request, state))
