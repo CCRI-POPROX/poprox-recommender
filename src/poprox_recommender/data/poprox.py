@@ -80,12 +80,12 @@ class PoproxData(EvalData):
             yield id
 
     def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV4:
-        impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]
+        impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == str(newsletter_id)]
         account_id = impressions_df.iloc[0]["account_id"]
         newsletter_created_at = impressions_df.iloc[0]["created_at"]
 
         # Filter clicks to those before the newsletter
-        account_clicks_df = self.clicks_df.loc[self.clicks_df["account_id"] == account_id]
+        account_clicks_df = self.clicks_df.loc[self.clicks_df["account_id"] == str(account_id)]
         # TODO: Change `timestamp` to `created_at` in the export
         filtered_clicks_df = account_clicks_df[account_clicks_df["timestamp"] < newsletter_created_at]
 
