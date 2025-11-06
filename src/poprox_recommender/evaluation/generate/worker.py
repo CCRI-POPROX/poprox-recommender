@@ -76,7 +76,7 @@ def serial_recommend(dataset: EvalData, pipeline: str, n_requests: int | None, o
     ]
 
     for slate_id in dataset.iter_slate_ids(limit=n_requests):
-        request = dataset.lookup_request(id=slate_id)
+        request = dataset.lookup_request(slate_id)
         state = recommend_for_request(pipe, request)
         for w in writers:
             w.write_recommendations(request, state)
