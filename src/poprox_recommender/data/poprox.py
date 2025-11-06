@@ -188,11 +188,11 @@ def load_poprox_frames(archive: str = "POPROX"):
     newsletters_df = pd.read_parquet(data / "POPROX" / "newsletters.parquet")
 
     articles_df = pd.read_parquet(data / "POPROX" / "articles.parquet")
-    mentions_df = pd.read_parquet(data / "POPROX" / "mentions.parquet")
+    mentions_df = pd.read_parquet(data / "POPROX" / "article_mentions.parquet")
 
     clicks_df = pd.read_parquet(data / "POPROX" / "clicks.parquet")
     clicked_articles_df = pd.read_parquet(data / "POPROX" / "clicked" / "articles.parquet")
-    clicked_mentions_df = pd.read_parquet(data / "POPROX" / "clicked" / "mentions.parquet")
+    clicked_mentions_df = pd.read_parquet(data / "POPROX" / "clicked" / "article_mentions.parquet")
 
     interests_df = pd.read_parquet(data / "POPROX" / "interests.parquet")
 
