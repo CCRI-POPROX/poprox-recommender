@@ -8,7 +8,6 @@ from __future__ import annotations
 import itertools as it
 import json
 import logging
-import math
 from typing import Generator
 from uuid import UUID
 
@@ -70,30 +69,30 @@ class PoproxData(EvalData):
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
-    def iter_profile_ids(self) -> Generator[UUID]:
+    def iter_profile_ids(self, *, limit: int | None = None) -> Generator[UUID]:
         newsletter_ids = self.newsletters_df["newsletter_id"].unique()
+        if limit is not None:
+            newsletter_ids = it.islice(newsletter_ids, limit)
         for id in newsletter_ids:
             if not isinstance(id, UUID):
                 id = UUID(id)
             yield id
 
     def iter_profiles(self, *, limit: int | None = None) -> Generator[RecommendationRequestV4]:
-        loop = self.iter_profile_ids()
-        if limit is not None:
-            loop = it.islice(loop, limit)
+        loop = self.iter_profile_ids(limit=limit)
         for newsletter_id in loop:
             yield self.lookup_request(newsletter_id)
 
     def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV4:
-        impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]
+        impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == str(newsletter_id)]
         # TODO: Change `account_id` to `profile_id` in the export
         profile_id = impressions_df.iloc[0]["account_id"]
         newsletter_created_at = impressions_df.iloc[0]["created_at"]
 
         # Filter clicks to those before the newsletter
-        profile_clicks_df = self.clicks_df.loc[self.clicks_df["profile_id"] == profile_id]
+        profile_clicks_df = self.clicks_df.loc[self.clicks_df["account_id"] == str(profile_id)]
         # TODO: Change `timestamp` to `created_at` in the export
-        filtered_clicks_df = profile_clicks_df[profile_clicks_df["timestamp"] < newsletter_created_at]
+        filtered_clicks_df = profile_clicks_df[profile_clicks_df["clicked_at"] < newsletter_created_at]
 
         # Create Article and Click objects from dataframe rows
         clicks = []
@@ -107,7 +106,7 @@ class PoproxData(EvalData):
                     Click(
                         article_id=article_row.article_id,
                         newsletter_id=article_row.newsletter_id,
-                        timestamp=article_row.timestamp,
+                        timestamp=article_row.clicked_at,
                     )
                 )
 
@@ -120,7 +119,6 @@ class PoproxData(EvalData):
                     entity_id=interest.entity_id,
                     entity_name=interest.entity_name,
                     preference=interest.preference,
-                    frequency=interest.frequency if not math.isnan(interest.frequency) else -1,
                 )
             )
 
@@ -188,11 +186,11 @@ def load_poprox_frames(archive: str = "POPROX"):
     newsletters_df = pd.read_parquet(data / "POPROX" / "newsletters.parquet")
 
     articles_df = pd.read_parquet(data / "POPROX" / "articles.parquet")
-    mentions_df = pd.read_parquet(data / "POPROX" / "mentions.parquet")
+    mentions_df = pd.read_parquet(data / "POPROX" / "article_mentions.parquet")
 
     clicks_df = pd.read_parquet(data / "POPROX" / "clicks.parquet")
     clicked_articles_df = pd.read_parquet(data / "POPROX" / "clicked" / "articles.parquet")
-    clicked_mentions_df = pd.read_parquet(data / "POPROX" / "clicked" / "mentions.parquet")
+    clicked_mentions_df = pd.read_parquet(data / "POPROX" / "clicked" / "article_mentions.parquet")
 
     interests_df = pd.read_parquet(data / "POPROX" / "interests.parquet")
 

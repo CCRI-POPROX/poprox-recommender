@@ -99,6 +99,37 @@ stages:
         - outputs/mind-subset/${item}/metrics.json:
             cache: false
 
+  # real POPROX data snapshot
+  recommend-poprox:
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -P POPROX -o outputs/poprox/${item} ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/POPROX/
+      outs:
+        - outputs/poprox/${item}/recommendations.parquet
+        - outputs/poprox/${item}/recommendations.ndjson.zst
+        - outputs/poprox/${item}/embeddings.parquet
+        - outputs/poprox/${item}/generate-task.json
+
+  measure-poprox:
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX poprox ${item}
+      deps:
+        - src/poprox_recommender/evaluation/evaluate.py
+        - src/poprox_recommender/evaluation/metrics/
+        - data/POPROX/
+        - outputs/poprox/${item}/recommendations.parquet
+      outs:
+        - outputs/poprox/${item}/profile-metrics.csv.gz
+      metrics:
+        - outputs/poproxt/${item}/metrics.json:
+            cache: false
+
   collect-metrics:
     foreach:
       - mind-subset
