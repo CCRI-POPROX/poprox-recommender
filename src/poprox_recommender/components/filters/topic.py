@@ -58,6 +58,8 @@ class TopicFilter(Component):
         filtered = CandidateSet(articles=kept_articles)
         if kept_scores:
             filtered.scores = np.array(kept_scores)
+        else:
+            filtered.scores = None
 
         return filtered
 
