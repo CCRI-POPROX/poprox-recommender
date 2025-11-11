@@ -16,8 +16,8 @@ import duckdb
 import pandas as pd
 from duckdb import DuckDBPyConnection
 
-from poprox_concepts.api.recommendations import RecommendationRequest
-from poprox_concepts.domain import Article, Click, Entity, InterestProfile, Mention
+from poprox_concepts.api.recommendations import RecommendationRequestV4
+from poprox_concepts.domain import Article, CandidateSet, Click, Entity, InterestProfile, Mention
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 
@@ -127,7 +127,7 @@ class MindData(EvalData):
 
                 yield imp_id
 
-    def lookup_request(self, id: int | UUID) -> RecommendationRequest:
+    def lookup_request(self, id: int | UUID) -> RecommendationRequestV4:
         if isinstance(id, UUID):
             uuid = id
             self.duck.execute("SELECT imp_id FROM impressions WHERE imp_uuid = ?", [uuid])
@@ -150,8 +150,11 @@ class MindData(EvalData):
 
         # FIXME the profile ID should probably be the user ID
         profile = InterestProfile(profile_id=uuid, click_history=clicks, onboarding_topics=[])
-        return RecommendationRequest(
-            todays_articles=today, past_articles=past, interest_profile=profile, num_recs=TEST_REC_COUNT
+        return RecommendationRequestV4(
+            candidates=CandidateSet(articles=today),
+            interacted=CandidateSet(articles=past),
+            interest_profile=profile,
+            num_recs=TEST_REC_COUNT,
         )
 
     def lookup_articles(

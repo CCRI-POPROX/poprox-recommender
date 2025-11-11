@@ -53,6 +53,7 @@ def generate_main():
     lenskit.configure(cfg_dir=project_root())
 
     out_path = Path(options["--output-path"])
+    out_path.mkdir(exist_ok=True, parents=True)
     outputs = RecOutputs(out_path)
 
     n_requests = options["--subset"]
