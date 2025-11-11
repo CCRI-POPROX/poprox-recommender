@@ -16,7 +16,7 @@ Options:
     -P DATA, --poprox-data=DATA
             read POPROX test data DATA
     --subset=N
-            test only on the first N test profiles
+            test only on the first N test requests
     PIPELINE
             The name of the pipeline to generate from
 """
@@ -32,7 +32,7 @@ from lenskit.logging import LoggingConfig
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.generate.outputs import RecOutputs
-from poprox_recommender.evaluation.generate.worker import generate_profile_recs
+from poprox_recommender.evaluation.generate.worker import generate_recs_for_requests
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.evaluation.generate")
@@ -56,9 +56,9 @@ def generate_main():
     out_path.mkdir(exist_ok=True, parents=True)
     outputs = RecOutputs(out_path)
 
-    n_profiles = options["--subset"]
-    if n_profiles is not None:
-        n_profiles = int(n_profiles)
+    n_requests = options["--subset"]
+    if n_requests is not None:
+        n_requests = int(n_requests)
 
     if options["--poprox-data"]:
         dataset = PoproxData(options["--poprox-data"])
@@ -67,7 +67,7 @@ def generate_main():
 
     pipe_name = options["PIPELINE"]
 
-    generate_profile_recs(dataset, outputs, pipe_name, n_profiles)
+    generate_recs_for_requests(dataset, outputs, pipe_name, n_requests)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ Collect offline metrics from different pipelines for a run.
 
 For an evaluation EVAL, this script collects metrics from
 outputs/EVAL/*/metrics.json, and outputs them to outputs/EVAL-metrics.csv.
-It likewise aggregates the profile metrics.
+It likewise aggregates the recommendation metrics.
 
 Usage:
     poprox_recommender.evaluation.collect [options] EVAL
@@ -73,15 +73,15 @@ def main():
     tdf.to_csv(csv_out, index=True)
 
     prof_results = {}
-    for mf in sorted(path.glob("*/profile-metrics.csv.gz"), key=lambda p: p.as_posix()):
+    for mf in sorted(path.glob("*/recommendation-metrics.csv.gz"), key=lambda p: p.as_posix()):
         pipe = mf.parent.name
-        logger.info("reading pipeline profile metrics", pipeline=pipe, path=mf)
-        metrics = pd.read_csv(mf).set_index("profile_id")
+        logger.info("reading pipeline recommendation metrics", pipeline=pipe, path=mf)
+        metrics = pd.read_csv(mf).set_index("recommendation_id")
         prof_results[pipe] = metrics
 
     prof_df = pd.concat(prof_results, names=["pipeline"])
-    csv_out = path.parent / f"{name}-profile-metrics.csv.gz"
-    logger.info("saving profile metrics for %d pipelines", len(prof_results), file=str(csv_out))
+    csv_out = path.parent / f"{name}-recommendation-metrics.csv.gz"
+    logger.info("saving recommendation metrics for %d pipelines", len(prof_results), file=str(csv_out))
     prof_df.to_csv(csv_out, index=True)
 
 
