@@ -26,7 +26,9 @@ class TopicFilter(Component):
         kept_articles = []
         kept_scores = []
         for idx, article in enumerate(candidates.articles):
-            article_topics = {mention.entity.name for mention in article.mentions}
+            article_topics = {
+                mention.entity.name for mention in article.mentions if mention.entity.entity_type == "topic"
+            }
 
             # Articles with very high interest topics are included in the candidate set
             if overlap(article_topics, very_high):

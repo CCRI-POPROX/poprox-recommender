@@ -61,7 +61,9 @@ def test_select_by_topic_filters_articles():
     # there are 2 valid articles that match their preferences (us news & politics)
     assert len(result.impressions) == 2
     for impression in result.impressions:
-        topics = [mention.entity.name for mention in impression.article.mentions]
+        topics = [
+            mention.entity.name for mention in impression.article.mentions if mention.entity.entity_type == "topic"
+        ]
         assert "U.S. News" in topics or "Politics" in topics
 
     # If we need to, fill out the end of the list with other random articles
@@ -71,5 +73,7 @@ def test_select_by_topic_filters_articles():
     assert len(result.impressions) == 3
 
     for impression in result.impressions[:2]:
-        topics = [mention.entity.name for mention in impression.article.mentions]
+        topics = [
+            mention.entity.name for mention in impression.article.mentions if mention.entity.entity_type == "topic"
+        ]
         assert "U.S. News" in topics or "Politics" in topics
