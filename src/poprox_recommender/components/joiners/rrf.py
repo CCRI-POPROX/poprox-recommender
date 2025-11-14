@@ -3,7 +3,7 @@ from collections import defaultdict
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import ImpressedRecommendations
+from poprox_concepts.domain import ImpressedSection
 
 
 class RRFConfig(BaseModel):
@@ -14,7 +14,7 @@ class RRFConfig(BaseModel):
 class ReciprocalRankFusion(Component):
     config: RRFConfig
 
-    def __call__(self, recs1: ImpressedRecommendations, recs2: ImpressedRecommendations) -> ImpressedRecommendations:
+    def __call__(self, recs1: ImpressedSection, recs2: ImpressedSection) -> ImpressedSection:
         article_scores = defaultdict(float)
         impressions_by_article_id = {}
 
@@ -39,4 +39,4 @@ class ReciprocalRankFusion(Component):
             impressions_by_article_id[article_id] for article_id in sorted_article_ids[: self.config.num_slots]
         ]
 
-        return ImpressedRecommendations(impressions=rrf_impressions)
+        return ImpressedSection(impressions=rrf_impressions)

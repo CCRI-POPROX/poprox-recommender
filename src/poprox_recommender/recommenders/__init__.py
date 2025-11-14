@@ -3,7 +3,7 @@ from typing import Any
 
 from poprox_concepts.domain import (
     CandidateSet,
-    ImpressedRecommendations,
+    ImpressedSection,
     InterestProfile,
 )
 
@@ -33,7 +33,7 @@ def select_articles(
     clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
-) -> tuple[ImpressedRecommendations, Any]:
+) -> tuple[ImpressedSection, Any]:
     """
     Select articles with default recommender configuration.  It returns a
     pipeline state whose ``default`` is the final list of recommendations.

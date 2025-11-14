@@ -2,7 +2,7 @@ import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import CandidateSet, ImpressedRecommendations
+from poprox_concepts.domain import CandidateSet, ImpressedSection
 
 
 class SoftmaxConfig(BaseModel):
@@ -13,7 +13,7 @@ class SoftmaxConfig(BaseModel):
 class SoftmaxSampler(Component):
     config: SoftmaxConfig
 
-    def __call__(self, candidate_articles: CandidateSet) -> ImpressedRecommendations:
+    def __call__(self, candidate_articles: CandidateSet) -> ImpressedSection:
         if candidate_articles.scores is None:
             scores = np.ones(len(candidate_articles.articles))
         else:
@@ -45,7 +45,7 @@ class SoftmaxSampler(Component):
         sorted_indices = np.argsort(exponentials)
         sampled = [candidate_articles.articles[idx] for idx in sorted_indices[: self.config.num_slots]]
 
-        return ImpressedRecommendations.from_articles(sampled)
+        return ImpressedSection.from_articles(sampled)
 
 
 def sigmoid(x):

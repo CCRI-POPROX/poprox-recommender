@@ -5,7 +5,7 @@ import random
 import pytest
 from pytest import skip
 
-from poprox_concepts import Article, CandidateSet, Click
+from poprox_concepts.domain import Article, CandidateSet, Click
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.paths import project_root
 from poprox_recommender.topics import GENERAL_TOPICS, extract_general_topics, match_news_topics_to_general

@@ -1,12 +1,12 @@
 from lenskit.pipeline import Component
 
-from poprox_concepts.domain import ImpressedRecommendations
+from poprox_concepts.domain import ImpressedSection
 
 
 class Concatenate(Component):
     config: None
 
-    def __call__(self, recs1: ImpressedRecommendations, recs2: ImpressedRecommendations) -> ImpressedRecommendations:
+    def __call__(self, recs1: ImpressedSection, recs2: ImpressedSection) -> ImpressedSection:
         """
         Concatenates two sets of candidates, while deduplicating them, keeping the
         first occurrence of each article (by id), and maintaining their original order.
@@ -21,4 +21,4 @@ class Concatenate(Component):
         impressions = {impression.article.article_id: impression for impression in reverse_impressions}.values()
         unreversed_impressions = list(reversed(impressions))
 
-        return ImpressedRecommendations(impressions=unreversed_impressions)
+        return ImpressedSection(impressions=unreversed_impressions)
