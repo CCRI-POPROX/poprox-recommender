@@ -2,7 +2,7 @@ import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import CandidateSet, ImpressedRecommendations
+from poprox_concepts.domain import CandidateSet, ImpressedSection
 
 
 class TopkConfig(BaseModel):
@@ -12,11 +12,11 @@ class TopkConfig(BaseModel):
 class TopkRanker(Component):
     config: TopkConfig
 
-    def __call__(self, candidate_articles: CandidateSet) -> ImpressedRecommendations:
+    def __call__(self, candidate_articles: CandidateSet) -> ImpressedSection:
         articles = []
         if candidate_articles.scores is not None:
             article_indices = np.argsort(candidate_articles.scores)[-self.config.num_slots :][::-1]
 
             articles = [candidate_articles.articles[int(idx)] for idx in article_indices]
 
-        return ImpressedRecommendations.from_articles(articles)
+        return ImpressedSection.from_articles(articles)

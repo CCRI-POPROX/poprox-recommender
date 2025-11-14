@@ -2,7 +2,7 @@ import torch
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import CandidateSet, ImpressedRecommendations, InterestProfile
+from poprox_concepts.domain import CandidateSet, ImpressedSection, InterestProfile
 from poprox_recommender.pytorch.datachecks import assert_tensor_size
 from poprox_recommender.pytorch.decorators import torch_inference
 
@@ -16,7 +16,7 @@ class MMRDiversifier(Component):
     config: MMRConfig
 
     @torch_inference
-    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> ImpressedRecommendations:
+    def __call__(self, candidate_articles: CandidateSet, interest_profile: InterestProfile) -> ImpressedSection:
         if candidate_articles.scores is None:
             recommended = candidate_articles.articles
         else:
@@ -28,7 +28,7 @@ class MMRDiversifier(Component):
             )
             recommended = [candidate_articles.articles[int(idx)] for idx in article_indices]
 
-        return ImpressedRecommendations.from_articles(articles=recommended)
+        return ImpressedSection.from_articles(articles=recommended)
 
 
 def compute_similarity_matrix(todays_article_vectors):

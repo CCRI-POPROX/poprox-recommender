@@ -4,7 +4,7 @@ import random
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import CandidateSet, ImpressedRecommendations
+from poprox_concepts.domain import CandidateSet, ImpressedSection
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class EpsilonGreedyConfig(BaseModel):
 class EpsilonGreedy(Component):
     config: EpsilonGreedyConfig
 
-    def __call__(self, ranked: ImpressedRecommendations, candidates: CandidateSet) -> ImpressedRecommendations:
+    def __call__(self, ranked: ImpressedSection, candidates: CandidateSet) -> ImpressedSection:
         selected_articles = []
         ranked_idx = 0
         candidate_idx = 0
@@ -55,4 +55,4 @@ class EpsilonGreedy(Component):
                 selected_articles.append(selected)
 
         # TODO: Maintain whatever information was on the original impression of ranked articles
-        return ImpressedRecommendations.from_articles(selected_articles)
+        return ImpressedSection.from_articles(selected_articles)
