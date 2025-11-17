@@ -28,9 +28,9 @@ def make_article(id_str, mentions=None):
 
 @pytest.fixture
 def test_data():
-    mention_a = Mention(entity=Entity(name="sports", entity_type="category", source="test"), relevance=1, source="test")
-    mention_b = Mention(entity=Entity(name="health", entity_type="category", source="test"), relevance=1, source="test")
-    mention_c = Mention(entity=Entity(name="tech", entity_type="category", source="test"), relevance=1, source="test")
+    mention_a = Mention(entity=Entity(name="sports", entity_type="topic", source="test"), relevance=1, source="test")
+    mention_b = Mention(entity=Entity(name="health", entity_type="topic", source="test"), relevance=1, source="test")
+    mention_c = Mention(entity=Entity(name="tech", entity_type="topic", source="test"), relevance=1, source="test")
 
     m1 = make_article("00000000-0000-0000-0000-000000000001", mentions=[mention_a, mention_b])
     m2 = make_article("00000000-0000-0000-0000-000000000002", mentions=[mention_a])

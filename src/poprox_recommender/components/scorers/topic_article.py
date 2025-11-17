@@ -38,7 +38,9 @@ class TopicalArticleScorer(ArticleScorer):
         topic_name_to_id = {value["topic_name"]: key for key, value in topic_weights.items()}
 
         for i, article in enumerate(candidate_articles.articles):
-            article_topics = {mention.entity.name for mention in article.mentions}
+            article_topics = {
+                mention.entity.name for mention in article.mentions if mention.entity.entity_type == "topic"
+            }
 
             for topic_name in article_topics:
                 if topic_name in topic_name_to_id:
