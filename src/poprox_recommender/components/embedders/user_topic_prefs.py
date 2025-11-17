@@ -269,7 +269,9 @@ class UserOnboardingEmbedder(NRMSUserEmbedder):
     def find_topical_articles(self, topic: str, articles: list[Article]) -> list[Article]:
         topical_articles = []
         for article in articles:
-            article_topics = {mention.entity.name for mention in article.mentions}
+            article_topics = {
+                mention.entity.name for mention in article.mentions if mention.entity.entity_type == "topic"
+            }
             if topic in article_topics:
                 topical_articles.append(article)
         return topical_articles
