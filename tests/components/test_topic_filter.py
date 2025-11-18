@@ -12,9 +12,11 @@ def test_select_by_topic_filters_articles():
     profile = InterestProfile(
         click_history=[],
         entity_interests=[
-            AccountInterest(entity_id=uuid4(), entity_name="U.S. News", preference=4, frequency=1),
-            AccountInterest(entity_id=uuid4(), entity_name="Politics", preference=5, frequency=2),
-            AccountInterest(entity_id=uuid4(), entity_name="Entertainment", preference=1, frequency=1),
+            AccountInterest(entity_id=uuid4(), entity_name="U.S. News", entity_type="topic", preference=4, frequency=1),
+            AccountInterest(entity_id=uuid4(), entity_name="Politics", entity_type="topic", preference=5, frequency=2),
+            AccountInterest(
+                entity_id=uuid4(), entity_name="Entertainment", entity_type="topic", preference=1, frequency=1
+            ),
         ],
     )
 
