@@ -23,7 +23,7 @@
       "40f1c3e5-2e33-49ac-ab95-067f0e40908b": false,
       "f04d2066-b567-4f61-b23c-198f88edfd31": false
     },
-    "onboarding_topics": [
+    "entity_interests": [
       {
         "entity_id": "c74a986e-3bd9-4be0-b8c1-bd95e376d064",
         "entity_name": "Education",
