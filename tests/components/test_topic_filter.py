@@ -12,9 +12,11 @@ def test_select_by_topic_filters_articles():
     profile = InterestProfile(
         click_history=[],
         onboarding_topics=[
-            AccountInterest(entity_id=uuid4(), entity_name="U.S. News", preference=4, frequency=1),
-            AccountInterest(entity_id=uuid4(), entity_name="Politics", preference=5, frequency=2),
-            AccountInterest(entity_id=uuid4(), entity_name="Entertainment", preference=1, frequency=1),
+            AccountInterest(entity_id=uuid4(), entity_name="U.S. News", entity_type="topic", preference=4, frequency=1),
+            AccountInterest(entity_id=uuid4(), entity_name="Politics", entity_type="topic", preference=5, frequency=2),
+            AccountInterest(
+                entity_id=uuid4(), entity_name="Entertainment", entity_type="topic", preference=1, frequency=1
+            ),
         ],
     )
 
@@ -26,22 +28,22 @@ def test_select_by_topic_filters_articles():
         Article(
             article_id=uuid4(),
             headline="Something about TV",
-            mentions=[Mention(source="AP", relevance=50.0, entity=entertainment)],
+            mentions=[Mention(source="AP", relevance=99.0, entity=entertainment)],
         ),
         Article(
             article_id=uuid4(),
             headline="Something about the US",
-            mentions=[Mention(source="AP", relevance=50.0, entity=us_news)],
+            mentions=[Mention(source="AP", relevance=99.0, entity=us_news)],
         ),
         Article(
             article_id=uuid4(),
             headline="Something about politics",
-            mentions=[Mention(source="AP", relevance=50.0, entity=politics)],
+            mentions=[Mention(source="AP", relevance=99.0, entity=politics)],
         ),
         Article(
             article_id=uuid4(),
             headline="Something about books",
-            mentions=[Mention(source="AP", relevance=50.0, entity=entertainment)],
+            mentions=[Mention(source="AP", relevance=99.0, entity=entertainment)],
         ),
     ]
 

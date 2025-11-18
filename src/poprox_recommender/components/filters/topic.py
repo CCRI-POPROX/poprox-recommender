@@ -29,7 +29,9 @@ class TopicFilter(Component):
         kept_scores = []
         for idx, article in enumerate(candidates.articles):
             article_topics = {
-                mention.entity.name for mention in article.mentions if mention.entity.entity_type == "topic"
+                mention.entity.name
+                for mention in article.mentions
+                if mention.entity.entity_type == "topic" and (mention.relevance or 0) >= 76
             }
 
             # Articles with very high interest topics are included in the candidate set
