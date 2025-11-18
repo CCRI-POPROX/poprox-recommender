@@ -293,13 +293,13 @@ static_num_recs = 10
 # topical_pref_only || clicked_topic_personas || topical_click_only
 
 variation = "topical_pref_only"
-pipeline = "nrms_topic_scores"
+pipeline = "nrms_topic_hard_filter"
 def_pref = 3
 
 # topic_embeddings_cand_11_months || topic_embeddings_cand_15_15_days ||
 # topic_embeddings_cand_15_days   || topic_embeddings_cand_30_days ||
 # topic_embeddings_def_llm || topic_embeddings_hybrid
-time_frame = "topic_embeddings_cand_11_months_def_1"
+time_frame = "nrms_topic_hard_filter_def_3"
 
 # synthetic data generation
 synthetic_personas = synthetic_personas_generator(def_pref, variation, interacted_articles)
