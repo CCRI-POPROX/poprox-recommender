@@ -293,7 +293,7 @@ static_num_recs = 10
 # topical_pref_only || clicked_topic_personas || topical_click_only
 
 variation = "topical_pref_only"
-pipeline = "nrms_topic_hard_filter"
+pipeline = "nrms_topic_rn"
 def_pref = 3
 
 # topic_embeddings_cand_11_months || topic_embeddings_cand_15_15_days ||
