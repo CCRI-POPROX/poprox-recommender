@@ -18,7 +18,7 @@ from pydantic import BaseModel
 from typing_extensions import TypeVar
 
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationRequestV4
-from poprox_concepts.domain import CandidateSet, ImpressedRecommendations
+from poprox_concepts.domain import CandidateSet, ImpressedSection
 from poprox_recommender.evaluation.writer import ParquetBatchedWriter
 
 logger = get_logger(__name__)
@@ -32,9 +32,9 @@ class OfflineRecommendations(BaseModel):
 
 
 class OfflineRecResults(BaseModel, validate_assignment=True):
-    final: ImpressedRecommendations
-    ranked: ImpressedRecommendations | None = None
-    reranked: ImpressedRecommendations | None = None
+    final: ImpressedSection
+    ranked: ImpressedSection | None = None
+    reranked: ImpressedSection | None = None
 
 
 class RecOutputs:
@@ -238,7 +238,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
         ]
         ranked = pipeline_state.get("ranker", None)
         if ranked is not None:
-            assert isinstance(ranked, ImpressedRecommendations), f"reranked has unexpected type {type(ranked)}"
+            assert isinstance(ranked, ImpressedSection), f"reranked has unexpected type {type(ranked)}"
             frames.append(
                 pd.DataFrame(
                     {
@@ -251,7 +251,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
             )
         reranked = pipeline_state.get("reranker", None)
         if reranked is not None:
-            assert isinstance(reranked, ImpressedRecommendations), f"reranked has unexpected type {type(reranked)}"
+            assert isinstance(reranked, ImpressedSection), f"reranked has unexpected type {type(reranked)}"
             frames.append(
                 pd.DataFrame(
                     {
