@@ -118,6 +118,7 @@ class PoproxData(EvalData):
                     account_id=profile_id,
                     entity_id=interest.entity_id,
                     entity_name=interest.entity_name,
+                    entity_type="topic",
                     preference=interest.preference,
                 )
             )

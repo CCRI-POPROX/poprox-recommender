@@ -230,6 +230,7 @@ class RequestGenerator:
                 account_id=self.profile_id,
                 entity_id=uuid4(),
                 entity_name=topic,
+                entity_type="topic",
                 preference=random.randint(1, 5),
                 frequency=None,
             )
