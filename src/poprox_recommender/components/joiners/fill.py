@@ -2,7 +2,7 @@ from lenskit.pipeline import Component
 from lenskit.pipeline.types import Lazy
 from pydantic import BaseModel
 
-from poprox_concepts.domain import ImpressedRecommendations, Impression
+from poprox_concepts.domain import ImpressedSection, Impression
 
 
 class FillConfig(BaseModel):
@@ -13,9 +13,7 @@ class FillConfig(BaseModel):
 class FillRecs(Component):
     config: FillConfig
 
-    def __call__(
-        self, recs1: ImpressedRecommendations, recs2: Lazy[ImpressedRecommendations]
-    ) -> ImpressedRecommendations:
+    def __call__(self, recs1: ImpressedSection, recs2: Lazy[ImpressedSection]) -> ImpressedSection:
         combined: list[Impression] = []
         combined.extend(recs1.impressions)
 
@@ -41,5 +39,5 @@ class FillRecs(Component):
 
             combined.extend(recs2_content.impressions)
 
-        # Return the resulting ImpressedRecommendations, limiting the size to num_slots
-        return ImpressedRecommendations(impressions=combined[: self.config.num_slots])
+        # Return the resulting ImpressedSection, limiting the size to num_slots
+        return ImpressedSection(impressions=combined[: self.config.num_slots])
