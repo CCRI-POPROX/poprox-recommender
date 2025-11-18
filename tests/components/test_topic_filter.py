@@ -11,7 +11,7 @@ from poprox_recommender.components.samplers import UniformSampler
 def test_select_by_topic_filters_articles():
     profile = InterestProfile(
         click_history=[],
-        onboarding_topics=[
+        entity_interests=[
             AccountInterest(entity_id=uuid4(), entity_name="U.S. News", entity_type="topic", preference=4, frequency=1),
             AccountInterest(entity_id=uuid4(), entity_name="Politics", entity_type="topic", preference=5, frequency=2),
             AccountInterest(

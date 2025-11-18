@@ -16,7 +16,7 @@ def test_reciprocal_rank_fusion():
         "recs2": ImpressedSection.from_articles(
             articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots * 2))]
         ),
-        "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+        "profile": InterestProfile(click_history=[], entity_interests=[]),
     }
 
     rrf = ReciprocalRankFusion(num_slots=total_slots)
@@ -52,7 +52,7 @@ def test_reciprocal_rank_fusion_overlap():
         "recs2": ImpressedSection.from_articles(
             articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots * 2))]
         ),
-        "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+        "profile": InterestProfile(click_history=[], entity_interests=[]),
     }
 
     inputs["recs2"].impressions[1].article = inputs["recs1"].impressions[1].article
@@ -85,7 +85,7 @@ def test_reciprocal_rank_fusion_mismatched_lengths():
         "recs2": ImpressedSection.from_articles(
             articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots * 2))]
         ),
-        "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+        "profile": InterestProfile(click_history=[], entity_interests=[]),
     }
 
     rrf = ReciprocalRankFusion(num_slots=total_slots)
@@ -109,7 +109,7 @@ def test_reciprocal_rank_fusion_empty_list():
         "recs2": ImpressedSection.from_articles(
             articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots * 2))]
         ),
-        "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+        "profile": InterestProfile(click_history=[], entity_interests=[]),
     }
 
     rrf = ReciprocalRankFusion(num_slots=total_slots)

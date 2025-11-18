@@ -26,7 +26,7 @@ inputs = {
     "candidate": CandidateSet(
         articles=[Article(article_id=uuid4(), headline="headline") for _ in range(2 * total_slots)]
     ),
-    "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+    "profile": InterestProfile(click_history=[], entity_interests=[]),
 }
 
 
@@ -103,7 +103,7 @@ def test_fill_removes_duplicates():
         "recs": ImpressedSection.from_articles(
             articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots / 2))]
         ),
-        "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+        "profile": InterestProfile(click_history=[], entity_interests=[]),
     }
 
     fill = FillRecs(num_slots=total_slots)
