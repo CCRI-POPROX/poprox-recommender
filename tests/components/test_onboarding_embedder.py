@@ -25,7 +25,11 @@ def test_embed_user():
 
     interests = [
         AccountInterest(
-            entity_id=topic_article.article_id, entity_name=topic_article.external_id, preference=2, frequency=None
+            entity_id=topic_article.article_id,
+            entity_name=topic_article.external_id,
+            entity_type="topic",
+            preference=2,
+            frequency=None,
         )
         for topic_article in TOPIC_ARTICLES
     ]
