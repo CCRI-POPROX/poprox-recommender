@@ -50,7 +50,7 @@ def test_embed_user():
         embeddings=th.rand(1, 768),
     )
 
-    profile = InterestProfile(click_history=[Click(article_id=article_id)], onboarding_topics=interests)
+    profile = InterestProfile(click_history=[Click(article_id=article_id)], entity_interests=interests)
 
     initial_clicks = len(profile.click_history)
 

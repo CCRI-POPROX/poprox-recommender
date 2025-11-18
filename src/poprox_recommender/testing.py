@@ -246,7 +246,7 @@ class RequestGenerator:
         interest_profile = InterestProfile(
             profile_id=self.profile_id,
             click_history=self.clicks,
-            onboarding_topics=self.added_topics,
+            entity_interests=self.added_topics,
         )
 
         try:

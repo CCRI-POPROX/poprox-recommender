@@ -161,7 +161,7 @@ class MindData(EvalData):
         today = self.lookup_articles(imp_id, relation="candidates")
 
         # FIXME the profile ID should probably be the user ID
-        profile = InterestProfile(profile_id=uuid, click_history=clicks, onboarding_topics=[])
+        profile = InterestProfile(profile_id=uuid, click_history=clicks, entity_interests=[])
         return RecommendationRequestV4(
             candidates=CandidateSet(articles=today),
             interacted=CandidateSet(articles=past),
