@@ -45,7 +45,9 @@ def get_single_request() -> str:
     elif min_click:
         if with_topics:
             for req in requests:
-                if len(req.interest_profile.click_history) >= int(min_click) and req.interest_profile.onboarding_topics:
+                if len(req.interest_profile.click_history) >= int(min_click) and req.interest_profile.interests_by_type(
+                    "topic"
+                ):
                     request_body = RecommendationRequestV4.model_dump_json(
                         req,
                         exclude={
@@ -69,7 +71,7 @@ def get_single_request() -> str:
                     break
     elif with_topics:
         for req in requests:
-            if req.interest_profile.onboarding_topics:
+            if req.interest_profile.interests_by_type("topic"):
                 request_body = RecommendationRequestV4.model_dump_json(
                     req,
                     exclude={"candidates": excluded_fields, "interacted": excluded_fields, "protocol_version": True},

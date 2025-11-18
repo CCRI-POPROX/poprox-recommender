@@ -36,7 +36,7 @@ class TopicCalibrator(Calibrator):
     def compute_topic_dist(self, interest_profile):
         topic_preferences: dict[str, int] = defaultdict(int)
 
-        for interest in interest_profile.onboarding_topics:
+        for interest in interest_profile.interests_by_type("topic"):
             topic_preferences[interest.entity_name] = max(interest.preference - 1, 0)
 
         if interest_profile.click_topic_counts:
