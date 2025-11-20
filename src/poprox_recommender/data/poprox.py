@@ -53,14 +53,14 @@ class PoproxData(EvalData):
         self.interests_df = interests_df
 
     @property
-    def n_profiles(self) -> int:
+    def n_requests(self) -> int:
         return len(self.newsletters_df["newsletter_id"].unique())
 
     @property
     def n_articles(self) -> int:
         return self.articles_df.shape[0]
 
-    def profile_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
+    def slate_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
         # Create one row per clicked article with this newsletter_id
         # Returned dataframe must have an "item_id" column containing the clicked article ids
         # and the "item_id" column must be the index of the dataframe
@@ -69,7 +69,7 @@ class PoproxData(EvalData):
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
-    def iter_profile_ids(self, *, limit: int | None = None) -> Generator[UUID]:
+    def iter_slate_ids(self, *, limit: int | None = None) -> Generator[UUID]:
         newsletter_ids = self.newsletters_df["newsletter_id"].unique()
         if limit is not None:
             newsletter_ids = it.islice(newsletter_ids, limit)
@@ -78,21 +78,15 @@ class PoproxData(EvalData):
                 id = UUID(id)
             yield id
 
-    def iter_profiles(self, *, limit: int | None = None) -> Generator[RecommendationRequestV4]:
-        loop = self.iter_profile_ids(limit=limit)
-        for newsletter_id in loop:
-            yield self.lookup_request(newsletter_id)
-
     def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV4:
         impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == str(newsletter_id)]
-        # TODO: Change `account_id` to `profile_id` in the export
-        profile_id = impressions_df.iloc[0]["account_id"]
+        account_id = impressions_df.iloc[0]["account_id"]
         newsletter_created_at = impressions_df.iloc[0]["created_at"]
 
         # Filter clicks to those before the newsletter
-        profile_clicks_df = self.clicks_df.loc[self.clicks_df["account_id"] == str(profile_id)]
+        account_clicks_df = self.clicks_df.loc[self.clicks_df["account_id"] == str(account_id)]
         # TODO: Change `timestamp` to `created_at` in the export
-        filtered_clicks_df = profile_clicks_df[profile_clicks_df["clicked_at"] < newsletter_created_at]
+        filtered_clicks_df = account_clicks_df[account_clicks_df["clicked_at"] < newsletter_created_at]
 
         # Create Article and Click objects from dataframe rows
         clicks = []
@@ -110,12 +104,12 @@ class PoproxData(EvalData):
                     )
                 )
 
-        interests = self.interests_df.loc[self.interests_df["account_id"] == profile_id]
+        interests = self.interests_df.loc[self.interests_df["account_id"] == account_id]
         topics = []
         for interest in interests.itertuples():
             topics.append(
                 AccountInterest(
-                    account_id=profile_id,
+                    account_id=account_id,
                     entity_id=interest.entity_id,
                     entity_name=interest.entity_name,
                     entity_type="topic",

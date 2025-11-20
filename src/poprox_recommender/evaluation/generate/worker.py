@@ -1,5 +1,5 @@
 import itertools as it
-from collections.abc import Iterator
+from uuid import UUID
 
 import ray
 import torch
@@ -10,10 +10,10 @@ from lenskit.parallel.ray import TaskLimiter, init_cluster
 from lenskit.pipeline import Pipeline, PipelineState
 from torch.multiprocessing.reductions import reduce_tensor
 
-from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationRequestV4
+from poprox_concepts.api.recommendations import RecommendationRequestV4
 from poprox_recommender.config import default_device
 from poprox_recommender.data.eval import EvalData
-from poprox_recommender.data.mind import TEST_REC_COUNT, MindData
+from poprox_recommender.data.mind import TEST_REC_COUNT
 from poprox_recommender.evaluation.generate.outputs import (
     EmbeddingWriter,
     JSONRecommendationWriter,
@@ -32,14 +32,14 @@ STAGES = ["final", "ranked", "reranked"]
 TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
 
 
-def generate_profile_recs(dataset: EvalData, outs: RecOutputs, pipeline: str, n_profiles: int | None = None):
+def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: str, n_requests: int | None = None):
     logger.info("generating recommendations", dataset=dataset.name)
 
     pc = get_parallel_config()
     cluster = pc.processes > 1
 
-    count = n_profiles if n_profiles is not None else dataset.n_profiles
-    logger.info("recommending for %d profiles", count)
+    count = n_requests if n_requests is not None else dataset.n_requests
+    logger.info("recommending for %d requests", count)
 
     with (
         item_progress("recommend", total=count) as pb,
@@ -51,10 +51,9 @@ def generate_profile_recs(dataset: EvalData, outs: RecOutputs, pipeline: str, n_
         task.save_to_file(outs.base_dir / "generate-task.json")
         pc = get_parallel_config()
         if cluster:
-            cluster_recommend(dataset, pipeline, n_profiles, outs, pc, task, pb)
-
+            cluster_recommend(dataset, pipeline, n_requests, outs, pc, task, pb)
         else:
-            serial_recommend(pipeline, dataset.iter_profiles(limit=n_profiles), outs, pb)
+            serial_recommend(dataset, pipeline, n_requests, outs, pb)
 
     logger.info("finished recommending in %s", naturaldelta(task.duration) if task.duration else "unknown time")
     cpu = task.total_cpu()
@@ -64,7 +63,7 @@ def generate_profile_recs(dataset: EvalData, outs: RecOutputs, pipeline: str, n_
         logger.info("recommendation took %s", metric(task.system_power, "J"))
 
 
-def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], outs: RecOutputs, pb: Progress):
+def serial_recommend(dataset: EvalData, pipeline: str, n_requests: int | None, outs: RecOutputs, pb: Progress):
     logger.info("loading pipeline")
     pipe = get_pipeline(pipeline, device=default_device())
     logger.info("starting serial evaluation")
@@ -75,8 +74,9 @@ def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], o
         EmbeddingWriter(outs),
     ]
 
-    for request in profiles:
-        state = recommend_for_profile(pipe, request)
+    for slate_id in dataset.iter_slate_ids(limit=n_requests):
+        request = dataset.lookup_request(slate_id)
+        state = recommend_for_request(pipe, request)
         for w in writers:
             w.write_recommendations(request, state)
         pb.update()
@@ -88,7 +88,7 @@ def serial_recommend(pipeline: str, profiles: Iterator[RecommendationRequest], o
 def cluster_recommend(
     dataset: EvalData,
     pipeline: str,
-    max_profiles: int | None,
+    max_recommendations: int | None,
     outs: RecOutputs,
     pc: ParallelConfig,
     task: Task,
@@ -113,7 +113,7 @@ def cluster_recommend(
         EmbeddingWriter.create_remote(outs),
     ]
 
-    profiles = dataset.iter_profile_ids(limit=max_profiles)
+    slate_ids = dataset.iter_slate_ids(limit=max_recommendations)
     ds_ref = ray.put(dataset)
     rec_batch = dynamic_remote(recommend_batch)
     limit = TaskLimiter(pc.processes)
@@ -121,7 +121,7 @@ def cluster_recommend(
     writes = []
     for n, btask, bwrites in limit.imap(
         lambda batch: rec_batch.remote(pipe, batch, writers, dataset=ds_ref),
-        it.batched(profiles, BATCH_SIZE),
+        it.batched(slate_ids, BATCH_SIZE),
         ordered=False,
     ):
         pb.update(n)
@@ -147,7 +147,7 @@ def cluster_recommend(
         task.add_subtask(wt)
 
 
-def recommend_for_profile(pipeline: Pipeline, request: RecommendationRequestV4) -> PipelineState:
+def recommend_for_request(pipeline: Pipeline, request: RecommendationRequestV4) -> PipelineState:
     """
     Generate recommendations for a single request, returning the pipeline state.
     """
@@ -176,10 +176,9 @@ def recommend_for_profile(pipeline: Pipeline, request: RecommendationRequestV4) 
 
 def recommend_batch(
     pipeline: Pipeline,
-    batch: list[RecommendationRequest | int],
+    batch: list[UUID | int],
     writers: list[RecommendationWriter],
-    *,
-    dataset: MindData | None = None,
+    dataset: EvalData,
 ):
     """
     Batch-recommend function, to be used as a Ray worker task.
@@ -188,11 +187,9 @@ def recommend_batch(
     outputs = []
 
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
-        for request in batch:
-            if not isinstance(request, RecommendationRequest):
-                assert dataset is not None
-                request = dataset.lookup_request(request)
-            state = recommend_for_profile(pipeline, request)
+        for request_id in batch:
+            request = dataset.lookup_request(request_id)
+            state = recommend_for_request(pipeline, request)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
             outputs.append((request, state))
 
