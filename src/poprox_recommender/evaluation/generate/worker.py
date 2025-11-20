@@ -10,7 +10,7 @@ from lenskit.parallel.ray import TaskLimiter, init_cluster
 from lenskit.pipeline import Pipeline, PipelineState
 from torch.multiprocessing.reductions import reduce_tensor
 
-from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationRequestV4
+from poprox_concepts.api.recommendations import RecommendationRequestV4
 from poprox_recommender.config import default_device
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import TEST_REC_COUNT
