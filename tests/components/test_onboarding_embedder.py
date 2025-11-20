@@ -25,7 +25,11 @@ def test_embed_user():
 
     interests = [
         AccountInterest(
-            entity_id=topic_article.article_id, entity_name=topic_article.external_id, preference=2, frequency=None
+            entity_id=topic_article.article_id,
+            entity_name=topic_article.external_id,
+            entity_type="topic",
+            preference=2,
+            frequency=None,
         )
         for topic_article in TOPIC_ARTICLES
     ]
@@ -50,7 +54,7 @@ def test_embed_user():
         embeddings=th.rand(1, 768),
     )
 
-    profile = InterestProfile(click_history=[Click(article_id=article_id)], onboarding_topics=interests)
+    profile = InterestProfile(click_history=[Click(article_id=article_id)], entity_interests=interests)
 
     initial_clicks = len(profile.click_history)
 

@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from lenskit.pipeline import Pipeline, PipelineBuilder
 
-from poprox_concepts.domain import Article, CandidateSet, ImpressedRecommendations, InterestProfile
+from poprox_concepts.domain import Article, CandidateSet, ImpressedSection, InterestProfile
 from poprox_recommender.components.filters import TopicFilter
 from poprox_recommender.components.joiners import Concatenate, FillRecs, Interleave
 from poprox_recommender.components.samplers import UniformSampler
@@ -26,7 +26,7 @@ inputs = {
     "candidate": CandidateSet(
         articles=[Article(article_id=uuid4(), headline="headline") for _ in range(2 * total_slots)]
     ),
-    "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+    "profile": InterestProfile(click_history=[], entity_interests=[]),
 }
 
 
@@ -79,14 +79,12 @@ def test_interleave_two_recs_lists():
 def test_fill_out_one_recs_list_from_another():
     sampled_slots = 7
 
-    backup = ImpressedRecommendations.from_articles(
-        articles=inputs["candidate"].articles[: total_slots - sampled_slots]
-    )
+    backup = ImpressedSection.from_articles(articles=inputs["candidate"].articles[: total_slots - sampled_slots])
 
     joiner = FillRecs(num_slots=total_slots, deduplicate=False)
 
     builder = init_builder(sampled_slots)
-    builder.create_input("backup", ImpressedRecommendations)
+    builder.create_input("backup", ImpressedSection)
     builder.add_component("joiner", joiner, recs1=builder.node("sampler"), recs2=backup)
     builder.alias("recommender", "joiner")
     pipeline = builder.build()
@@ -102,16 +100,16 @@ def test_fill_out_one_recs_list_from_another():
 
 def test_fill_removes_duplicates():
     inputs = {
-        "recs": ImpressedRecommendations.from_articles(
+        "recs": ImpressedSection.from_articles(
             articles=[Article(article_id=uuid4(), headline="headline") for _ in range(int(total_slots / 2))]
         ),
-        "profile": InterestProfile(click_history=[], onboarding_topics=[]),
+        "profile": InterestProfile(click_history=[], entity_interests=[]),
     }
 
     fill = FillRecs(num_slots=total_slots)
 
     builder = PipelineBuilder(name="duplicate_concat")
-    recs_input = builder.create_input("recs", ImpressedRecommendations)
+    recs_input = builder.create_input("recs", ImpressedSection)
 
     builder.add_component("fill", fill, recs1=recs_input, recs2=recs_input)
     builder.alias("recommender", "fill")

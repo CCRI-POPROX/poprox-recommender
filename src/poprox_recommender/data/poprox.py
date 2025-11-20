@@ -112,11 +112,12 @@ class PoproxData(EvalData):
                     account_id=account_id,
                     entity_id=interest.entity_id,
                     entity_name=interest.entity_name,
+                    entity_type="topic",
                     preference=interest.preference,
                 )
             )
 
-        profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, onboarding_topics=topics)
+        profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, entity_interests=topics)
 
         # Filter candidate articles to those ingested on the same day as the newsletter (today's articles)
         candidate_articles = []
