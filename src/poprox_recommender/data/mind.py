@@ -111,7 +111,7 @@ class MindData(EvalData):
             clone.execute(query)
 
             # loop over the results and yield the recommendations
-            logger.info("iterating test articles")
+            logger.info("iterating MIND evaluation slates")
             while row := clone.fetchone():
                 imp_id, imp_uuid = row
                 assert isinstance(imp_uuid, UUID)
