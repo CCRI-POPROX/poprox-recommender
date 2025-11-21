@@ -1,4 +1,5 @@
 import itertools as it
+from typing import Any
 from uuid import UUID
 
 import ray
@@ -33,8 +34,13 @@ TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
 
 
 def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: str, n_requests: int | None = None):
+    """
+    Generate recommendations for evaluation requests and save them in the
+    appropriate outputs.
+    """
     logger.info("generating recommendations", dataset=dataset.name)
 
+    # check for parallel operation
     pc = get_parallel_config()
     cluster = pc.processes > 1
 
@@ -49,7 +55,6 @@ def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: st
         ) as task,
     ):
         task.save_to_file(outs.base_dir / "generate-task.json")
-        pc = get_parallel_config()
         if cluster:
             cluster_recommend(dataset, pipeline, n_requests, outs, pc, task, pb)
         else:
@@ -64,10 +69,13 @@ def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: st
 
 
 def serial_recommend(dataset: EvalData, pipeline: str, n_requests: int | None, outs: RecOutputs, pb: Progress):
+    """
+    Generate and save recommendations in-process.
+    """
     logger.info("loading pipeline")
     pipe = get_pipeline(pipeline, device=default_device())
     logger.info("starting serial evaluation")
-    # directly call things in-process
+    # directly generate outputs in-process
     writers: list[RecommendationWriter] = [
         ParquetRecommendationWriter(outs),
         JSONRecommendationWriter(outs),
@@ -94,6 +102,9 @@ def cluster_recommend(
     task: Task,
     pb: Progress,
 ):
+    """
+    Generate and save recommendations with parallel worker processes.
+    """
     logger.info("starting parallel evaluation with task limit of %d", pc.processes)
     init_cluster(global_logging=True)
 
@@ -107,6 +118,7 @@ def cluster_recommend(
     logger.info("sending pipeline to Ray cluster")
     pipe = ray.put(pipe)
 
+    # Set up output writers as Ray actors for concurrent writing
     writers: list[RecommendationWriter] = [
         ParquetRecommendationWriter.create_remote(outs),
         JSONRecommendationWriter.create_remote(outs),
@@ -114,7 +126,10 @@ def cluster_recommend(
     ]
 
     slate_ids = dataset.iter_slate_ids(limit=max_recommendations)
+    # Send the dataset to Ray shared storage for concurrent use
     ds_ref = ray.put(dataset)
+
+    # Set up parallel task and throttle for running the eval
     rec_batch = dynamic_remote(recommend_batch)
     limit = TaskLimiter(pc.processes)
 
@@ -125,6 +140,7 @@ def cluster_recommend(
         ordered=False,
     ):
         pb.update(n)
+        # add the subtask to record cumulative resource consumption
         task.add_subtask(btask)
         writes += bwrites
 
@@ -134,8 +150,8 @@ def cluster_recommend(
             for rh in done:
                 ray.get(rh)
 
+    # wait for all final writes to finish
     logger.debug("waiting for remaining writes")
-    # clear pending writes
     while writes:
         done, writes = ray.wait(writes)
         for rh in done:
@@ -179,13 +195,33 @@ def recommend_batch(
     batch: list[UUID | int],
     writers: list[RecommendationWriter],
     dataset: EvalData,
-):
+) -> tuple[int, Task, list[Any]]:
     """
-    Batch-recommend function, to be used as a Ray worker task.
+    Batch-recommend function, to be used as a Ray worker task.  For large-scale
+    parallel operations, Ray recommends explicitly batching them to reduce
+    communication overhead.
+
+    Args:
+        pipeline:
+            The pipeline to use to generate recommendations.
+        batch:
+            The slate IDs in this recommendation batch.
+        writers:
+            Refernces to the actors for writing recommendations.
+        dataset:
+            The evaluation data set for looking up eval requests.
+
+    Returns:
+        A tuple containing:
+
+        1. The batch length.
+        2. The LensKit :class:`Task` for recommending this batch.
+        3. A list of Ray futures for svaing the batch's output.
     """
 
     outputs = []
 
+    # wrap in a Task to record resource consumption
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
         for request_id in batch:
             request = dataset.lookup_request(request_id)
@@ -233,6 +269,12 @@ def dynamic_remote(task_or_actor):
 
 
 class _SharedTensor:
+    """
+    Custom serialization support for tensors, using PyTorch's shared GPU memory
+    support.  Eventually this can be replaced with Ray Direct Transport, but RDT
+    isn't yet ready for use.
+    """
+
     def __init__(self, tensor: torch.Tensor):
         self.tensor = tensor
 

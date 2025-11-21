@@ -1,3 +1,9 @@
+"""
+This file provides abstractions for saving the outputs of batch-running
+recommender pipelines, so the worker code just needs to know about a "save my
+stuff" interface and can be spared the details of output.
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -9,7 +15,6 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import ray
-import ray.actor
 import torch
 import zstandard
 from lenskit.logging import Task, get_logger
