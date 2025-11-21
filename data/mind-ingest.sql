@@ -13,7 +13,7 @@ CREATE MACRO make_imp_uuid(imp_id, imp_ts) AS (
     -- add the UUID version (7)
     | unhex('00000000000070000000000000000000')::BITSTRING
     -- add the 48-bit ms timestamp
-    | ((bitstring(epoch_ms(imp_ts)::bitstring, 128) << 80) | 0::INT128::bitstring)
+    | (bitstring(epoch_ms(imp_ts)::bitstring, 128) << 80)
 )::BYTEA::UUID;
 
 
