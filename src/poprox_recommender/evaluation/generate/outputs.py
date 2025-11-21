@@ -384,6 +384,7 @@ class EmbeddingWriter(RecommendationWriter[pa.Table | None]):
 
         package = package.filter(mask)
         if package.num_rows:
+            logger.debug("writing %d embeddings rows", package.num_rows)
             self.writer.write_frame(package)
 
         for aid in article_ids:
