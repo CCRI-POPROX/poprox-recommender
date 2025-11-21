@@ -73,7 +73,7 @@ class MindData(EvalData):
         self.duck.execute("SELECT article_uuid FROM articles")
         return [row[0] for row in self.duck.fetchall()]
 
-    def slate_truth(self, imp_uuid: UUID) -> pd.DataFrame | None:
+    def slate_truth(self, slate_id: UUID) -> pd.DataFrame | None:
         """
         Look up the ground-truth data for a particular user profile,
         in LensKit format with item UUIDs for item IDs.
@@ -88,7 +88,7 @@ class MindData(EvalData):
             JOIN articles USING (article_id)
             WHERE imp_uuid = ?
             """,
-            [imp_uuid],
+            [slate_id],
         )
         truth = self.duck.fetch_df()
         return truth.set_index("item_id")
@@ -118,16 +118,16 @@ class MindData(EvalData):
 
                 yield imp_uuid
 
-    def lookup_request(self, uuid: UUID) -> RecommendationRequestV4:
+    def lookup_request(self, slate_id: UUID) -> RecommendationRequestV4:
         # get the historical articles and click list
-        past = self.lookup_articles(uuid, relation="history")
+        past = self.lookup_articles(slate_id, relation="history")
         clicks = [Click(article_id=a.article_id) for a in past]
 
         # get the candidate articles
-        today = self.lookup_articles(uuid, relation="candidates")
+        today = self.lookup_articles(slate_id, relation="candidates")
 
         # FIXME the profile ID should probably be the user ID
-        profile = InterestProfile(profile_id=uuid, click_history=clicks, entity_interests=[])
+        profile = InterestProfile(profile_id=slate_id, click_history=clicks, entity_interests=[])
         return RecommendationRequestV4(
             candidates=CandidateSet(articles=today),
             interacted=CandidateSet(articles=past),

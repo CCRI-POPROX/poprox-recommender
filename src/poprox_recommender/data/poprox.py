@@ -60,12 +60,12 @@ class PoproxData(EvalData):
     def n_articles(self) -> int:
         return self.articles_df.shape[0]
 
-    def slate_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
+    def slate_truth(self, slate_id: UUID) -> pd.DataFrame | None:
         # Create one row per clicked article with this newsletter_id
         # Returned dataframe must have an "item_id" column containing the clicked article ids
         # and the "item_id" column must be the index of the dataframe
         # There must also be a "rating" columns
-        newsletter_clicks = self.clicks_df[self.clicks_df["newsletter_id"] == str(newsletter_id)]
+        newsletter_clicks = self.clicks_df[self.clicks_df["newsletter_id"] == str(slate_id)]
         clicked_items = newsletter_clicks["article_id"].unique()
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
@@ -78,8 +78,8 @@ class PoproxData(EvalData):
                 id = UUID(id)
             yield id
 
-    def lookup_request(self, newsletter_id: UUID) -> RecommendationRequestV4:
-        impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == str(newsletter_id)]
+    def lookup_request(self, slate_id: UUID) -> RecommendationRequestV4:
+        impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == str(slate_id)]
         account_id = impressions_df.iloc[0]["account_id"]
         newsletter_created_at = impressions_df.iloc[0]["created_at"]
 
@@ -117,7 +117,7 @@ class PoproxData(EvalData):
                 )
             )
 
-        profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, entity_interests=topics)
+        profile = InterestProfile(profile_id=slate_id, click_history=clicks, entity_interests=topics)
 
         # Filter candidate articles to those ingested on the same day as the newsletter (today's articles)
         candidate_articles = []
