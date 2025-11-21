@@ -107,7 +107,7 @@ def main():
     recs_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendations.parquet"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
-    n_recommendations = recs_df["profile_id"].nunique()
+    n_recommendations = recs_df["recommendation_id"].nunique()
     logger.info("loaded recommendations for %d recommendations", n_recommendations)
 
     logger.info("measuring recommendations")
