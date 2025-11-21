@@ -93,7 +93,7 @@ class MindData(EvalData):
             """
             SELECT article_uuid AS item_id,
                 CAST(clicked AS INT2) AS rating
-            FROM impression
+            FROM impressions
             JOIN impression_articles USING (imp_id)
             JOIN article USING (article_id)
             WHERE imp_uuid = ?
@@ -153,7 +153,7 @@ class MindData(EvalData):
             self.duck.execute(
                 """
                 SELECT article_uuid, category, subcategory, title
-                FROM impression
+                FROM impressions
                 JOIN impression_history USING (imp_id)
                 JOIN articles USING (article_id)
                 WHERE imp_uuid = ?
@@ -164,7 +164,7 @@ class MindData(EvalData):
             self.duck.execute(
                 """
                 SELECT article_uuid, category, subcategory, title
-                FROM impression
+                FROM impressions
                 JOIN impression_articles USING (imp_id)
                 JOIN articles USING (article_id)
                 WHERE imp_uuid = ?
@@ -175,7 +175,7 @@ class MindData(EvalData):
             self.duck.execute(
                 """
                 SELECT article_uuid, category, subcategory, title
-                FROM impression
+                FROM impressions
                 JOIN impression_expanded_candidates USING (imp_id)
                 JOIN articles USING (article_id)
                 WHERE imp_uuid = ?
