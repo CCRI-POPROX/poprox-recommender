@@ -75,7 +75,7 @@ class MindData(EvalData):
 
     def slate_truth(self, slate_id: UUID) -> pd.DataFrame | None:
         """
-        Look up the ground-truth data for a particular user profile,
+        Look up the ground-truth data for a particular evaluation slate profile,
         in LensKit format with item UUIDs for item IDs.
         """
 
