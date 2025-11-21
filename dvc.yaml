@@ -33,7 +33,7 @@ stages:
         - data/MINDlarge_dev.db
         - outputs/mind-val/${item}/recommendations.parquet
       outs:
-        - outputs/mind-val/${item}/profile-metrics.csv.gz
+        - outputs/mind-val/${item}/recommendation-metrics.csv.gz
       metrics:
         - outputs/mind-val/${item}/metrics.json:
             cache: false
@@ -63,7 +63,7 @@ stages:
         - data/MINDsmall_dev.db
         - outputs/mind-small/${item}/recommendations.parquet
       outs:
-        - outputs/mind-small/${item}/profile-metrics.csv.gz
+        - outputs/mind-small/${item}/recommendation-metrics.csv.gz
       metrics:
         - outputs/mind-small/${item}/metrics.json:
             cache: false
@@ -94,7 +94,7 @@ stages:
         - data/MINDsmall_dev.db
         - outputs/mind-subset/${item}/recommendations.parquet
       outs:
-        - outputs/mind-subset/${item}/profile-metrics.csv.gz
+        - outputs/mind-subset/${item}/recommendation-metrics.csv.gz
       metrics:
         - outputs/mind-subset/${item}/metrics.json:
             cache: false
@@ -125,7 +125,7 @@ stages:
         - data/POPROX/
         - outputs/poprox/${item}/recommendations.parquet
       outs:
-        - outputs/poprox/${item}/profile-metrics.csv.gz
+        - outputs/poprox/${item}/recommendation-metrics.csv.gz
       metrics:
         - outputs/poproxt/${item}/metrics.json:
             cache: false
@@ -141,7 +141,7 @@ stages:
         - src/poprox_recommender/evaluation/collect.py
         - outputs/${item}/
       outs:
-        - outputs/${item}-profile-metrics.csv.gz
+        - outputs/${item}-recommendation-metrics.csv.gz
         - outputs/${item}-metrics.csv:
             cache: false
         - outputs/${item}-tasks.csv:

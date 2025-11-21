@@ -23,6 +23,7 @@ Options:
 
 import logging
 import os
+import sys
 from pathlib import Path
 
 import lenskit
@@ -39,9 +40,6 @@ logger = logging.getLogger("poprox_recommender.evaluation.generate")
 
 
 def generate_main():
-    """
-    For offline evaluation, set theta in mmr_diversity = 1
-    """
     options = docopt(__doc__)  # type: ignore
     log_cfg = LoggingConfig()
     # turn on verbose logging when GitHub actions run in debug mode
@@ -64,9 +62,13 @@ def generate_main():
         dataset = PoproxData(options["--poprox-data"])
     elif options["--mind-data"]:
         dataset = MindData(options["--mind-data"])
+    else:
+        logger.error("must specify a data source")
+        sys.exit(2)
 
     pipe_name = options["PIPELINE"]
 
+    logger.info("preparing to generate for pipeline %s", pipe_name)
     generate_recs_for_requests(dataset, outputs, pipe_name, n_requests)
 
 

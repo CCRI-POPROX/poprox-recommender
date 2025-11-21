@@ -1,3 +1,9 @@
+"""
+This file provides abstractions for saving the outputs of batch-running
+recommender pipelines, so the worker code just needs to know about a "save my
+stuff" interface and can be spared the details of output.
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -9,7 +15,6 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import ray
-import ray.actor
 import torch
 import zstandard
 from lenskit.logging import Task, get_logger
@@ -341,12 +346,14 @@ class EmbeddingWriter(RecommendationWriter[pa.Table | None]):
     WANTED_NODES = {"candidate-selector"}
 
     outputs: RecOutputs
-    seen: set[str]
+    pkg_seen: set[str]
+    write_seen: set[str]
     writer: ParquetBatchedWriter
 
     def __init__(self, outs: RecOutputs | None = None):
         super().__init__()
-        self.seen = set()
+        self.pkg_seen = set()
+        self.write_seen = set()
         if outs is not None:
             self.outputs = outs
             outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
@@ -363,9 +370,9 @@ class EmbeddingWriter(RecommendationWriter[pa.Table | None]):
             for idx, article in enumerate(embedded.articles):
                 aid = str(article.article_id)
                 # first-stage filtering, so we only send embeddings once from each worker
-                if aid not in self.seen:
+                if aid not in self.pkg_seen:
                     rows.append({"article_id": aid, "embedding": embedded.embeddings[idx].cpu().numpy()})  # type: ignore
-                    self.seen.add(aid)
+                    self.pkg_seen.add(aid)
 
         if rows:
             # directly use pyarrow to avoid DF overhead, small but easy to avoid here
@@ -378,16 +385,18 @@ class EmbeddingWriter(RecommendationWriter[pa.Table | None]):
             return
 
         # second-stage filtering, so we only write embeddings once
+        # this is redundant in single-process eval, necessary in multi-process
         article_ids = package.column("article_id").to_pylist()
-        mask = [aid not in self.seen for aid in article_ids]
+        mask = [aid not in self.write_seen for aid in article_ids]
         mask = pa.array(mask, pa.bool_())
 
         package = package.filter(mask)
         if package.num_rows:
+            logger.debug("writing %d embeddings rows", package.num_rows)
             self.writer.write_frame(package)
 
         for aid in article_ids:
-            self.seen.add(aid)  # type: ignore
+            self.write_seen.add(aid)  # type: ignore
 
     def close(self):
         if hasattr(self, "writer"):
