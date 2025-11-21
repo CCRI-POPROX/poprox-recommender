@@ -223,11 +223,11 @@ def recommend_batch(
 
     # wrap in a Task to record resource consumption
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
-        for rec_id in batch:
-            request = dataset.lookup_request(rec_id)
+        for slate_id in batch:
+            request = dataset.lookup_request(slate_id)
             state = recommend_for_request(pipeline, request)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
-            outputs.append((rec_id, request, state))
+            outputs.append((slate_id, request, state))
 
         writes = [w.write_recommendation_batch(outputs) for w in writers]
 

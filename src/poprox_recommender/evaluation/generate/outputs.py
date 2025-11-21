@@ -33,7 +33,7 @@ Package = TypeVar("Package", default=Any)
 
 
 class OfflineRecommendations(BaseModel):
-    recommendation_id: UUID
+    slate_id: UUID
     request: RecommendationRequestV4
     results: OfflineRecResults
 
@@ -134,7 +134,7 @@ class RecommendationWriter(ABC, Generic[Package]):
         return ProxyRecommendationWriter(local=local, remote=remote)
 
     @abstractmethod
-    def prepare_write(self, rec_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState) -> Package:
+    def prepare_write(self, slate_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState) -> Package:
         """
         Create a package representing the data needed to write.
         """
@@ -152,11 +152,11 @@ class RecommendationWriter(ABC, Generic[Package]):
         for package in packages:
             self.write_package(package)
 
-    def write_recommendations(self, rec_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
+    def write_recommendations(self, slate_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState):
         """
         Write recommendations to this writer's storage.
         """
-        pkg = self.prepare_write(rec_id, request, pipeline_state)
+        pkg = self.prepare_write(slate_id, request, pipeline_state)
         return self.write_package(pkg)
 
     def close(self):
@@ -188,8 +188,8 @@ class ProxyRecommendationWriter(RecommendationWriter[Package]):
         self._local = local
         self._remote = remote
 
-    def prepare_write(self, rec_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState) -> Package:
-        return self._local.prepare_write(rec_id, request, pipeline_state)
+    def prepare_write(self, slate_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState) -> Package:
+        return self._local.prepare_write(slate_id, request, pipeline_state)
 
     def write_package(self, package: Package):
         return self._remote.write_package.remote(package)  # type: ignore
@@ -225,9 +225,9 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
             self.writer = ParquetBatchedWriter(outs.rec_parquet_file, compression="snappy")
 
     def prepare_write(
-        self, rec_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState
+        self, slate_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState
     ) -> list[pd.DataFrame]:
-        logger.debug("writing recommendations to Parquet", rec_id=rec_id)
+        logger.debug("writing recommendations to Parquet", slate_id=slate_id)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
         # profile = request.interest_profile.profile_id
@@ -237,7 +237,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
         frames = [
             pd.DataFrame(
                 {
-                    "recommendation_id": str(rec_id),
+                    "slate_id": str(slate_id),
                     "stage": "final",
                     "item_id": [str(impression.article.article_id) for impression in recs.impressions],
                     "rank": np.arange(len(recs.impressions), dtype=np.int16) + 1,
@@ -250,7 +250,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
             frames.append(
                 pd.DataFrame(
                     {
-                        "recommendation_id": str(rec_id),
+                        "slate_id": str(slate_id),
                         "stage": "ranked",
                         "item_id": [str(impression.article.article_id) for impression in ranked.impressions],
                         "rank": np.arange(len(ranked.impressions), dtype=np.int16) + 1,
@@ -263,7 +263,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
             frames.append(
                 pd.DataFrame(
                     {
-                        "recommendation_id": str(rec_id),
+                        "slate_id": str(slate_id),
                         "stage": "reranked",
                         "item_id": [str(impression.article.article_id) for impression in reranked.impressions],
                         "rank": np.arange(len(reranked.impressions), dtype=np.int16) + 1,
@@ -301,8 +301,8 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
             outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
             self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(1))
 
-    def prepare_write(self, rec_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState) -> str:
-        logger.debug("writing recommendations to JSON", rec_id=rec_id)
+    def prepare_write(self, slate_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState) -> str:
+        logger.debug("writing recommendations to JSON", slate_id=slate_id)
         # recommendations {account id (uuid): LIST[Article]}
         # use the url of Article
 
@@ -319,7 +319,7 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
         if reranked is not None:
             results.reranked = reranked
 
-        data = OfflineRecommendations(recommendation_id=rec_id, request=request, results=results)
+        data = OfflineRecommendations(slate_id=slate_id, request=request, results=results)
         return data.model_dump_json(serialize_as_any=True, fallback=_json_fallback)
 
     def write_package(self, package: str):
@@ -362,7 +362,7 @@ class EmbeddingWriter(RecommendationWriter[pa.Table | None]):
             self.writer = ParquetBatchedWriter(self.outputs.emb_file, compression="snappy")
 
     def prepare_write(
-        self, rec_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState
+        self, slate_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState
     ) -> pa.Table | None:
         # get the embeddings
         embedded = pipeline_state.get("candidate-embedder", None)
