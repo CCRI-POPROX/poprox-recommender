@@ -95,7 +95,7 @@ class MindData(EvalData):
                 CAST(clicked AS INT2) AS rating
             FROM impressions
             JOIN impression_articles USING (imp_id)
-            JOIN article USING (article_id)
+            JOIN articles USING (article_id)
             WHERE imp_uuid = ?
             """,
             [imp_uuid],
