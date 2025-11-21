@@ -183,3 +183,21 @@ stages:
       hash: md5
       md5: a245249210d3ce50e507086919ad274c
       size: 212348928
+  ingest-poprox:
+    cmd: python -m poprox_recommender.data.duckscript POPROX.db
+      poprox-ingest.sql
+    deps:
+    - path: POPROX
+      hash: md5
+      md5: 720877eff356ed7cf3a9f44ebc47a752.dir
+      size: 59153430
+      nfiles: 10
+    - path: poprox-ingest.sql
+      hash: md5
+      md5: af31c2a913fe93a63c607cac6815ea96
+      size: 2945
+    outs:
+    - path: POPROX.db
+      hash: md5
+      md5: 87f23a898a9d06f0257185c735390d22
+      size: 146026496
