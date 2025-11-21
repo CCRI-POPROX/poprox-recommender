@@ -124,8 +124,9 @@ class MindData(EvalData):
             logger.info("iterating test articles")
             while row := clone.fetchone():
                 imp_id, imp_uuid = row
+                assert isinstance(imp_uuid, UUID)
 
-                yield UUID(imp_uuid)
+                yield imp_uuid
 
     def lookup_request(self, uuid: UUID) -> RecommendationRequestV4:
         # get the historical articles and click list
