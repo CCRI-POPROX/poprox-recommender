@@ -31,7 +31,7 @@ class RecsWithTruth(NamedTuple):
     The recommendation for a specific request (possibly from multiple algorithms and stages)
     """
 
-    recommendation_id: UUID
+    slate_id: UUID
     recs: pd.DataFrame
     truth: pd.DataFrame
 

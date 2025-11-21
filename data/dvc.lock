@@ -104,8 +104,8 @@ stages:
       nfiles: 4
     - path: mind-ingest.sql
       hash: md5
-      md5: 97b670b02dd01a312718a70be7024b93
-      size: 2936
+      md5: 86b0a736b6ea76c2c003aa13acc65721
+      size: 3677
     - path: mind-schema.sql
       hash: md5
       md5: dc19f3fe383396390c91ee29fa299533
@@ -113,8 +113,8 @@ stages:
     outs:
     - path: MINDsmall_dev.db
       hash: md5
-      md5: 2ba5a90c0cce9934eda1121d63986340
-      size: 109850624
+      md5: d72b031b65edac58252c4a5a72ed70a9
+      size: 110899200
   ingest-mind@MINDlarge_dev:
     cmd: python -m poprox_recommender.data.duckscript -D mind_path=MINDlarge_dev
       MINDlarge_dev.db mind-schema.sql mind-ingest.sql
@@ -126,8 +126,8 @@ stages:
       nfiles: 5
     - path: mind-ingest.sql
       hash: md5
-      md5: 97b670b02dd01a312718a70be7024b93
-      size: 2936
+      md5: 86b0a736b6ea76c2c003aa13acc65721
+      size: 3677
     - path: mind-schema.sql
       hash: md5
       md5: dc19f3fe383396390c91ee29fa299533
@@ -135,8 +135,8 @@ stages:
     outs:
     - path: MINDlarge_dev.db
       hash: md5
-      md5: 354cc185c20971a5fbad7d1593705acb
-      size: 475541504
+      md5: ef2ca97555e63a36b0d7b09bc8b2b0c7
+      size: 476065792
   ingest-mind@MINDlarge_train:
     cmd: python -m poprox_recommender.data.duckscript -D
       mind_path=MINDlarge_train MINDlarge_train.db mind-schema.sql
@@ -149,8 +149,8 @@ stages:
       nfiles: 5
     - path: mind-ingest.sql
       hash: md5
-      md5: 97b670b02dd01a312718a70be7024b93
-      size: 2936
+      md5: 86b0a736b6ea76c2c003aa13acc65721
+      size: 3677
     - path: mind-schema.sql
       hash: md5
       md5: dc19f3fe383396390c91ee29fa299533
@@ -158,8 +158,8 @@ stages:
     outs:
     - path: MINDlarge_train.db
       hash: md5
-      md5: 9c874684a19c5e6f9fa27e911a5fe699
-      size: 2626433024
+      md5: 192048225c5a337014340ed814c0d6af
+      size: 2632724480
   ingest-mind@MINDsmall_train:
     cmd: python -m poprox_recommender.data.duckscript -D
       mind_path=MINDsmall_train MINDsmall_train.db mind-schema.sql
@@ -172,8 +172,8 @@ stages:
       nfiles: 4
     - path: mind-ingest.sql
       hash: md5
-      md5: 97b670b02dd01a312718a70be7024b93
-      size: 2936
+      md5: 86b0a736b6ea76c2c003aa13acc65721
+      size: 3677
     - path: mind-schema.sql
       hash: md5
       md5: dc19f3fe383396390c91ee29fa299533
@@ -181,5 +181,5 @@ stages:
     outs:
     - path: MINDsmall_train.db
       hash: md5
-      md5: 276da2ae461e113c147a1d819b89ee48
-      size: 212086784
+      md5: a245249210d3ce50e507086919ad274c
+      size: 212348928

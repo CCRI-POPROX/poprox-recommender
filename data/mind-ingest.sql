@@ -2,6 +2,21 @@
 -- The path to the MIND data should be in the SQL variable 'mind_path'.
 -- Default is the current directory.
 
+--- create V7 UUIDs for impressions, based on the timestamp *from the
+--- impression log*.  The remaining "random" bits are taken from the
+--- UUIDV5 computed from the impression ID.  This gives us deterministic
+--- impression UUIDs that are still sorted.
+CREATE MACRO make_imp_uuid(imp_id, imp_ts) AS (
+    (sha_uuid('https://data.poprox.io/mind/impression/', imp_id::VARCHAR)::BYTEA::BITSTRING
+    -- 00000000-0000-0FFF-FFFF-FFFFFFFFFFFF strips down to random + variant
+    & unhex('0000000000000FFFFFFFFFFFFFFFFFFF')::BITSTRING)
+    -- add the UUID version (7)
+    | unhex('00000000000070000000000000000000')::BITSTRING
+    -- add the 48-bit ms timestamp
+    | (bitstring(epoch_ms(imp_ts)::bitstring, 128) << 80)
+)::BYTEA::UUID;
+
+
 CREATE TEMPORARY VIEW raw_behaviors AS
 SELECT * FROM read_csv(
     COALESCE(getvariable('mind_path'), '.') || '/behaviors.tsv',
@@ -36,7 +51,7 @@ TRUNCATE articles;
 INSERT INTO articles
 SELECT
     -- remove leading char to yield a number
-    CAST(article_id[2:] AS INTEGER),
+    CAST(article_id[2:] AS INTEGER) AS aid,
     sha_uuid('https://data.poprox.io/mind/article/', article_id),
     category,
     subcategory,
@@ -44,13 +59,14 @@ SELECT
     abstract,
     title_entities,
     abstract_entities,
-FROM raw_news;
+FROM raw_news
+ORDER BY aid;
 
 -- Ingest the impressions with partial parsing to make tables.
 CREATE TEMPORARY TABLE parsed_impressions AS
 SELECT
     impression_id AS imp_id,
-    sha_uuid('https://data.poprox.io/mind/impression/', CAST(impression_id AS VARCHAR)) AS imp_uuid,
+    make_imp_uuid(impression_id, strptime(time, '%m/%d/%Y %H:%M:%S %p')) AS imp_uuid,
     CAST(user_id[2:] AS INTEGER) user_id,
     strptime(time, '%m/%d/%Y %H:%M:%S %p') AS imp_time,
     string_split_regex(clicked_news, '\s+') AS clicked_news,
@@ -63,7 +79,7 @@ INSERT INTO impressions
 SELECT imp_id, imp_uuid, user_id, imp_time,
     CAST(julian(imp_time) AS INTEGER)
 FROM parsed_impressions
-ORDER BY imp_id;
+ORDER BY imp_uuid;
 
 -- Extract the users' historical articles.
 TRUNCATE impression_history;

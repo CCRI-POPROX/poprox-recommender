@@ -127,7 +127,7 @@ stages:
       outs:
         - outputs/poprox/${item}/recommendation-metrics.csv.gz
       metrics:
-        - outputs/poproxt/${item}/metrics.json:
+        - outputs/poprox/${item}/metrics.json:
             cache: false
 
   collect-metrics:

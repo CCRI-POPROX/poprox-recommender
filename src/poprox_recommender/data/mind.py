@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import Generator, Literal
-from uuid import NAMESPACE_URL, UUID, uuid5
+from uuid import UUID
 
 import duckdb
 import pandas as pd
@@ -23,8 +23,6 @@ from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
-NAMESPACE_ARTICLE = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
-NAMESPACE_IMPRESSION = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/impression/")
 
 
 class MindData(EvalData):
@@ -60,14 +58,6 @@ class MindData(EvalData):
         (n,) = self.duck.fetchone() or (0,)
         self._article_count = n
 
-    def news_uuid_for_id(self, id: str | int) -> UUID:
-        if isinstance(id, int):
-            id = f"N{id}"
-        return uuid5(NAMESPACE_ARTICLE, id)
-
-    def behavior_uuid_for_id(self, id: str | int) -> UUID:
-        return uuid5(NAMESPACE_IMPRESSION, str(id))
-
     @property
     def n_requests(self) -> int:
         return self._impression_count
@@ -83,27 +73,27 @@ class MindData(EvalData):
         self.duck.execute("SELECT article_uuid FROM articles")
         return [row[0] for row in self.duck.fetchall()]
 
-    def slate_truth(self, user: UUID) -> pd.DataFrame | None:
+    def slate_truth(self, slate_id: UUID) -> pd.DataFrame | None:
         """
-        Look up the ground-truth data for a particular user profile,
+        Look up the ground-truth data for a particular evaluation slate profile,
         in LensKit format with item UUIDs for item IDs.
         """
 
         self.duck.execute(
             """
-            SELECT article_id AS mind_item_id,
+            SELECT article_uuid AS item_id,
                 CAST(clicked AS INT2) AS rating
             FROM impressions
             JOIN impression_articles USING (imp_id)
+            JOIN articles USING (article_id)
             WHERE imp_uuid = ?
             """,
-            [user],
+            [slate_id],
         )
         truth = self.duck.fetch_df()
-        truth["item_id"] = [self.news_uuid_for_id(aid) for aid in truth["mind_item_id"]]
         return truth.set_index("item_id")
 
-    def iter_slate_ids(self, *, limit: int | None = None) -> Generator[int]:
+    def iter_slate_ids(self, *, limit: int | None = None) -> Generator[UUID]:
         """
         Iterate the identifiers of recommendations.
         """
@@ -121,35 +111,23 @@ class MindData(EvalData):
             clone.execute(query)
 
             # loop over the results and yield the recommendations
-            logger.info("iterating test articles")
+            logger.info("iterating MIND evaluation slates")
             while row := clone.fetchone():
                 imp_id, imp_uuid = row
+                assert isinstance(imp_uuid, UUID)
 
-                yield imp_id
+                yield imp_uuid
 
-    def lookup_request(self, id: int | UUID) -> RecommendationRequestV4:
-        if isinstance(id, UUID):
-            uuid = id
-            self.duck.execute("SELECT imp_id FROM impressions WHERE imp_uuid = ?", [uuid])
-            if row := self.duck.fetchone():
-                (imp_id,) = row
-            else:
-                raise KeyError(f"unknown impression {uuid}")
-        else:
-            imp_id = id
-            uuid = self.behavior_uuid_for_id(id)
-
-        assert id is not None
-
+    def lookup_request(self, slate_id: UUID) -> RecommendationRequestV4:
         # get the historical articles and click list
-        past = self.lookup_articles(imp_id, relation="history")
+        past = self.lookup_articles(slate_id, relation="history")
         clicks = [Click(article_id=a.article_id) for a in past]
 
         # get the candidate articles
-        today = self.lookup_articles(imp_id, relation="candidates")
+        today = self.lookup_articles(slate_id, relation="candidates")
 
         # FIXME the profile ID should probably be the user ID
-        profile = InterestProfile(profile_id=uuid, click_history=clicks, entity_interests=[])
+        profile = InterestProfile(profile_id=slate_id, click_history=clicks, entity_interests=[])
         return RecommendationRequestV4(
             candidates=CandidateSet(articles=today),
             interacted=CandidateSet(articles=past),
@@ -158,38 +136,41 @@ class MindData(EvalData):
         )
 
     def lookup_articles(
-        self, imp_id: int, *, relation: Literal["history", "candidates", "expanded-candidates"]
+        self, imp_uuid: UUID, *, relation: Literal["history", "candidates", "expanded-candidates"]
     ) -> list[Article]:
         # run the query for the articles we're looking for
         if relation == "history":
             self.duck.execute(
                 """
                 SELECT article_uuid, category, subcategory, title
-                FROM impression_history
+                FROM impressions
+                JOIN impression_history USING (imp_id)
                 JOIN articles USING (article_id)
-                WHERE imp_id = ?
+                WHERE imp_uuid = ?
                 """,
-                [imp_id],
+                [imp_uuid],
             )
         elif relation == "candidates":
             self.duck.execute(
                 """
                 SELECT article_uuid, category, subcategory, title
-                FROM impression_articles
+                FROM impressions
+                JOIN impression_articles USING (imp_id)
                 JOIN articles USING (article_id)
-                WHERE imp_id = ?
+                WHERE imp_uuid = ?
                 """,
-                [imp_id],
+                [imp_uuid],
             )
         elif relation == "expanded-candidates":
             self.duck.execute(
                 """
                 SELECT article_uuid, category, subcategory, title
-                FROM impression_expanded_candidates
+                FROM impressions
+                JOIN impression_expanded_candidates USING (imp_id)
                 JOIN articles USING (article_id)
-                WHERE imp_id = ?
+                WHERE imp_uuid = ?
                 """,
-                [imp_id],
+                [imp_uuid],
             )
 
         articles = []
@@ -198,29 +179,15 @@ class MindData(EvalData):
 
         return articles
 
-    def lookup_article(self, *, id: str | None = None, uuid: UUID | None = None):
-        if uuid is not None:
-            self.duck.execute(
-                """
-                SELECT article_uuid, category, subcategory, title
-                FROM articles
-                WHERE article_uuid = ?
-                """,
-                [uuid],
-            )
-        elif id is not None:
-            assert id[0] == "N"
-            id_num = int(id[1:])
-            self.duck.execute(
-                """
-                SELECT article_uuid, category, subcategory, title
-                FROM articles
-                WHERE article_id = ?
-                """,
-                [id_num],
-            )
-        else:
-            raise ValueError("must provide one of uuid or id")
+    def lookup_article(self, *, uuid: UUID):
+        self.duck.execute(
+            """
+            SELECT article_uuid, category, subcategory, title
+            FROM articles
+            WHERE article_uuid = ?
+            """,
+            [uuid],
+        )
 
         row = self.duck.fetchone()
         if row:

@@ -50,18 +50,17 @@ logger = logging.getLogger(__name__)
 
 def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[RecsWithTruth]:
     """
-    Iterate over recommendations, yielding each recommendation list with its truth and
-    whether the recommendations are personalized.  This supports parallel computation of the
-    final metrics.
+    Iterate over recommendations, yielding each recommendation list with its
+    truth.  This supports parallel computation of the final metrics.
     """
-    for recommendation_id, recs in recs_df.groupby("profile_id"):
-        recommendation_id = UUID(str(recommendation_id))
-        truth = eval_data.slate_truth(recommendation_id)
+    for slate_id, recs in recs_df.groupby("slate_id"):
+        slate_id = UUID(str(slate_id))
+        truth = eval_data.slate_truth(slate_id)
         assert truth is not None
         if len(truth) > 0:
-            yield RecsWithTruth(recommendation_id, recs.copy(), truth)
+            yield RecsWithTruth(slate_id, recs.copy(), truth)
         else:
-            logger.warning("request %s has no truth", recommendation_id)
+            logger.warning("request %s has no truth", slate_id)
 
 
 def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[dict[str, Any]]:
@@ -108,7 +107,7 @@ def main():
     recs_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendations.parquet"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
-    n_recommendations = recs_df["profile_id"].nunique()
+    n_recommendations = recs_df["slate_id"].nunique()
     logger.info("loaded recommendations for %d recommendations", n_recommendations)
 
     logger.info("measuring recommendations")

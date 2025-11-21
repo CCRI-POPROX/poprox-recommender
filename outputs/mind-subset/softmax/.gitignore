@@ -3,3 +3,4 @@
 /embeddings.parquet
 /profile-metrics.csv.gz
 /generate-task.json
+/recommendation-metrics.csv.gz
