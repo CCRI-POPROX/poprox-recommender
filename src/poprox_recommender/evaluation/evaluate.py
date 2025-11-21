@@ -53,7 +53,7 @@ def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[Recs
     Iterate over recommendations, yielding each recommendation list with its
     truth.  This supports parallel computation of the final metrics.
     """
-    for recommendation_id, recs in recs_df.groupby("profile_id"):
+    for recommendation_id, recs in recs_df.groupby("recommendation_id"):
         recommendation_id = UUID(str(recommendation_id))
         truth = eval_data.slate_truth(recommendation_id)
         assert truth is not None

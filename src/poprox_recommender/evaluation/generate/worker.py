@@ -86,7 +86,7 @@ def serial_recommend(dataset: EvalData, pipeline: str, n_requests: int | None, o
         request = dataset.lookup_request(slate_id)
         state = recommend_for_request(pipe, request)
         for w in writers:
-            w.write_recommendations(request, state)
+            w.write_recommendations(slate_id, request, state)
         pb.update()
 
     for w in writers:
@@ -192,7 +192,7 @@ def recommend_for_request(pipeline: Pipeline, request: RecommendationRequestV4) 
 
 def recommend_batch(
     pipeline: Pipeline,
-    batch: list[UUID | int],
+    batch: list[UUID],
     writers: list[RecommendationWriter],
     dataset: EvalData,
 ) -> tuple[int, Task, list[Any]]:
@@ -223,11 +223,11 @@ def recommend_batch(
 
     # wrap in a Task to record resource consumption
     with Task("generate-batch", subprocess=True, reset_hwm=True) as task:
-        for request_id in batch:
-            request = dataset.lookup_request(request_id)
+        for rec_id in batch:
+            request = dataset.lookup_request(rec_id)
             state = recommend_for_request(pipeline, request)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
-            outputs.append((request, state))
+            outputs.append((rec_id, request, state))
 
         writes = [w.write_recommendation_batch(outputs) for w in writers]
 
