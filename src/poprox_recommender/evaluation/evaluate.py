@@ -50,9 +50,8 @@ logger = logging.getLogger(__name__)
 
 def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[RecsWithTruth]:
     """
-    Iterate over recommendations, yielding each recommendation list with its truth and
-    whether the recommendations are personalized.  This supports parallel computation of the
-    final metrics.
+    Iterate over recommendations, yielding each recommendation list with its
+    truth.  This supports parallel computation of the final metrics.
     """
     for recommendation_id, recs in recs_df.groupby("profile_id"):
         recommendation_id = UUID(str(recommendation_id))
