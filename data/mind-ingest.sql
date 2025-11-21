@@ -36,7 +36,7 @@ TRUNCATE articles;
 INSERT INTO articles
 SELECT
     -- remove leading char to yield a number
-    CAST(article_id[2:] AS INTEGER),
+    CAST(article_id[2:] AS INTEGER) AS aid,
     sha_uuid('https://data.poprox.io/mind/article/', article_id),
     category,
     subcategory,
@@ -44,7 +44,8 @@ SELECT
     abstract,
     title_entities,
     abstract_entities,
-FROM raw_news;
+FROM raw_news
+ORDER BY aid;
 
 -- Ingest the impressions with partial parsing to make tables.
 CREATE TEMPORARY TABLE parsed_impressions AS
