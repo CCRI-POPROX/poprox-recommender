@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import Generator, Literal
-from uuid import NAMESPACE_URL, UUID, uuid5
+from uuid import UUID
 
 import duckdb
 import pandas as pd
@@ -23,8 +23,6 @@ from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
-NAMESPACE_ARTICLE = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/article/")
-NAMESPACE_IMPRESSION = uuid5(NAMESPACE_URL, "https://data.poprox.io/mind/impression/")
 
 
 class MindData(EvalData):
@@ -59,14 +57,6 @@ class MindData(EvalData):
         self.duck.execute("SELECT COUNT(*) FROM articles")
         (n,) = self.duck.fetchone() or (0,)
         self._article_count = n
-
-    def news_uuid_for_id(self, id: str | int) -> UUID:
-        if isinstance(id, int):
-            id = f"N{id}"
-        return uuid5(NAMESPACE_ARTICLE, id)
-
-    def behavior_uuid_for_id(self, id: str | int) -> UUID:
-        return uuid5(NAMESPACE_IMPRESSION, str(id))
 
     @property
     def n_requests(self) -> int:
