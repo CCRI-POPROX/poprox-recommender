@@ -21,7 +21,7 @@ def rank_bias_entropy(final_recs: CandidateSet, k: int, d: float = 0.85, eval_da
                 return np.nan
 
         for mention in mentions:
-            if mention.entity.entity_type == "topic":
+            if mention.entity.entity_type in ["subject", "topic"]:
                 topic = mention.entity.name
                 weighted_counts[topic] += float(weight)
 
