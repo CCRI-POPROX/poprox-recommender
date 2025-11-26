@@ -70,7 +70,10 @@ class PoproxData(EvalData):
         return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
 
     def iter_slate_ids(self, *, limit: int | None = None) -> Generator[UUID]:
-        newsletter_ids = self.newsletters_df["newsletter_id"].unique()
+        # One profile/newsletter per account
+        newsletters_df = self.newsletters_df.drop_duplicates(subset=["account_id"])
+
+        newsletter_ids = newsletters_df["newsletter_id"].unique()
         if limit is not None:
             newsletter_ids = it.islice(newsletter_ids, limit)
         for id in newsletter_ids:
