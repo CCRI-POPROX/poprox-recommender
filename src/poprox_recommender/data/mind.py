@@ -99,9 +99,9 @@ class MindData(EvalData):
         """
         logger.info("querying for test recommendations / impressions")
 
-        # we use 2 queries: an outer query to list the impression IDs, and inner
-        # queries to get the articles and article data.  outer query is in a cloned
-        # connection so that they don't interfere with each other.
+        # since the client will be calling lookup_request while iterating
+        # over this iterator, we need to use a cloned cursor to keep this
+        # loop's iteration separate from other requests from the caller.
         with self.duck.cursor() as clone:
             query = "SELECT imp_id, imp_uuid FROM impressions"
             if limit is not None:
@@ -179,7 +179,7 @@ class MindData(EvalData):
 
         return articles
 
-    def lookup_article(self, *, uuid: UUID):
+    def lookup_article(self, uuid: UUID):
         self.duck.execute(
             """
             SELECT article_uuid, category, subcategory, title
@@ -193,7 +193,7 @@ class MindData(EvalData):
         if row:
             return self._make_article(*row)
         else:
-            raise KeyError(uuid or id)
+            raise KeyError(uuid)
 
     def _make_article(self, uuid, category, subcategory, title) -> Article:
         category = Entity(name=category, entity_type="category", source="MIND")
