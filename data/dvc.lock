@@ -194,10 +194,10 @@ stages:
       nfiles: 10
     - path: poprox-ingest.sql
       hash: md5
-      md5: aed90f94c1f02495c87b1476b80a5148
+      md5: f16de4a74c72a560e094d16d0d7229ce
       size: 3321
     outs:
     - path: POPROX.db
       hash: md5
-      md5: 70fc81ff783662ff2477eb40aa2ec7ac
-      size: 153890816
+      md5: 50b5bc6664c85571bc9bcee4fd789d24
+      size: 152580096

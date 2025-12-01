@@ -99,7 +99,7 @@ SELECT
     article_id, headline, subhead, url,
     linked_articles, raw_data, published_at, created_at, body
 FROM 'POPROX/articles.parquet'
-ORDER BY article_id;
+ORDER BY created_at;
 
 INSERT INTO candidate_article_mentions
 SELECT mention_id, article_id, source, relevance, entity
