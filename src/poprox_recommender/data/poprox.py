@@ -50,7 +50,7 @@ class PoproxData(EvalData):
 
         # pre-fetch counts
         self.duck.execute("SELECT COUNT(*) FROM newsletters")
-        (n,) = self.duck.fetchone() or (0,)
+        (n,) = self.duck.fetchone() or [0]
         self._impression_count = n
 
         self.duck.execute(
@@ -63,6 +63,8 @@ class PoproxData(EvalData):
             )
             """
         )
+        (n,) = self.duck.fetchone() or [0]
+        self._article_count = n
 
     @property
     def n_requests(self) -> int:
