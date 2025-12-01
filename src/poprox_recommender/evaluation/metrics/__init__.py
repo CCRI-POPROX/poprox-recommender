@@ -1,7 +1,9 @@
 import logging
+import os
 from typing import Any, NamedTuple
 from uuid import UUID
 
+import numpy as np
 import pandas as pd
 from lenskit.data import ItemList
 from lenskit.metrics import call_metric
@@ -13,6 +15,36 @@ from poprox_recommender.evaluation.metrics.ils import intralist_similarity
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
+
+# Global cache for embeddings
+_embeddings_cache = None
+
+
+def load_embeddings_cache():
+    """Load embeddings from parquet file"""
+    global _embeddings_cache
+    if _embeddings_cache is None:
+        try:
+            possible_paths = [
+                # "outputs/mind-subset/control/embeddings.parquet",  # This one works
+                "outputs/poprox/nrms_topic_mmr/embeddings.parquet",  # Now this works
+                "outputs/mind-subset/embeddings.parquet",
+            ]
+
+            for path in possible_paths:
+                if os.path.exists(path):
+                    df = pd.read_parquet(path)
+                    _embeddings_cache = {row["article_id"]: np.array(row["embedding"]) for _, row in df.iterrows()}
+                    logging.getLogger(__name__).info(f"Loaded {len(_embeddings_cache)} embeddings from {path}")
+                    break
+            else:
+                logging.getLogger(__name__).warning("No embeddings file found, ILS will be NaN")
+                _embeddings_cache = {}
+        except Exception as e:
+            logging.getLogger(__name__).warning(f"Failed to load embeddings: {e}")
+            _embeddings_cache = {}
+    return _embeddings_cache
+
 
 __all__ = [
     "rank_biased_overlap",
@@ -36,11 +68,39 @@ class RecsWithTruth(NamedTuple):
     truth: pd.DataFrame
 
 
-def convert_df_to_article_set(rec_df):
+def convert_df_to_article_set(rec_df, eval_data=None):
     articles = []
+    embeddings_cache = load_embeddings_cache()
     for _, row in rec_df.iterrows():
-        articles.append(Article(article_id=row["item_id"], headline=""))
-    return CandidateSet(articles=articles)
+        if eval_data is not None:
+            article = eval_data.lookup_article(uuid=UUID(row["item_id"]))
+            articles.append(article)
+        else:
+            articles.append(Article(article_id=row["item_id"], headline=""))
+
+    embeddings = []
+    # Determine embedding size dynamically from cache or use default
+    embedding_size = 768  # Default for DistilBERT
+    if embeddings_cache:
+        # Get the size from the first available embedding
+        for emb in embeddings_cache.values():
+            if emb is not None and len(emb) > 0:
+                embedding_size = len(emb)
+                break
+
+    for article in articles:
+        emb = embeddings_cache.get(str(article.article_id))
+        if emb is not None:
+            embeddings.append(emb)
+        else:
+            embeddings.append(np.zeros(embedding_size))
+
+    if embeddings:
+        embeddings_array = np.stack(embeddings)
+    else:
+        embeddings_array = None
+
+    return CandidateSet(articles=articles, embeddings=embeddings_array)
 
 
 def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | None = None) -> dict[str, Any]:
@@ -54,20 +114,28 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     truth = truth.reset_index()
 
     truth = truth[truth["rating"] > 0]
-    truth = ItemList.from_df(truth)
+    if truth.empty:
+        truth_list = None
+    else:
+        truth_list = ItemList.from_df(truth)
 
     final_rec_df = recs[recs["stage"] == "final"]
     final_rec = ItemList.from_df(final_rec_df)
 
-    single_rr = call_metric(RecipRank, final_rec, truth)
-    single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
-    single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
+    if truth_list is not None:
+        single_rr = call_metric(RecipRank, final_rec, truth_list)
+        single_ndcg5 = call_metric(NDCG, final_rec, truth_list, k=5)
+        single_ndcg10 = call_metric(NDCG, final_rec, truth_list, k=10)
+    else:
+        single_rr = None
+        single_ndcg5 = None
+        single_ndcg10 = None
 
     ranked_rec_df = recs[recs["stage"] == "ranked"]
-    ranked = convert_df_to_article_set(ranked_rec_df)
+    ranked = convert_df_to_article_set(ranked_rec_df, eval_data)
 
     reranked_rec_df = recs[recs["stage"] == "reranked"]
-    reranked = convert_df_to_article_set(reranked_rec_df)
+    reranked = convert_df_to_article_set(reranked_rec_df, eval_data)
 
     if ranked and reranked:
         single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
@@ -78,8 +146,8 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
         single_rbo10 = None
         lip = None
 
-    rbe = rank_bias_entropy(ranked, k=10, d=0.5, eval_data=eval_data)
-    ils = intralist_similarity(ranked, k=10)
+    rbe = rank_bias_entropy(reranked, k=10, d=0.5, eval_data=eval_data)
+    ils = intralist_similarity(reranked, k=10)
 
     logger.debug(
         "recommendation %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
@@ -101,9 +169,9 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
         # whole function should be revised for generality when we want to support
         # other pipelines.
         "personalized": len(ranked.articles) > 0,
-        "NDCG@5": single_ndcg5,
-        "NDCG@10": single_ndcg10,
-        "RR": single_rr,
+        "NDCG@5": single_ndcg5 if single_ndcg5 is not None else np.nan,
+        "NDCG@10": single_ndcg10 if single_ndcg10 is not None else np.nan,
+        "RR": single_rr if single_rr is not None else np.nan,
         "RBO@5": single_rbo5,
         "RBO@10": single_rbo10,
         "rank_based_entropy": rbe,
