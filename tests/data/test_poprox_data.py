@@ -42,16 +42,23 @@ def test_lookup_requests(poprox_data: PoproxData):
             assert 10 < len(req.candidates.articles) < 150
             assert 0 <= len(req.interacted.articles) < 100
 
+            slate_ts = req.interest_profile.model_extra["slate_created_at"]
+
             # make sure data is consistent
             click_aids = set(c.article_id for c in req.interest_profile.click_history)
             assert len(click_aids) == len(req.interacted.articles)
 
-            # check that the candidates are published on the same date
-            min_time = min(cand.published_at for cand in req.candidates.articles)
-            max_time = max(cand.published_at for cand in req.candidates.articles)
-            delta = max_time - min_time
-            # articles span no more than one day
-            assert delta < timedelta(days=1)
+            # check the dates of candidate articles
+            times = [a.created_at for a in req.candidates.articles]
+            assert not any(t is None for t in times)
+            # are all articles ingested on the same day?
+            min_ts = min(times)
+            max_ts = max(times)
+            assert (max_ts - min_ts) <= timedelta(days=1)
+            # are all articles ingested after they are published, and before the newsletter?
+            for a in req.candidates.articles:
+                assert a.published_at <= a.created_at
+                assert a.created_at <= slate_ts
         except Exception as e:
             e.add_note(f"Error occurred in test slate {i} ({slate_id})")
             raise e
@@ -59,8 +66,10 @@ def test_lookup_requests(poprox_data: PoproxData):
 
 def test_request_articles(poprox_data: PoproxData):
     "Look for articles mentioned by requests."
+    if not hasattr(poprox_data, "lookup_article"):
+        skip("testing against old PoproxData")
 
-    for slate_id in islice(poprox_data.iter_slate_ids(), 50, 75):
+    for slate_id in islice(poprox_data.iter_slate_ids(), 15, 5000, 150):
         req = poprox_data.lookup_request(slate_id)
         assert req is not None
 
@@ -72,7 +81,13 @@ def test_request_articles(poprox_data: PoproxData):
             art = poprox_data.lookup_article(cand.article_id)
             assert art.article_id == cand.article_id
             assert art.headline == cand.headline
+            # are all articles ingested after they are published?
+            for art in req.candidates.articles:
+                assert art.published_at <= art.created_at
 
         for click in req.interest_profile.click_history:
             art = poprox_data.lookup_article(click.article_id, source="clicked")
             assert art.article_id == click.article_id
+            # are all articles ingested after they are published?
+            for art in req.candidates.articles:
+                assert art.published_at <= art.created_at
