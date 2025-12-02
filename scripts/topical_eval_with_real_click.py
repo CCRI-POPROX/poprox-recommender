@@ -60,7 +60,7 @@ def full_request_generator(user_profile, interacted_articles_dict, candidate_art
 # utility functions for user profile generation
 
 
-def user_profile_generator(CLK_df, interest_df, min_CLK, max_CLK):
+def user_profile_generator(clk_df, interest_df, min_CLK, max_CLK):
     user_profile_batch = {}
 
     for uuid in interest_df["account_id"].unique():
@@ -70,7 +70,7 @@ def user_profile_generator(CLK_df, interest_df, min_CLK, max_CLK):
                 newsletter_id=clk["newsletter_id"],
                 timestamp=clk["clicked_at"],
             )
-            for _, clk in CLK_df.iterrows()
+            for _, clk in clk_df.iterrows()
             if clk["profile_id"] == uuid
         ]
 
@@ -105,21 +105,21 @@ def user_profile_generator(CLK_df, interest_df, min_CLK, max_CLK):
 
 
 def daily_user_wise_JSD(user_profile, user_topic_counts):
-    Topical_Pref_dist = {t.entity_name: t.preference for t in user_profile.onboarding_topics}
-    pref_total = sum(Topical_Pref_dist.values())
-    Topical_Pref_dist_norm = {k: (v / pref_total) if pref_total > 0 else 0 for k, v in Topical_Pref_dist.items()}
+    topical_pref_dist = {t.entity_name: t.preference for t in user_profile.onboarding_topics}
+    pref_total = sum(topical_pref_dist.values())
+    topical_pref_dist_norm = {k: (v / pref_total) if pref_total > 0 else 0 for k, v in topical_pref_dist.items()}
 
-    Rec_Topical_dist_norm = {}
+    rec_topical_dist_norm = {}
     rec_topic_total = sum(user_topic_counts.values())
-    for topic in Topical_Pref_dist_norm.keys():
-        Rec_Topical_dist_norm[topic] = user_topic_counts.get(topic, 0) / rec_topic_total if rec_topic_total > 0 else 0
+    for topic in topical_pref_dist_norm.keys():
+        rec_topical_dist_norm[topic] = user_topic_counts.get(topic, 0) / rec_topic_total if rec_topic_total > 0 else 0
 
     kl_p_m = 0.0
     kl_q_m = 0.0
 
-    for t in Topical_Pref_dist.keys():
-        p = Topical_Pref_dist_norm[t]
-        q = Rec_Topical_dist_norm[t]
+    for t in topical_pref_dist.keys():
+        p = topical_pref_dist_norm[t]
+        q = rec_topical_dist_norm[t]
         m = 0.5 * (p + q)
 
         if p > 0 and m > 0:
@@ -129,7 +129,7 @@ def daily_user_wise_JSD(user_profile, user_topic_counts):
 
     jsd = 0.5 * kl_p_m + 0.5 * kl_q_m
 
-    return jsd, Topical_Pref_dist_norm, Rec_Topical_dist_norm
+    return jsd, topical_pref_dist_norm, rec_topical_dist_norm
 
 
 # utility functions for data storage
@@ -144,18 +144,18 @@ def compute_jsd_and_generate_outputs(
 
     os.makedirs(plots_dir, exist_ok=True)
 
-    for uuid, (jsd, Topical_Pref_dist_norm, Rec_Topical_dist_norm) in user_wise_rec_result.items():
+    for uuid, (jsd, topical_pref_dist_norm, rec_topical_dist_norm) in user_wise_rec_result.items():
         row = {"uuid": str(uuid), "jsd": jsd}
 
-        for topic in Topical_Pref_dist_norm.keys():
-            row[f"pref_{topic}"] = Topical_Pref_dist_norm[topic]
-            row[f"rec_{topic}"] = Rec_Topical_dist_norm.get(topic, 0)
+        for topic in topical_pref_dist_norm.keys():
+            row[f"pref_{topic}"] = topical_pref_dist_norm[topic]
+            row[f"rec_{topic}"] = rec_topical_dist_norm.get(topic, 0)
 
         rows_for_csv.append(row)
 
-        topics = list(Topical_Pref_dist_norm.keys())
-        pref_vals = [Topical_Pref_dist_norm[t] for t in topics]
-        rec_vals = [Rec_Topical_dist_norm[t] for t in topics]
+        topics = list(topical_pref_dist_norm.keys())
+        pref_vals = [topical_pref_dist_norm[t] for t in topics]
+        rec_vals = [rec_topical_dist_norm[t] for t in topics]
 
         x = np.arange(len(topics))
         width = 0.6
@@ -187,32 +187,32 @@ def compute_jsd_and_generate_outputs(
 topics = {t for t in TOPIC_DESCRIPTIONS.keys()}
 
 data = project_root() / "data" / "Test_Real_Click"
-Cand_articles_df = pd.read_parquet(data / "articles.parquet")
-Cand_mentions_df = pd.read_parquet(data / "mentions.parquet")
-candidate_dates = sorted(Cand_articles_df["published_at"].dt.normalize().unique())
+cand_articles_df = pd.read_parquet(data / "articles.parquet")
+cand_mentions_df = pd.read_parquet(data / "mentions.parquet")
+candidate_dates = sorted(cand_articles_df["published_at"].dt.normalize().unique())
 last_30_days_candidate = candidate_dates[-30:]
 
 
-CLK_df = pd.read_parquet(data / "clicks.parquet")
+clk_df = pd.read_parquet(data / "clicks.parquet")
 interest_df = pd.read_parquet(data / "interests.parquet")
 
 
-Clk_articles_df = pd.read_parquet(data / "clicked" / "articles.parquet")
-Clk_mentions_df = pd.read_parquet(data / "clicked" / "mentions.parquet")
-CLK_dates = sorted(Clk_articles_df["published_at"].dt.normalize().unique())
-candidate_excluded_CLK_dates = CLK_dates[:-30]
+clk_articles_df = pd.read_parquet(data / "clicked" / "articles.parquet")
+clk_mentions_df = pd.read_parquet(data / "clicked" / "mentions.parquet")
+clk_dates = sorted(clk_articles_df["published_at"].dt.normalize().unique())
+candidate_excluded_clk_dates = clk_dates[:-30]
 
 
-Clk_article_filtered = Clk_articles_df[
-    Clk_articles_df["published_at"].dt.normalize().isin(candidate_excluded_CLK_dates)
+clk_article_filtered = clk_articles_df[
+    clk_articles_df["published_at"].dt.normalize().isin(candidate_excluded_clk_dates)
 ]
-CLK_filtered = CLK_df[CLK_df["article_id"].isin(Clk_article_filtered["article_id"])]
+clk_filtered = clk_df[clk_df["article_id"].isin(clk_article_filtered["article_id"])]
 
 
 interacted_articles = []
 
-for row in Clk_article_filtered.itertuples():
-    article = complete_article_generator(row, Clk_mentions_df)
+for row in clk_article_filtered.itertuples():
+    article = complete_article_generator(row, clk_mentions_df)
     interacted_articles.append(article)
 
 interacted_articles_dict = {a.article_id: a for a in interacted_articles}
@@ -232,7 +232,7 @@ user_wise_rec_result = {}
 
 min_CLK = 10
 max_CLK = 50
-users_profile = user_profile_generator(CLK_filtered, interest_df, min_CLK, max_CLK)
+users_profile = user_profile_generator(clk_filtered, interest_df, min_CLK, max_CLK)
 
 
 user_topic_counts = {uuid: defaultdict(int) for uuid in users_profile.keys()}
@@ -241,11 +241,11 @@ user_topic_counts = {uuid: defaultdict(int) for uuid in users_profile.keys()}
 topic_counts_30d = Counter({topic: 0 for topic in topics})
 
 for day in tqdm(last_30_days_candidate):
-    day_df = Cand_articles_df[Cand_articles_df["published_at"].dt.normalize() == day]
+    day_df = cand_articles_df[cand_articles_df["published_at"].dt.normalize() == day]
 
     candidate_articles = []
     for row in day_df.itertuples():
-        article = complete_article_generator(row, Cand_mentions_df)
+        article = complete_article_generator(row, cand_mentions_df)
         candidate_articles.append(article)
 
     if len(candidate_articles) < static_num_recs:
@@ -275,8 +275,8 @@ for day in tqdm(last_30_days_candidate):
 
 
 for uuid, user_profile in users_profile.items():
-    jsd, Topical_Pref_dist_norm, Rec_Topical_dist_norm = daily_user_wise_JSD(user_profile, user_topic_counts[uuid])
+    jsd, topical_pref_dist_norm, rec_topical_dist_norm = daily_user_wise_JSD(user_profile, user_topic_counts[uuid])
 
-    user_wise_rec_result[uuid] = (jsd, Topical_Pref_dist_norm, Rec_Topical_dist_norm)
+    user_wise_rec_result[uuid] = (jsd, topical_pref_dist_norm, rec_topical_dist_norm)
 
 df = compute_jsd_and_generate_outputs(user_wise_rec_result)
