@@ -2138,3 +2138,74 @@ stages:
       hash: md5
       md5: c05e9a3bf9458f13816fbe5d9d01e1dc
       size: 601
+  recommend-poprox@nrms:
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX -o
+      outputs/poprox/nrms nrms
+    deps:
+    - path: data/POPROX/
+      hash: md5
+      md5: 720877eff356ed7cf3a9f44ebc47a752.dir
+      size: 59153430
+      nfiles: 10
+    - path: models/nrms-mind/
+      hash: md5
+      md5: fc8cc08f0ef9d25f78d493aa278108a8.dir
+      size: 571192256
+      nfiles: 3
+    - path: src/poprox_recommender/evaluation/generate/
+      hash: md5
+      md5: 579a3f14098b0785affd9537fb46e386.dir
+      size: 26542
+      nfiles: 4
+    - path: src/poprox_recommender/recommenders/configurations/nrms.py
+      hash: md5
+      md5: cd7a371ae9f2568d0bc95b930edf9c5f
+      size: 2585
+    outs:
+    - path: outputs/poprox/nrms/embeddings.parquet
+      hash: md5
+      md5: 2d6dd32483b95f14212eeecd6cb1d051
+      size: 28729981
+    - path: outputs/poprox/nrms/generate-task.json
+      hash: md5
+      md5: 4bacb4f6619fb16b03ded59aead0caaf
+      size: 388289
+    - path: outputs/poprox/nrms/recommendations.ndjson.zst
+      hash: md5
+      md5: 5c6abfb18a4d7879520a990b6d128166
+      size: 7975528123
+    - path: outputs/poprox/nrms/recommendations.parquet
+      hash: md5
+      md5: d4fb9744735c427dc349657e237394bc
+      size: 1721614
+  measure-poprox@nrms:
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX poprox nrms
+    deps:
+    - path: data/POPROX/
+      hash: md5
+      md5: 720877eff356ed7cf3a9f44ebc47a752.dir
+      size: 59153430
+      nfiles: 10
+    - path: outputs/poprox/nrms/recommendations.parquet
+      hash: md5
+      md5: d4fb9744735c427dc349657e237394bc
+      size: 1721614
+    - path: src/poprox_recommender/evaluation/evaluate.py
+      hash: md5
+      md5: f2c463132a273d5fc17fd1417810ac6c
+      size: 5253
+      isexec: true
+    - path: src/poprox_recommender/evaluation/metrics/
+      hash: md5
+      md5: b963e8ef04da407ecc859a2d0308d1f5.dir
+      size: 6943
+      nfiles: 5
+    outs:
+    - path: outputs/poprox/nrms/metrics.json
+      hash: md5
+      md5: b7850836b3677d3984e16407403fc780
+      size: 167
+    - path: outputs/poprox/nrms/recommendation-metrics.csv.gz
+      hash: md5
+      md5: d090144c1e5c5a770774e8f398f22c5d
+      size: 35492
