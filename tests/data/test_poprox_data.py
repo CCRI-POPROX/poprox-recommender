@@ -88,6 +88,9 @@ def test_lookup_truth(poprox_data: PoproxData):
                 # newsletter? it may be ingested after the newsletter, if we
                 # re-ingested it on a later day, so we don't test for that.
                 assert slate_ts - art.created_at <= timedelta(days=1)
+
+                # TODO: when we have explicit candidate sets, test that clicked articles
+                # are in the candidate set.
         except Exception as e:
             e.add_note(f"Error occurred in test slate {i} ({slate_id})")
             raise e
