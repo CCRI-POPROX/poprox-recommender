@@ -1,20 +1,20 @@
-import csv
 import json
 import math
-from collections import defaultdict
+import os
+from collections import Counter, defaultdict
 
-# from pathlib import Path
-from uuid import uuid4
-
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
 from poprox_concepts import AccountInterest, Article, CandidateSet, Click, Entity, InterestProfile, Mention
 from poprox_concepts.api.recommendations.v2 import RecommendationRequestV2, RecommendationResponseV2
 from poprox_recommender.api.main import root
+from poprox_recommender.components.topical_description import TOPIC_DESCRIPTIONS
 from poprox_recommender.paths import project_root
 
-# utility functions for article generator, rec_request generator and result store
+# utility functions for article generator, rec_request generator
 
 
 def complete_article_generator(row, mentions_df):
@@ -57,42 +57,37 @@ def full_request_generator(user_profile, interacted_articles_dict, candidate_art
     return RecommendationRequestV2.model_validate(full_request)
 
 
-def store_rec_recall_as_csv(sorted_user_wise_rec_recall, variation, time_frame):
-    csv_rows = [("Topic", "Avg_Precision", "Avg_Recall")]
-    for persona, values in sorted_user_wise_rec_recall.items():
-        csv_rows.append((persona, f"{values['avg_precision']:.5f}", f"{values['avg_recall']:.5f}"))
-
-    with open(data / f"{variation}_{time_frame}.csv", "w", newline="") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerows(csv_rows)
+# utility functions for user profile generation
 
 
-# utility functions for synthetic data generation
-
-
-def user_profile_generator(user_account_ID, CLK_df, interest_df):
+def user_profile_generator(CLK_df, interest_df, min_CLK, max_CLK):
     user_profile_batch = {}
 
-    for uuid in user_account_ID:
+    for uuid in interest_df["account_id"].unique():
         user_clicks = [
             Click(
-                article_id=clk.article_id,
-                newsletter_id=clk.newsletter_id,
-                timestamp=clk.clicked_at,
+                article_id=clk["article_id"],
+                newsletter_id=clk["newsletter_id"],
+                timestamp=clk["clicked_at"],
             )
-            for clk in CLK_df
-            if clk.profile_id == uuid
+            for _, clk in CLK_df.iterrows()
+            if clk["profile_id"] == uuid
         ]
+
+        if not (min_CLK <= len(user_clicks) <= max_CLK):
+            continue
+
         user_interests = [
             AccountInterest(
-                account_id=interest.account_id,
-                entity_id=interest.entity_id,
-                entity_name=interest.entity_name,
-                preference=interest.preference,
+                account_id=interest["account_id"],
+                entity_id=interest["entity_id"],
+                entity_name=interest["entity_name"],
+                preference=interest["preference"],
             )
-            for interest in interest_df
-            if interest.account_id == uuid
+            for _, interest in interest_df.iterrows()
+            if interest["account_id"] == uuid
         ]
+
         user_profile = InterestProfile(
             profile_id=uuid,
             click_history=user_clicks,
@@ -109,93 +104,143 @@ def user_profile_generator(user_account_ID, CLK_df, interest_df):
 # all the calculation functions
 
 
-def daily_user_wise_JSD(candidate_articles, uuid, response):
-    candidate_count = 0
-    for article in candidate_articles:
-        article_topics = set([m.entity.name for m in article.mentions if m.entity is not None])
-        if persona_topic in article_topics:
-            candidate_count += 1
+def daily_user_wise_JSD(user_profile, user_topic_counts):
+    Topical_Pref_dist = {t.entity_name: t.preference for t in user_profile.onboarding_topics}
+    pref_total = sum(Topical_Pref_dist.values())
+    Topical_Pref_dist_norm = {k: (v / pref_total) if pref_total > 0 else 0 for k, v in Topical_Pref_dist.items()}
 
-    articles = response["recommendations"]["articles"]
-    topical_count = 0
-    for i, article in enumerate(articles):
-        article_topics = set([m["entity"]["name"] for m in article["mentions"] if m["entity"] is not None])
-        if persona_topic in article_topics:
-            topical_count += 1
+    Rec_Topical_dist_norm = {}
+    rec_topic_total = sum(user_topic_counts.values())
+    for topic in Topical_Pref_dist_norm.keys():
+        Rec_Topical_dist_norm[topic] = user_topic_counts.get(topic, 0) / rec_topic_total if rec_topic_total > 0 else 0
 
-    recall = topical_count / candidate_count if candidate_count else float("nan")
-    precision = topical_count / 10
-    return recall, precision
+    kl_p_m = 0.0
+    kl_q_m = 0.0
 
+    for t in Topical_Pref_dist.keys():
+        p = Topical_Pref_dist_norm[t]
+        q = Rec_Topical_dist_norm[t]
+        m = 0.5 * (p + q)
 
-def avg_user_wise_rec_recall_over_days_calculator(persona_wise_rec_recall):
-    for persona, values in persona_wise_rec_recall.items():
-        daily_values = values["daily_scores"]
-        total_precision = 0
-        total_recall = 0
-        total_precison_count = 0
-        total_recall_count = 0
-        for day, precision, recall in daily_values:
-            total_precision += precision
-            total_precison_count += 1
-            if not math.isnan(recall):
-                total_recall += recall
-                total_recall_count += 1
-        values["avg_precision"] = total_precision / total_precison_count
-        values["avg_recall"] = total_recall / total_recall_count
-    return dict(sorted(persona_wise_rec_recall.items(), key=lambda x: x[0]))
+        if p > 0 and m > 0:
+            kl_p_m += p * math.log2(p / m)
+        if q > 0 and m > 0:
+            kl_q_m += q * math.log2(q / m)
+
+    jsd = 0.5 * kl_p_m + 0.5 * kl_q_m
+
+    return jsd, Topical_Pref_dist_norm, Rec_Topical_dist_norm
 
 
-# fetching article and mention data
+# utility functions for data storage
+
+
+def compute_jsd_and_generate_outputs(
+    user_wise_rec_result,
+    csv_path="TP_user_jsd_topic_distributions.csv",
+    plots_dir="TP_jsd_user_topic_plots",
+):
+    rows_for_csv = []
+
+    os.makedirs(plots_dir, exist_ok=True)
+
+    for uuid, (jsd, Topical_Pref_dist_norm, Rec_Topical_dist_norm) in user_wise_rec_result.items():
+        row = {"uuid": str(uuid), "jsd": jsd}
+
+        for topic in Topical_Pref_dist_norm.keys():
+            row[f"pref_{topic}"] = Topical_Pref_dist_norm[topic]
+            row[f"rec_{topic}"] = Rec_Topical_dist_norm.get(topic, 0)
+
+        rows_for_csv.append(row)
+
+        topics = list(Topical_Pref_dist_norm.keys())
+        pref_vals = [Topical_Pref_dist_norm[t] for t in topics]
+        rec_vals = [Rec_Topical_dist_norm[t] for t in topics]
+
+        x = np.arange(len(topics))
+        width = 0.6
+
+        fig, ax = plt.subplots(figsize=(8, 4))
+
+        # Background prefs
+        ax.bar(x, pref_vals, width=width, alpha=0.4, label="Topical Prefs")
+        # Foreground recs
+        ax.bar(x, rec_vals, width=width * 0.7, label="Recommended Articles")
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(topics, rotation=45, ha="right")
+        ax.set_ylabel("Probability")
+        ax.set_ylim(0, 1)
+        ax.set_title(f"Topic distributions for user {uuid}\nJSD = {jsd:.3f}")
+        ax.legend()
+        fig.tight_layout()
+
+        fig.savefig(os.path.join(plots_dir, f"{uuid}_topics.png"))
+        plt.close(fig)
+
+    df = pd.DataFrame(rows_for_csv)
+    df.to_csv(csv_path, index=False)
+
+    return df
+
+
+topics = {t for t in TOPIC_DESCRIPTIONS.keys()}
+
 data = project_root() / "data" / "Test_Real_Click"
 Cand_articles_df = pd.read_parquet(data / "articles.parquet")
 Cand_mentions_df = pd.read_parquet(data / "mentions.parquet")
-cadidate_dates = sorted(Cand_articles_df["published_at"].dt.normalize().unique())
+candidate_dates = sorted(Cand_articles_df["published_at"].dt.normalize().unique())
+last_30_days_candidate = candidate_dates[-30:]
 
-CLK_df = pd.read_parquet(data / "click.parquet")
-CLK_account_ID = CLK_df["profile_id"].unique()
 
-interest_df = pd.read_parquet(data / "insterests.parquet")
-interest_account_ID = interest_df["account_id"].unique()
+CLK_df = pd.read_parquet(data / "clicks.parquet")
+interest_df = pd.read_parquet(data / "interests.parquet")
 
-user_account_ID = set(CLK_account_ID) | set(interest_account_ID)
 
 Clk_articles_df = pd.read_parquet(data / "clicked" / "articles.parquet")
 Clk_mentions_df = pd.read_parquet(data / "clicked" / "mentions.parquet")
+CLK_dates = sorted(Clk_articles_df["published_at"].dt.normalize().unique())
+candidate_excluded_CLK_dates = CLK_dates[:-30]
 
 
-# preparing interacted article
+Clk_article_filtered = Clk_articles_df[
+    Clk_articles_df["published_at"].dt.normalize().isin(candidate_excluded_CLK_dates)
+]
+CLK_filtered = CLK_df[CLK_df["article_id"].isin(Clk_article_filtered["article_id"])]
+
+
 interacted_articles = []
 
-for row in tqdm(Clk_articles_df.itertuples()):
+for row in Clk_article_filtered.itertuples():
     article = complete_article_generator(row, Clk_mentions_df)
     interacted_articles.append(article)
 
 interacted_articles_dict = {a.article_id: a for a in interacted_articles}
 
 
-# preparing resulting dict
-user_wise_rec_recall = defaultdict(lambda: {"daily_scores": []})
-
-
-# setting parameters for different condition
 static_num_recs = 10
-# topical_pref_only || clicked_topic_personas || topical_click_only
-
-variation = "topical_pref_only"
 pipeline = "nrms_topic_scores"
-def_pref = 3
 
-# topic_embeddings_cand_11_months || topic_embeddings_cand_15_15_days ||
-# topic_embeddings_cand_15_days   || topic_embeddings_cand_30_days ||
-# topic_embeddings_def_llm || topic_embeddings_hybrid
-time_frame = "topic_embeddings_hybrid_AP"
 
-# synthetic data generation
-user_profiles = user_profile_generator(user_account_ID, CLK_df, interest_df)
+# topic_embeddings_cand_11_months || topic_embeddings_def || topic_embeddings_def_llm
+# topic_embeddings_hybrid || topic_embeddings_llm_hybrid
+# topic_embed_method = "topic_embeddings_cand"
 
-# day to day caddidate article
-for day in tqdm(cadidate_dates):
+
+user_wise_rec_result = {}
+
+
+min_CLK = 10
+max_CLK = 50
+users_profile = user_profile_generator(CLK_filtered, interest_df, min_CLK, max_CLK)
+
+
+user_topic_counts = {uuid: defaultdict(int) for uuid in users_profile.keys()}
+
+
+topic_counts_30d = Counter({topic: 0 for topic in topics})
+
+for day in tqdm(last_30_days_candidate):
     day_df = Cand_articles_df[Cand_articles_df["published_at"].dt.normalize() == day]
 
     candidate_articles = []
@@ -206,28 +251,32 @@ for day in tqdm(cadidate_dates):
     if len(candidate_articles) < static_num_recs:
         continue
 
+    for article in candidate_articles:
+        article_topics = {m.entity.name for m in article.mentions if m.entity.name in topics}
+        topic_counts_30d.update(article_topics)
+
     # taking each persona and generating full recommendation request based on topical preference
     # and interacted article as well as passing all the candidate articles for that day.
     # finally passing the pipeline and generating recommendation response.
-    for uuid, user_profile in user_profiles.items():
+    for uuid, user_profile in users_profile.items():
         req = full_request_generator(user_profile, interacted_articles_dict, candidate_articles, static_num_recs)
 
         response = root(req.model_dump(), pipeline=pipeline)
         response = RecommendationResponseV2.model_validate(response)
         response = response.model_dump()
 
-        # calculating the daily recall and precision for each persona
-        recall, precision = daily_user_wise_JSD(candidate_articles, uuid, response)
+        articles = response["recommendations"]["articles"]
 
-        user_wise_rec_recall[uuid]["daily_scores"].append((day, precision, recall))
+        for article in articles:
+            article_topics = {m["entity"]["name"] for m in article["mentions"] if m["entity"]["name"] in topics}
 
-
-# calculating persona wise avg recall over days
-avg_user_wise_rec_recall = avg_user_wise_rec_recall_over_days_calculator(user_wise_rec_recall)
-
-# store result in CSV
-store_rec_recall_as_csv(avg_user_wise_rec_recall, variation, time_frame)
+            for topic in article_topics:
+                user_topic_counts[uuid][topic] += 1
 
 
-# for persona, values in avg_persona_wise_rec_recall.items():
-#     print(f"\nTopic: {persona}|| Precision: {values['avg_precision']:.5f}|| Recall: {values['avg_recall']:.5f}")
+for uuid, user_profile in users_profile.items():
+    jsd, Topical_Pref_dist_norm, Rec_Topical_dist_norm = daily_user_wise_JSD(user_profile, user_topic_counts[uuid])
+
+    user_wise_rec_result[uuid] = (jsd, Topical_Pref_dist_norm, Rec_Topical_dist_norm)
+
+df = compute_jsd_and_generate_outputs(user_wise_rec_result)
