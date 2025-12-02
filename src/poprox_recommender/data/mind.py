@@ -206,7 +206,9 @@ class MindData(EvalData):
             mentions=[Mention(source="MIND", relevance=1, entity=entity) for entity in [category, subcategory]],
         )
 
-    # we cannot pickle live DuckDB connections, so drop object + reconnect at startup
+    # We pickle everything _except_ the database connection itself, and then re-connect
+    # to the database when unpickled. This allows us to share a data loader through Ray,
+    # and each work will have its own (read-only) connection to the database.
     def __getstate__(self):
         return {name: val for name, val in self.__dict__.items() if name != "duck"}
 
