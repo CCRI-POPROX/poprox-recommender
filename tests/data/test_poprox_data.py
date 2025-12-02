@@ -1,0 +1,78 @@
+import logging
+from datetime import timedelta
+from itertools import islice
+
+from pytest import fixture, skip
+
+from poprox_recommender.data.poprox import PoproxData
+
+logger = logging.getLogger(__name__)
+
+
+@fixture(scope="module")
+def poprox_data():
+    try:
+        yield PoproxData()
+    except FileNotFoundError as e:
+        logger.error("POPROX not found: %r", e)
+        skip("POPROX data not available")
+
+
+def test_load(poprox_data: PoproxData):
+    "Test the data loads & basic properties work."
+    assert poprox_data.n_articles > 100
+    assert poprox_data.n_requests > 500
+
+
+def test_scan_slate_ids(poprox_data: PoproxData):
+    "Test that the slate ID iterator is consistent with request count."
+    # count the number of items in the iterator
+    count = sum(1 for _ in poprox_data.iter_slate_ids())
+    assert count == poprox_data.n_requests
+
+
+def test_lookup_requests(poprox_data: PoproxData):
+    "Test that we can look up some requests."
+
+    for i, slate_id in enumerate(islice(poprox_data.iter_slate_ids(), 0, 5000, 100)):
+        try:
+            req = poprox_data.lookup_request(slate_id)
+            assert req is not None
+            # some basic sanity checks
+            assert 10 < len(req.candidates.articles) < 150
+            assert 0 <= len(req.interacted.articles) < 100
+
+            # make sure data is consistent
+            click_aids = set(c.article_id for c in req.interest_profile.click_history)
+            assert len(click_aids) == len(req.interacted.articles)
+
+            # check that the candidates are published on the same date
+            min_time = min(cand.published_at for cand in req.candidates.articles)
+            max_time = max(cand.published_at for cand in req.candidates.articles)
+            delta = max_time - min_time
+            # articles span no more than one day
+            assert delta < timedelta(days=1)
+        except Exception as e:
+            e.add_note(f"Error occurred in test slate {i} ({slate_id})")
+            raise e
+
+
+def test_request_articles(poprox_data: PoproxData):
+    "Look for articles mentioned by requests."
+
+    for slate_id in islice(poprox_data.iter_slate_ids(), 50, 75):
+        req = poprox_data.lookup_request(slate_id)
+        assert req is not None
+
+        click_aids = set(c.article_id for c in req.interest_profile.click_history)
+        assert len(click_aids) == len(req.interacted.articles)
+
+        # check that we can look up all the specified articles
+        for cand in req.candidates.articles:
+            art = poprox_data.lookup_article(cand.article_id)
+            assert art.article_id == cand.article_id
+            assert art.headline == cand.headline
+
+        for click in req.interest_profile.click_history:
+            art = poprox_data.lookup_article(click.article_id, source="clicked")
+            assert art.article_id == click.article_id
