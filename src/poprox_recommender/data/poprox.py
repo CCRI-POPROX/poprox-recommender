@@ -196,7 +196,13 @@ class PoproxData(EvalData):
             for (eid, ename, pref) in self.duck.fetchall()
         ]
 
-        profile = InterestProfile(profile_id=slate_id, click_history=clicks, entity_interests=topics)
+        profile = InterestProfile(
+            profile_id=slate_id,
+            click_history=clicks,
+            entity_interests=topics,
+            # stashing the newsletter timestamp here because we don't have it on request yet
+            slate_created_at=newsletter_created_at,
+        )
 
         # Filter candidate articles to those ingested on the same day as the newsletter (today's articles).
         # ME: is this correct, or do we need previous day?
