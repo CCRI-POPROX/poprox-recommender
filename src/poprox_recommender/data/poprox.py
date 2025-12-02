@@ -143,7 +143,7 @@ class PoproxData(EvalData):
             """
             SELECT
                 -- article metadata
-                article_id, headline, subhead, published_at, url, NULL, raw_data,
+                article_id, headline, subhead, published_at, url, raw_data, ca.created_at AS created_at,
                 -- pull together the mentions into a single list per result row
                 LIST({
                     'mention_id': mention_id,
@@ -206,7 +206,7 @@ class PoproxData(EvalData):
             """
             SELECT
                 -- article metadata
-                article_id, headline, subhead, published_at, url, body, raw_data,
+                article_id, headline, subhead, published_at, url, body, raw_data, ca.created_at AS created_at,
                 -- pull together the mentions
                 LIST({
                     'mention_id': mention_id,
@@ -255,7 +255,7 @@ class PoproxData(EvalData):
             f"""
             SELECT
                 -- article metadata
-                article_id, headline, subhead, published_at, url, NULL, raw_data,
+                article_id, headline, subhead, published_at, url, raw_data,
                 -- pull together the mentions
                 LIST({{
                     'mention_id': mention_id,
@@ -293,38 +293,39 @@ class PoproxData(EvalData):
         if db is None:
             db = self.duck
 
+        names = [d[0] for d in db.description]
+        required_names = ["article_id", "headline", "subhead", "published_at", "mentions"]
+        for f in required_names:
+            if f not in names:
+                raise RuntimeError(f"required article field {f} not in query")
+
         while row := db.fetchone():
-            article_id, headline, subhead, pub_date, url, body, raw, mentions = row
+            assert len(row) == len(names)
+            row_dict = dict(zip(names, row))
 
             # convert mentions into POPROX concept models
-            mms = []
-            for mr in mentions:
-                entity = None
-                if ent_json := mr.get("entity", None):
-                    entity = Entity.model_validate_json(ent_json)
+            if "mentions" in row_dict:
+                mms = []
+                for mr in row_dict["mentions"]:
+                    entity = None
+                    if ent_json := mr.get("entity", None):
+                        entity = Entity.model_validate_json(ent_json)
 
-                mms.append(
-                    Mention(
-                        mention_id=mr["mention_id"],
-                        article_id=article_id,
-                        source=mr["source"],
-                        relevance=mr["relevance"],
-                        entity=entity,
+                    mms.append(
+                        Mention(
+                            mention_id=mr["mention_id"],
+                            article_id=row_dict["article_id"],
+                            source=mr["source"],
+                            relevance=mr["relevance"],
+                            entity=entity,
+                        )
                     )
-                )
+                row_dict["mentions"] = mms
 
-            yield Article(
-                article_id=article_id,
-                headline=headline,
-                subhead=subhead,
-                published_at=pub_date,
-                body=body,
-                mentions=mms,
-                url=url,
-                source="AP",
-                external_id="",
-                raw_data=json.loads(raw) if raw else None,
-            )
+            if "raw_data" in row_dict:
+                row_dict["raw_data"] = json.loads(row_dict["raw_data"])
+
+            yield Article(source="AP", external_id="", **row_dict)
 
     # We pickle everything _except_ the database connection itself, and then re-connect
     # to the database when unpickled. This allows us to share a data loader through Ray,
