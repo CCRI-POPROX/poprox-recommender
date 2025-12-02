@@ -64,6 +64,38 @@ def test_lookup_requests(poprox_data: PoproxData):
             raise e
 
 
+def test_lookup_truth(poprox_data: PoproxData):
+    "Test that we can look up some truth."
+
+    n = 0
+    for i, slate_id in enumerate(islice(poprox_data.iter_slate_ids(), 0, 5000, 15)):
+        try:
+            truth = poprox_data.slate_truth(slate_id)
+            assert truth is not None
+            if len(truth) == 0:
+                continue
+
+            n += 1
+            req = poprox_data.lookup_request(slate_id)
+            slate_ts = req.interest_profile.slate_created_at
+            for aid in truth.index:
+                art = poprox_data.lookup_article(aid, source="clicked")
+                assert art.article_id == aid
+
+                # was the article published before the newsletter?
+                assert art.published_at <= slate_ts
+                # was the article ingested no more than 1 day before the
+                # newsletter? it may be ingested after the newsletter, if we
+                # re-ingested it on a later day, so we don't test for that.
+                assert slate_ts - art.created_at <= timedelta(days=1)
+        except Exception as e:
+            e.add_note(f"Error occurred in test slate {i} ({slate_id})")
+            raise e
+
+    # make sure we got some articles with nonzero truth so the test isn't void
+    assert n > 10, "no test requests had clicks"
+
+
 def test_request_articles(poprox_data: PoproxData):
     "Look for articles mentioned by requests."
     if not hasattr(poprox_data, "lookup_article"):
