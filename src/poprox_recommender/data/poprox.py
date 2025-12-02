@@ -30,9 +30,9 @@ class PoproxData(EvalData):
     """
 
     name: str
-    "Name of the MIND dataset."
+    "Name of the POPROX dataset."
     path: Path
-    "Path to the MIND database."
+    "Path to the POPROX database."
     duck: DuckDBPyConnection
     "DuckDB connection."
 
