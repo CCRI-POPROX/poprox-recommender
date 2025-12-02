@@ -261,7 +261,7 @@ class PoproxData(EvalData):
             f"""
             SELECT
                 -- article metadata
-                article_id, headline, subhead, published_at, url, raw_data,
+                article_id, headline, subhead, published_at, a.created_at AS created_at, url, raw_data,
                 -- pull together the mentions
                 LIST({{
                     'mention_id': mention_id,
@@ -269,7 +269,7 @@ class PoproxData(EvalData):
                     'relevance': relevance,
                     'entity': entity
                 }}) FILTER (mention_id IS NOT NULL) AS mentions
-            FROM {article_tbl}
+            FROM {article_tbl} a
             LEFT JOIN {mention_tbl} USING (article_id)
             WHERE article_id = ?
             GROUP BY ALL
