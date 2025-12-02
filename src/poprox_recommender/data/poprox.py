@@ -1,5 +1,5 @@
 """
-Support for loading POPROX data for evaluation.
+Load POPROX data for evaluation.
 """
 
 # pyright: basic
