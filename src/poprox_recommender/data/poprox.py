@@ -126,14 +126,14 @@ class PoproxData(EvalData):
         # look up the newsletter itself
         self.duck.execute(
             """
-            SELECT account_id, created_at
+            SELECT account_id, created_at, newsletter_date
             FROM newsletters
             WHERE newsletter_id = ?
             """,
             [slate_id],
         )
         if row := self.duck.fetchone():
-            account_id, newsletter_created_at = row
+            account_id, newsletter_created_at, newsletter_date = row
         else:
             raise KeyError(slate_id)
 
@@ -204,10 +204,7 @@ class PoproxData(EvalData):
             slate_created_at=newsletter_created_at,
         )
 
-        # Filter candidate articles to those ingested on the same day as the newsletter (today's articles).
-        # ME: is this correct, or do we need previous day?
-        # ME: what time zone are we operating in?
-        # ME: alternate proposal: newsletter date - 24h
+        # Retrieve the candidate articles for the newsletter date.
         self.duck.execute(
             """
             SELECT
@@ -221,13 +218,14 @@ class PoproxData(EvalData):
                     'entity': entity
                 }) FILTER (mention_id IS NOT NULL) AS mentions
             -- find all candidate articles with matching dates
-            FROM candidate_articles ca
+            FROM newsletter_candidates nc
+            JOIN candidate_articles ca USING (article_id)
             -- also pull in their mentions
             LEFT JOIN candidate_article_mentions USING (article_id)
-            WHERE ca.created_at::DATE = ?::DATE
+            WHERE newsletter_date = ?
             GROUP BY ALL
             """,
-            [newsletter_created_at],
+            [newsletter_date],
         )
         candidate_articles = list(self._iter_query_articles())
 
