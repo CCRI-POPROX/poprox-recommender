@@ -2349,3 +2349,73 @@ stages:
       hash: md5
       md5: 051409714eaaa662d3feab14fb1270ad
       size: 550
+  recommend-poprox-latest@softmax:
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o 
+      outputs/poprox-latest/softmax softmax
+    deps:
+    - path: data/POPROX.db
+      hash: md5
+      md5: 38cd49e48b793143c48afc751f03b8e8
+      size: 153104384
+    - path: models/nrms-mind/
+      hash: md5
+      md5: fc8cc08f0ef9d25f78d493aa278108a8.dir
+      size: 571192256
+      nfiles: 3
+    - path: src/poprox_recommender/evaluation/generate/
+      hash: md5
+      md5: 7906238df35e373820e3e9f82aaba94f.dir
+      size: 26869
+      nfiles: 4
+    - path: src/poprox_recommender/recommenders/configurations/softmax.py
+      hash: md5
+      md5: 9ba5b94ba1188889db8299ff6dbcffc7
+      size: 2976
+    outs:
+    - path: outputs/poprox-latest/softmax/embeddings.parquet
+      hash: md5
+      md5: 4b3a2b7af41f4f62287d3362e96fffbe
+      size: 15721625
+    - path: outputs/poprox-latest/softmax/generate-task.json
+      hash: md5
+      md5: a572af4511c029af8d5be10e12164260
+      size: 9688
+    - path: outputs/poprox-latest/softmax/recommendations.ndjson.zst
+      hash: md5
+      md5: 5202cacd1ec245de91d8c76ad56fd4d8
+      size: 178455441
+    - path: outputs/poprox-latest/softmax/recommendations.parquet
+      hash: md5
+      md5: 04db1d3abbccf4d7f96222c95387ee2f
+      size: 60417
+  measure-poprox@poprox-latest-softmax:
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
+      poprox-latest softmax
+    deps:
+    - path: data/POPROX.db
+      hash: md5
+      md5: 38cd49e48b793143c48afc751f03b8e8
+      size: 153104384
+    - path: outputs/poprox-latest/softmax/recommendations.parquet
+      hash: md5
+      md5: 04db1d3abbccf4d7f96222c95387ee2f
+      size: 60417
+    - path: src/poprox_recommender/evaluation/evaluate.py
+      hash: md5
+      md5: f2c463132a273d5fc17fd1417810ac6c
+      size: 5253
+      isexec: true
+    - path: src/poprox_recommender/evaluation/metrics/
+      hash: md5
+      md5: b963e8ef04da407ecc859a2d0308d1f5.dir
+      size: 6943
+      nfiles: 5
+    outs:
+    - path: outputs/poprox-latest/softmax/metrics.json
+      hash: md5
+      md5: 630d1ea8ba463047b3e9a4f65131259d
+      size: 189
+    - path: outputs/poprox-latest/softmax/recommendation-metrics.csv.gz
+      hash: md5
+      md5: 888db6dedea5e05a807227205006b186
+      size: 795
