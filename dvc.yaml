@@ -146,19 +146,23 @@ stages:
         - outputs/poprox-recent/${item}/generate-task.json
 
   measure-poprox:
-    foreach: ${pipelines}
-    do:
-      cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX poprox ${item}
-      deps:
-        - src/poprox_recommender/evaluation/evaluate.py
-        - src/poprox_recommender/evaluation/metrics/
-        - data/POPROX.db
-        - outputs/poprox/${item}/recommendations.parquet
-      outs:
-        - outputs/poprox/${item}/recommendation-metrics.csv.gz
-      metrics:
-        - outputs/poprox/${item}/metrics.json:
-            cache: false
+    matrix:
+      data:
+        - poprox
+        - poprox-recent
+        - poprox-latest
+      pipeline: ${pipelines}
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX ${item.data} ${item.pipeline}
+    deps:
+      - src/poprox_recommender/evaluation/evaluate.py
+      - src/poprox_recommender/evaluation/metrics/
+      - data/POPROX.db
+      - outputs/${item.data}/${item.pipeline}/recommendations.parquet
+    outs:
+      - outputs/${item.data}/${item.pipeline}/recommendation-metrics.csv.gz
+    metrics:
+      - outputs/${item.data}/${item.pipeline}/metrics.json:
+          cache: false
 
   collect-metrics:
     foreach:
