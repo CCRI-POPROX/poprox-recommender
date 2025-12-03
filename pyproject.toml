@@ -143,8 +143,8 @@ unfixable = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# tests can have unused imports (for pytest fixtures)
-"tests/**/*" = ["F401"]
+# tests can have unused imports and overrides (for pytest fixtures)
+"tests/**/*" = ["F401", "F811"]
 
 [tool.ruff.isort]
 known-first-party = ["poprox_*"]

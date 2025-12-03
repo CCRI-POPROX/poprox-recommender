@@ -27,6 +27,16 @@ stages:
       outs:
         - ${item}.db
 
+  ingest-poprox:
+    cmd: python -m poprox_recommender.data.duckscript POPROX.db poprox-schema.sql poprox-ingest.sql poprox-post.sql
+    deps:
+      - poprox-schema.sql
+      - poprox-ingest.sql
+      - poprox-post.sql
+      - POPROX
+    outs:
+      - POPROX.db
+
   preprocess-training-data:
     cmd: python -m poprox_recommender.training.preprocess
     deps:
