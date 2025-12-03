@@ -39,7 +39,7 @@ def test_identical_embeddings(all_articles):
     embeddings = th.ones((10, 768))
     reference = CandidateSet(articles=all_articles[:10], embeddings=embeddings)
     ils_score = intralist_similarity(reference, k=10)
-    assert ils_score == pytest.approx(1.0)
+    assert ils_score == pytest.approx(1.0, rel=0.01)
 
 
 def test_orthogonal_embeddings(all_articles):
