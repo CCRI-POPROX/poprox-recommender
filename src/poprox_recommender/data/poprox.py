@@ -23,6 +23,11 @@ from poprox_recommender.paths import project_root
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
 
+type SlateSet = Literal["all", "latest", "recent"]
+"""
+Type for selecting the set of slates to return from the POPROX data.
+"""
+
 
 class PoproxData(EvalData):
     """
@@ -35,13 +40,16 @@ class PoproxData(EvalData):
     "Path to the POPROX database."
     duck: DuckDBPyConnection
     "DuckDB connection."
+    slates: SlateSet
+    "Set of slates to return."
 
     _impression_count: int
     _article_count: int
 
-    def __init__(self, archive: str = "POPROX"):
+    def __init__(self, archive: str = "POPROX", *, slates: SlateSet = "all"):
         self.name = archive
         self.path = project_root() / "data" / f"{archive}.db"
+        self.slates = slates
 
         if not self.path.exists():
             raise FileNotFoundError(self.path)
@@ -49,7 +57,7 @@ class PoproxData(EvalData):
         self.duck = duckdb.connect(self.path, read_only=True)
 
         # pre-fetch counts
-        self.duck.execute("SELECT COUNT(*) FROM newsletters")
+        self.duck.execute(f"SELECT COUNT(*) FROM ({self._newsletter_query()})")
         (n,) = self.duck.fetchone() or [0]
         self._impression_count = n
 
@@ -94,7 +102,7 @@ class PoproxData(EvalData):
         # over this iterator, we need to use a cloned cursor to keep this
         # loop's iteration separate from other requests from the caller.
         with self.duck.cursor() as clone:
-            query = "SELECT newsletter_id FROM newsletters ORDER BY created_at"
+            query = self._newsletter_query()
             if limit is not None:
                 assert isinstance(limit, int)
                 query += f" LIMIT {limit}"
@@ -106,6 +114,31 @@ class PoproxData(EvalData):
                 (slate_id,) = row
                 assert isinstance(slate_id, UUID)
                 yield slate_id
+
+    def _newsletter_query(self) -> str:
+        "Construct a query to retrieve newsletter IDs."
+        match self.slates:
+            case "all":
+                query = "SELECT newsletter_id FROM newsletters ORDER BY created_at"
+            case "latest":
+                # only get the last slate for each account
+                query = """
+                    SELECT LAST(newsletter_id ORDER BY created_at)
+                    FROM newsletters
+                    GROUP BY account_id
+                """
+            case "recent":
+                # get the last slate for each account, leaving 1 week lookahead
+                query = """
+                    SELECT LAST(newsletter_id ORDER BY created_at)
+                    FROM newsletters
+                    WHERE created_at < (SELECT MAX(created_at) - INTERVAL '1 week' FROM newsletters)
+                    GROUP BY account_id
+                """
+            case _:
+                raise ValueError(f"unsupported slate set {self.slates}")
+
+        return query
 
     def lookup_request(self, slate_id: UUID) -> RecommendationRequestV4:
         """

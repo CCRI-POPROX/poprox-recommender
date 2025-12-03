@@ -15,6 +15,7 @@ repos:
         exclude: ^notebooks/.*\.ipynb
       - id: mixed-line-ending
       - id: trailing-whitespace
+        exclude: (^|/)dvc\.lock$
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.28.0
     hooks:
