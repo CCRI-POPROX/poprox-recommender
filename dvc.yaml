@@ -72,7 +72,7 @@ stages:
   recommend-mind-subset:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000 -o outputs/mind-subset/${item} ${item}
+      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=250 -o outputs/mind-subset/${item} ${item}
       deps:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
