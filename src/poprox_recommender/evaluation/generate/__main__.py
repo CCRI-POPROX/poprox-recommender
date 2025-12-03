@@ -17,6 +17,10 @@ Options:
             read POPROX test data DATA
     --subset=N
             test only on the first N test requests
+    --latest
+            test only on the last profile for each user
+    --recent
+            test only on a single recent profile for each user
     PIPELINE
             The name of the pipeline to generate from
 """
@@ -59,7 +63,13 @@ def generate_main():
         n_requests = int(n_requests)
 
     if options["--poprox-data"]:
-        dataset = PoproxData(options["--poprox-data"])
+        if options["--recent"]:
+            slates = "recent"
+        elif options["--latest"]:
+            slates = "latest"
+        else:
+            slates = "all"
+        dataset = PoproxData(options["--poprox-data"], slates=slates)
     elif options["--mind-data"]:
         dataset = MindData(options["--mind-data"])
     else:
