@@ -23,7 +23,7 @@ from poprox_recommender.paths import project_root
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
 
-type SlateSet = Literal["all", "latest", "pseudo-latest"]
+type SlateSet = Literal["all", "latest", "recent"]
 """
 Type for selecting the set of slates to return from the POPROX data.
 """
@@ -112,7 +112,7 @@ class PoproxData(EvalData):
                         FROM newsletters
                         GROUP BY account_id
                     """
-                case "pseudo-latest":
+                case "recent":
                     # get the last slate for each account, leaving 1 week lookahead
                     query = """
                         SELECT LAST(newsletter_id ORDER BY created_at)

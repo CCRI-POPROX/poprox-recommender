@@ -143,8 +143,8 @@ def test_latest_slates():
     assert len(slates) == n
 
 
-def test_pseudo_latest_slates():
-    poprox_data = _load_or_skip("pseudo-latest")
+def test_recent_slates():
+    poprox_data = _load_or_skip("recent")
 
     slates = list(poprox_data.iter_slate_ids())
     db = poprox_data.duck.cursor()
