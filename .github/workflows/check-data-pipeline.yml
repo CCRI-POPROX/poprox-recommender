@@ -63,3 +63,11 @@ jobs:
           LK_NUM_PROCS: 4
           LK_NUM_THREADS: 2
           LK_NUM_BACKEND_THREADS: 2
+
+      - name: Re-run POPROX recent outputs
+        run: |
+          dvc repro -f measure-poprox@poprox-recent-nrms
+        env:
+          LK_NUM_PROCS: 4
+          LK_NUM_THREADS: 2
+          LK_NUM_BACKEND_THREADS: 2
