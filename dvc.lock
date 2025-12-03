@@ -2209,3 +2209,42 @@ stages:
       hash: md5
       md5: d090144c1e5c5a770774e8f398f22c5d
       size: 35492
+  recommend-poprox-recent@nrms:
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o
+      outputs/poprox-recent/nrms nrms
+    deps:
+    - path: data/POPROX.db
+      hash: md5
+      md5: 38cd49e48b793143c48afc751f03b8e8
+      size: 153104384
+    - path: models/nrms-mind/
+      hash: md5
+      md5: fc8cc08f0ef9d25f78d493aa278108a8.dir
+      size: 571192256
+      nfiles: 3
+    - path: src/poprox_recommender/evaluation/generate/
+      hash: md5
+      md5: 7906238df35e373820e3e9f82aaba94f.dir
+      size: 26869
+      nfiles: 4
+    - path: src/poprox_recommender/recommenders/configurations/nrms.py
+      hash: md5
+      md5: cd7a371ae9f2568d0bc95b930edf9c5f
+      size: 2585
+    outs:
+    - path: outputs/poprox-recent/nrms/embeddings.parquet
+      hash: md5
+      md5: 140b3754a6af5e20364be536dbb27eda
+      size: 14197784
+    - path: outputs/poprox-recent/nrms/generate-task.json
+      hash: md5
+      md5: fdc76a2ce7ec2e8e4b8e5f023612de7e
+      size: 9680
+    - path: outputs/poprox-recent/nrms/recommendations.ndjson.zst
+      hash: md5
+      md5: d9e15933c5095907a6957ec7b5e8bcda
+      size: 140647743
+    - path: outputs/poprox-recent/nrms/recommendations.parquet
+      hash: md5
+      md5: 2e2275efdcfcea5281eae1743a43e47e
+      size: 50966

@@ -115,6 +115,36 @@ stages:
         - outputs/poprox/${item}/embeddings.parquet
         - outputs/poprox/${item}/generate-task.json
 
+  recommend-poprox-latest:
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o outputs/poprox-latest/${item} ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/POPROX.db
+      outs:
+        - outputs/poprox-latest/${item}/recommendations.parquet
+        - outputs/poprox-latest/${item}/recommendations.ndjson.zst
+        - outputs/poprox-latest/${item}/embeddings.parquet
+        - outputs/poprox-latest/${item}/generate-task.json
+
+  recommend-poprox-recent:
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o outputs/poprox-recent/${item} ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/POPROX.db
+      outs:
+        - outputs/poprox-recent/${item}/recommendations.parquet
+        - outputs/poprox-recent/${item}/recommendations.ndjson.zst
+        - outputs/poprox-recent/${item}/embeddings.parquet
+        - outputs/poprox-recent/${item}/generate-task.json
+
   measure-poprox:
     foreach: ${pipelines}
     do:
