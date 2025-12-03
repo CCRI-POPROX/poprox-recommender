@@ -4,15 +4,19 @@ from itertools import islice
 
 from pytest import fixture, skip
 
-from poprox_recommender.data.poprox import PoproxData
+from poprox_recommender.data.poprox import PoproxData, SlateSet
 
 logger = logging.getLogger(__name__)
 
 
 @fixture(scope="module")
 def poprox_data():
+    yield _load_or_skip()
+
+
+def _load_or_skip(slates: SlateSet = "all"):
     try:
-        yield PoproxData()
+        return PoproxData(slates=slates)
     except FileNotFoundError as e:
         logger.error("POPROX not found: %r", e)
         skip("POPROX data not available")
@@ -126,3 +130,25 @@ def test_request_articles(poprox_data: PoproxData):
             # are all articles ingested after they are published?
             for art in req.candidates.articles:
                 assert art.published_at <= art.created_at
+
+
+def test_latest_slates():
+    poprox_data = _load_or_skip("latest")
+
+    slates = list(poprox_data.iter_slate_ids())
+    db = poprox_data.duck.cursor()
+    db.execute("SELECT COUNT(DISTINCT account_id) FROM newsletters")
+    (n,) = db.fetchone() or [0]
+    # did we get one slate per account?
+    assert len(slates) == n
+
+
+def test_pseudo_latest_slates():
+    poprox_data = _load_or_skip("pseudo-latest")
+
+    slates = list(poprox_data.iter_slate_ids())
+    db = poprox_data.duck.cursor()
+    db.execute("SELECT COUNT(DISTINCT account_id) FROM newsletters")
+    (n,) = db.fetchone() or [0]
+    # did we get one slate per account?
+    assert len(slates) <= n
