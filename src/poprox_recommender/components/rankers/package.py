@@ -16,11 +16,11 @@ class PackageFilterConfig(BaseModel):
 class PackageFilter(Component):
     config: PackageFilterConfig
 
-    def __call__(self, candidate_articles: CandidateSet, article_packags: list[ArticlePackage]) -> CandidateSet:
+    def __call__(self, candidate_articles: CandidateSet, article_packages: list[ArticlePackage]) -> CandidateSet:
         article_lookup = {article.article_id: article for article in candidate_articles.articles}
         selected_articles = []
 
-        for package in article_packags:
+        for package in article_packages:
             if not package.seed or package.seed.entity_id != self.config.package_entity_id:
                 continue
 
@@ -32,7 +32,7 @@ class PackageFilter(Component):
             "PackageFilter selected %d of %d candidate articles from'%d' packages",
             len(selected_articles),
             len(candidate_articles.articles),
-            len(article_packags),
+            len(article_packages),
         )
 
         return CandidateSet(articles=selected_articles)
