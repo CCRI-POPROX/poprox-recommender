@@ -109,7 +109,6 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
         "personalized": len(ranked.articles) > 0,
         # count the number of instances with non-empty truth sets
         "num_truth": len(truth),
-        # effectivess metrics can default to 0
         "RBP": single_rbp,
         "NDCG@5": single_ndcg5,
         "NDCG@10": single_ndcg10,
