@@ -5,7 +5,7 @@ from uuid import UUID
 import pandas as pd
 from lenskit.data import ItemList
 from lenskit.metrics import call_metric
-from lenskit.metrics.ranking import NDCG, RecipRank
+from lenskit.metrics.ranking import NDCG, RBP, RecipRank
 
 from poprox_concepts.domain import Article, CandidateSet
 from poprox_recommender.data.eval import EvalData
@@ -59,9 +59,11 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     final_rec_df = recs[recs["stage"] == "final"]
     final_rec = ItemList.from_df(final_rec_df)
 
+    # for effectiveness metrics, fill in 0s
     single_rr = call_metric(RecipRank, final_rec, truth)
     single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
     single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
+    single_rbp = call_metric(RBP, final_rec, truth)
 
     ranked_rec_df = recs[recs["stage"] == "ranked"]
     ranked = convert_df_to_article_set(ranked_rec_df)
@@ -82,9 +84,10 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     ils = intralist_similarity(ranked, k=10)
 
     logger.debug(
-        "recommendation %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
+        "recommendation %s: RBP=%0.3f, NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
         " LIP=%0.3f, RBE=%0.3f",
         recommendation_id,
+        single_rbp,
         single_ndcg5,
         single_ndcg10,
         single_rr,
@@ -101,9 +104,13 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
         # whole function should be revised for generality when we want to support
         # other pipelines.
         "personalized": len(ranked.articles) > 0,
-        "NDCG@5": single_ndcg5,
-        "NDCG@10": single_ndcg10,
-        "RR": single_rr,
+        # count the number of instances with non-empty truth sets
+        "num_truth": len(truth),
+        # effectivess metrics can default to 0
+        "RBP": single_rbp or 0.0,
+        "NDCG@5": single_ndcg5 or 0.0,
+        "NDCG@10": single_ndcg10 or 0.0,
+        "RR": single_rr or 0.0,
         "RBO@5": single_rbo5,
         "RBO@10": single_rbo10,
         "rank_based_entropy": rbe,

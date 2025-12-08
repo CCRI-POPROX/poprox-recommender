@@ -120,6 +120,7 @@ def main():
             pb.update()
 
     metrics = pd.DataFrame.from_records(metric_records)
+
     print(metrics)
     logger.info("measured metrics for %d recommendations", metrics["recommendation_id"].nunique())
 
