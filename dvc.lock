@@ -2347,7 +2347,7 @@ stages:
       size: 215
     - path: outputs/poprox-latest/nrms/recommendation-metrics.csv.gz
       hash: md5
-      md5: c549ebbc4c5b86d12d2b6c2ea159d545
+      md5: 588fda8bd04c917cf701ad20394fc98e
       size: 9001
   recommend-poprox-latest@softmax:
     cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o 
