@@ -1,4 +1,5 @@
 import logging
+from math import isnan
 from typing import Any, NamedTuple
 from uuid import UUID
 
@@ -107,10 +108,10 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
         # count the number of instances with non-empty truth sets
         "num_truth": len(truth),
         # effectivess metrics can default to 0
-        "RBP": single_rbp or 0.0,
-        "NDCG@5": single_ndcg5 or 0.0,
-        "NDCG@10": single_ndcg10 or 0.0,
-        "RR": single_rr or 0.0,
+        "RBP": single_rbp if not isnan(single_rbp) else 0.0,
+        "NDCG@5": single_ndcg5 if not isnan(single_ndcg5) else 0.0,
+        "NDCG@10": single_ndcg10 if not isnan(single_ndcg10) else 0.0,
+        "RR": single_rr if not isnan(single_rr) else 0.0,
         "RBO@5": single_rbo5,
         "RBO@10": single_rbo10,
         "rank_based_entropy": rbe,
