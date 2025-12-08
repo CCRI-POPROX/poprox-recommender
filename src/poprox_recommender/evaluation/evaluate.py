@@ -57,10 +57,9 @@ def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[Recs
         slate_id = UUID(str(slate_id))
         truth = eval_data.slate_truth(slate_id)
         assert truth is not None
-        if len(truth) > 0:
-            yield RecsWithTruth(slate_id, recs.copy(), truth)
-        else:
+        if len(truth) == 0:
             logger.warning("request %s has no truth", slate_id)
+        yield RecsWithTruth(slate_id, recs.copy(), truth)
 
 
 def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[dict[str, Any]]:
