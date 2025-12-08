@@ -1,1 +1,1 @@
-{"NDCG@5":0.5190274011,"NDCG@10":0.5375841586,"MRR":0.4006535948,"RBO@5":0.0,"RBO@10":0.0,"rank_based_entropy":0.0,"least_item_promoted":0.0,"intralist_similarity":null}
+{"num_truth":0.0560471976,"RBP":0.0896712115,"NDCG@5":0.5190274011,"NDCG@10":0.5375841586,"MRR":0.4006535948,"RBO@5":0.0,"RBO@10":0.0,"rank_based_entropy":0.0,"least_item_promoted":0.0,"intralist_similarity":null}

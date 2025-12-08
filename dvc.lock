@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   measure-mind-val:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val
     deps:
     - path: data/MINDlarge_dev.zip
@@ -27,7 +27,7 @@ stages:
       md5: db28d1c70783822fa1d61447979b228d
       size: 38010752
   recommend-mind-val:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val
     deps:
     - path: data/MINDlarge_dev.zip
@@ -55,7 +55,7 @@ stages:
       size: 43055436
       nfiles: 4
   recommend-mind-small:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small
     deps:
     - path: data/MINDsmall_dev.zip
@@ -83,7 +83,7 @@ stages:
       size: 8350118
       nfiles: 4
   measure-mind-small:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small
     deps:
     - path: data/MINDlarge_dev.zip
@@ -109,7 +109,7 @@ stages:
       md5: 87be17f2335a167ffb9e56876a359221
       size: 7385308
   recommend-mind-subset:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=1000 -o outputs/mind-subset
     deps:
     - path: data/MINDsmall_dev.zip
@@ -137,7 +137,7 @@ stages:
       size: 197665
       nfiles: 4
   measure-mind-subset:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset
     deps:
     - path: data/MINDlarge_dev.zip
@@ -163,7 +163,7 @@ stages:
       md5: 016719a6b8213f774ef9c4f3b71cc1ab
       size: 101677
   recommend-mind-subset@nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=250 -o outputs/mind-subset/nrms_topics_static nrms_topics_static
     deps:
     - path: data/MINDsmall_dev.db
@@ -180,7 +180,7 @@ stages:
       md5: 579a3f14098b0785affd9537fb46e386.dir
       size: 26542
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topics_static.py
       hash: md5
       md5: 8ca4b9c9e60d555358cc03eb852dea1b
@@ -203,7 +203,7 @@ stages:
       md5: 74f8e86f9e881070421d976097d05fad
       size: 21789
   recommend-mind-subset@nrms_images:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=1000 -o outputs/mind-subset/nrms_images nrms_images
     deps:
     - path: data/MINDsmall_dev.zip
@@ -242,7 +242,7 @@ stages:
       md5: 3df602990a70df4c249f83e9b075cd7b
       size: 95761
   recommend-mind-subset@nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=250 -o outputs/mind-subset/nrms_topic_scores nrms_topic_scores
     deps:
     - path: data/MINDsmall_dev.db
@@ -259,7 +259,7 @@ stages:
       md5: 579a3f14098b0785affd9537fb46e386.dir
       size: 26542
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topic_scores.py
       hash: md5
       md5: b3d6de6c19f669bc42ec748fcfda9ade
@@ -282,7 +282,7 @@ stages:
       md5: eeb57a006fad44f5af7559ec832989da
       size: 24312
   recommend-mind-subset@softmax:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=250 -o outputs/mind-subset/softmax softmax
     deps:
     - path: data/MINDsmall_dev.db
@@ -321,7 +321,7 @@ stages:
       md5: fedc8aa29251468b705d9921b3e8a503
       size: 30713
   recommend-mind-subset@mmr:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=1000 -o outputs/mind-subset/mmr mmr
     deps:
     - path: data/MINDsmall_dev.zip
@@ -360,7 +360,7 @@ stages:
       md5: 8b915337da946668c7a98aa61a0d1067
       size: 108512
   recommend-mind-subset@topic_cali:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=1000 -o outputs/mind-subset/topic_cali topic_cali
     deps:
     - path: data/MINDsmall_dev.zip
@@ -399,7 +399,7 @@ stages:
       md5: e366155d49b7d2420a3a1008ce5dcf6c
       size: 105684
   recommend-mind-subset@pfar:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=1000 -o outputs/mind-subset/pfar pfar
     deps:
     - path: data/MINDsmall_dev.zip
@@ -438,7 +438,7 @@ stages:
       md5: a0bdb340b81b18cd7d6767b55b2499b7
       size: 103893
   recommend-mind-subset@nrms:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
       --subset=250 -o outputs/mind-subset/nrms nrms
     deps:
     - path: data/MINDsmall_dev.db
@@ -477,8 +477,8 @@ stages:
       md5: 2882fcd2fbf1e96e311a1dad30d1bb1c
       size: 27156
   recommend-mind-subset@nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev
-      --subset=250 -o outputs/mind-subset/nrms_rrf_static_user
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev 
+      --subset=250 -o outputs/mind-subset/nrms_rrf_static_user 
       nrms_rrf_static_user
     deps:
     - path: data/MINDsmall_dev.db
@@ -495,7 +495,7 @@ stages:
       md5: 579a3f14098b0785affd9537fb46e386.dir
       size: 26542
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_rrf_static_user.py
       hash: md5
       md5: c1dd604f3c0902d3d1a3b3dd3c3b78b5
@@ -518,7 +518,7 @@ stages:
       md5: e39da6a25f2a7f07656c490a5e88d144
       size: 28110
   measure-mind-subset@nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset nrms_rrf_static_user
     deps:
     - path: data/MINDsmall_dev.db
@@ -544,13 +544,13 @@ stages:
       hash: md5
       md5: 2923eb03d6dfe3248e787e658e7eeef4
       size: 170
-    - path:
+    - path: 
         outputs/mind-subset/nrms_rrf_static_user/recommendation-metrics.csv.gz
       hash: md5
       md5: b3498e377498d57cacab2e3928bac00c
       size: 6381
   measure-mind-subset@nrms:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset nrms
     deps:
     - path: data/MINDsmall_dev.db
@@ -581,7 +581,7 @@ stages:
       md5: c3d96191829a35a18a5467ce29241187
       size: 6431
   measure-mind-subset@nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset nrms_topic_scores
     deps:
     - path: data/MINDsmall_dev.db
@@ -612,7 +612,7 @@ stages:
       md5: e93efd4b93eb2b22b59234dc2baee08a
       size: 6403
   measure-mind-subset@mmr:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset mmr
     deps:
     - path: data/MINDlarge_dev.zip
@@ -643,7 +643,7 @@ stages:
       md5: e481ac720b7c435bb0d31db8dfda0b88
       size: 36050
   measure-mind-subset@nrms_images:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset nrms_images
     deps:
     - path: data/MINDlarge_dev.zip
@@ -674,7 +674,7 @@ stages:
       md5: 8534103eba6f8064170e6ae49a319711
       size: 27987
   measure-mind-subset@topic_cali:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset topic_cali
     deps:
     - path: data/MINDlarge_dev.zip
@@ -705,7 +705,7 @@ stages:
       md5: cc2c2f0d730245bbbb41768fcc253823
       size: 29003
   measure-mind-subset@pfar:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset pfar
     deps:
     - path: data/MINDlarge_dev.zip
@@ -736,7 +736,7 @@ stages:
       md5: 830fbeb1376b3e6fb22e4bb9c9ccaca7
       size: 28880
   measure-mind-subset@softmax:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset softmax
     deps:
     - path: data/MINDsmall_dev.db
@@ -767,7 +767,7 @@ stages:
       md5: c47cddd653cf852f19cd4115168ba252
       size: 9603
   measure-mind-subset@nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-subset nrms_topics_static
     deps:
     - path: data/MINDsmall_dev.db
@@ -823,7 +823,7 @@ stages:
       md5: 78a50f8951efd12cf4c750ef81d2e908
       size: 581
   recommend-mind-small@nrms:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/nrms nrms
     deps:
     - path: data/MINDsmall_dev.db
@@ -862,7 +862,7 @@ stages:
       md5: 02f8b17cf1622ebf7ee60e51c6ef3e29
       size: 5652783
   recommend-mind-small@mmr:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/mmr mmr
     deps:
     - path: data/MINDsmall_dev.zip
@@ -901,7 +901,7 @@ stages:
       md5: 821a261d000326fb2ca796c163452921
       size: 6884578
   recommend-mind-small@pfar:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/pfar pfar
     deps:
     - path: data/MINDsmall_dev.zip
@@ -940,7 +940,7 @@ stages:
       md5: 1cb2bdd2e253a8abace155d4de0368f3
       size: 5963780
   measure-mind-small@pfar:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small pfar
     deps:
     - path: data/MINDlarge_dev.zip
@@ -971,7 +971,7 @@ stages:
       md5: 89925a1046d10f98b81f0367aad64adb
       size: 2032658
   recommend-mind-small@nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/nrms_topic_scores nrms_topic_scores
     deps:
     - path: data/MINDsmall_dev.db
@@ -988,7 +988,7 @@ stages:
       md5: 7b2ec284f78ce3dba49eca8229d0b4be.dir
       size: 23898
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topic_scores.py
       hash: md5
       md5: 83158173bafbaa53a25a19f41a9271de
@@ -1011,7 +1011,7 @@ stages:
       md5: acd0d2e99eaf2bd99081b527710a4038
       size: 4836139
   recommend-mind-small@softmax:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/softmax softmax
     deps:
     - path: data/MINDsmall_dev.db
@@ -1050,7 +1050,7 @@ stages:
       md5: e07921f9ec4328b98a93e999513d130f
       size: 6419823
   measure-mind-small@softmax:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small softmax
     deps:
     - path: data/MINDsmall_dev.db
@@ -1081,7 +1081,7 @@ stages:
       md5: eb1d7182bea07ad5531a8fa11918191a
       size: 2748710
   recommend-mind-small@nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/nrms_topics_static nrms_topics_static
     deps:
     - path: data/MINDsmall_dev.db
@@ -1098,7 +1098,7 @@ stages:
       md5: 7b2ec284f78ce3dba49eca8229d0b4be.dir
       size: 23898
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topics_static.py
       hash: md5
       md5: 1922f6eb88f77e0ceb15373aa2970743
@@ -1121,7 +1121,7 @@ stages:
       md5: 299a5afe29d920a1a2ddfe4ccc50c0aa
       size: 5616813
   measure-mind-small@mmr:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small mmr
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1152,7 +1152,7 @@ stages:
       md5: b9be4dd398a5c715e0399ff56059a5eb
       size: 2550924
   recommend-mind-small@topic_cali:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/topic_cali topic_cali
     deps:
     - path: data/MINDsmall_dev.zip
@@ -1191,7 +1191,7 @@ stages:
       md5: f7512d1f3583ec502ebbf622de0499a7
       size: 5650319
   measure-mind-small@nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small nrms_topics_static
     deps:
     - path: data/MINDsmall_dev.db
@@ -1222,7 +1222,7 @@ stages:
       md5: fa87751556b44ae9618bdc8aa3d6ea1a
       size: 1924645
   recommend-mind-small@nrms_images:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/nrms_images nrms_images
     deps:
     - path: data/MINDsmall_dev.zip
@@ -1261,7 +1261,7 @@ stages:
       md5: 7d851aff70c5cb165ea9346482480baf
       size: 5654894
   measure-mind-small@nrms_images:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small nrms_images
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1292,7 +1292,7 @@ stages:
       md5: 6b3cc402f0e8461f528cf216c5a0808e
       size: 1965445
   recommend-mind-small@nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev -o 
       outputs/mind-small/nrms_rrf_static_user nrms_rrf_static_user
     deps:
     - path: data/MINDsmall_dev.db
@@ -1309,7 +1309,7 @@ stages:
       md5: 7b2ec284f78ce3dba49eca8229d0b4be.dir
       size: 23898
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_rrf_static_user.py
       hash: md5
       md5: 1306e49ab5d740c350fbea31337b0501
@@ -1332,7 +1332,7 @@ stages:
       md5: 83eb95b48bb0ed62b41ccf7d22a57328
       size: 6217429
   measure-mind-small@nrms:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small nrms
     deps:
     - path: data/MINDsmall_dev.db
@@ -1363,7 +1363,7 @@ stages:
       md5: a7840c2984efcb83273989a02847c82b
       size: 1980415
   measure-mind-small@nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small nrms_rrf_static_user
     deps:
     - path: data/MINDsmall_dev.db
@@ -1394,7 +1394,7 @@ stages:
       md5: 1276aa6b119f99f5260c74a58e516ab9
       size: 1968984
   measure-mind-small@nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small nrms_topic_scores
     deps:
     - path: data/MINDsmall_dev.db
@@ -1425,7 +1425,7 @@ stages:
       md5: 93e49176799afbd8ca509437cb1ecf17
       size: 1973403
   measure-mind-small@topic_cali:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev 
       mind-small topic_cali
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1456,7 +1456,7 @@ stages:
       md5: c6069bb9405d5200e1291a5108881683
       size: 2032120
   recommend-mind-val@mmr:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/mmr mmr
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1495,7 +1495,7 @@ stages:
       md5: a8a35eaf9f7bc2628a11157881a883da
       size: 35067466
   recommend-mind-val@topic_cali:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/topic_cali topic_cali
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1534,7 +1534,7 @@ stages:
       md5: d44cbedc941011ccde9c9692e447ae76
       size: 29693743
   recommend-mind-val@softmax:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/softmax softmax
     deps:
     - path: data/MINDlarge_dev.db
@@ -1573,7 +1573,7 @@ stages:
       md5: 6e0f52bbfde4e9a9df81a5c87386493c
       size: 33661332
   recommend-mind-val@nrms:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/nrms nrms
     deps:
     - path: data/MINDlarge_dev.db
@@ -1612,7 +1612,7 @@ stages:
       md5: da05c1a2ed269737b5999dc6693080a9
       size: 29302025
   recommend-mind-val@nrms_images:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/nrms_images nrms_images
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1651,7 +1651,7 @@ stages:
       md5: 7e73737dcb8da55482215cd32b5e382e
       size: 29311399
   recommend-mind-val@nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/nrms_topics_static nrms_topics_static
     deps:
     - path: data/MINDlarge_dev.db
@@ -1668,7 +1668,7 @@ stages:
       md5: 7b2ec284f78ce3dba49eca8229d0b4be.dir
       size: 23898
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topics_static.py
       hash: md5
       md5: 1922f6eb88f77e0ceb15373aa2970743
@@ -1691,7 +1691,7 @@ stages:
       md5: 36fb717d353122084d799be0379187f3
       size: 29541942
   recommend-mind-val@pfar:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/pfar pfar
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1730,7 +1730,7 @@ stages:
       md5: 30895488bd6a67debdafb4d21ebfe9c3
       size: 31068846
   recommend-mind-val@nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/nrms_rrf_static_user nrms_rrf_static_user
     deps:
     - path: data/MINDlarge_dev.db
@@ -1747,7 +1747,7 @@ stages:
       md5: 7b2ec284f78ce3dba49eca8229d0b4be.dir
       size: 23898
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_rrf_static_user.py
       hash: md5
       md5: 1306e49ab5d740c350fbea31337b0501
@@ -1770,7 +1770,7 @@ stages:
       md5: 387da4a5d98f8c095b72871da5db27d6
       size: 32693785
   recommend-mind-val@nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o
+    cmd: python -m poprox_recommender.evaluation.generate -M MINDlarge_dev -o 
       outputs/mind-val/nrms_topic_scores nrms_topic_scores
     deps:
     - path: data/MINDlarge_dev.db
@@ -1787,7 +1787,7 @@ stages:
       md5: 7b2ec284f78ce3dba49eca8229d0b4be.dir
       size: 23898
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topic_scores.py
       hash: md5
       md5: 83158173bafbaa53a25a19f41a9271de
@@ -1810,7 +1810,7 @@ stages:
       md5: bce70a3831f221d10b37bcd258499786
       size: 25125344
   measure-mind-val@nrms:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val nrms
     deps:
     - path: data/MINDlarge_dev.db
@@ -1841,7 +1841,7 @@ stages:
       md5: 00c147210f94624fc17cdccc1c815254
       size: 10161784
   measure-mind-val@mmr:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val mmr
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1872,7 +1872,7 @@ stages:
       md5: e72f8f6033f6d1b74c083f0629144437
       size: 13116377
   measure-mind-val@pfar:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val pfar
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1903,7 +1903,7 @@ stages:
       md5: 006a3561e05a76c65204edb296a89642
       size: 10419352
   measure-mind-val@softmax:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val softmax
     deps:
     - path: data/MINDlarge_dev.db
@@ -1934,7 +1934,7 @@ stages:
       md5: 2ea2a63a0f1104b0fc47c8c1957e1ab9
       size: 14130526
   measure-mind-val@topic_cali:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val topic_cali
     deps:
     - path: data/MINDlarge_dev.zip
@@ -1965,7 +1965,7 @@ stages:
       md5: 28dd3037262b486b67b01aaa62f4e13a
       size: 10419679
   measure-mind-val@nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val nrms_rrf_static_user
     deps:
     - path: data/MINDlarge_dev.db
@@ -1996,7 +1996,7 @@ stages:
       md5: 25e1d8f2757b17241efc4e544b629051
       size: 10106596
   measure-mind-val@nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val nrms_topic_scores
     deps:
     - path: data/MINDlarge_dev.db
@@ -2027,7 +2027,7 @@ stages:
       md5: 6095389a7be792aeb8d0bbac54ab9e13
       size: 10128685
   measure-mind-val@nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val nrms_topics_static
     deps:
     - path: data/MINDlarge_dev.db
@@ -2058,7 +2058,7 @@ stages:
       md5: 5a8c4e21b7ba6acfa5dc2290a7488f0b
       size: 9887775
   measure-mind-val@nrms_images:
-    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev
+    cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev 
       mind-val nrms_images
     deps:
     - path: data/MINDlarge_dev.zip
@@ -2139,7 +2139,7 @@ stages:
       md5: c05e9a3bf9458f13816fbe5d9d01e1dc
       size: 601
   recommend-poprox@nrms:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX -o 
       outputs/poprox/nrms nrms
     deps:
     - path: data/POPROX/
@@ -2210,7 +2210,7 @@ stages:
       md5: d090144c1e5c5a770774e8f398f22c5d
       size: 35492
   recommend-poprox-recent@nrms:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o 
       outputs/poprox-recent/nrms nrms
     deps:
     - path: data/POPROX.db
@@ -2249,7 +2249,7 @@ stages:
       md5: 2e2275efdcfcea5281eae1743a43e47e
       size: 50966
   measure-poprox@poprox-recent-nrms:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-recent nrms
     deps:
     - path: data/POPROX.db
@@ -2262,25 +2262,25 @@ stages:
       size: 50966
     - path: src/poprox_recommender/evaluation/evaluate.py
       hash: md5
-      md5: f2c463132a273d5fc17fd1417810ac6c
-      size: 5253
+      md5: 7cc94df4eab924389a5e3949765aa734
+      size: 5822
       isexec: true
     - path: src/poprox_recommender/evaluation/metrics/
       hash: md5
-      md5: b963e8ef04da407ecc859a2d0308d1f5.dir
-      size: 6943
+      md5: c321b4961517f96b6f44b4cb5b354c7f.dir
+      size: 7369
       nfiles: 5
     outs:
     - path: outputs/poprox-recent/nrms/metrics.json
       hash: md5
-      md5: 4d66fd997f8ef1675e9a610646d24546
-      size: 170
+      md5: d1ac319ff593944c7f9424b20f411949
+      size: 214
     - path: outputs/poprox-recent/nrms/recommendation-metrics.csv.gz
       hash: md5
-      md5: 45c4dc3a0ea10eeb24ceabc9eecb3107
-      size: 698
+      md5: 6fb134551475656dea72a824ca9eb0da
+      size: 8876
   recommend-poprox-latest@nrms:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o 
       outputs/poprox-latest/nrms nrms
     deps:
     - path: data/POPROX.db
@@ -2319,7 +2319,7 @@ stages:
       md5: baa434b3ade219c76a717be431849014
       size: 54738
   measure-poprox@poprox-latest-nrms:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-latest nrms
     deps:
     - path: data/POPROX.db
@@ -2350,7 +2350,7 @@ stages:
       md5: 051409714eaaa662d3feab14fb1270ad
       size: 550
   recommend-poprox-latest@softmax:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o 
       outputs/poprox-latest/softmax softmax
     deps:
     - path: data/POPROX.db
@@ -2389,7 +2389,7 @@ stages:
       md5: 04db1d3abbccf4d7f96222c95387ee2f
       size: 60417
   measure-poprox@poprox-latest-softmax:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-latest softmax
     deps:
     - path: data/POPROX.db
@@ -2420,7 +2420,7 @@ stages:
       md5: 888db6dedea5e05a807227205006b186
       size: 795
   recommend-poprox-latest@nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o 
       outputs/poprox-latest/nrms_topic_scores nrms_topic_scores
     deps:
     - path: data/POPROX.db
@@ -2437,7 +2437,7 @@ stages:
       md5: 7906238df35e373820e3e9f82aaba94f.dir
       size: 26869
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topic_scores.py
       hash: md5
       md5: b3d6de6c19f669bc42ec748fcfda9ade
@@ -2460,7 +2460,7 @@ stages:
       md5: cd077b656f4a3932b83faa79e411adb1
       size: 52862
   recommend-poprox-latest@nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o 
       outputs/poprox-latest/nrms_topics_static nrms_topics_static
     deps:
     - path: data/POPROX.db
@@ -2477,7 +2477,7 @@ stages:
       md5: 7906238df35e373820e3e9f82aaba94f.dir
       size: 26869
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topics_static.py
       hash: md5
       md5: 8ca4b9c9e60d555358cc03eb852dea1b
@@ -2500,7 +2500,7 @@ stages:
       md5: ba3429624aef4e39992f3cc7db963d2f
       size: 45136
   measure-poprox@poprox-latest-nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-latest nrms_topics_static
     deps:
     - path: data/POPROX.db
@@ -2526,13 +2526,13 @@ stages:
       hash: md5
       md5: 279cba9d8e9c40082139892ea8384ffc
       size: 162
-    - path:
+    - path: 
         outputs/poprox-latest/nrms_topics_static/recommendation-metrics.csv.gz
       hash: md5
       md5: 8d0e3c01916b6b71ebe7bd97a7af4203
       size: 518
   measure-poprox@poprox-latest-nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-latest nrms_topic_scores
     deps:
     - path: data/POPROX.db
@@ -2558,13 +2558,13 @@ stages:
       hash: md5
       md5: 520fe926cb5c0f015fab6e763adbfbca
       size: 171
-    - path:
+    - path: 
         outputs/poprox-latest/nrms_topic_scores/recommendation-metrics.csv.gz
       hash: md5
       md5: 11030339a82c2a8e3aee6fd61dfb23db
       size: 571
   recommend-poprox-latest@nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o 
       outputs/poprox-latest/nrms_rrf_static_user nrms_rrf_static_user
     deps:
     - path: data/POPROX.db
@@ -2581,7 +2581,7 @@ stages:
       md5: 7906238df35e373820e3e9f82aaba94f.dir
       size: 26869
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_rrf_static_user.py
       hash: md5
       md5: c1dd604f3c0902d3d1a3b3dd3c3b78b5
@@ -2595,7 +2595,7 @@ stages:
       hash: md5
       md5: 781d3d8de9b89a2960286d6d9f5ad138
       size: 9692
-    - path:
+    - path: 
         outputs/poprox-latest/nrms_rrf_static_user/recommendations.ndjson.zst
       hash: md5
       md5: 7169c853e8b258e6b54ebf6ae046fe4a
@@ -2605,7 +2605,7 @@ stages:
       md5: 01807bfb9b9fe82ee161955ccd7a79bc
       size: 49360
   measure-poprox@poprox-latest-nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-latest nrms_rrf_static_user
     deps:
     - path: data/POPROX.db
@@ -2631,13 +2631,13 @@ stages:
       hash: md5
       md5: d24cc64875688e89c9076dbb3c6a760d
       size: 170
-    - path:
+    - path: 
         outputs/poprox-latest/nrms_rrf_static_user/recommendation-metrics.csv.gz
       hash: md5
       md5: 0afa11cf097896c8879f1256102f9bb5
       size: 563
   recommend-poprox-recent@nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o 
       outputs/poprox-recent/nrms_rrf_static_user nrms_rrf_static_user
     deps:
     - path: data/POPROX.db
@@ -2654,7 +2654,7 @@ stages:
       md5: 7906238df35e373820e3e9f82aaba94f.dir
       size: 26869
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_rrf_static_user.py
       hash: md5
       md5: c1dd604f3c0902d3d1a3b3dd3c3b78b5
@@ -2668,7 +2668,7 @@ stages:
       hash: md5
       md5: 17568a655ca02d1ccecd33d551b74eac
       size: 9691
-    - path:
+    - path: 
         outputs/poprox-recent/nrms_rrf_static_user/recommendations.ndjson.zst
       hash: md5
       md5: 1ed38710591d8a9982143f0aeeb5b4a3
@@ -2678,7 +2678,7 @@ stages:
       md5: d9255c616acc00fe931547ac4b0e04b7
       size: 46447
   recommend-poprox-recent@nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o 
       outputs/poprox-recent/nrms_topics_static nrms_topics_static
     deps:
     - path: data/POPROX.db
@@ -2695,7 +2695,7 @@ stages:
       md5: 7906238df35e373820e3e9f82aaba94f.dir
       size: 26869
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topics_static.py
       hash: md5
       md5: 8ca4b9c9e60d555358cc03eb852dea1b
@@ -2718,7 +2718,7 @@ stages:
       md5: 52ca794e127074c6e0ab7cc1a2d4e070
       size: 42991
   measure-poprox@poprox-recent-nrms_rrf_static_user:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-recent nrms_rrf_static_user
     deps:
     - path: data/POPROX.db
@@ -2744,13 +2744,13 @@ stages:
       hash: md5
       md5: 5599cfbfe136de9ac65656fd4e371187
       size: 170
-    - path:
+    - path: 
         outputs/poprox-recent/nrms_rrf_static_user/recommendation-metrics.csv.gz
       hash: md5
       md5: 7d810b0ac11a9a2f93c7d7da9bee8e63
       size: 712
   recommend-poprox-recent@softmax:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o 
       outputs/poprox-recent/softmax softmax
     deps:
     - path: data/POPROX.db
@@ -2789,7 +2789,7 @@ stages:
       md5: e7d306feac9cc3ed3ec25766cd152493
       size: 56075
   measure-poprox@poprox-recent-softmax:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-recent softmax
     deps:
     - path: data/POPROX.db
@@ -2820,7 +2820,7 @@ stages:
       md5: 18cf749bf839a49ee8022fbcf749269e
       size: 1043
   measure-poprox@poprox-recent-nrms_topics_static:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-recent nrms_topics_static
     deps:
     - path: data/POPROX.db
@@ -2846,13 +2846,13 @@ stages:
       hash: md5
       md5: a1bff3672f357c895cce57ad0587120c
       size: 170
-    - path:
+    - path: 
         outputs/poprox-recent/nrms_topics_static/recommendation-metrics.csv.gz
       hash: md5
       md5: e62d5460864882a3a38c7877276a4e4e
       size: 671
   recommend-poprox-recent@nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o
+    cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o 
       outputs/poprox-recent/nrms_topic_scores nrms_topic_scores
     deps:
     - path: data/POPROX.db
@@ -2869,7 +2869,7 @@ stages:
       md5: 7906238df35e373820e3e9f82aaba94f.dir
       size: 26869
       nfiles: 4
-    - path:
+    - path: 
         src/poprox_recommender/recommenders/configurations/nrms_topic_scores.py
       hash: md5
       md5: b3d6de6c19f669bc42ec748fcfda9ade
@@ -2892,7 +2892,7 @@ stages:
       md5: 943fbf83285a0f8c7099467d21aea2fe
       size: 48718
   measure-poprox@poprox-recent-nrms_topic_scores:
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX
+    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX 
       poprox-recent nrms_topic_scores
     deps:
     - path: data/POPROX.db
@@ -2918,7 +2918,7 @@ stages:
       hash: md5
       md5: 773c2c0151df8d7637d5c8353c002617
       size: 171
-    - path:
+    - path: 
         outputs/poprox-recent/nrms_topic_scores/recommendation-metrics.csv.gz
       hash: md5
       md5: 5420f1bb82d5fc8a7a2fd950761ba976

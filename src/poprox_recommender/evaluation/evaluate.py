@@ -32,9 +32,11 @@ from typing import Any, Iterator
 from uuid import UUID
 
 import lenskit
+import numpy as np
 import pandas as pd
 import ray
 from docopt import docopt
+from humanize import metric
 from lenskit.logging import LoggingConfig, item_progress
 from lenskit.parallel import get_parallel_config
 from lenskit.parallel.ray import TaskLimiter, init_cluster
@@ -57,10 +59,9 @@ def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[Recs
         slate_id = UUID(str(slate_id))
         truth = eval_data.slate_truth(slate_id)
         assert truth is not None
-        if len(truth) > 0:
-            yield RecsWithTruth(slate_id, recs.copy(), truth)
-        else:
-            logger.warning("request %s has no truth", slate_id)
+        if len(truth) == 0:
+            logger.debug("request %s has no truth", slate_id)
+        yield RecsWithTruth(slate_id, recs.copy(), truth)
 
 
 def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[dict[str, Any]]:
@@ -121,6 +122,7 @@ def main():
             pb.update()
 
     metrics = pd.DataFrame.from_records(metric_records)
+
     print(metrics)
     logger.info("measured metrics for %d recommendations", metrics["recommendation_id"].nunique())
 
@@ -131,6 +133,24 @@ def main():
     agg_metrics = metrics.drop(columns=["recommendation_id", "personalized"]).mean()
     # reciprocal rank mean to MRR
     agg_metrics = agg_metrics.rename(index={"RR": "MRR"})
+
+    # issue one warning about lots of missing truth
+    num_bad = np.sum(metrics["num_truth"] == 0)
+    frac_bad = num_bad / len(metrics)
+    if frac_bad >= 0.1:
+        logging.warning(
+            "%.1f%% (%s/%s) of eval slates have no truth",
+            frac_bad * 100,
+            metric(num_bad),
+            metric(len(metrics)),
+        )
+    else:
+        logging.info(
+            "%.1f%% (%s/%s) of eval slates have no truth",
+            frac_bad * 100,
+            metric(num_bad),
+            metric(len(metrics)),
+        )
 
     logger.info("aggregate metrics:\n%s", agg_metrics)
 

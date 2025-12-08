@@ -660,6 +660,15 @@ wheels = [
 ]
 
 [[package]]
+name = "deepmerge"
+version = "2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/3a/b0ba594708f1ad0bc735884b3ad854d3ca3bdc1d741e56e40bbda6263499/deepmerge-2.0.tar.gz", hash = "sha256:5c3d86081fbebd04dd5de03626a0607b809a98fb6ccba5770b62466fe940ff20", size = 19890, upload-time = "2024-08-30T05:31:50.308Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/82/e5d2c1c67d19841e9edc74954c827444ae826978499bde3dfc1d007c8c11/deepmerge-2.0-py3-none-any.whl", hash = "sha256:6de9ce507115cff0bed95ff0ce9ecc31088ef50cbdf09bc90a09349a318b3d00", size = 13475, upload-time = "2024-08-30T05:31:48.659Z" },
+]
+
+[[package]]
 name = "defusedxml"
 version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1911,10 +1920,11 @@ wheels = [
 
 [[package]]
 name = "lenskit"
-version = "2025.3.0a4.dev171+gecb7da91"
-source = { registry = "https://pypi.lenskit.org/lenskit-dev/" }
+version = "2025.6.2"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
+    { name = "deepmerge" },
     { name = "humanize" },
     { name = "lazy-loader" },
     { name = "more-itertools" },
@@ -1930,6 +1940,7 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
     { name = "scipy" },
+    { name = "setuptools" },
     { name = "structlog" },
     { name = "threadpoolctl" },
     { name = "torch", version = "2.7.1", source = { registry = "https://pypi.lenskit.org/torch/cpu/" }, marker = "(sys_platform == 'darwin' and extra == 'group-18-poprox-recommender-cpu') or (sys_platform == 'darwin' and extra != 'group-18-poprox-recommender-cuda') or (extra == 'group-18-poprox-recommender-cpu' and extra == 'group-18-poprox-recommender-cuda')" },
@@ -1939,15 +1950,15 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "xopen" },
 ]
-sdist = { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev171%2Bgecb7da91.tar.gz" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/32/f405d7df84a8a2701b2b0d4cfde785557c9d7a22c4793c0e7e4a41d4128b/lenskit-2025.6.2.tar.gz", hash = "sha256:39451d22e8b4c7318ff310bc22c9c04c589c6e60a4261eb3c65a318b07494c9a", size = 2966972, upload-time = "2025-12-08T16:43:56.595Z" }
 wheels = [
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev171%2Bgecb7da91-cp311-abi3-macosx_10_12_x86_64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev171%2Bgecb7da91-cp311-abi3-macosx_11_0_arm64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev171%2Bgecb7da91-cp311-abi3-manylinux_2_17_i686.manylinux2014_i686.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev171%2Bgecb7da91-cp311-abi3-manylinux_2_28_aarch64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev171%2Bgecb7da91-cp311-abi3-manylinux_2_28_x86_64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev171%2Bgecb7da91-cp311-abi3-win32.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2025.3.0a4.dev171%2Bgecb7da91-cp311-abi3-win_amd64.whl" },
+    { url = "https://files.pythonhosted.org/packages/ec/63/c3c4e519b57d0c4bf204d87122d9c8b90d4f435d93159656cf097c0664a4/lenskit-2025.6.2-cp311-abi3-macosx_10_12_x86_64.whl", hash = "sha256:0dff0ba554af824562aaa71c76d353b338f881c7087da7ca4e491ed02d156a3d", size = 2779002, upload-time = "2025-12-08T16:43:44.193Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/cc/7602b8d75b2b283eed1f89c28374e6b7a2735898520ccbf805a7c8884d26/lenskit-2025.6.2-cp311-abi3-macosx_11_0_arm64.whl", hash = "sha256:3e375c9690871c9b99e6d27b529c53860189c589a80e2a3fe753c95b24b0fa99", size = 2538522, upload-time = "2025-12-08T16:43:46.577Z" },
+    { url = "https://files.pythonhosted.org/packages/a0/19/f45f8d4e3e6628f65192cf87816df82ab80f5b84d32cb90d719dffd59398/lenskit-2025.6.2-cp311-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f12433d571d52f639144afa784c3070d06f6be121389aacf65461c7a23e96bd7", size = 8060169, upload-time = "2025-12-08T16:43:48.409Z" },
+    { url = "https://files.pythonhosted.org/packages/c4/f8/d0735ea27d9f74ada6771e64c82507fc27eee8c1413f01b5c6109afe1bbc/lenskit-2025.6.2-cp311-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:461bb933db51fa897a59bd66022e66d329d224e15de831aaf436a26f66c2eda4", size = 7290318, upload-time = "2025-12-08T16:43:50.207Z" },
+    { url = "https://files.pythonhosted.org/packages/27/7a/800618f64eb0b8ab6839266f0e50534727367126f0d1e0e27a66f63c24a1/lenskit-2025.6.2-cp311-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:e48e4db25f798936fad737d36079a6e7739d3b343b60b92a3517b9d274fc1bef", size = 7801531, upload-time = "2025-12-08T16:43:51.987Z" },
+    { url = "https://files.pythonhosted.org/packages/9c/eb/2a6b548d7a8ce28836b7441f57950f0015a7a24f7919c41a39699d674eb4/lenskit-2025.6.2-cp311-abi3-win32.whl", hash = "sha256:ae94066048662decdc1859e5b5fd0793ff6aedd319d6d4e3b26efbf6ada987d3", size = 2463123, upload-time = "2025-12-08T16:43:53.492Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/2c/1692a9e03f0093e519d52c385f0c953d34a2360e7761e0a2b6a52a8c1f95/lenskit-2025.6.2-cp311-abi3-win_amd64.whl", hash = "sha256:f57206852ef752381259dedffa3b74073f0958cfb15909fd8934da09acdfd45d", size = 2731507, upload-time = "2025-12-08T16:43:55.218Z" },
 ]
 
 [[package]]
@@ -2745,7 +2756,7 @@ requires-dist = [
     { name = "awslambdaric", marker = "extra == 'deploy'", specifier = "~=2.2" },
     { name = "fastapi", extras = ["all"], specifier = "~=0.115.11" },
     { name = "httpx", specifier = "~=0.28.1" },
-    { name = "lenskit", specifier = ">=2025.3.0a4.dev145", index = "https://pypi.lenskit.org/lenskit-dev/" },
+    { name = "lenskit", specifier = ">=2025.6.2,<2026" },
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "poprox-concepts", git = "https://github.com/CCRI-POPROX/poprox-concepts.git" },
@@ -2985,17 +2996,17 @@ wheels = [
 
 [[package]]
 name = "pyarrow"
-version = "21.0.0"
+version = "22.0.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ef/c2/ea068b8f00905c06329a3dfcd40d0fcc2b7d0f2e355bdb25b65e0a0e4cd4/pyarrow-21.0.0.tar.gz", hash = "sha256:5051f2dccf0e283ff56335760cbc8622cf52264d67e359d5569541ac11b6d5bc", size = 1133487, upload-time = "2025-07-18T00:57:31.761Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/30/53/04a7fdc63e6056116c9ddc8b43bc28c12cdd181b85cbeadb79278475f3ae/pyarrow-22.0.0.tar.gz", hash = "sha256:3d600dc583260d845c7d8a6db540339dd883081925da2bd1c5cb808f720b3cd9", size = 1151151, upload-time = "2025-10-24T12:30:00.762Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/d4/d4f817b21aacc30195cf6a46ba041dd1be827efa4a623cc8bf39a1c2a0c0/pyarrow-21.0.0-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:3a302f0e0963db37e0a24a70c56cf91a4faa0bca51c23812279ca2e23481fccd", size = 31160305, upload-time = "2025-07-18T00:55:35.373Z" },
-    { url = "https://files.pythonhosted.org/packages/a2/9c/dcd38ce6e4b4d9a19e1d36914cb8e2b1da4e6003dd075474c4cfcdfe0601/pyarrow-21.0.0-cp312-cp312-macosx_12_0_x86_64.whl", hash = "sha256:b6b27cf01e243871390474a211a7922bfbe3bda21e39bc9160daf0da3fe48876", size = 32684264, upload-time = "2025-07-18T00:55:39.303Z" },
-    { url = "https://files.pythonhosted.org/packages/4f/74/2a2d9f8d7a59b639523454bec12dba35ae3d0a07d8ab529dc0809f74b23c/pyarrow-21.0.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:e72a8ec6b868e258a2cd2672d91f2860ad532d590ce94cdf7d5e7ec674ccf03d", size = 41108099, upload-time = "2025-07-18T00:55:42.889Z" },
-    { url = "https://files.pythonhosted.org/packages/ad/90/2660332eeb31303c13b653ea566a9918484b6e4d6b9d2d46879a33ab0622/pyarrow-21.0.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:b7ae0bbdc8c6674259b25bef5d2a1d6af5d39d7200c819cf99e07f7dfef1c51e", size = 42829529, upload-time = "2025-07-18T00:55:47.069Z" },
-    { url = "https://files.pythonhosted.org/packages/33/27/1a93a25c92717f6aa0fca06eb4700860577d016cd3ae51aad0e0488ac899/pyarrow-21.0.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:58c30a1729f82d201627c173d91bd431db88ea74dcaa3885855bc6203e433b82", size = 43367883, upload-time = "2025-07-18T00:55:53.069Z" },
-    { url = "https://files.pythonhosted.org/packages/05/d9/4d09d919f35d599bc05c6950095e358c3e15148ead26292dfca1fb659b0c/pyarrow-21.0.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:072116f65604b822a7f22945a7a6e581cfa28e3454fdcc6939d4ff6090126623", size = 45133802, upload-time = "2025-07-18T00:55:57.714Z" },
-    { url = "https://files.pythonhosted.org/packages/71/30/f3795b6e192c3ab881325ffe172e526499eb3780e306a15103a2764916a2/pyarrow-21.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:cf56ec8b0a5c8c9d7021d6fd754e688104f9ebebf1bf4449613c9531f5346a18", size = 26203175, upload-time = "2025-07-18T00:56:01.364Z" },
+    { url = "https://files.pythonhosted.org/packages/af/63/ba23862d69652f85b615ca14ad14f3bcfc5bf1b99ef3f0cd04ff93fdad5a/pyarrow-22.0.0-cp312-cp312-macosx_12_0_arm64.whl", hash = "sha256:bea79263d55c24a32b0d79c00a1c58bb2ee5f0757ed95656b01c0fb310c5af3d", size = 34211578, upload-time = "2025-10-24T10:05:21.583Z" },
+    { url = "https://files.pythonhosted.org/packages/b1/d0/f9ad86fe809efd2bcc8be32032fa72e8b0d112b01ae56a053006376c5930/pyarrow-22.0.0-cp312-cp312-macosx_12_0_x86_64.whl", hash = "sha256:12fe549c9b10ac98c91cf791d2945e878875d95508e1a5d14091a7aaa66d9cf8", size = 35989906, upload-time = "2025-10-24T10:05:29.485Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/a8/f910afcb14630e64d673f15904ec27dd31f1e009b77033c365c84e8c1e1d/pyarrow-22.0.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:334f900ff08ce0423407af97e6c26ad5d4e3b0763645559ece6fbf3747d6a8f5", size = 45021677, upload-time = "2025-10-24T10:05:38.274Z" },
+    { url = "https://files.pythonhosted.org/packages/13/95/aec81f781c75cd10554dc17a25849c720d54feafb6f7847690478dcf5ef8/pyarrow-22.0.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:c6c791b09c57ed76a18b03f2631753a4960eefbbca80f846da8baefc6491fcfe", size = 47726315, upload-time = "2025-10-24T10:05:47.314Z" },
+    { url = "https://files.pythonhosted.org/packages/bb/d4/74ac9f7a54cfde12ee42734ea25d5a3c9a45db78f9def949307a92720d37/pyarrow-22.0.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:c3200cb41cdbc65156e5f8c908d739b0dfed57e890329413da2748d1a2cd1a4e", size = 47990906, upload-time = "2025-10-24T10:05:58.254Z" },
+    { url = "https://files.pythonhosted.org/packages/2e/71/fedf2499bf7a95062eafc989ace56572f3343432570e1c54e6599d5b88da/pyarrow-22.0.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:ac93252226cf288753d8b46280f4edf3433bf9508b6977f8dd8526b521a1bbb9", size = 50306783, upload-time = "2025-10-24T10:06:08.08Z" },
+    { url = "https://files.pythonhosted.org/packages/68/ed/b202abd5a5b78f519722f3d29063dda03c114711093c1995a33b8e2e0f4b/pyarrow-22.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:44729980b6c50a5f2bfcc2668d36c569ce17f8b17bccaf470c4313dcbbf13c9d", size = 27972883, upload-time = "2025-10-24T10:06:14.204Z" },
 ]
 
 [[package]]
