@@ -74,7 +74,7 @@ def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> I
     rwts = recs_with_truth(eval_data, recs_df)
     if pc.processes > 1:
         logger.info("starting parallel measurement with up to %d tasks", pc.processes)
-        init_cluster(global_logging=True)
+        init_cluster(global_logging=True, configure_logging=False)
 
         eval_data_ref = ray.put(eval_data)
         limit = TaskLimiter(pc.processes)
