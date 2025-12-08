@@ -91,7 +91,7 @@ conflicts = [[{ group = "cpu" }, { group = "cuda" }]]
 index-strategy = "unsafe-first-match"
 
 [tool.uv.sources]
-lenskit = { index = "lenskit-dev" }
+# lenskit = { index = "lenskit-dev" }
 torch = [
   { index = "pytorch-cpu", group = "cpu" },
   { index = "pytorch-cuda", group = "cuda" },
