@@ -41,6 +41,8 @@ from humanize import metric
 from lenskit.logging import LoggingConfig, item_progress
 from lenskit.parallel import get_parallel_config
 from lenskit.parallel.ray import TaskLimiter, init_cluster
+from rich import print
+from rich.pretty import pprint
 
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
@@ -130,7 +132,8 @@ def main():
 
     metrics = pd.DataFrame.from_records(metric_records)
 
-    print(metrics)
+    print("[bold]Preview of Metrics[/bold]")
+    print(metrics.set_index("recommendation_id"))
     logger.info("measured metrics for %d recommendations", metrics["recommendation_id"].nunique())
 
     metrics_out_fn = out_dir / "recommendation-metrics.csv.gz"
@@ -164,10 +167,13 @@ def main():
     with open(out_fn, "wt") as jsf:
         print(agg_metrics.to_json(), file=jsf)
 
+    # set up to print summary metrics, filtering if needed
     printable = agg_metrics.to_dict()
     if not options.evaluate.print_effectiveness:
         printable = {k: v for (k, v) in printable.items() if not EFF_METRIC_NAMES.match(k)}
-    logger.info("aggregate metrics:\n%s", printable)
+
+    print("[bold]Summary of Metrics:[/bold]", end=" ")
+    pprint(printable, expand_all=True)
 
 
 @ray.remote(num_cpus=1)
