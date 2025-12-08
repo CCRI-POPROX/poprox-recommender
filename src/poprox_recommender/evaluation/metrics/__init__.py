@@ -1,5 +1,4 @@
 import logging
-from math import isnan
 from typing import Any, NamedTuple
 from uuid import UUID
 
@@ -60,11 +59,14 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     final_rec_df = recs[recs["stage"] == "final"]
     final_rec = ItemList.from_df(final_rec_df)
 
-    # for effectiveness metrics, fill in 0s
-    single_rr = call_metric(RecipRank, final_rec, truth)
-    single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
-    single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
-    single_rbp = call_metric(RBP, final_rec, truth)
+    # we only compute effectiveness with truth
+    if len(truth) > 0:
+        single_rbp = call_metric(RBP, final_rec, truth)
+        single_rr = call_metric(RecipRank, final_rec, truth)
+        single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
+        single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
+    else:
+        single_rbp = single_rr = single_ndcg5 = single_ndcg10 = None
 
     ranked_rec_df = recs[recs["stage"] == "ranked"]
     ranked = convert_df_to_article_set(ranked_rec_df)
@@ -108,10 +110,10 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
         # count the number of instances with non-empty truth sets
         "num_truth": len(truth),
         # effectivess metrics can default to 0
-        "RBP": single_rbp if not isnan(single_rbp) else 0.0,
-        "NDCG@5": single_ndcg5 if not isnan(single_ndcg5) else 0.0,
-        "NDCG@10": single_ndcg10 if not isnan(single_ndcg10) else 0.0,
-        "RR": single_rr if not isnan(single_rr) else 0.0,
+        "RBP": single_rbp,
+        "NDCG@5": single_ndcg5,
+        "NDCG@10": single_ndcg10,
+        "RR": single_rr,
         "RBO@5": single_rbo5,
         "RBO@10": single_rbo10,
         "rank_based_entropy": rbe,
