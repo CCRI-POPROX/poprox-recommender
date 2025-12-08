@@ -26,7 +26,7 @@ stages:
   measure-mind-val:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev mind-val ${item}
+      cmd: python -m poprox_recommender.evaluation.measure -M MINDlarge_dev mind-val ${item}
       deps:
         - src/poprox_recommender/evaluation/evaluate.py
         - src/poprox_recommender/evaluation/metrics/
@@ -56,7 +56,7 @@ stages:
   measure-mind-small:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small ${item}
+      cmd: python -m poprox_recommender.evaluation.measure -M MINDsmall_dev mind-small ${item}
       deps:
         - src/poprox_recommender/evaluation/evaluate.py
         - src/poprox_recommender/evaluation/metrics/
@@ -87,7 +87,7 @@ stages:
   measure-mind-subset:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset ${item}
+      cmd: python -m poprox_recommender.evaluation.measure -M MINDsmall_dev mind-subset ${item}
       deps:
         - src/poprox_recommender/evaluation/evaluate.py
         - src/poprox_recommender/evaluation/metrics/
@@ -152,7 +152,7 @@ stages:
         - poprox-recent
         - poprox-latest
       pipeline: ${pipelines}
-    cmd: python -m poprox_recommender.evaluation.evaluate -P POPROX ${item.data} ${item.pipeline}
+    cmd: python -m poprox_recommender.evaluation.measure -P POPROX ${item.data} ${item.pipeline}
     deps:
       - src/poprox_recommender/evaluation/evaluate.py
       - src/poprox_recommender/evaluation/metrics/
