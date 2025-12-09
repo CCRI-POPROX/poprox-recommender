@@ -26,6 +26,7 @@ Options:
 # pyright: basic
 import logging
 import os
+import re
 from collections.abc import Sequence
 from itertools import batched
 from typing import Any, Iterator
@@ -40,14 +41,18 @@ from humanize import metric
 from lenskit.logging import LoggingConfig, item_progress
 from lenskit.parallel import get_parallel_config
 from lenskit.parallel.ray import TaskLimiter, init_cluster
+from rich import print
+from rich.pretty import pprint
 
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.metrics import RecsWithTruth, measure_rec_metrics
+from poprox_recommender.evaluation.options import load_eval_options
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
+EFF_METRIC_NAMES = re.compile(r"^(NDCG|M?RR|RBP)(@|$)?")
 
 
 def recs_with_truth(eval_data: EvalData, recs_df: pd.DataFrame) -> Iterator[RecsWithTruth]:
@@ -69,7 +74,7 @@ def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> I
     rwts = recs_with_truth(eval_data, recs_df)
     if pc.processes > 1:
         logger.info("starting parallel measurement with up to %d tasks", pc.processes)
-        init_cluster(global_logging=True)
+        init_cluster(global_logging=True, configure_logging=False)
 
         eval_data_ref = ray.put(eval_data)
         limit = TaskLimiter(pc.processes)
@@ -86,26 +91,30 @@ def recommendation_eval_results(eval_data: EvalData, recs_df: pd.DataFrame) -> I
 
 
 def main():
-    options = docopt(__doc__)  # type: ignore
+    cli_opts = docopt(__doc__)  # type: ignore
     log_cfg = LoggingConfig()
-    if options["--verbose"] or os.environ.get("RUNNER_DEBUG", 0):
+    if cli_opts["--verbose"] or os.environ.get("RUNNER_DEBUG", 0):
         log_cfg.set_verbose(True)
-    if options["--log-file"]:
-        log_cfg.set_log_file(options["--log-file"])
+    if cli_opts["--log-file"]:
+        log_cfg.set_log_file(cli_opts["--log-file"])
     log_cfg.apply()
     lenskit.configure(cfg_dir=project_root())
 
     global eval_data
 
-    if options["--poprox-data"]:
-        eval_data = PoproxData(options["--poprox-data"])
+    if cli_opts["--poprox-data"]:
+        eval_data = PoproxData(cli_opts["--poprox-data"])
     else:
-        eval_data = MindData(options["--mind-data"])
+        eval_data = MindData(cli_opts["--mind-data"])
 
-    eval_name = options["EVAL"]
-    pipe_name = options["PIPELINE"]
+    eval_name = cli_opts["EVAL"]
+    pipe_name = cli_opts["PIPELINE"]
+
+    out_dir = project_root() / "outputs" / eval_name / pipe_name
+    options = load_eval_options(out_dir)
+
     logger.info("measuring evaluation %s for %s", eval_name, pipe_name)
-    recs_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendations.parquet"
+    recs_fn = out_dir / "recommendations.parquet"
     logger.info("loading recommendations from %s", recs_fn)
     recs_df = pd.read_parquet(recs_fn)
     n_recommendations = recs_df["slate_id"].nunique()
@@ -123,10 +132,11 @@ def main():
 
     metrics = pd.DataFrame.from_records(metric_records)
 
-    print(metrics)
+    print("[bold]Preview of Metrics[/bold]")
+    print(metrics.set_index("recommendation_id"))
     logger.info("measured metrics for %d recommendations", metrics["recommendation_id"].nunique())
 
-    metrics_out_fn = project_root() / "outputs" / eval_name / pipe_name / "recommendation-metrics.csv.gz"
+    metrics_out_fn = out_dir / "recommendation-metrics.csv.gz"
     logger.info("saving per-recommendation metrics to %s", metrics_out_fn)
     metrics.to_csv(metrics_out_fn)
 
@@ -152,12 +162,18 @@ def main():
             metric(len(metrics)),
         )
 
-    logger.info("aggregate metrics:\n%s", agg_metrics)
-
-    out_fn = project_root() / "outputs" / eval_name / pipe_name / "metrics.json"
+    out_fn = out_dir / "metrics.json"
     logger.info("saving evaluation to %s", out_fn)
     with open(out_fn, "wt") as jsf:
         print(agg_metrics.to_json(), file=jsf)
+
+    # set up to print summary metrics, filtering if needed
+    printable = agg_metrics.to_dict()
+    if not options.evaluate.print_effectiveness:
+        printable = {k: v for (k, v) in printable.items() if not EFF_METRIC_NAMES.match(k)}
+
+    print("[bold]Summary of Metrics:[/bold]", end=" ")
+    pprint(printable, expand_all=True)
 
 
 @ray.remote(num_cpus=1)
