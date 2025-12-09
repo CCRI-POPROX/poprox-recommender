@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Generate evaluations for offline test data.
+Compute metrics for offline test data.
 
 For an evaluation EVAL and PIPELINE, this script reads
 outputs/DATA/PIPELINE/recommendations.parquet and produces
 ouptuts/DATA/PIPELINE/recommendation-metrics.csv.gz and ouptuts/DATA/PIPELINE/metrics.json.
 
 Usage:
-    poprox_recommender.evaluation.evaluate [options] EVAL PIPELINE
+    poprox_recommender.evaluation.measure [options] EVAL PIPELINE
 
 Options:
     -v, --verbose
@@ -51,7 +51,7 @@ from poprox_recommender.evaluation.metrics import RecsWithTruth, measure_rec_met
 from poprox_recommender.evaluation.options import load_eval_options
 from poprox_recommender.paths import project_root
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("poprox_recommender.evaluation.measure")
 EFF_METRIC_NAMES = re.compile(r"^(NDCG|M?RR|RBP)(@|$)?")
 
 
