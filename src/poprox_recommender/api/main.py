@@ -55,11 +55,16 @@ def root(
     profile.click_topic_counts = user_topic_preference(req.interacted.articles, profile.click_history)
     profile.click_locality_counts = user_locality_preference(req.interacted.articles, profile.click_history)
 
+    # Extract article_packages if available (V5 protocol)
+    # V4 requests won't have this field, so defaults to empty list
+    article_packages = getattr(req, "article_packages", [])
+
     recs, rec_info = select_articles(
         req.candidates,
         req.interacted,
         profile,
         {"pipeline": pipeline},
+        article_packages=article_packages,
     )
 
     resp_body = RecommendationResponseV4.model_validate({"recommendations": recs, "recommender": rec_info.model_dump()})
