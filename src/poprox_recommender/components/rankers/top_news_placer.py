@@ -7,13 +7,11 @@ from poprox_concepts.domain import CandidateSet, ImpressedSection
 
 
 class TopNewsPlacerConfig(BaseModel):
-
     max_top_news: int = 3  # Maximum top news to place at beginning (positions 1-3)
     total_slots: int = 12
 
 
 class TopNewsPlacer(Component):
-
     config: TopNewsPlacerConfig
 
     def __call__(
@@ -22,7 +20,6 @@ class TopNewsPlacer(Component):
         top_news_article_ids: set[UUID] | None = None,
         top_news_candidates: CandidateSet | None = None,
     ) -> ImpressedSection:
-
         if not ranked_articles.impressions:
             return ImpressedSection.from_articles([])
 
