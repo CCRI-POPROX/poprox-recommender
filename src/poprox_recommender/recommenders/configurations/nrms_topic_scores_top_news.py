@@ -26,7 +26,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_candidates = builder.create_input("candidate", CandidateSet)
     i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
-    i_packages = builder.create_input("packages", list[ArticlePackage], default=[])
+    i_packages = builder.create_input("packages", list[ArticlePackage])
 
     # Extract Top News Articles from Packages
     n_top_news_candidates = builder.add_component(
