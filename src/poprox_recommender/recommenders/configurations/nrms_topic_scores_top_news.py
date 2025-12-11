@@ -125,7 +125,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     # Rank top candidates based on fused scores
     n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)
 
-    # Place top news at beginning (slots 1-3), followed by personalized recommendations (slots 4-12)
+    # Place top news at beginning (slots 1-3), followed by default recommendations.
     placer_config = TopNewsPlacerConfig(
         max_top_news=3,
         total_slots=num_slots,
