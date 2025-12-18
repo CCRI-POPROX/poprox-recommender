@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 BATCH_SIZE = 25
 STAGES = ["final", "ranked", "reranked"]
 # outputs we want for the result, to pre-filter
-TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
+TO_SAVE = ["candidate-embedder", "ranker", "reranker"]
 
 
 def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: str, n_requests: int | None = None):
@@ -226,6 +226,8 @@ def recommend_batch(
         for slate_id in batch:
             request = dataset.lookup_request(slate_id)
             state = recommend_for_request(pipeline, request)
+            wanted = set(TO_SAVE)
+            wanted.add(pipeline.config.default)
             state = {k: v for (k, v) in state.items() if k in TO_SAVE}
             outputs.append((slate_id, request, state))
 
