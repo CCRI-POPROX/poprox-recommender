@@ -91,6 +91,7 @@ class InProcessTestService:
             else:
                 raise e
 
+        assert res["statusCode"] == 200, f"server error (see log output for details): {res['body']}"
         return RecommendationResponseV4.model_validate_json(res["body"])
 
 
