@@ -70,3 +70,4 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     builder.add_component(
         "recommender", ReciprocalRankFusion, {"num_slots": num_slots}, recs1=n_ranker, recs2=n_ranker2
     )
+    builder.default_component("recommender")

@@ -180,3 +180,4 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     builder.add_component("recommender", TopkRanker, {"num_slots": num_slots}, candidate_articles=fusion)
+    builder.default_component("recommender")
