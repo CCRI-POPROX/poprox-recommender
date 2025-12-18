@@ -81,6 +81,14 @@ def get_pipeline_builder(name: str, device: str | None = None, num_slots: int = 
     builder = PipelineBuilder(norm_name, pipe_ver)
     builder.add_run_hook("component-input", shallow_copy_pydantic_model)
     pipe_mod.configure(builder, num_slots=num_slots, device=device)
+
+    # check that we have a default component
+    # TODO: directly check the builder once Lenskit
+    # Enhancement ticket: https://github.com/lenskit/lkpy/issues/972
+    cfg = builder.build_config()
+    if cfg.default is None:
+        raise PipelineLoadError(f"pipeline {name} does not have a default component")
+
     return builder
 
 
