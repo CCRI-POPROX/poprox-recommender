@@ -33,6 +33,20 @@ def warmup(response: Response):
     return list(available_recommenders.keys())
 
 
+@app.post("/embed")
+def embed(body: Annotated[dict[str, Any], Body()]):
+    """
+    Stub endpoint for article pre-embedding support in V4/V5 API.
+    
+    Pre-embedding allows the platform to embed articles ahead of time to speed up
+    recommendation generation. Currently returns empty dict as we don't cache embeddings.
+    
+    TODO: Implement actual pre-embedding and caching when needed for performance.
+    """
+    logger.debug("Received embed request (stub implementation)")
+    return {}
+
+
 @app.post("/")
 def root(
     body: Annotated[dict[str, Any], Body()],

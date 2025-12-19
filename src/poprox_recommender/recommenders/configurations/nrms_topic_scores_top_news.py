@@ -129,6 +129,8 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     placer_config = TopNewsPlacerConfig(
         max_top_news=3,
         total_slots=num_slots,
+        top_news_entity_id=TOP_NEWS_PACKAGE_ID,
+        add_section_metadata=True,
     )
     builder.add_component(
         "recommender",

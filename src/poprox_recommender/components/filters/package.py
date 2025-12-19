@@ -29,7 +29,7 @@ class PackageFilter(Component):
             )
 
         logger.debug(
-            "PackageFilter selected %d of %d candidate articles from %d packages",
+            "PackageFilter selected %d of %d candidate articles from'%d' packages",
             len(selected_articles),
             len(candidate_articles.articles),
             len(article_packages),
