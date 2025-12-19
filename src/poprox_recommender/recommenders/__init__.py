@@ -34,7 +34,7 @@ def select_articles(
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
     article_packages: list | None = None,
-) -> tuple[ImpressedSection, Any]:
+) -> tuple[list[ImpressedSection], Any]:
     """
     Select articles with default recommender configuration.  It returns a
     pipeline state whose ``default`` is the final list of recommendations.
