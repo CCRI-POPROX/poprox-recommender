@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 BATCH_SIZE = 25
 STAGES = ["final", "ranked", "reranked"]
 # outputs we want for the result, to pre-filter
-TO_SAVE = ["candidate-embedder", "recommender", "ranker", "reranker"]
+TO_SAVE = ["candidate-embedder", "recommender", "unfiltered-ranker", "filtered-ranker"]
 
 
 def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: str, n_requests: int | None = None):
