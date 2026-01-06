@@ -3,7 +3,7 @@ from uuid import UUID
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import CandidateSet, ImpressedSection
+from poprox_concepts.domain import ImpressedSection
 
 
 class TopNewsPlacerConfig(BaseModel):
@@ -20,27 +20,17 @@ class TopNewsPlacer(Component):
         self,
         ranked_articles: ImpressedSection,
         top_news_article_ids: set[UUID] | None = None,
-        top_news_candidates: CandidateSet | None = None,
     ) -> list[ImpressedSection]:
         if not ranked_articles.impressions:
             return []
 
-        if top_news_candidates is not None and top_news_article_ids is None:
-            top_news_article_ids = {article.article_id for article in top_news_candidates.articles}
-        elif top_news_article_ids is None:
-            top_news_article_ids = set()
+        top_news_article_ids = top_news_article_ids or set()
 
         # extract articles from impressions
         all_articles = [imp.article for imp in ranked_articles.impressions]
 
-        top_news_articles = []
-        regular_articles = []
-
-        for article in all_articles:
-            if article.article_id in top_news_article_ids:
-                top_news_articles.append(article)
-            else:
-                regular_articles.append(article)
+        top_news_articles = [a for a in all_articles if a.article_id in top_news_article_ids]
+        regular_articles = [a for a in all_articles if a.article_id not in top_news_article_ids]
 
         # take up to max_top_news articles
         selected_top_news = top_news_articles[: self.config.max_top_news]
