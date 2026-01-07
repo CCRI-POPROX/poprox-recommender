@@ -1,14 +1,12 @@
-from itertools import zip_longest
-
 from lenskit.pipeline import Component
 
-from poprox_concepts.domain import RecommendationList
+from poprox_concepts.domain import ImpressedSection
 
 
 class Concatenate(Component):
     config: None
 
-    def __call__(self, recs1: RecommendationList, recs2: RecommendationList) -> RecommendationList:
+    def __call__(self, recs1: ImpressedSection, recs2: ImpressedSection) -> ImpressedSection:
         """
         Concatenates two sets of candidates, while deduplicating them, keeping the
         first occurrence of each article (by id), and maintaining their original order.
@@ -19,10 +17,8 @@ class Concatenate(Component):
         the dict keys can be ignored and the dict values are the deduplicated candidates
         in reverse order. Reversing them one more time returns them to the original order.
         """
-        reverse_articles = reversed(recs1.articles + recs2.articles)
-        reverse_extras = reversed(recs1.extras + recs2.extras)
+        reverse_impressions = reversed(recs1.impressions + recs2.impressions)
+        impressions = {impression.article.article_id: impression for impression in reverse_impressions}.values()
+        unreversed_impressions = list(reversed(impressions))
 
-        articles = {article.article_id: article for article in reverse_articles}
-        extras = {article.article_id: extra for article, extra in zip_longest(reverse_articles, reverse_extras)}
-
-        return RecommendationList(articles=list(reversed(articles.values())), extras=list(reversed(extras.values())))
+        return ImpressedSection(impressions=unreversed_impressions)

@@ -1,7 +1,7 @@
 import torch
 from lenskit.pipeline import Component
 
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import CandidateSet, InterestProfile
 from poprox_recommender.pytorch.decorators import torch_inference
 
 
@@ -19,6 +19,7 @@ class ArticleScorer(Component):
         #change from one user embeddings to 32, which gets 32 scores for each article. and then aggregate (average them)
         #need to create mind interest profile (list)
         if user_embedding is not None:
+            user_embedding = torch.nan_to_num(user_embedding)
             pred = torch.matmul(candidate_embeddings, user_embedding.t()).squeeze()
             with_scores.scores = pred.cpu().detach().numpy()
         else:

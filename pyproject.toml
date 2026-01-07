@@ -10,7 +10,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
 ]
-requires-python = ">= 3.12"
+requires-python = "~=3.12.0"
 readme = "README.md"
 license = { file = "LICENSE.md" }
 dynamic = ["version"]
@@ -19,22 +19,17 @@ dependencies = [
   "fastapi[all]~=0.115.11",
   "mangum~=0.19.0",
   "uvicorn~=0.34.0",
-  "lenskit>=2025.3.0a4.dev85",
+  "lenskit>=2025.6.2,<2026",
   "nltk>=3.8,<4",
-  "numpy>=1.26,<2",
   "torch~=2.2",
   "smart_open==7.*",
   "safetensors>=0.4,<1",
   "transformers[torch]>=4.41,<5",
-  "rich ~=13.9",
   "poprox-concepts @ git+https://github.com/CCRI-POPROX/poprox-concepts.git",
 ]
 
 [project.optional-dependencies]
 deploy = ["awslambdaric ~=2.2"]
-# declare extras for Torch install
-cpu = ["torch~=2.2"]
-cuda = ["torch~=2.2"]
 
 [project.urls]
 Homepage = "https://docs.poprox.ai"
@@ -43,25 +38,34 @@ GitHub = "https://github.com/CCRI-POPROX/poprox-recommender"
 ## dependencies for various task sets
 [dependency-groups]
 lint = ["pre-commit ~=3.7", "ruff >=0.4", "pyright ~=1.1"]
-test = ["requests >=2.31,<3", "coverage >=6.5", "pytest >=8"]
+test = [
+  "requests >=2.31,<3",
+  "coverage >=6.5",
+  "pytest >=8",
+  "scikit-learn>=1.3,<2",
+]
 eval = [
   "docopt-ng >=0.9",
   "pandas ~=2.0",
   "ray ~=2.44",
+  { include-group = "data" },
+  "scikit-learn>=1.3,<2",
 ]
 dev = [
   "hatch ~=1.13",
   "ipython >=8",
   "notebook >=7.2",
+  "py-spy>=0.4.1",
   "pyarrow-stubs ~=17.11",
   { include-group = "lint" },
   { include-group = "test" },
   { include-group = "data" },
   { include-group = "eval" },
+  "scikit-learn>=1.3,<2",
 ]
 data = [
-  "dvc ~=3.51",
-  "dvc-s3 >=3",
+  "invoke ~=2.2",
+  "dvc[s3] ~=3.51",
   "docopt-ng >=0.9",
   "pandas ~=2.0",
   "matplotlib ~=3.6",
@@ -72,31 +76,47 @@ data = [
   "scipy ~=1.14.1",
   "pylatex ~=1.4.2",
   "jq ~=1.8",
+  "zstandard ~=0.23",
+  "wcmatch>=10.0",
+  "duckdb ~=1.3",
 ]
+# declare extras for Torch install
+cpu = ["torch~=2.2"]
+cuda = ["torch~=2.2"]
 
 ## UV index setup for PyTorch
 [tool.uv]
-conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+conflicts = [[{ group = "cpu" }, { group = "cuda" }]]
+# theoretically, our indices should keep us from needing this, but unfortunately not
+index-strategy = "unsafe-first-match"
 
 [tool.uv.sources]
+# lenskit = { index = "lenskit-dev" }
 torch = [
-  { index = "pytorch-cpu", extra = "cpu" },
-  { index = "pytorch-cu124", extra = "cuda" },
+  { index = "pytorch-cpu", group = "cpu" },
+  { index = "pytorch-cuda", group = "cuda" },
 ]
+# following can be uncommented when temporarily using a git checkout
+# lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
 
+# pre-release version of LensKit
 [[tool.uv.index]]
 name = "lenskit-dev"
 url = "https://pypi.lenskit.org/lenskit-dev/"
+explicit = true
 
+# PyPI index providing CPU-only PyTorch *without* clobbering unrelated PyPI
+# packages.  Enabled by default, so we default to CPU-only Torch.
 [[tool.uv.index]]
 name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
+url = "https://pypi.lenskit.org/torch/cpu/"
 
+# PyPI index providing GPU-enabled PyTorch *without* clobbering unrelated PyPI
+# packages.  Also enabled (for transitive nvidia deps, "explicit" only works for
+# direct dependencies), but lower-priority than CPU.
 [[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
-explicit = true
+name = "pytorch-cuda"
+url = "https://pypi.lenskit.org/torch/cu128/"
 
 ###### build and environment configurations ######
 # basic hatch config
@@ -112,7 +132,7 @@ path = "src/poprox_recommender/__about__.py"
 ###### tooling configurations ######
 # ruff — formatting and lints
 [tool.ruff]
-target-version = "py311"
+target-version = "py312"
 line-length = 120
 
 [tool.ruff.lint]
@@ -123,8 +143,8 @@ unfixable = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# tests can have unused imports (for pytest fixtures)
-"tests/**/*" = ["F401"]
+# tests can have unused imports and overrides (for pytest fixtures)
+"tests/**/*" = ["F401", "F811"]
 
 [tool.ruff.isort]
 known-first-party = ["poprox_*"]
@@ -133,7 +153,7 @@ known-first-party = ["poprox_*"]
 ban-relative-imports = "all"
 
 [tool.pyright]
-exclude = [".venv/", ".pixi/", "node_modules"]
+exclude = [".venv/", ".pixi/", "node_modules/"]
 
 # Component's interface creates a lot of noise with this check
 reportIncompatibleMethodOverride = false

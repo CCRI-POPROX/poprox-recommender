@@ -1,0 +1,25 @@
+[random]
+seed = 20250612
+
+# The 'machine' sections define different machines we use for training & eval.
+
+# screamer & cruncher are at Drexel
+[machines.screamer]
+description = "INERTIAL GPU workstation"
+idle_watts = 81
+
+# These are Prometheus queries for obtaining power consumption data.  Each query
+# returns the estimated power consumed, in Joules, in the last {elapsed} ms.
+[machines.screamer.power_queries]
+system = 'sum_over_time((apcupsd_nominal_power_watts{{machine="{machine}"}} * (apcupsd_ups_load_percent{{machine="{machine}"}} / 100))[{elapsed}ms:1s])'
+cpu = 'increase(node_rapl_package_joules_total{{machine="{machine}"}}[{elapsed}ms:1s])'
+gpu = 'sum_over_time((nvidia_gpu_power_usage_milliwatts{{machine="{machine}"}} / 1000)[{elapsed}ms:1s])'
+
+[machines.cruncher]
+description = "INERTIAL datacenter machine"
+idle_watts = 220
+
+[machines.cruncher.power_queries]
+system = 'sum_over_time(sum(redfish_psu_input_power_watts{{machine="{machine}"}})[{elapsed}ms:1s])'
+cpu = 'increase(sum(node_rapl_package_joules_total{{machine="{machine}"}})[{elapsed}ms:1s])'
+gpu = 'increase(DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION{{machine="{machine}"}}[{elapsed}ms:1s]) / 1000'

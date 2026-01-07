@@ -4,7 +4,7 @@ import logging
 import torch as th
 from transformers import AutoModel, AutoTokenizer
 
-from poprox_concepts.domain import Article, Image, InterestProfile, RecommendationList
+from poprox_concepts.domain import Article, Image, ImpressedSection, InterestProfile
 from poprox_recommender.pytorch.decorators import torch_inference
 
 logger = logging.getLogger(__name__)
@@ -18,8 +18,8 @@ class ImageSelector:
         self.encoder = AutoModel.from_pretrained("distilbert-base-uncased").to(self.device)
 
     @torch_inference
-    def __call__(self, recommendations: RecommendationList, interest_profile: InterestProfile) -> RecommendationList:
-        if not recommendations.articles:
+    def __call__(self, recommendations: ImpressedSection, interest_profile: InterestProfile) -> ImpressedSection:
+        if not recommendations.impressions:
             return recommendations
 
         if interest_profile.embedding is None:
@@ -27,10 +27,10 @@ class ImageSelector:
 
         user_embedding = interest_profile.embedding.squeeze(0)
 
-        for article in recommendations.articles:
-            selected_image = self._select_article_image(article, user_embedding)
+        for impression in recommendations.impressions:
+            selected_image = self._select_article_image(impression.article, user_embedding)
             if selected_image:
-                article.preview_image_id = selected_image.image_id
+                impression.preview_image_id = selected_image.image_id
 
         return recommendations
 

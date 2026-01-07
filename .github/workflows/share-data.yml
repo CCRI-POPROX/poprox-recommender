@@ -8,8 +8,8 @@ on:
 jobs:
   share-data:
     name: Share data to S3
-    runs-on: ubuntu-latest
-
+    runs-on: codebuild-poprox-recommender-${{ github.run_id }}-${{ github.run_attempt }}
+    if: github.repository_owner == 'CCRI-POPROX'
     environment: data-publish
 
     steps:
@@ -19,16 +19,13 @@ jobs:
           fetch-depth: 0
 
       - name: 🕶️ Install uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v5
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version-file: ".python-version"
+          activate-environment: true
 
       - name: 📦 Set up dependencies
         run: |
-          uv sync --extra=cpu --no-default-groups --group=data
+          uv sync --group=cpu --no-default-groups --group=data
           echo "$PWD/.venv/bin" >>"$GITHUB_PATH"
 
       - name: Configure sharing
@@ -43,13 +40,13 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Upload shared data
-        run: ./scripts/upload-shared-data.sh --shared
+        run: invoke upload-shared-data
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Upload public data
-        run: ./scripts/upload-shared-data.sh --public
+        run: invoke upload-shared-data --public
         env:
           AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}

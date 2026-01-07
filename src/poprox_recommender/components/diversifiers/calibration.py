@@ -4,7 +4,7 @@ import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts import Article
+from poprox_concepts.domain import Article
 from poprox_recommender.topics import normalized_category_count
 
 

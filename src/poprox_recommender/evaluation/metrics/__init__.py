@@ -5,22 +5,33 @@ from uuid import UUID
 import pandas as pd
 from lenskit.data import ItemList
 from lenskit.metrics import call_metric
-from lenskit.metrics.ranking import NDCG, RecipRank
+from lenskit.metrics.ranking import NDCG, RBP, RecipRank
 
-from poprox_concepts import Article, CandidateSet
+from poprox_concepts.domain import Article, CandidateSet
+from poprox_recommender.data.eval import EvalData
+from poprox_recommender.evaluation.metrics.ils import intralist_similarity
+from poprox_recommender.evaluation.metrics.lip import least_item_promoted
+from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 
-__all__ = ["rank_biased_overlap", "ProfileRecs", "measure_profile_recs"]
+__all__ = [
+    "rank_biased_overlap",
+    "RecsWithTruth",
+    "measure_rec_metrics",
+    "least_item_promoted",
+    "rank_bias_entropy",
+    "intralist_similarity",
+]
 
 logger = logging.getLogger(__name__)
 
 
-class ProfileRecs(NamedTuple):
+class RecsWithTruth(NamedTuple):
     """
-    A user profile's recommendations (possibly from multiple algorithms and stages)
+    The recommendation for a specific request (possibly from multiple algorithms and stages)
     """
 
-    profile_id: UUID
+    slate_id: UUID
     recs: pd.DataFrame
     truth: pd.DataFrame
 
@@ -32,12 +43,12 @@ def convert_df_to_article_set(rec_df):
     return CandidateSet(articles=articles)
 
 
-def measure_profile_recs(profile: ProfileRecs) -> dict[str, Any]:
+def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | None = None) -> dict[str, Any]:
     """
-    Measure a single user profile's recommendations.  Returns the profile ID and
+    Measure a single set of recommendations against ground truth.  Returns the recommendation ID and
     a dictionary of evaluation metrics.
     """
-    profile_id, recs, truth = profile
+    recommendation_id, recs, truth = recs_with_truth
     truth.index = truth.index.astype(str)
 
     truth = truth.reset_index()
@@ -48,9 +59,14 @@ def measure_profile_recs(profile: ProfileRecs) -> dict[str, Any]:
     final_rec_df = recs[recs["stage"] == "final"]
     final_rec = ItemList.from_df(final_rec_df)
 
-    single_rr = call_metric(RecipRank, final_rec, truth)
-    single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
-    single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
+    # we only compute effectiveness with truth
+    if len(truth) > 0:
+        single_rbp = call_metric(RBP, final_rec, truth)
+        single_rr = call_metric(RecipRank, final_rec, truth)
+        single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
+        single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
+    else:
+        single_rbp = single_rr = single_ndcg5 = single_ndcg10 = None
 
     ranked_rec_df = recs[recs["stage"] == "ranked"]
     ranked = convert_df_to_article_set(ranked_rec_df)
@@ -61,29 +77,45 @@ def measure_profile_recs(profile: ProfileRecs) -> dict[str, Any]:
     if ranked and reranked:
         single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
         single_rbo10 = rank_biased_overlap(ranked, reranked, k=10)
+        lip = least_item_promoted(ranked, reranked, k=10)
     else:
         single_rbo5 = None
         single_rbo10 = None
+        lip = None
+
+    rbe = rank_bias_entropy(ranked, k=10, d=0.5, eval_data=eval_data)
+    ils = intralist_similarity(ranked, k=10)
 
     logger.debug(
-        "profile %s: NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
-        profile_id,
+        "recommendation %s: RBP=%0.3f, NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
+        " LIP=%0.3f, RBE=%0.3f",
+        recommendation_id,
+        single_rbp,
         single_ndcg5,
         single_ndcg10,
         single_rr,
         single_rbo5 or -1.0,
         single_rbo10 or -1.0,
+        lip,
+        rbe,
+        ils,
     )
 
     return {
-        "profile_id": profile_id,
+        "recommendation_id": recommendation_id,
         # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
         # whole function should be revised for generality when we want to support
         # other pipelines.
         "personalized": len(ranked.articles) > 0,
+        # count the number of instances with non-empty truth sets
+        "num_truth": len(truth),
+        "RBP": single_rbp,
         "NDCG@5": single_ndcg5,
         "NDCG@10": single_ndcg10,
         "RR": single_rr,
         "RBO@5": single_rbo5,
         "RBO@10": single_rbo10,
+        "rank_based_entropy": rbe,
+        "least_item_promoted": lip,
+        "intralist_similarity": ils,
     }

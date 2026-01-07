@@ -10,7 +10,7 @@ from lenskit.pipeline import Component
 from safetensors.torch import load_file
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
-from poprox_concepts import CandidateSet
+from poprox_concepts.domain import CandidateSet
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.news_encoder import NewsEncoder
 from poprox_recommender.paths import model_file_path

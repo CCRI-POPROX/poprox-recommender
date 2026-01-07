@@ -1,14 +1,10 @@
 vars:
   - pipelines:
       - nrms
-      - mmr
-      - pfar
       - softmax
-      - topic_cali
       - nrms_rrf_static_user
       - nrms_topic_scores
       - nrms_topics_static
-      - nrms_images
 
 stages:
   # these are *foreach stages*: they have multiple versions, one for each pipeline.
@@ -20,7 +16,7 @@ stages:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
         - models/nrms-mind/
-        - data/MINDlarge_dev.zip
+        - data/MINDlarge_dev.db
       outs:
         - outputs/mind-val/${item}/recommendations.parquet
         - outputs/mind-val/${item}/recommendations.ndjson.zst
@@ -30,14 +26,14 @@ stages:
   measure-mind-val:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDlarge_dev mind-val ${item}
+      cmd: python -m poprox_recommender.evaluation.measure -M MINDlarge_dev mind-val ${item}
       deps:
-        - src/poprox_recommender/evaluation/evaluate.py
+        - src/poprox_recommender/evaluation/measure.py
         - src/poprox_recommender/evaluation/metrics/
-        - data/MINDlarge_dev.zip
+        - data/MINDlarge_dev.db
         - outputs/mind-val/${item}/recommendations.parquet
       outs:
-        - outputs/mind-val/${item}/profile-metrics.csv.gz
+        - outputs/mind-val/${item}/recommendation-metrics.csv.gz
       metrics:
         - outputs/mind-val/${item}/metrics.json:
             cache: false
@@ -50,7 +46,7 @@ stages:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
         - models/nrms-mind/
-        - data/MINDsmall_dev.zip
+        - data/MINDsmall_dev.db
       outs:
         - outputs/mind-small/${item}/recommendations.parquet
         - outputs/mind-small/${item}/recommendations.ndjson.zst
@@ -60,14 +56,14 @@ stages:
   measure-mind-small:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-small ${item}
+      cmd: python -m poprox_recommender.evaluation.measure -M MINDsmall_dev mind-small ${item}
       deps:
-        - src/poprox_recommender/evaluation/evaluate.py
+        - src/poprox_recommender/evaluation/measure.py
         - src/poprox_recommender/evaluation/metrics/
-        - data/MINDlarge_dev.zip
+        - data/MINDsmall_dev.db
         - outputs/mind-small/${item}/recommendations.parquet
       outs:
-        - outputs/mind-small/${item}/profile-metrics.csv.gz
+        - outputs/mind-small/${item}/recommendation-metrics.csv.gz
       metrics:
         - outputs/mind-small/${item}/metrics.json:
             cache: false
@@ -76,12 +72,12 @@ stages:
   recommend-mind-subset:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=1000 -o outputs/mind-subset/${item} ${item}
+      cmd: python -m poprox_recommender.evaluation.generate -M MINDsmall_dev --subset=250 -o outputs/mind-subset/${item} ${item}
       deps:
         - src/poprox_recommender/evaluation/generate/
         - src/poprox_recommender/recommenders/configurations/${item}.py
         - models/nrms-mind/
-        - data/MINDsmall_dev.zip
+        - data/MINDsmall_dev.db
       outs:
         - outputs/mind-subset/${item}/recommendations.parquet
         - outputs/mind-subset/${item}/recommendations.ndjson.zst
@@ -91,27 +87,96 @@ stages:
   measure-mind-subset:
     foreach: ${pipelines}
     do:
-      cmd: python -m poprox_recommender.evaluation.evaluate -M MINDsmall_dev mind-subset ${item}
+      cmd: python -m poprox_recommender.evaluation.measure -M MINDsmall_dev mind-subset ${item}
       deps:
-        - src/poprox_recommender/evaluation/evaluate.py
+        - src/poprox_recommender/evaluation/measure.py
         - src/poprox_recommender/evaluation/metrics/
-        - data/MINDlarge_dev.zip
+        - data/MINDsmall_dev.db
         - outputs/mind-subset/${item}/recommendations.parquet
       outs:
-        - outputs/mind-subset/${item}/profile-metrics.csv.gz
+        - outputs/mind-subset/${item}/recommendation-metrics.csv.gz
       metrics:
         - outputs/mind-subset/${item}/metrics.json:
             cache: false
 
+  # real POPROX data snapshot
+  recommend-poprox:
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -P POPROX -o outputs/poprox/${item} ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/POPROX.db
+      outs:
+        - outputs/poprox/${item}/recommendations.parquet
+        - outputs/poprox/${item}/recommendations.ndjson.zst
+        - outputs/poprox/${item}/embeddings.parquet
+        - outputs/poprox/${item}/generate-task.json
+
+  recommend-poprox-latest:
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -P POPROX --latest -o outputs/poprox-latest/${item} ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/POPROX.db
+      outs:
+        - outputs/poprox-latest/${item}/recommendations.parquet
+        - outputs/poprox-latest/${item}/recommendations.ndjson.zst
+        - outputs/poprox-latest/${item}/embeddings.parquet
+        - outputs/poprox-latest/${item}/generate-task.json
+
+  recommend-poprox-recent:
+    foreach: ${pipelines}
+    do:
+      cmd: python -m poprox_recommender.evaluation.generate -P POPROX --recent -o outputs/poprox-recent/${item} ${item}
+      deps:
+        - src/poprox_recommender/evaluation/generate/
+        - src/poprox_recommender/recommenders/configurations/${item}.py
+        - models/nrms-mind/
+        - data/POPROX.db
+      outs:
+        - outputs/poprox-recent/${item}/recommendations.parquet
+        - outputs/poprox-recent/${item}/recommendations.ndjson.zst
+        - outputs/poprox-recent/${item}/embeddings.parquet
+        - outputs/poprox-recent/${item}/generate-task.json
+
+  measure-poprox:
+    matrix:
+      data:
+        - poprox
+        - poprox-recent
+        - poprox-latest
+      pipeline: ${pipelines}
+    cmd: python -m poprox_recommender.evaluation.measure -P POPROX ${item.data} ${item.pipeline}
+    deps:
+      - src/poprox_recommender/evaluation/measure.py
+      - src/poprox_recommender/evaluation/metrics/
+      - data/POPROX.db
+      - outputs/${item.data}/${item.pipeline}/recommendations.parquet
+    outs:
+      - outputs/${item.data}/${item.pipeline}/recommendation-metrics.csv.gz
+    metrics:
+      - outputs/${item.data}/${item.pipeline}/metrics.json:
+          cache: false
+
   collect-metrics:
     foreach:
       - mind-subset
+      - mind-small
+      - mind-val
     do:
       cmd: python -m poprox_recommender.evaluation.collect ${item}
       deps:
         - src/poprox_recommender/evaluation/collect.py
         - outputs/${item}/
       outs:
-        - outputs/${item}-profile-metrics.csv.gz
+        - outputs/${item}-recommendation-metrics.csv.gz
         - outputs/${item}-metrics.csv:
+            cache: false
+        - outputs/${item}-tasks.csv:
             cache: false

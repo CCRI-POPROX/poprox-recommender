@@ -4,7 +4,7 @@ from uuid import UUID
 from torch.nn.functional import cosine_similarity
 from transformers import AutoModel, AutoTokenizer
 
-from poprox_concepts import Article, Click
+from poprox_concepts.domain import Article, Click
 from poprox_concepts.domain.topics import GENERAL_TOPICS
 from poprox_recommender.paths import model_file_path
 
@@ -12,12 +12,12 @@ NEWS_MODEL_NAME = "news-category-classifier-distilbert"
 
 
 def extract_general_topics(article: Article) -> set[str]:
-    article_topics = set([mention.entity.name for mention in article.mentions])
+    article_topics = set([mention.entity.name for mention in article.mentions if mention.entity.entity_type == "topic"])
     return article_topics.intersection(GENERAL_TOPICS)
 
 
 def extract_locality_topics(article: Article) -> set[str]:
-    article_topics = set([mention.entity.name for mention in article.mentions])
+    article_topics = set([mention.entity.name for mention in article.mentions if mention.entity.entity_type == "topic"])
     locality_topics = ["U.S. news", "World news", "Washington news"]
     return article_topics.intersection(locality_topics)
 
@@ -127,7 +127,7 @@ def match_news_topics_to_general(articles: list[Article]):
     article_to_new_topic = {}
 
     for article in articles:
-        news_topics = [mention.entity.name for mention in article.mentions]
+        news_topics = [mention.entity.name for mention in article.mentions if mention.entity.entity_type == "topic"]
         article_topic = set()
         for topic in news_topics:
             if topic not in topic_matched_dict:

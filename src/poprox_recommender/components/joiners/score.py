@@ -8,6 +8,8 @@ from poprox_concepts.domain import CandidateSet
 
 class ScoreFusionConfig(BaseModel):
     combiner: str = "sum"
+    weight1: float = 1
+    weight2: float = 1
 
 
 class ScoreFusion(Component):
@@ -20,22 +22,25 @@ class ScoreFusion(Component):
         if candidates1.scores is not None:
             for article, score in zip(candidates1.articles, candidates1.scores):
                 article_id = article.article_id
-                combined_score[article_id] += score
+                combined_score[article_id] += self.config.weight1 * score
                 combined_article[article_id] = article
 
         if candidates2.scores is not None:
             for article, score in zip(candidates2.articles, candidates2.scores):
                 article_id = article.article_id
-                combined_score[article_id] += score
+                if self.config.combiner == "sub":
+                    combined_score[article_id] -= self.config.weight2 * score
+                else:
+                    combined_score[article_id] += self.config.weight2 * score
                 combined_article[article_id] = article
-
-        if self.config.combiner == "avg":
-            denominator = 2
-        else:
-            denominator = 1
 
         merged_scores = []
         merged_articles = []
+
+        if self.config.combiner == "avg":
+            denominator = self.config.weight1 + self.config.weight2
+        else:
+            denominator = 1
 
         for key, score in combined_score.items():
             merged_articles.append(combined_article[key])

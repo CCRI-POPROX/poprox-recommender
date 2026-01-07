@@ -4,8 +4,7 @@ import random
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts import CandidateSet
-from poprox_concepts.domain import RecommendationList
+from poprox_concepts.domain import CandidateSet, ImpressedSection
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +16,7 @@ class UniformSamplerConfig(BaseModel):
 class UniformSampler(Component):
     config: UniformSamplerConfig
 
-    def __call__(self, candidates1: CandidateSet, candidates2: CandidateSet | None = None) -> RecommendationList:
+    def __call__(self, candidates1: CandidateSet, candidates2: CandidateSet | None = None) -> ImpressedSection:
         articles = {a.article_id: a for a in candidates1.articles}
 
         if candidates2 and candidates2.articles:
@@ -35,4 +34,4 @@ class UniformSampler(Component):
             num_backups = min(self.config.num_slots - len(sampled), len(backup_articles))
             sampled += random.sample(backup_articles, num_backups)
 
-        return RecommendationList(articles=sampled)
+        return ImpressedSection.from_articles(sampled)

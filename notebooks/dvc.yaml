@@ -18,7 +18,23 @@ stages:
       cmd: papermill -p EVAL_NAME ${item} basic-eval-template.ipynb ${item}.ipynb
       deps:
         - basic-eval-template.ipynb
-        - ../outputs/${item}-profile-metrics.csv.gz
+        - ../outputs/${item}-recommendation-metrics.csv.gz
       outs:
         - ${item}.ipynb:
             cache: false
+
+  # run the quick eval notebook
+  # convert the basic template from source-managed Markdown to Jupyter
+  mind-quick-summary:
+    cmd: jupytext --to notebook --execute mind-quick-summary.md
+    deps:
+      - mind-quick-summary.md
+      - ../outputs/mind-subset-metrics.csv
+      - ../outputs/mind-subset-tasks.csv
+      - ../outputs/mind-small-metrics.csv
+      - ../outputs/mind-small-tasks.csv
+      - ../outputs/mind-val-metrics.csv
+      - ../outputs/mind-val-tasks.csv
+    outs:
+      - mind-quick-summary.ipynb:
+          cache: false

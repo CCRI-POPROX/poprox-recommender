@@ -1,5 +1,5 @@
 """
-Support for loading POPROX data for evaluation.
+Load POPROX data for evaluation.
 """
 
 # pyright: basic
@@ -7,188 +7,369 @@ from __future__ import annotations
 
 import json
 import logging
-import math
-from typing import Generator
+from pathlib import Path
+from typing import Generator, Literal
 from uuid import UUID
 
+import duckdb
 import pandas as pd
+from duckdb import DuckDBPyConnection
 
-from poprox_concepts import AccountInterest, Article, Click, Entity, InterestProfile, Mention
-from poprox_concepts.api.recommendations import RecommendationRequestV2
-from poprox_concepts.domain import CandidateSet
+from poprox_concepts.api.recommendations import RecommendationRequestV4
+from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, Entity, InterestProfile, Mention
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
 
+type SlateSet = Literal["all", "latest", "recent"]
+"""
+Type for selecting the set of slates to return from the POPROX data.
+"""
+
 
 class PoproxData(EvalData):
-    def __init__(self, archive: str = "POPROX"):
-        (
-            articles_df,
-            mentions_df,
-            newsletters_df,
-            clicks_df,
-            clicked_articles_df,
-            clicked_mentions_df,
-            interests_df,
-        ) = load_poprox_frames(archive)
+    """
+    News and behavior data loaded from POPROX data.
+    """
 
-        self.newsletters_df = newsletters_df
+    name: str
+    "Name of the POPROX dataset."
+    path: Path
+    "Path to the POPROX database."
+    duck: DuckDBPyConnection
+    "DuckDB connection."
+    slates: SlateSet
+    "Set of slates to return."
 
-        # index data frames for quick lookup of users & articles
-        self.mentions_df = mentions_df
-        self.articles_df = articles_df.set_index("article_id", drop=False)
-        if not self.articles_df.index.unique:
-            logger.warning("article data has non-unique index")
+    _impression_count: int
+    _article_count: int
 
-        self.clicks_df = clicks_df
-        self.clicked_mentions_df = clicked_mentions_df
-        self.clicked_articles_df = clicked_articles_df.set_index("article_id", drop=False)
-        if not self.clicked_articles_df.index.unique:
-            logger.warning("clicked article data has non-unique index")
+    def __init__(self, archive: str = "POPROX", *, slates: SlateSet = "all"):
+        self.name = archive
+        self.path = project_root() / "data" / f"{archive}.db"
+        self.slates = slates
 
-        self.interests_df = interests_df
+        if not self.path.exists():
+            raise FileNotFoundError(self.path)
+
+        self.duck = duckdb.connect(self.path, read_only=True)
+
+        # pre-fetch counts
+        self.duck.execute(f"SELECT COUNT(*) FROM ({self._newsletter_query()})")
+        (n,) = self.duck.fetchone() or [0]
+        self._impression_count = n
+
+        self.duck.execute(
+            """
+            SELECT COUNT(DISTINCT article_id)
+            FROM (
+                SELECT article_id FROM candidate_articles
+                UNION DISTINCT
+                SELECT article_id FROM clicked_articles
+            )
+            """
+        )
+        (n,) = self.duck.fetchone() or [0]
+        self._article_count = n
 
     @property
-    def n_profiles(self) -> int:
-        return len(self.newsletters_df["newsletter_id"].unique())
+    def n_requests(self) -> int:
+        return self._impression_count
 
     @property
     def n_articles(self) -> int:
-        return self.articles_df.shape[0]
+        return self._article_count
 
-    def profile_truth(self, newsletter_id: UUID) -> pd.DataFrame | None:
+    def slate_truth(self, slate_id: UUID) -> pd.DataFrame | None:
         # Create one row per clicked article with this newsletter_id
         # Returned dataframe must have an "item_id" column containing the clicked article ids
         # and the "item_id" column must be the index of the dataframe
         # There must also be a "rating" columns
-        newsletter_clicks = self.clicks_df[self.clicks_df["newsletter_id"] == str(newsletter_id)]
-        clicked_items = newsletter_clicks["article_id"].unique()
-        return pd.DataFrame({"item_id": clicked_items, "rating": [1.0] * len(clicked_items)}).set_index("item_id")
+        self.duck.execute(
+            """
+            SELECT DISTINCT article_id AS item_id, 1.0 AS rating
+            FROM clicks
+            WHERE newsletter_id = ?
+            """,
+            [slate_id],
+        )
+        return self.duck.fetch_df().set_index("item_id")
 
-    def iter_profiles(self) -> Generator[RecommendationRequestV2]:
-        newsletter_ids = self.newsletters_df["newsletter_id"].unique()
+    def iter_slate_ids(self, *, limit: int | None = None) -> Generator[UUID]:
+        # since the client will be calling lookup_request while iterating
+        # over this iterator, we need to use a cloned cursor to keep this
+        # loop's iteration separate from other requests from the caller.
+        with self.duck.cursor() as clone:
+            query = self._newsletter_query()
+            if limit is not None:
+                assert isinstance(limit, int)
+                query += f" LIMIT {limit}"
 
-        for newsletter_id in newsletter_ids:
-            impressions_df = self.newsletters_df.loc[self.newsletters_df["newsletter_id"] == newsletter_id]
-            # TODO: Change `account_id` to `profile_id` in the export
-            profile_id = impressions_df.iloc[0]["account_id"]
-            newsletter_created_at = impressions_df.iloc[0]["created_at"]
+            clone.execute(query)
 
-            # Filter clicks to those before the newsletter
-            profile_clicks_df = self.clicks_df.loc[self.clicks_df["profile_id"] == profile_id]
-            # TODO: Change `timestamp` to `created_at` in the export
-            filtered_clicks_df = profile_clicks_df[profile_clicks_df["timestamp"] < newsletter_created_at]
+            logger.info("iterating POPROX evaluation slates")
+            while row := clone.fetchone():
+                (slate_id,) = row
+                assert isinstance(slate_id, UUID)
+                yield slate_id
 
-            # Create Article and Click objects from dataframe rows
-            clicks = []
-            past_articles = []
-            for article_row in filtered_clicks_df.itertuples():
-                article = self.lookup_clicked_article(article_row.article_id)
-                if article:
-                    past_articles.append(article)
+    def _newsletter_query(self) -> str:
+        "Construct a query to retrieve newsletter IDs."
+        match self.slates:
+            case "all":
+                query = "SELECT newsletter_id FROM newsletters ORDER BY created_at"
+            case "latest":
+                # only get the last slate for each account
+                query = """
+                    SELECT LAST(newsletter_id ORDER BY created_at)
+                    FROM newsletters
+                    GROUP BY account_id
+                """
+            case "recent":
+                # get the last slate for each account, leaving 1 week lookahead
+                query = """
+                    SELECT LAST(newsletter_id ORDER BY created_at)
+                    FROM newsletters
+                    WHERE created_at < (SELECT MAX(created_at) - INTERVAL '1 week' FROM newsletters)
+                    GROUP BY account_id
+                """
+            case _:
+                raise ValueError(f"unsupported slate set {self.slates}")
 
-                    clicks.append(
-                        Click(
-                            article_id=article_row.article_id,
-                            newsletter_id=article_row.newsletter_id,
-                            timestamp=article_row.timestamp,
-                        )
-                    )
+        return query
 
-            interests = self.interests_df.loc[self.interests_df["account_id"] == profile_id]
-            topics = []
-            for interest in interests.itertuples():
-                topics.append(
-                    AccountInterest(
-                        account_id=profile_id,
-                        entity_id=interest.entity_id,
-                        entity_name=interest.entity_name,
-                        preference=interest.preference,
-                        frequency=interest.frequency if not math.isnan(interest.frequency) else -1,
-                    )
-                )
+    def lookup_request(self, slate_id: UUID) -> RecommendationRequestV4:
+        """
+        Fetch a request for a given slate ID.  In the POPROX data, slate IDs
+        are newsletter IDs.
 
-            profile = InterestProfile(profile_id=newsletter_id, click_history=clicks, onboarding_topics=topics)
+        Args:
+            slate_id:
+                The ID of the newsletter to generate an eval request for.
 
-            # Filter candidate articles to those ingested on the same day as the newsletter (today's articles)
-            candidate_articles = []
-            newsletter_date = newsletter_created_at.date()
+        Returns:
+            The recommendation request for the specified slate ID.
 
-            for article_row in self.articles_df[
-                self.articles_df["created_at"].apply(lambda c: c.date()) == newsletter_date
-            ].itertuples():
-                candidate_articles.append(self.lookup_candidate_article(article_row.article_id))
+        Raises:
+            KeyError:
+                If the specified slate ID does not exist.
+        """
+        # look up the newsletter itself
+        self.duck.execute(
+            """
+            SELECT account_id, created_at, newsletter_date
+            FROM newsletters
+            WHERE newsletter_id = ?
+            """,
+            [slate_id],
+        )
+        if row := self.duck.fetchone():
+            account_id, newsletter_created_at, newsletter_date = row
+        else:
+            raise KeyError(slate_id)
 
-            yield RecommendationRequestV2(
-                candidates=CandidateSet(articles=candidate_articles),
-                interacted=CandidateSet(articles=past_articles),
-                interest_profile=profile,
-                num_recs=TEST_REC_COUNT,
+        # Get the clicked articles. We get clicks separately to reuse
+        # article rehydration logic.
+        self.duck.execute(
+            """
+            SELECT
+                -- article metadata
+                article_id, headline, subhead, published_at, url, raw_data, ca.created_at AS created_at,
+                -- pull together the mentions into a single list per result row
+                LIST({
+                    'mention_id': mention_id,
+                    'source': source,
+                    'relevance': relevance,
+                    'entity': entity
+                }) FILTER (mention_id IS NOT NULL) AS mentions
+            -- get the account's clicks
+            FROM clicks c
+            -- join with the clicked articles
+            JOIN clicked_articles ca USING (article_id)
+            -- also pull in their mentions
+            LEFT JOIN clicked_article_mentions USING (article_id)
+            WHERE account_id = ?
+            -- limit to clicks before the newsletter
+            AND c.clicked_at < ?
+            GROUP BY ALL
+            """,
+            [account_id, newsletter_created_at],
+        )
+        # load the resulting articles
+        past_articles = list(self._iter_query_articles())
+
+        # now extact just the clicks, with their timestamps
+        self.duck.execute(
+            """
+            SELECT article_id, newsletter_id, clicked_at
+            FROM clicks c
+            WHERE account_id = ?
+            AND c.clicked_at < ?
+            """,
+            [account_id, newsletter_created_at],
+        )
+        clicks = [Click(article_id=aid, newsletter_id=nid, timestamp=ts) for (aid, nid, ts) in self.duck.fetchall()]
+
+        # Now we need to assemble the interest profile — get the interests for this account.
+        # TODO: support interest record timestamps once those are in the export
+        self.duck.execute(
+            """
+            SELECT entity_id, entity_name, preference
+            FROM interests
+            WHERE account_id = ?
+            """,
+            [account_id],
+        )
+        topics = [
+            AccountInterest(
+                account_id=account_id, entity_id=eid, entity_name=ename, entity_type="topic", preference=pref
             )
-
-    def lookup_candidate_article(self, article_id: UUID):
-        article_row = self.articles_df.loc[str(article_id)]
-        mention_rows = self.mentions_df[self.mentions_df["article_id"] == article_row.article_id]
-        return self.convert_row_to_article(article_row, mention_rows)
-
-    def lookup_clicked_article(self, article_id: UUID):
-        try:
-            article_row = self.clicked_articles_df.loc[str(article_id)]
-            mention_rows = self.clicked_mentions_df[self.clicked_mentions_df["article_id"] == article_row.article_id]
-            return self.convert_row_to_article(article_row, mention_rows)
-        except Exception as _:
-            print(f"Did not find the clicked article with id {str(article_id)}")
-            return None
-
-    def convert_row_to_article(self, article_row, mention_rows):
-        mentions = [
-            Mention(
-                mention_id=row.mention_id,
-                article_id=row.article_id,
-                source=row.source,
-                relevance=row.relevance,
-                entity=Entity(**json.loads(row.entity)) if row.entity else None,
-            )
-            for row in mention_rows.itertuples()
+            for (eid, ename, pref) in self.duck.fetchall()
         ]
 
-        return Article(
-            article_id=article_row.article_id,
-            headline=article_row.headline,
-            subhead=article_row.subhead,
-            body=article_row.body,
-            published_at=article_row.published_at,
-            mentions=mentions,
-            source="AP",
-            external_id="",
-            raw_data=json.loads(article_row.raw_data) if article_row.raw_data else None,
+        profile = InterestProfile(
+            profile_id=slate_id,
+            click_history=clicks,
+            entity_interests=topics,
+            # stashing the newsletter timestamp here because we don't have it on request yet
+            slate_created_at=newsletter_created_at,
         )
 
+        # Retrieve the candidate articles for the newsletter date.
+        self.duck.execute(
+            """
+            SELECT
+                -- article metadata
+                article_id, headline, subhead, published_at, url, body, raw_data, ca.created_at AS created_at,
+                -- pull together the mentions
+                LIST({
+                    'mention_id': mention_id,
+                    'source': source,
+                    'relevance': relevance,
+                    'entity': entity
+                }) FILTER (mention_id IS NOT NULL) AS mentions
+            -- find all candidate articles with matching dates
+            FROM newsletter_candidates nc
+            JOIN candidate_articles ca USING (article_id)
+            -- also pull in their mentions
+            LEFT JOIN candidate_article_mentions USING (article_id)
+            WHERE newsletter_date = ?
+            GROUP BY ALL
+            """,
+            [newsletter_date],
+        )
+        candidate_articles = list(self._iter_query_articles())
 
-def load_poprox_frames(archive: str = "POPROX"):
-    data = project_root() / "data"
-    logger.info("loading POPROX data from %s", archive)
+        return RecommendationRequestV4(
+            candidates=CandidateSet(articles=candidate_articles),
+            interacted=CandidateSet(articles=past_articles),
+            interest_profile=profile,
+            num_recs=TEST_REC_COUNT,
+        )
 
-    newsletters_df = pd.read_parquet(data / "POPROX" / "newsletters.parquet")
+    def lookup_article(self, uuid: UUID, source: Literal["clicked", "candidate"] = "candidate") -> Article:
+        """
+        Look up a single article from the dataset.
 
-    articles_df = pd.read_parquet(data / "POPROX" / "articles.parquet")
-    mentions_df = pd.read_parquet(data / "POPROX" / "mentions.parquet")
+        Args:
+            uuid:
+                The article ID to look up.
+            source:
+                The type/source of articles (so long as those are different).
 
-    clicks_df = pd.read_parquet(data / "POPROX" / "clicks.parquet")
-    clicked_articles_df = pd.read_parquet(data / "POPROX" / "clicked" / "articles.parquet")
-    clicked_mentions_df = pd.read_parquet(data / "POPROX" / "clicked" / "mentions.parquet")
+        Returns:
+            The article.
+        Raises:
+            KeyError:
+                If the specified article ID does not exist.
+        """
+        article_tbl = f"{source}_articles"
+        mention_tbl = f"{source}_article_mentions"
 
-    interests_df = pd.read_parquet(data / "POPROX" / "interests.parquet")
+        self.duck.execute(
+            f"""
+            SELECT
+                -- article metadata
+                article_id, headline, subhead, published_at, a.created_at AS created_at, url, raw_data,
+                -- pull together the mentions
+                LIST({{
+                    'mention_id': mention_id,
+                    'source': source,
+                    'relevance': relevance,
+                    'entity': entity
+                }}) FILTER (mention_id IS NOT NULL) AS mentions
+            FROM {article_tbl} a
+            LEFT JOIN {mention_tbl} USING (article_id)
+            WHERE article_id = ?
+            GROUP BY ALL
+            """,
+            [uuid],
+        )
+        # loop over the articles, returning the first (and only) result.
+        for article in self._iter_query_articles():
+            return article
 
-    return (
-        articles_df,
-        mentions_df,
-        newsletters_df,
-        clicks_df,
-        clicked_articles_df,
-        clicked_mentions_df,
-        interests_df,
-    )
+        # if we got here, the loop had zero entries, so there was no matching article.
+        raise KeyError(uuid)
+
+    def _iter_query_articles(self, *, db: DuckDBPyConnection | None = None) -> Generator[Article]:
+        """
+        Iterate over the articles returned by a query, one per row.
+
+        The query should be of the form constructed by :meth:`lookup_article`.
+
+        Implemeting this as a generator allows it to be reused in any of the
+        methods that need to process one or more articles.
+
+        Args:
+            db:
+                The DuckDB connection to use, defaults to :attr:`duck`.
+        """
+        if db is None:
+            db = self.duck
+
+        names = [d[0] for d in db.description]
+        required_names = ["article_id", "headline", "subhead", "published_at", "mentions"]
+        for f in required_names:
+            if f not in names:
+                raise RuntimeError(f"required article field {f} not in query")
+
+        while row := db.fetchone():
+            assert len(row) == len(names)
+            row_dict = dict(zip(names, row))
+
+            # convert mentions into POPROX concept models
+            if "mentions" in row_dict:
+                mms = []
+                for mr in row_dict["mentions"]:
+                    entity = None
+                    if ent_json := mr.get("entity", None):
+                        entity = Entity.model_validate_json(ent_json)
+
+                    mms.append(
+                        Mention(
+                            mention_id=mr["mention_id"],
+                            article_id=row_dict["article_id"],
+                            source=mr["source"],
+                            relevance=mr["relevance"],
+                            entity=entity,
+                        )
+                    )
+                row_dict["mentions"] = mms
+
+            if "raw_data" in row_dict:
+                row_dict["raw_data"] = json.loads(row_dict["raw_data"])
+
+            yield Article(source="AP", external_id="", **row_dict)
+
+    # We pickle everything _except_ the database connection itself, and then re-connect
+    # to the database when unpickled. This allows us to share a data loader through Ray,
+    # and each work will have its own (read-only) connection to the database.
+    def __getstate__(self):
+        return {name: val for name, val in self.__dict__.items() if name != "duck"}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.duck = duckdb.connect(self.path, read_only=True)

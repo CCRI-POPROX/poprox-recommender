@@ -17,7 +17,7 @@
               "entity_id": "1d1bbaf5-b690-4b2b-9b98-f99f3a4c3cd5",
               "external_id": "b17e2751b26d4523a2c99d79e04747ee",
               "name": "COVID-19 pandemic",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "b17e2751b26d4523a2c99d79e04747ee",
@@ -40,7 +40,7 @@
               "entity_id": "4700a8cc-153d-45a9-a374-d8b351f8a504",
               "external_id": "ec2db49888e810048c93f8851349f9bd",
               "name": "Labor",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "ec2db49888e810048c93f8851349f9bd",
@@ -63,7 +63,7 @@
               "entity_id": "71517262-cbc3-45e0-b396-4ed5cbf2a9a8",
               "external_id": "4f7e0448857510048d0aff2260dd383e",
               "name": "Economy",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "4f7e0448857510048d0aff2260dd383e",
@@ -86,7 +86,7 @@
               "entity_id": "d91dd8b1-b57d-4108-8a2c-9da84cf0131b",
               "external_id": "ec3142c088e810048cbaf8851349f9bd",
               "name": "Inflation",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "ec3142c088e810048cbaf8851349f9bd",
@@ -109,7 +109,7 @@
               "entity_id": "c7707573-1a18-4e5e-8f79-a3aa8891d6a5",
               "external_id": "e00eb978850a1004895591f43387513e",
               "name": "Jobs and careers",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "e00eb978850a1004895591f43387513e",
@@ -132,7 +132,7 @@
               "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
               "external_id": "c8e409f8858510048872ff2260dd383e",
               "name": "Business",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "c8e409f8858510048872ff2260dd383e",
@@ -155,7 +155,7 @@
               "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
               "external_id": "c8e409f8858510048872ff2260dd383e",
               "name": "Business",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "c8e409f8858510048872ff2260dd383e",
@@ -187,7 +187,7 @@
               "entity_id": "b688c6b1-bc92-493a-a267-f46a03bbbd14",
               "external_id": "78c99fe8829f100481b5df092526b43e",
               "name": "Trials",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "78c99fe8829f100481b5df092526b43e",
@@ -210,7 +210,7 @@
               "entity_id": "128cc425-bfbe-4c05-9a25-76f34f0fd844",
               "external_id": "4626a38a1b52454ca5d01755d14f1dc9",
               "name": "Legal proceedings",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "4626a38a1b52454ca5d01755d14f1dc9",
@@ -233,7 +233,7 @@
               "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
               "external_id": "86aad5207dac100488ecba7fa5283c3e",
               "name": "Politics",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "86aad5207dac100488ecba7fa5283c3e",
@@ -257,7 +257,7 @@
               "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
               "external_id": "a4677d70863b4012b846a1b00f5079f5",
               "name": "U.S. news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "a4677d70863b4012b846a1b00f5079f5",
@@ -281,7 +281,7 @@
               "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
               "external_id": "f25af2d07e4e100484f5df092526b43e",
               "name": "General news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "f25af2d07e4e100484f5df092526b43e",
@@ -314,7 +314,7 @@
               "entity_id": "00a1d691-9fbf-4fe7-a2ea-3732d94a99ab",
               "external_id": "74bbae4a3d914703acc9581f89305a62",
               "name": "Black people",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "74bbae4a3d914703acc9581f89305a62",
@@ -337,7 +337,7 @@
               "entity_id": "020b3273-2d8a-48bb-8288-453eec248321",
               "external_id": "3b7438807d7010048477ba7fa5283c3e",
               "name": "Military and defense",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "3b7438807d7010048477ba7fa5283c3e",
@@ -360,7 +360,7 @@
               "entity_id": "0a2eb950-a26b-4847-9b41-6e9adc58179a",
               "external_id": "7cf243908830100481e9ae2ac3a6923e",
               "name": "War and unrest",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "7cf243908830100481e9ae2ac3a6923e",
@@ -383,7 +383,7 @@
               "entity_id": "8dce31f5-c218-4009-8bf7-ad0ef9c9b68e",
               "external_id": "58ad538091c7100480a9a55c96277d3e",
               "name": "Evacuations",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "58ad538091c7100480a9a55c96277d3e",
@@ -406,7 +406,7 @@
               "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
               "external_id": "86aad5207dac100488ecba7fa5283c3e",
               "name": "Politics",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "86aad5207dac100488ecba7fa5283c3e",
@@ -430,7 +430,7 @@
               "entity_id": "14906f89-4474-4c65-bb16-ddf203a38a24",
               "external_id": "ec28dcdfc4ca4ac9918d3b61427e65c3",
               "name": "Race and ethnicity",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "ec28dcdfc4ca4ac9918d3b61427e65c3",
@@ -454,7 +454,7 @@
               "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
               "external_id": "16cb0ba3e6d24d97ace39f5a1924669a",
               "name": "Entertainment",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "16cb0ba3e6d24d97ace39f5a1924669a",
@@ -487,7 +487,7 @@
               "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
               "external_id": "c8e409f8858510048872ff2260dd383e",
               "name": "Business",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "c8e409f8858510048872ff2260dd383e",
@@ -510,7 +510,7 @@
               "entity_id": "4700a8cc-153d-45a9-a374-d8b351f8a504",
               "external_id": "ec2db49888e810048c93f8851349f9bd",
               "name": "Labor",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "ec2db49888e810048c93f8851349f9bd",
@@ -533,7 +533,7 @@
               "entity_id": "2a08e147-0a9f-47c4-8fe3-7079fc0760fa",
               "external_id": "5238090088e910048f5ef8851349f9bd",
               "name": "Compensation and benefits",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "5238090088e910048f5ef8851349f9bd",
@@ -556,7 +556,7 @@
               "entity_id": "606afcb8-3fc1-47a7-9da7-3d95115373a3",
               "external_id": "455ef2b87df7100483d8df092526b43e",
               "name": "Technology",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "455ef2b87df7100483d8df092526b43e",
@@ -580,7 +580,7 @@
               "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
               "external_id": "a4677d70863b4012b846a1b00f5079f5",
               "name": "U.S. news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "a4677d70863b4012b846a1b00f5079f5",
@@ -604,7 +604,7 @@
               "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
               "external_id": "f25af2d07e4e100484f5df092526b43e",
               "name": "General news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "f25af2d07e4e100484f5df092526b43e",
@@ -628,7 +628,7 @@
               "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
               "external_id": "c8e409f8858510048872ff2260dd383e",
               "name": "Business",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "c8e409f8858510048872ff2260dd383e",
@@ -660,7 +660,7 @@
               "entity_id": "53b45dcf-3625-4494-ba5a-02b898751baf",
               "external_id": "b4ed19d87e5c10048565df092526b43e",
               "name": "Celebrity",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "b4ed19d87e5c10048565df092526b43e",
@@ -683,7 +683,7 @@
               "entity_id": "05e3ba5b-3200-4886-8055-1b3853084b2f",
               "external_id": "533056429d224434859d3b570c6359fd",
               "name": "BET Awards",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "533056429d224434859d3b570c6359fd",
@@ -706,7 +706,7 @@
               "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
               "external_id": "16cb0ba3e6d24d97ace39f5a1924669a",
               "name": "Entertainment",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "16cb0ba3e6d24d97ace39f5a1924669a",
@@ -730,7 +730,7 @@
               "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
               "external_id": "a4677d70863b4012b846a1b00f5079f5",
               "name": "U.S. news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "a4677d70863b4012b846a1b00f5079f5",
@@ -754,7 +754,7 @@
               "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
               "external_id": "f25af2d07e4e100484f5df092526b43e",
               "name": "General news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "f25af2d07e4e100484f5df092526b43e",
@@ -778,7 +778,7 @@
               "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
               "external_id": "16cb0ba3e6d24d97ace39f5a1924669a",
               "name": "Entertainment",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "16cb0ba3e6d24d97ace39f5a1924669a",
@@ -811,7 +811,7 @@
               "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
               "external_id": "54df6c687df7100483dedf092526b43e",
               "name": "Sports",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "54df6c687df7100483dedf092526b43e",
@@ -835,7 +835,7 @@
               "entity_id": "281adbd8-b522-4ba5-95a6-79eaf03bcad5",
               "external_id": "49e9acf88c87100481eda07ca041d23e",
               "name": "Sports transactions",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "49e9acf88c87100481eda07ca041d23e",
@@ -858,7 +858,7 @@
               "entity_id": "06f3b956-0ad6-4a06-b510-8760b63a861f",
               "external_id": "bea8168c30d64406819526e1d11f2041",
               "name": "MLS soccer",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "bea8168c30d64406819526e1d11f2041",
@@ -881,7 +881,7 @@
               "entity_id": "dc7b0ed2-bf54-42aa-b931-ad433cb6af3b",
               "external_id": "20dbbcf87e4e100488c9d0913b2d075c",
               "name": "Soccer",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "20dbbcf87e4e100488c9d0913b2d075c",
@@ -904,7 +904,7 @@
               "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
               "external_id": "54df6c687df7100483dedf092526b43e",
               "name": "Sports",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "54df6c687df7100483dedf092526b43e",
@@ -937,7 +937,7 @@
               "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
               "external_id": "f25af2d07e4e100484f5df092526b43e",
               "name": "General news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "f25af2d07e4e100484f5df092526b43e",
@@ -961,7 +961,7 @@
               "entity_id": "8697f7d9-25cb-4161-a8c8-9b94bbd287e7",
               "external_id": "5934f1087e87100487e3df092526b43e",
               "name": "Injuries",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "5934f1087e87100487e3df092526b43e",
@@ -984,7 +984,7 @@
               "entity_id": "46730aeb-4edb-4da9-86c7-030b8ea4c522",
               "external_id": "9bec03a0883310048673ae2ac3a6923e",
               "name": "Military occupations",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "9bec03a0883310048673ae2ac3a6923e",
@@ -1007,7 +1007,7 @@
               "entity_id": "0a2eb950-a26b-4847-9b41-6e9adc58179a",
               "external_id": "7cf243908830100481e9ae2ac3a6923e",
               "name": "War and unrest",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "7cf243908830100481e9ae2ac3a6923e",
@@ -1030,7 +1030,7 @@
               "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
               "external_id": "86aad5207dac100488ecba7fa5283c3e",
               "name": "Politics",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "86aad5207dac100488ecba7fa5283c3e",
@@ -1054,7 +1054,7 @@
               "entity_id": "00a1d691-9fbf-4fe7-a2ea-3732d94a99ab",
               "external_id": "74bbae4a3d914703acc9581f89305a62",
               "name": "Black people",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "74bbae4a3d914703acc9581f89305a62",
@@ -1077,7 +1077,7 @@
               "entity_id": "eac0ee8f-1a56-4006-b0c5-4d2c54a5fe21",
               "external_id": "abfca78268874726966cdad8c35c4ae3",
               "name": "Washington news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "abfca78268874726966cdad8c35c4ae3",
@@ -1101,7 +1101,7 @@
               "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
               "external_id": "f25af2d07e4e100484f5df092526b43e",
               "name": "General news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "f25af2d07e4e100484f5df092526b43e",
@@ -1125,7 +1125,7 @@
               "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
               "external_id": "a4677d70863b4012b846a1b00f5079f5",
               "name": "U.S. news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "a4677d70863b4012b846a1b00f5079f5",
@@ -1158,7 +1158,7 @@
               "entity_id": "ec489f76-18c6-4f78-b53b-fda5849a1056",
               "external_id": "86aad5207dac100488ecba7fa5283c3e",
               "name": "Politics",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "86aad5207dac100488ecba7fa5283c3e",
@@ -1182,7 +1182,7 @@
               "entity_id": "76b1df08-8a91-42b4-8b56-26b34243af38",
               "external_id": "48612b807c2b4b93bbbacbf54f547ad5",
               "name": "Crime",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "48612b807c2b4b93bbbacbf54f547ad5",
@@ -1205,7 +1205,7 @@
               "entity_id": "3ed7f2ab-8e71-49b5-96b9-b3ada2e5e1fb",
               "external_id": "5018b8f4ded948128561c5af2144ca66",
               "name": "Shootings",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "5018b8f4ded948128561c5af2144ca66",
@@ -1228,7 +1228,7 @@
               "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
               "external_id": "a4677d70863b4012b846a1b00f5079f5",
               "name": "U.S. news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "a4677d70863b4012b846a1b00f5079f5",
@@ -1252,7 +1252,7 @@
               "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
               "external_id": "f25af2d07e4e100484f5df092526b43e",
               "name": "General news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "f25af2d07e4e100484f5df092526b43e",
@@ -1285,7 +1285,7 @@
               "entity_id": "32ff9e3c-4025-4eef-9eb6-e4606d985b9c",
               "external_id": "aa719a8ade994c3faa014cb52a2f1411",
               "name": "Theft",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "aa719a8ade994c3faa014cb52a2f1411",
@@ -1308,7 +1308,7 @@
               "entity_id": "5ea9c71c-d949-484b-b002-f0b4b67e40e6",
               "external_id": "a37eab90831510048fcfdf092526b43e",
               "name": "Law enforcement",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "a37eab90831510048fcfdf092526b43e",
@@ -1331,7 +1331,7 @@
               "entity_id": "c27b59df-7cf0-407d-8f39-1de79888fbe4",
               "external_id": "4c96e8e92e0441579dbce2f9e8d06493",
               "name": "Prisons",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "4c96e8e92e0441579dbce2f9e8d06493",
@@ -1354,7 +1354,7 @@
               "entity_id": "76b1df08-8a91-42b4-8b56-26b34243af38",
               "external_id": "48612b807c2b4b93bbbacbf54f547ad5",
               "name": "Crime",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "48612b807c2b4b93bbbacbf54f547ad5",
@@ -1377,7 +1377,7 @@
               "entity_id": "547ed7b8-6699-473f-96c7-4c76636701f4",
               "external_id": "42c5b4aa33fe47f99018a0a7f866bf99",
               "name": "Fraud",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "42c5b4aa33fe47f99018a0a7f866bf99",
@@ -1400,7 +1400,7 @@
               "entity_id": "4554dcf2-6472-43a3-bfd6-e904a2936315",
               "external_id": "16cb0ba3e6d24d97ace39f5a1924669a",
               "name": "Entertainment",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "16cb0ba3e6d24d97ace39f5a1924669a",
@@ -1424,7 +1424,7 @@
               "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
               "external_id": "a4677d70863b4012b846a1b00f5079f5",
               "name": "U.S. news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "a4677d70863b4012b846a1b00f5079f5",
@@ -1448,7 +1448,7 @@
               "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
               "external_id": "f25af2d07e4e100484f5df092526b43e",
               "name": "General news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "f25af2d07e4e100484f5df092526b43e",
@@ -1481,7 +1481,7 @@
               "entity_id": "62f25891-ac05-4142-b010-a9e1ab330d3e",
               "external_id": "3b6ef8c07d7010048463ba7fa5283c3e",
               "name": "Disaster planning and response",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "3b6ef8c07d7010048463ba7fa5283c3e",
@@ -1504,7 +1504,7 @@
               "entity_id": "5f6de24a-9a1b-4863-ab01-1ecacf4c54b7",
               "external_id": "c8e409f8858510048872ff2260dd383e",
               "name": "Business",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "c8e409f8858510048872ff2260dd383e",
@@ -1527,7 +1527,7 @@
               "entity_id": "66ba9689-3ad7-4626-9d20-03930d88e302",
               "external_id": "a4677d70863b4012b846a1b00f5079f5",
               "name": "U.S. news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "a4677d70863b4012b846a1b00f5079f5",
@@ -1551,7 +1551,7 @@
               "entity_id": "72bb7674-7bde-4f3e-a351-ccdeae888502",
               "external_id": "f25af2d07e4e100484f5df092526b43e",
               "name": "General news",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "f25af2d07e4e100484f5df092526b43e",
@@ -1584,7 +1584,7 @@
               "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
               "external_id": "54df6c687df7100483dedf092526b43e",
               "name": "Sports",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "54df6c687df7100483dedf092526b43e",
@@ -1608,7 +1608,7 @@
               "entity_id": "d73d61cf-737c-49a6-bb21-c321a2e6db8e",
               "external_id": "20dde3c07e4e100488f6d0913b2d075c",
               "name": "NFL football",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "20dde3c07e4e100488f6d0913b2d075c",
@@ -1631,7 +1631,7 @@
               "entity_id": "f984b26b-4333-42b3-a463-bc232bf95d5f",
               "external_id": "54df6c687df7100483dedf092526b43e",
               "name": "Sports",
-              "entity_type": "subject",
+              "entity_type": "topic",
               "source": "http://cv.ap.org/id/",
               "raw_data": {
                 "code": "54df6c687df7100483dedf092526b43e",
@@ -1841,7 +1841,7 @@
       "U.S. news": 1,
       "Sports": 1
     },
-    "onboarding_topics": []
+    "entity_interests": []
   },
   "num_recs": 4
 }
