@@ -78,3 +78,4 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     r_topk = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=s_fusion)
     builder.add_component("recommender", EpsilonGreedy, ranked=r_topk, candidates=f_candidates)
+    builder.default_component("recommender")

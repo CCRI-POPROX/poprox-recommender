@@ -47,7 +47,11 @@ def select_articles(
 
     pipeline = get_pipeline(name)
 
-    recs = pipeline.node("recommender")
+    # TODO: simplify when there is a public default node api
+    # tracking issue: https://github.com/lenskit/lkpy/issues/973
+    default = pipeline.config.default
+    assert default is not None
+    recs = pipeline.node(default)
     topk = pipeline.node("ranker", missing="none")
     if topk is None:
         wanted = (recs,)
