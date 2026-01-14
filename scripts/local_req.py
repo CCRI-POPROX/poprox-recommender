@@ -8,39 +8,42 @@ from poprox_recommender.topics import extract_general_topics
 
 warnings.filterwarnings("ignore")
 
-
 if __name__ == "__main__":
     with open(project_root() / "tests/request_data/onboarding.json", "r") as req_file:
         raw_json = req_file.read()
         req = RecommendationRequestV4.model_validate_json(raw_json)
 
-    event_nrms = {
-        "body": raw_json,
-        "queryStringParameters": {"pipeline": "nrms"},
-        "isBase64Encoded": False,
-    }
+    #event_nrms = {
+    #    "body": raw_json,
+    #    "queryStringParameters": {"pipeline": "nrms"},
+    #    "isBase64Encoded": False,
+    #}
     event_miner = {
        "body": raw_json,
        "queryStringParameters": {"pipeline": "miner"},
        "isBase64Encoded": False,
     }
 
-    response_nrms = root(req.model_dump(), pipeline="nrms")
-    response_nrms = RecommendationResponseV4.model_validate(response_nrms)
+    #response_nrms = root(req.model_dump(), pipeline="nrms")
+    #response_nrms = RecommendationResponseV4.model_validate(response_nrms)
 
     response_miner = root(req.model_dump(), pipeline="miner")
-    response_miner = RecommendationResponseV2.model_validate(response_miner)
+    response_miner = RecommendationResponseV4.model_validate(response_miner)
 
-    print("\n")
-    print(f"{event_nrms['queryStringParameters']['pipeline']}")
+    #print("\n")
+    #print(f"{event_nrms['queryStringParameters']['pipeline']}")
 
-    for idx, article in enumerate([impression.article for impression in response_nrms.recommendations]):
-        article_topics = extract_general_topics(article)
-        print(f"{idx + 1}. {article.headline} {article_topics}")
+    #for idx, article in enumerate([impression.article for impression in response_nrms.recommendations]):
+    #    article_topics = extract_general_topics(article)
+    #    print(f"{idx + 1}. {article.headline} {article_topics}")
 
     print("\n")
     print(f"{event_miner['queryStringParameters']['pipeline']}")
 
-    for idx, article in enumerate(response_miner.recommendations.articles):
+    for imp in response_miner.recommendations.impressions:
+        article = imp.article
+        topic_mentions = [m.entity.name for m in article.mentions if m.entity.entity_type == "subject"]
         article_topics = extract_general_topics(article)
-        print(f"{idx + 1}. {article.headline} {article_topics}")
+        #article_topics is empty for some reason, I switched to using the topic_mentions and find every "subject" there is
+        print(f"{imp.position}. {article.headline} {article_topics} {topic_mentions}")
+

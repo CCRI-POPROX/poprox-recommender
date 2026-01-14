@@ -5,7 +5,7 @@
 
 from lenskit.pipeline import PipelineBuilder
 
-from poprox_concepts import CandidateSet, InterestProfile
+from poprox_concepts.domain import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders.article_miner import MinerArticleEmbedder, MinerArticleEmbedderConfig
 from poprox_recommender.components.embedders.user_miner import MinerUserEmbedder, MinerUserEmbedderConfig
 from poprox_recommender.components.filters.topic import TopicFilter
@@ -46,7 +46,20 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     # )
 
     # Score and rank articles
-    miner_scorer = builder.add_component("scorer", MinerArticleScorer, candidate_articles=i_candidates, clicked_articles=i_clicked, interest_profile=i_profile)
+    #miner_scorer = builder.add_component("scorer", MinerArticleScorer, candidate_articles=i_candidates, clicked_articles=i_clicked, interest_profile=i_profile)
+    miner_scorer = builder.add_component(
+    "scorer",
+    MinerArticleScorer,
+    {
+        "model_path": model_file_path("miner/miner_2025-09-19.safetensors"),
+        "device": device,
+        # "max_clicks_per_user": 50,  # optional, defaults to 50
+    },
+    candidate_articles=i_candidates,
+    clicked_articles=i_clicked,
+    interest_profile=i_profile,
+)
+
     n_ranker = builder.add_component("ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=miner_scorer)
 
     # Fallback: sample from user topic interests

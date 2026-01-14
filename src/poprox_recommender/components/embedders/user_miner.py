@@ -5,7 +5,7 @@ import torch as th
 from lenskit.pipeline import Component
 from safetensors.torch import load_file
 
-from poprox_concepts import CandidateSet, Click, InterestProfile
+from poprox_concepts.domain import CandidateSet, Click, InterestProfile
 from poprox_recommender.model import ModelConfig
 from poprox_recommender.model.nrms.user_encoder import UserEncoder
 from poprox_recommender.pytorch.decorators import torch_inference

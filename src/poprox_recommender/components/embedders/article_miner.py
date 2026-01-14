@@ -10,7 +10,7 @@ from lenskit.pipeline import Component
 #from poprox_recommender.pytorch.datachecks import assert_tensor_size
 from transformers import AutoConfig, AutoModel, AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 
-from poprox_concepts import CandidateSet
+from poprox_concepts.domain import CandidateSet
 from poprox_recommender.paths import model_file_path
 from poprox_recommender.pytorch.decorators import torch_inference
 
