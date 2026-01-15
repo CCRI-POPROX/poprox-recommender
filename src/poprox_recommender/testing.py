@@ -23,7 +23,7 @@ import requests
 from pydantic import ValidationError
 from pytest import fixture, skip
 
-from poprox_concepts.api.recommendations.v4 import RecommendationRequestV4, RecommendationResponseV4
+from poprox_concepts.api.recommendations.v5 import RecommendationRequestV5, RecommendationResponseV5
 from poprox_concepts.domain import AccountInterest, CandidateSet, Click, InterestProfile
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.data.mind import MindData
@@ -39,7 +39,7 @@ class TestService(Protocol):
     endpoints.
     """
 
-    def request(self, req: RecommendationRequestV4 | str, pipeline: str) -> RecommendationResponseV4:
+    def request(self, req: RecommendationRequestV5 | str, pipeline: str) -> RecommendationResponseV5:
         """
         Request recommendations from the recommender.
         """
@@ -52,8 +52,8 @@ class InProcessTestService:
     """
 
     def request(
-        self, req: RecommendationRequestV4 | str, pipeline: str, compress: bool = False
-    ) -> RecommendationResponseV4:
+        self, req: RecommendationRequestV5 | str, pipeline: str, compress: bool = False
+    ) -> RecommendationResponseV5:
         # defer to here so we don't always import the handler
         from poprox_recommender.api.main import handler
 
@@ -91,7 +91,7 @@ class InProcessTestService:
             else:
                 raise e
 
-        return RecommendationResponseV4.model_validate_json(res["body"])
+        return RecommendationResponseV5.model_validate_json(res["body"])
 
 
 class DockerTestService:
@@ -105,8 +105,8 @@ class DockerTestService:
         self.url = url
 
     def request(
-        self, req: RecommendationRequestV4 | str, pipeline: str, compress: bool = False
-    ) -> RecommendationResponseV4:
+        self, req: RecommendationRequestV5 | str, pipeline: str, compress: bool = False
+    ) -> RecommendationResponseV5:
         if not isinstance(req, str):
             req = req.model_dump_json()
 
@@ -146,7 +146,7 @@ class DockerTestService:
             logger.info("result: %s", json.dumps(res_data, indent=2))
             raise AssertionError("lambda request failed")
 
-        return RecommendationResponseV4.model_validate_json(res_data["body"])
+        return RecommendationResponseV5.model_validate_json(res_data["body"])
 
 
 def local_service_impl() -> Generator[TestService, None, None]:
@@ -243,7 +243,7 @@ class RequestGenerator:
 
         self.candidate_articles = [self.mind_data.lookup_article(uuid=article_id) for article_id in selected_candidates]
 
-    def get_request(self) -> RecommendationRequestV4:
+    def get_request(self) -> RecommendationRequestV5:
         interest_profile = InterestProfile(
             profile_id=self.profile_id,
             click_history=self.clicks,
@@ -251,7 +251,7 @@ class RequestGenerator:
         )
 
         try:
-            request = RecommendationRequestV4(
+            request = RecommendationRequestV5(
                 candidates=CandidateSet(articles=self.candidate_articles),
                 interacted=CandidateSet(articles=self.interacted_articles),
                 interest_profile=interest_profile,

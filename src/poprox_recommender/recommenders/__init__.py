@@ -64,4 +64,8 @@ def select_articles(
 
     outputs = pipeline.run_all(*wanted, **inputs)
 
-    return outputs.default, outputs.meta
+    recs = outputs.default
+    if isinstance(recs, ImpressedSection):
+        recs = [recs]
+
+    return recs, outputs.meta
