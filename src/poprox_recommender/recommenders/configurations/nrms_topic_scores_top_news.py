@@ -9,7 +9,6 @@ from poprox_recommender.components.embedders import NRMSArticleEmbedder
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
-from poprox_recommender.components.filters.package import PackageFilter, PackageFilterConfig
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.top_news_placer import TopNewsPlacer, TopNewsPlacerConfig
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -27,15 +26,6 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
     i_packages = builder.create_input("packages", list[ArticlePackage])
-
-    # Extract Top News Articles from Packages
-    n_top_news_candidates = builder.add_component(
-        "top-news-filter",
-        PackageFilter,
-        PackageFilterConfig(package_entity_id=TOP_NEWS_PACKAGE_ID),
-        candidate_articles=i_candidates,
-        article_packages=i_packages,
-    )
 
     # Embed candidate and clicked articles
     ae_config = NRMSArticleEmbedderConfig(
@@ -137,5 +127,5 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         TopNewsPlacer,
         placer_config,
         ranked_articles=n_ranker,
-        top_news_candidates=n_top_news_candidates,
+        article_packages=i_packages,
     )
