@@ -1,2 +1,12 @@
-{"num_truth":0.0922660053,"RBP":0.0800790002,"NDCG@5":0.2701504715,"NDCG@10":0.3498046577,"MRR":0.2724053724,"RBO@5":0.0,"RBO@10":0.0,"rank_based_entropy":0.0,"least_item_promoted":null,"intralist_similarity":nul
-l}
+{
+  "num_truth":0.0922660053,
+  "RBP":0.1601580005,
+  "NDCG@5":0.3919520332,
+  "NDCG@10":0.5374067532,
+  "MRR":0.2191789903,
+  "RBO@5":0.0,
+  "RBO@10":0.0,
+  "rank_based_entropy":0.0,
+  "least_item_promoted":null,
+  "intralist_similarity":null
+}
