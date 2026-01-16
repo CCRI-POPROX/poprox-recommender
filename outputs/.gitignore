@@ -9,3 +9,5 @@
 /mind-small-profile-metrics.csv.gz
 /mind-val-profile-metrics.csv.gz
 /mind-subset-recommendation-metrics.csv.gz
+/mind-small-recommendation-metrics.csv.gz
+/mind-val-recommendation-metrics.csv.gz
