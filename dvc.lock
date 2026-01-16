@@ -807,17 +807,17 @@ stages:
       nfiles: 36
     - path: src/poprox_recommender/evaluation/collect.py
       hash: md5
-      md5: dabacace69a4efd2f2384e57d154af58
-      size: 3084
+      md5: 6b86f1aade3358788c185d5b58ccb00e
+      size: 3075
     outs:
     - path: outputs/mind-subset-metrics.csv
       hash: md5
       md5: 566f7cc68c2a9efec200c3f3a384a03d
       size: 575
-    - path: outputs/mind-subset-recommendation-metrics.csv.gz
+    - path: outputs/mind-subset-slate-metrics.csv.gz
       hash: md5
-      md5: 8811210136f3c3760a7ab4383b8af8a2
-      size: 21618
+      md5: 020bc0f5f05558b6684148d569be09af
+      size: 21609
     - path: outputs/mind-subset-tasks.csv
       hash: md5
       md5: c5d25cd8ee316e53594c7ed0da7dd0c7
@@ -2099,17 +2099,17 @@ stages:
       nfiles: 36
     - path: src/poprox_recommender/evaluation/collect.py
       hash: md5
-      md5: dabacace69a4efd2f2384e57d154af58
-      size: 3084
+      md5: 6b86f1aade3358788c185d5b58ccb00e
+      size: 3075
     outs:
     - path: outputs/mind-small-metrics.csv
       hash: md5
       md5: e10fdfe219ee308b37e1ffd72fb145d9
       size: 613
-    - path: outputs/mind-small-recommendation-metrics.csv.gz
+    - path: outputs/mind-small-slate-metrics.csv.gz
       hash: md5
-      md5: 2364337cd4ef0f5d9f136d10f065903d
-      size: 9028374
+      md5: 67f59010b30d391c608418b5876145e3
+      size: 9028365
     - path: outputs/mind-small-tasks.csv
       hash: md5
       md5: 17e198e097ea34bafa7e9f2f19846f89
@@ -2124,17 +2124,17 @@ stages:
       nfiles: 36
     - path: src/poprox_recommender/evaluation/collect.py
       hash: md5
-      md5: dabacace69a4efd2f2384e57d154af58
-      size: 3084
+      md5: 6b86f1aade3358788c185d5b58ccb00e
+      size: 3075
     outs:
     - path: outputs/mind-val-metrics.csv
       hash: md5
       md5: a45c73f4faf7083f8ca1f97b8b227dc3
       size: 614
-    - path: outputs/mind-val-recommendation-metrics.csv.gz
+    - path: outputs/mind-val-slate-metrics.csv.gz
       hash: md5
-      md5: bad0397b92bc17ff79582037ac959471
-      size: 45422999
+      md5: f0b81270b13ab8844ced79f5775bafe7
+      size: 45422990
     - path: outputs/mind-val-tasks.csv
       hash: md5
       md5: 59800df4bf2fc3c56688d624ea637585

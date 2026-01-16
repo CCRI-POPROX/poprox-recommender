@@ -175,7 +175,7 @@ stages:
         - src/poprox_recommender/evaluation/collect.py
         - outputs/${item}/
       outs:
-        - outputs/${item}-recommendation-metrics.csv.gz
+        - outputs/${item}-slate-metrics.csv.gz
         - outputs/${item}-metrics.csv:
             cache: false
         - outputs/${item}-tasks.csv:

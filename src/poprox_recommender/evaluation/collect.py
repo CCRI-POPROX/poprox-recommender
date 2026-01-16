@@ -84,7 +84,7 @@ def main():
         prof_results[pipe] = metrics
 
     prof_df = pd.concat(prof_results, names=["pipeline"])
-    csv_out = path.parent / f"{name}-recommendation-metrics.csv.gz"
+    csv_out = path.parent / f"{name}-slate-metrics.csv.gz"
     logger.info("saving recommendation metrics for %d pipelines", len(prof_results), file=str(csv_out))
     prof_df.to_csv(csv_out, index=True)
 
