@@ -11,7 +11,7 @@ from lenskit.parallel.ray import TaskLimiter, init_cluster
 from lenskit.pipeline import Pipeline, PipelineState
 from torch.multiprocessing.reductions import reduce_tensor
 
-from poprox_concepts.api.recommendations import RecommendationRequestV4
+from poprox_concepts.api.recommendations import RecommendationRequestV5
 from poprox_recommender.config import default_device
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.data.mind import TEST_REC_COUNT
@@ -163,7 +163,7 @@ def cluster_recommend(
         task.add_subtask(wt)
 
 
-def recommend_for_request(pipeline: Pipeline, request: RecommendationRequestV4) -> PipelineState:
+def recommend_for_request(pipeline: Pipeline, request: RecommendationRequestV5) -> PipelineState:
     """
     Generate recommendations for a single request, returning the pipeline state.
     """

@@ -23,7 +23,7 @@ from lenskit.pipeline import PipelineState
 from pydantic import BaseModel
 from typing_extensions import TypeVar
 
-from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationRequestV4
+from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationRequestV5
 from poprox_concepts.domain import CandidateSet, ImpressedSection
 from poprox_recommender.evaluation.writer import ParquetBatchedWriter
 
@@ -34,7 +34,7 @@ Package = TypeVar("Package", default=Any)
 
 class OfflineRecommendations(BaseModel):
     slate_id: UUID
-    request: RecommendationRequestV4
+    request: RecommendationRequestV5
     results: OfflineRecResults
 
 
