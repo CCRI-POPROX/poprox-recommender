@@ -37,13 +37,13 @@ def test_request_with_softmax_sampler():
             raise e
 
     # do we get recommendations?
-    softmax_recs, _ = sampled_outputs
-    base_recs, _ = base_outputs
-    assert len(softmax_recs.impressions) > 0
-    assert len(base_recs.impressions) == len(softmax_recs.impressions)
+    softmax_sections, _ = sampled_outputs
+    base_sections, _ = base_outputs
+    assert len(softmax_sections[0].impressions) > 0
+    assert len(base_sections[0].impressions) == len(softmax_sections[0].impressions)
 
-    base_article_ids = [impression.article.article_id for impression in base_recs.impressions]
-    sampled_article_ids = [impression.article.article_id for impression in softmax_recs.impressions]
+    base_article_ids = [impression.article.article_id for impression in base_sections[0].impressions]
+    sampled_article_ids = [impression.article.article_id for impression in softmax_sections[0].impressions]
 
     # are the recommendation lists different?
     assert base_article_ids != sampled_article_ids
