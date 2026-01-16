@@ -14,11 +14,12 @@ from poprox_recommender.evaluation.measure.recloader import RecLoader
 from poprox_recommender.evaluation.metrics import measure_rec_metrics
 
 logger = logging.getLogger(__name__)
+BATCH_SIZE = 1000
 
 
 def recommendation_eval_results(eval_data: EvalData, rec_data: RecLoader) -> Iterator[dict[str, Any]]:
     pc = get_parallel_config()
-    if pc.processes > 1:
+    if pc.processes > 1 and rec_data.count_slates() > BATCH_SIZE:
         logger.info("starting parallel measurement with up to %d tasks", pc.processes)
         init_cluster(global_logging=True, configure_logging=False)
 
@@ -28,7 +29,7 @@ def recommendation_eval_results(eval_data: EvalData, rec_data: RecLoader) -> Ite
 
         for bres in limit.imap(
             lambda batch: measure_batch.remote(batch, eval_data_ref, rec_data_ref),
-            batched(rec_data.iter_slate_ids(), 100),
+            batched(rec_data.iter_slate_ids(), BATCH_SIZE),
             ordered=False,
         ):
             assert isinstance(bres, list)
