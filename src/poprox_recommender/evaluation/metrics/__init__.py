@@ -1,5 +1,5 @@
 import logging
-from typing import Any, NamedTuple
+from typing import Any
 from uuid import UUID
 
 import pandas as pd
@@ -16,7 +16,6 @@ from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
 
 __all__ = [
     "rank_biased_overlap",
-    "RecsWithTruth",
     "measure_rec_metrics",
     "least_item_promoted",
     "rank_bias_entropy",
@@ -24,16 +23,6 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
-
-
-class RecsWithTruth(NamedTuple):
-    """
-    The recommendation for a specific request (possibly from multiple algorithms and stages)
-    """
-
-    slate_id: UUID
-    recs: pd.DataFrame
-    truth: pd.DataFrame
 
 
 def convert_df_to_article_set(rec_df):
