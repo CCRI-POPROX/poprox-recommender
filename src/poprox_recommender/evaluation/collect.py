@@ -43,8 +43,12 @@ def main():
     agg_results = {}
     for mf in sorted(path.glob("*/metrics.json"), key=lambda p: p.as_posix()):
         pipe = mf.parent.name
-        logger.info("reading pipeline metrics", pipeline=pipe, path=mf)
-        metrics = json.loads(mf.read_text())
+        logger.info("reading pipeline metrics", pipeline=pipe, path=str(mf))
+        try:
+            metrics = json.loads(mf.read_text())
+        except Exception as e:
+            e.add_note(f"failed parsing file: {mf}")
+            raise e
         agg_results[pipe] = metrics
 
     rdf = pd.DataFrame.from_dict(agg_results, "index")
