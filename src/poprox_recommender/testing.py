@@ -132,6 +132,7 @@ class DockerTestService:
                 }
             )
 
+        logger.info("sending request to %s", self.url)
         result = requests.post(self.url, json=event)
         res_data = result.json()
         if result.status_code != 200:
