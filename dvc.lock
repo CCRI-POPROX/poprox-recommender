@@ -749,8 +749,8 @@ stages:
       size: 30539
     - path: src/poprox_recommender/evaluation/measure.py
       hash: md5
-      md5: df2eaa534b35dbdaa85c2ddee34e3dfe
-      size: 6403
+      md5: 462cb82dc3e4a3f9a12e695c6227429e
+      size: 6411
       isexec: true
     - path: src/poprox_recommender/evaluation/metrics/
       hash: md5
@@ -760,11 +760,11 @@ stages:
     outs:
     - path: outputs/mind-subset/softmax/metrics.json
       hash: md5
-      md5: 31d5fec20afd14990390b68d11ad2c77
-      size: 225
+      md5: e558e273a0dfcbd15afec0c49cf8d83d
+      size: 255
     - path: outputs/mind-subset/softmax/recommendation-metrics.csv.gz
       hash: md5
-      md5: dee0dbe2c63431cdd7a0d9e36632e33b
+      md5: a6e9f46558c529e891362de8b2bee8eb
       size: 10118
   measure-mind-subset@nrms_topics_static:
     cmd: python -m poprox_recommender.evaluation.measure -M MINDsmall_dev 

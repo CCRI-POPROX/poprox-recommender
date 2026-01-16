@@ -165,7 +165,7 @@ def main():
     out_fn = out_dir / "metrics.json"
     logger.info("saving evaluation to %s", out_fn)
     with open(out_fn, "wt") as jsf:
-        print(agg_metrics.to_json(), file=jsf)
+        print(agg_metrics.to_json(indent=2), file=jsf)
 
     # set up to print summary metrics, filtering if needed
     printable = agg_metrics.to_dict()
