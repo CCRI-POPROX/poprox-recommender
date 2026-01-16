@@ -28,6 +28,6 @@ def test_basic_request(service, pipeline):  # noqa: F811
             raise e
 
     logger.info("sending request")
-    response = service.request(req_body, pipeline)
+    response = service.request(req_body, pipeline, compress=True)
     logger.info("response: %s", response.model_dump_json(indent=2))
     assert response.recommendations

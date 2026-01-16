@@ -33,7 +33,8 @@ def select_articles(
     clicked_articles: CandidateSet,
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
-) -> tuple[ImpressedSection, Any]:
+    article_packages: list | None = None,
+) -> tuple[list[ImpressedSection], Any]:
     """
     Select articles with default recommender configuration.  It returns a
     pipeline state whose ``default`` is the final list of recommendations.
@@ -54,8 +55,17 @@ def select_articles(
     else:
         wanted = (topk, recs)
 
-    outputs = pipeline.run_all(
-        *wanted, candidate=candidate_articles, clicked=clicked_articles, profile=interest_profile
-    )
+    inputs = {
+        "candidate": candidate_articles,
+        "clicked": clicked_articles,
+        "profile": interest_profile,
+        "packages": article_packages or [],
+    }
 
-    return outputs.default, outputs.meta
+    outputs = pipeline.run_all(*wanted, **inputs)
+
+    recs = outputs.default
+    if isinstance(recs, ImpressedSection):
+        recs = [recs]
+
+    return recs, outputs.meta

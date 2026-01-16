@@ -41,10 +41,10 @@ def test_basic_request(service, mind_data, pipeline):  # noqa: F811
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     # do we have recommendations?
-    recs = response.recommendations
-    assert len(recs.impressions) > 0
+    section = response.recommendations[0]
+    assert len(section.impressions) > 0
     # do we have the correct number of recommendations
-    assert len(recs.impressions) == request_generator.num_recs
+    assert len(section.impressions) == request_generator.num_recs
     # are all recommended articles unique?
-    article_ids = [impression.article.article_id for impression in recs.impressions]
+    article_ids = [impression.article.article_id for impression in section.impressions]
     assert len(article_ids) == len(set(article_ids))
