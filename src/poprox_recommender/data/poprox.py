@@ -15,7 +15,7 @@ import duckdb
 import pandas as pd
 from duckdb import DuckDBPyConnection
 
-from poprox_concepts.api.recommendations import RecommendationRequestV4
+from poprox_concepts.api.recommendations import RecommendationRequestV5
 from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, Entity, InterestProfile, Mention
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
@@ -140,7 +140,7 @@ class PoproxData(EvalData):
 
         return query
 
-    def lookup_request(self, slate_id: UUID) -> RecommendationRequestV4:
+    def lookup_request(self, slate_id: UUID) -> RecommendationRequestV5:
         """
         Fetch a request for a given slate ID.  In the POPROX data, slate IDs
         are newsletter IDs.
@@ -262,7 +262,7 @@ class PoproxData(EvalData):
         )
         candidate_articles = list(self._iter_query_articles())
 
-        return RecommendationRequestV4(
+        return RecommendationRequestV5(
             candidates=CandidateSet(articles=candidate_articles),
             interacted=CandidateSet(articles=past_articles),
             interest_profile=profile,

@@ -36,8 +36,9 @@ def test_sparse_interaction_history(service, mind_data, pipeline):  # noqa: F811
     logger.info("sending request")
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
-    # do we have recommendations?
-    recs = response.recommendations.impressions
+    # do we have recommendations in the first section?
+    section = response.recommendations[0]
+    recs = section.impressions
     assert len(recs) > 0
     # do we have the correct number of recommendations
     assert len(recs) == request_generator.num_recs

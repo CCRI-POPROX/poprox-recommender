@@ -27,7 +27,7 @@ def test_direct_basic_request():
 
     logger.info("generating recommendations")
     try:
-        recs, _ = select_articles(
+        sections, _ = select_articles(
             req.candidates,
             req.interacted,
             req.interest_profile,
@@ -39,7 +39,7 @@ def test_direct_basic_request():
             raise e
 
     # do we get recommendations?
-    assert len(recs.impressions) > 0
+    assert len(sections[0].impressions) > 0
 
 
 def test_direct_basic_request_without_clicks():
@@ -58,7 +58,7 @@ def test_direct_basic_request_without_clicks():
     profile = req.interest_profile
     profile.click_history = []
     try:
-        recs, _ = select_articles(
+        sections, _ = select_articles(
             req.candidates,
             req.interacted,
             req.interest_profile,
@@ -70,7 +70,7 @@ def test_direct_basic_request_without_clicks():
             raise e
 
     # do we get recommendations?
-    assert len(recs.impressions) > 0
+    assert len(sections[0].impressions) > 0
 
 
 def test_direct_basic_request_explicit_none():
@@ -86,7 +86,7 @@ def test_direct_basic_request_explicit_none():
 
     logger.info("generating recommendations")
     try:
-        recs, _ = select_articles(
+        sections, _ = select_articles(
             req.candidates, req.interacted, req.interest_profile, pipeline_params={"pipeline": None}
         )
     except PipelineLoadError as e:
@@ -97,4 +97,4 @@ def test_direct_basic_request_explicit_none():
             raise e
 
     # do we get recommendations?
-    assert len(recs.impressions) > 0
+    assert len(sections[0].impressions) > 0

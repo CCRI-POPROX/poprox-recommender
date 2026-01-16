@@ -33,7 +33,8 @@ def test_no_clicks_no_onboarding(service, mind_data, pipeline):  # noqa: F811
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     # do we have recommendations?
-    recs = response.recommendations.impressions
+    section = response.recommendations[0]
+    recs = section.impressions
     assert len(recs) > 0
     # do we have the correct number of recommendations
     assert len(recs) == request_generator.num_recs

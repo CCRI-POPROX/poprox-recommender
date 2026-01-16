@@ -16,7 +16,7 @@ import duckdb
 import pandas as pd
 from duckdb import DuckDBPyConnection
 
-from poprox_concepts.api.recommendations import RecommendationRequestV4
+from poprox_concepts.api.recommendations import RecommendationRequestV5
 from poprox_concepts.domain import Article, CandidateSet, Click, Entity, InterestProfile, Mention
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
@@ -118,7 +118,7 @@ class MindData(EvalData):
 
                 yield imp_uuid
 
-    def lookup_request(self, slate_id: UUID) -> RecommendationRequestV4:
+    def lookup_request(self, slate_id: UUID) -> RecommendationRequestV5:
         # get the historical articles and click list
         past = self.lookup_articles(slate_id, relation="history")
         clicks = [Click(article_id=a.article_id) for a in past]
@@ -128,7 +128,7 @@ class MindData(EvalData):
 
         # FIXME the profile ID should probably be the user ID
         profile = InterestProfile(profile_id=slate_id, click_history=clicks, entity_interests=[])
-        return RecommendationRequestV4(
+        return RecommendationRequestV5(
             candidates=CandidateSet(articles=today),
             interacted=CandidateSet(articles=past),
             interest_profile=profile,

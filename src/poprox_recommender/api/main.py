@@ -7,7 +7,7 @@ from fastapi import Body, FastAPI
 from fastapi.responses import Response
 from mangum import Mangum
 
-from poprox_concepts.api.recommendations.v4 import ProtocolModelV4_0, RecommendationRequestV4, RecommendationResponseV4
+from poprox_concepts.api.recommendations.v5 import ProtocolModelV5_0, RecommendationRequestV5, RecommendationResponseV5
 from poprox_recommender.api.gzip import GzipRoute
 from poprox_recommender.config import default_device
 from poprox_recommender.recommenders import load_all_pipelines, select_articles
@@ -25,12 +25,26 @@ logger = logging.getLogger(__name__)
 @app.get("/warmup")
 def warmup(response: Response):
     # Headers set on the response param get included in the response wrapped around return val
-    response.headers["poprox-protocol-version"] = ProtocolModelV4_0().protocol_version.value
+    response.headers["poprox-protocol-version"] = ProtocolModelV5_0().protocol_version.value
 
     # Load and cache available recommenders
     available_recommenders = load_all_pipelines(device=default_device())
 
     return list(available_recommenders.keys())
+
+
+@app.post("/embed")
+def embed(body: Annotated[dict[str, Any], Body()]):
+    """
+    Stub endpoint for article pre-embedding support in V4/V5 API.
+
+    Pre-embedding allows the platform to embed articles ahead of time to speed up
+    recommendation generation. Currently returns empty dict as we don't cache embeddings.
+
+    TODO: Implement actual pre-embedding and caching when needed for performance.
+    """
+    logger.debug("Received embed request (stub implementation)")
+    return {}
 
 
 @app.post("/")
@@ -40,7 +54,7 @@ def root(
 ):
     logger.info(f"Decoded body: {body}")
 
-    req = RecommendationRequestV4.model_validate(body)
+    req = RecommendationRequestV5.model_validate(body)
 
     candidate_articles = req.candidates.articles
     num_candidates = len(candidate_articles)
@@ -60,9 +74,10 @@ def root(
         req.interacted,
         profile,
         {"pipeline": pipeline},
+        article_packages=req.article_packages,
     )
 
-    resp_body = RecommendationResponseV4.model_validate({"recommendations": recs, "recommender": rec_info.model_dump()})
+    resp_body = RecommendationResponseV5.model_validate({"recommendations": recs, "recommender": rec_info.model_dump()})
 
     logger.info(f"Response body: {resp_body}")
     return resp_body.model_dump()
