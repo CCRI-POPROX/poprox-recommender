@@ -2,6 +2,7 @@ import logging
 import random
 from uuid import UUID
 
+import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
@@ -25,19 +26,18 @@ class Sectionizer(Component):
 
     def __call__(
         self,
-        ranked_articles: ImpressedSection,
+        candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
     ) -> list[ImpressedSection]:
         """
         Build newsletter sections from ranked articles and topic packages.
         """
-        if not ranked_articles.impressions:
+        if not candidate_set.articles:
             logger.debug("No ranked articles available.")
             return []
 
-        topic_entity_ids = self.get_top_topics(interest_profile, top_n=self.config.max_topic_sections)
-        candidate_set = CandidateSet(articles=[imp.article for imp in ranked_articles.impressions])
+        topic_entity_ids = get_top_topics(interest_profile, top_n=self.config.max_topic_sections)
         used_ids = set()
         sections = []
 
@@ -80,19 +80,28 @@ class Sectionizer(Component):
 
         package_filter = PackageFilter(config=PackageFilterConfig(package_entity_id=entity_id))
         filtered = package_filter(candidate_set, [package])
-        articles = [a for a in filtered.articles if a.article_id not in used_ids][:max_articles]
 
-        if not articles:
+        # rank filtered candidates
+        if hasattr(candidate_set, "scores") and candidate_set.scores is not None:
+            article_ids = [a.article_id for a in filtered.articles if a.article_id not in used_ids]
+            article_indices = [i for i, a in enumerate(candidate_set.articles) if a.article_id in article_ids]
+
+            scores = np.array(candidate_set.scores)[article_indices]
+            sorted_indices = np.argsort(scores)[::-1][:max_articles]
+
+            ranked_articles = [candidate_set.articles[article_indices[int(i)]] for i in sorted_indices]
+        else:
+            # preserve order if no scores
+            ranked_articles = [a for a in filtered.articles if a.article_id not in used_ids][:max_articles]
+
+        if not ranked_articles:
             return None
 
-        used_ids.update(a.article_id for a in articles)
-        section = ImpressedSection.from_articles(articles)
+        used_ids.update(a.article_id for a in ranked_articles)
+        section = ImpressedSection.from_articles(ranked_articles)
 
         if self.config.add_section_metadata:
-            if entity_id == self.config.top_news_entity_id:
-                section.title = "Top News"
-            else:
-                section.title = package.title
+            section.title = package.title
             section.personalized = True
             section.seed_entity_id = entity_id
 
@@ -103,7 +112,17 @@ class Sectionizer(Component):
         if not remaining:
             return None
 
-        misc_articles = remaining[: self.config.max_misc_articles]
+        if hasattr(candidate_set, "scores") and candidate_set.scores is not None:
+            # rank remaining by score
+            articles_indices = [
+                i for i, a in enumerate(candidate_set.articles) if a.article_id in [r.article_id for r in remaining]
+            ]
+            scores = np.array(candidate_set.scores)[articles_indices]
+            sorted_indices = np.argsort(scores)[::-1][: self.config.max_misc_articles]
+            misc_articles = [candidate_set.articles[articles_indices[int(i)]] for i in sorted_indices]
+        else:
+            misc_articles = remaining[: self.config.max_misc_articles]
+
         section = ImpressedSection.from_articles(misc_articles)
 
         if self.config.add_section_metadata:
@@ -112,13 +131,13 @@ class Sectionizer(Component):
 
         return section
 
-    @staticmethod
-    def get_top_topics(interest_profile: InterestProfile, top_n: int) -> list[UUID]:
-        topics = list(interest_profile.interests_by_type("topic"))
-        random.shuffle(topics)
-        topics_sorted = sorted(
-            topics,
-            key=lambda i: i.preference,
-            reverse=True,
-        )
-        return [i.entity_id for i in topics_sorted[:top_n]]
+
+def get_top_topics(interest_profile: InterestProfile, top_n: int) -> list[UUID]:
+    topics = list(interest_profile.interests_by_type("topic"))
+    random.shuffle(topics)
+    topics_sorted = sorted(
+        topics,
+        key=lambda i: i.preference,
+        reverse=True,
+    )
+    return [i.entity_id for i in topics_sorted[:top_n]]
