@@ -48,7 +48,7 @@ def measure_slate(slate_id: UUID, eval_data: EvalData, rec_data: RecLoader):
     return measure_rec_metrics(slate_id, recs, truth, eval_data)
 
 
-@ray.remote(num_cpus=1)
+@ray.remote(num_cpus=2)
 def measure_batch(slate_ids: Sequence[UUID], eval_data: EvalData, rec_data: RecLoader) -> list[dict[str, Any]]:
     """
     Measure a batch of recommendations.
