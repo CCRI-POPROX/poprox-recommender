@@ -80,7 +80,7 @@ def main():
     for mf in sorted(path.glob("*/recommendation-metrics.csv.gz"), key=lambda p: p.as_posix()):
         pipe = mf.parent.name
         logger.info("reading pipeline recommendation metrics", pipeline=pipe, path=mf)
-        metrics = pd.read_csv(mf).set_index("recommendation_id")
+        metrics = pd.read_csv(mf).set_index("slate_id")
         prof_results[pipe] = metrics
 
     prof_df = pd.concat(prof_results, names=["pipeline"])

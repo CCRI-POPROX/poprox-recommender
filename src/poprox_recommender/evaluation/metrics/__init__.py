@@ -43,20 +43,21 @@ def convert_df_to_article_set(rec_df):
     return CandidateSet(articles=articles)
 
 
-def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | None = None) -> dict[str, Any]:
+def measure_rec_metrics(
+    slate_id: UUID, recs_df: pd.DataFrame, truth_df: pd.DataFrame, eval_data: EvalData | None = None
+) -> dict[str, Any]:
     """
     Measure a single set of recommendations against ground truth.  Returns the recommendation ID and
     a dictionary of evaluation metrics.
     """
-    recommendation_id, recs, truth = recs_with_truth
-    truth.index = truth.index.astype(str)
+    truth_df.index = truth_df.index.astype(str)
 
-    truth = truth.reset_index()
+    truth = truth_df.reset_index()
 
     truth = truth[truth["rating"] > 0]
     truth = ItemList.from_df(truth)
 
-    final_rec_df = recs[recs["stage"] == "final"]
+    final_rec_df = recs_df[recs_df["stage"] == "final"]
     final_rec = ItemList.from_df(final_rec_df)
 
     # we only compute effectiveness with truth
@@ -68,10 +69,10 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     else:
         single_rbp = single_rr = single_ndcg5 = single_ndcg10 = None
 
-    ranked_rec_df = recs[recs["stage"] == "ranked"]
+    ranked_rec_df = recs_df[recs_df["stage"] == "ranked"]
     ranked = convert_df_to_article_set(ranked_rec_df)
 
-    reranked_rec_df = recs[recs["stage"] == "reranked"]
+    reranked_rec_df = recs_df[recs_df["stage"] == "reranked"]
     reranked = convert_df_to_article_set(reranked_rec_df)
 
     if ranked and reranked:
@@ -89,7 +90,7 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     logger.debug(
         "recommendation %s: RBP=%0.3f, NDCG@5=%0.3f, NDCG@10=%0.3f, RR=%0.3f, RBO@5=%0.3f, RBO@10=%0.3f",
         " LIP=%0.3f, RBE=%0.3f",
-        recommendation_id,
+        slate_id,
         single_rbp,
         single_ndcg5,
         single_ndcg10,
@@ -102,7 +103,7 @@ def measure_rec_metrics(recs_with_truth: RecsWithTruth, eval_data: EvalData | No
     )
 
     return {
-        "recommendation_id": recommendation_id,
+        "slate_id": slate_id,
         # FIXME: this is some hard-coded knowledge of our rec pipeline, but this
         # whole function should be revised for generality when we want to support
         # other pipelines.
