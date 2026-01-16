@@ -61,6 +61,14 @@ class RecLoader:
                 )
                 """
             )
+            db.execute(
+                f"""
+                INSERT INTO recs
+                SELECT slate_id, stage, item_id, rank
+                FROM '{fspath(path)}'
+                ORDER BY slate_id, stage, rank
+                """
+            )
             db.read_parquet(fspath(path)).insert_into("recs")
             db.execute("CREATE INDEX rec_slate_idx ON recs (slate_id)")
             db.close()
@@ -90,7 +98,9 @@ class RecLoader:
         self.db.execute(
             """
             SELECT slate_id::VARCHAR AS slate_id, stage, item_id::VARCHAR AS item_id, rank
-            FROM recs WHERE slate_id = ?
+            FROM recs
+            WHERE slate_id = ?
+            ORDER BY stage, rank
             """,
             [slate_id],
         )
