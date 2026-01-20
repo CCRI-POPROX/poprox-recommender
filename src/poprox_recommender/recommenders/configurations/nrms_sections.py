@@ -198,7 +198,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     builder.add_component(
-        "sectionizer",
+        "recommender",
         Sectionizer,
         s_config,
         candidate_set=fusion,
