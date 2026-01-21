@@ -1,0 +1,60 @@
+##TODO::
+1. save article_id, headline, topics(all of the mentions instead of 14) and the embeddings of AP article in a parquet file
+       a. pass the headline of article through news encoder to get the embedings ✅
+2. save article_id, headline and the embeddings of Mind article in a parquet file
+       a. pass the headline of article through news encoder to get the embedings ✅
+3. for each Mind article,
+       a. calculate it's distance with all the AP articles
+       b. determine neighbors
+       c. assign topics
+       d. store the augmented mind data (question where??)
+
+
+how to assign topics???
+    1. union (assign all the topics form all the articles)
+    2. intersection
+    3. union with support (if multiple articles (>K) have that topic)
+    4. union with weighted support (how close the article to the topic or frequency)
+    5. curate the corpass with numbers topics
+
+
+Option #1: K= threshold or the cos_sim>=K
+AP news topics intersection onboardings topics -> Mind category
+AP news topics negation onboardings topics     -> Mind Subcategory
+
+
+Option #2:
+AP news topics intersection onboardings topics -> Mind category
+AP news topics for the closest aricle (only 1) negation onboardings topics -> Mind Subcategory
+
+
+Option #3:
+AP news topics intersection onboardings topics -> Mind category
+AP news topics negation onboardings topics. Map (HOW????) every subcatory to the article headline embeddings and pick the closest. -> Mind Subcategory
+
+
+must
+#vectorizing the data
+    #vectorize ap_emb row->ap_artc column->torch
+    #vectorize mind_emb row->mind_artc column->torch
+    #calculate cos_sim
+
+1.Union
+Remove duplicates
+We all topics of first 5 articles to category
+
+2. Intersection
+We take common topics across 5 articles and assign to category
+
+Neighborhood:
+Save as CSV
+Run 3/5/7 with both union and intersection
+Total of 6 files generated
+
+
+#checking the union and intersection
+#use neighborhood sizes 3/5/7 -> how many topics we are getting for each neighborhood sizes?????
+#take some article, and look for what topics are getting for each thresshold and check relevence and sanity checking.
+#checking the topics of Mind and AP topics comparison (cross tabulation for Mind and AP, looking for correlation).
+#try out union first then intersection
+#make spreadsheet for union and intersection (for neighborhood size 3/5/7) maybe more too>>>>>>
