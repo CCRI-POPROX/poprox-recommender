@@ -64,10 +64,10 @@ stages:
     cmd: papermill -p EVAL_NAME mind-subset basic-eval-template.ipynb 
       mind-subset.ipynb
     deps:
-    - path: ../outputs/mind-subset-recommendation-metrics.csv.gz
+    - path: ../outputs/mind-subset-slate-metrics.csv.gz
       hash: md5
-      md5: 8811210136f3c3760a7ab4383b8af8a2
-      size: 21618
+      md5: 020bc0f5f05558b6684148d569be09af
+      size: 21609
     - path: basic-eval-template.ipynb
       hash: md5
       md5: 07238a3d2c8374c3dbee9343982616f4
@@ -75,16 +75,16 @@ stages:
     outs:
     - path: mind-subset.ipynb
       hash: md5
-      md5: 3e5f7f7178d0438d7603eec7c5f6d31e
-      size: 150505
+      md5: 2dca7f7aabc729f6796bfdcb5cd23381
+      size: 150605
   basic-results@mind-small:
     cmd: papermill -p EVAL_NAME mind-small basic-eval-template.ipynb 
       mind-small.ipynb
     deps:
-    - path: ../outputs/mind-small-recommendation-metrics.csv.gz
+    - path: ../outputs/mind-small-slate-metrics.csv.gz
       hash: md5
-      md5: 2364337cd4ef0f5d9f136d10f065903d
-      size: 9028374
+      md5: 67f59010b30d391c608418b5876145e3
+      size: 9028365
     - path: basic-eval-template.ipynb
       hash: md5
       md5: 07238a3d2c8374c3dbee9343982616f4
@@ -92,16 +92,16 @@ stages:
     outs:
     - path: mind-small.ipynb
       hash: md5
-      md5: c3d9fe895c266cc9956bb22b330a8e78
-      size: 154062
+      md5: a7d0bcf77325e4a5ba97d3b5fe79dff5
+      size: 153871
   basic-results@mind-val:
     cmd: papermill -p EVAL_NAME mind-val basic-eval-template.ipynb 
       mind-val.ipynb
     deps:
-    - path: ../outputs/mind-val-recommendation-metrics.csv.gz
+    - path: ../outputs/mind-val-slate-metrics.csv.gz
       hash: md5
-      md5: bad0397b92bc17ff79582037ac959471
-      size: 45422999
+      md5: f0b81270b13ab8844ced79f5775bafe7
+      size: 45422990
     - path: basic-eval-template.ipynb
       hash: md5
       md5: 07238a3d2c8374c3dbee9343982616f4
@@ -109,8 +109,8 @@ stages:
     outs:
     - path: mind-val.ipynb
       hash: md5
-      md5: 08142e2eb2ac881b843a819e42567100
-      size: 154134
+      md5: d0e55564a54f42b0cdaf16b2edffa9b2
+      size: 154133
   mind-quick-summary:
     cmd: jupytext --to notebook --execute mind-quick-summary.md
     deps:
