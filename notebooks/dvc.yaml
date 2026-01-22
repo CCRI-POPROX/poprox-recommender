@@ -18,7 +18,7 @@ stages:
       cmd: papermill -p EVAL_NAME ${item} basic-eval-template.ipynb ${item}.ipynb
       deps:
         - basic-eval-template.ipynb
-        - ../outputs/${item}-recommendation-metrics.csv.gz
+        - ../outputs/${item}-slate-metrics.csv.gz
       outs:
         - ${item}.ipynb:
             cache: false
