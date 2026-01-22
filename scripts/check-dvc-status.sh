@@ -4,6 +4,12 @@ report_file=dvc-status.log
 status_file=$(mktemp --tmpdir poprox-dvc-status.XXXXXXXX)
 trap 'rm $status_file' INT TERM EXIT
 
+if (("${RUNNER_DEBUG:-0}")); then
+    dvc status --no-updates -v
+else
+    dvc status
+fi
+
 dvc status --no-updates --json >$status_file
 
 n_changed=$(jq length <$status_file)
@@ -37,7 +43,7 @@ If the CI job also fails, then the pipeline is not only out-of-date but cannot b
 $ dvc status
 EOF
 
-dvc status --no-updates | tee -a $report_file
+dvc status --no-updates >>$report_file
 cat >>$report_file <<EOF
 \`\`\`
 
