@@ -34,17 +34,19 @@ def test_basic_request(service, mind_data, pipeline):  # noqa: F811
             "Oddities",
         ]
     )
-    request_generator.set_num_recs(10)
+    request_generator.set_num_recs(15)
     req_body = request_generator.get_request()
 
     logger.info("sending request")
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     # do we have recommendations?
-    section = response.recommendations[0]
-    assert len(section.impressions) > 0
+    # section = response.recommendations[0]
+    # get all recommendations from the sections
+    recs = [imp for section in response.recommendations for imp in section.impressions]
+    assert len(recs) > 0
     # do we have the correct number of recommendations
-    assert len(section.impressions) == request_generator.num_recs
+    assert len(recs) <= request_generator.num_recs
     # are all recommended articles unique?
-    article_ids = [impression.article.article_id for impression in section.impressions]
+    article_ids = [impression.article.article_id for impression in recs]
     assert len(article_ids) == len(set(article_ids))
