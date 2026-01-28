@@ -24,7 +24,7 @@ from pydantic import ValidationError
 from pytest import fixture, skip
 
 from poprox_concepts.api.recommendations.v5 import RecommendationRequestV5, RecommendationResponseV5
-from poprox_concepts.domain import AccountInterest, CandidateSet, Click, InterestProfile
+from poprox_concepts.domain import AccountInterest, ArticlePackage, CandidateSet, Click, Entity, InterestProfile
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.recommenders.load import PipelineLoadError
@@ -200,6 +200,7 @@ class RequestGenerator:
         self.interacted_articles = list()
         self.added_topics = list()
         self.clicks = list()
+        self.article_packages = []
 
     def set_num_recs(self, num_recs: int):
         self.num_recs = num_recs
@@ -238,6 +239,25 @@ class RequestGenerator:
             for topic in topics
         ]
 
+        # an article pacakge per topic
+        all_articles = self.mind_data.list_articles()  # gives uuids
+        self.article_packages = []
+        for interest in self.added_topics:
+            seed_entity = Entity(
+                entity_id=interest.entity_id,
+                name=interest.entity_name,
+                entity_type="topic",
+                source="MIND",
+            )
+            package_article_ids = random.sample(all_articles, min(5, len(all_articles)))
+            package = ArticlePackage(
+                title=f"{interest.entity_name}",
+                source="MIND",
+                seed=seed_entity,
+                article_ids=package_article_ids,
+            )
+            self.article_packages.append(package)
+
     def add_candidates(self, num_candidates):
         all_articles = self.mind_data.list_articles()
         selected_candidates = random.sample(all_articles, num_candidates)
@@ -257,6 +277,7 @@ class RequestGenerator:
                 interacted=CandidateSet(articles=self.interacted_articles),
                 interest_profile=interest_profile,
                 num_recs=self.num_recs,
+                article_packages=self.article_packages,
             )
             return request
         except ValidationError as e:

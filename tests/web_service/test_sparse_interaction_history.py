@@ -21,6 +21,7 @@ def test_sparse_interaction_history(service, mind_data, pipeline):  # noqa: F811
     request_generator = RequestGenerator(mind_data)
     request_generator.add_candidates(100)
     request_generator.add_clicks(num_clicks=1, num_days=10)
+    # add topics also builds article packages
     request_generator.add_topics(
         [
             "Science",
