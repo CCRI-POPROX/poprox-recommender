@@ -193,7 +193,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         max_top_news=3,
         max_topic_sections=3,
         max_articles_per_topic=3,
-        max_misc_articles=num_slots,
+        max_misc_articles=3,
         add_section_metadata=True,
     )
 
