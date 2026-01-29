@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 from signal import SIGINT
 from time import sleep
 from typing import Any, List, Protocol
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import requests
 from pydantic import ValidationError
@@ -227,10 +227,22 @@ class RequestGenerator:
         self.interacted_articles = [self.mind_data.lookup_article(uuid=click.article_id) for click in self.clicks]
 
     def add_topics(self, topics: List[str]):
+        sections_id = {
+            "General News": UUID("72bb7674-7bde-4f3e-a351-ccdeae888502"),
+            "Science": UUID("1e813fd6-0998-43fb-9839-75fa96b69b32"),
+            "Technology": UUID("606afcb8-3fc1-47a7-9da7-3d95115373a3"),
+            "Sports": UUID("f984b26b-4333-42b3-a463-bc232bf95d5f"),
+            "Oddities": UUID("16323227-4b42-4363-b67c-fd2be57c9aa1"),
+            "U.S. News": UUID("66ba9689-3ad7-4626-9d20-03930d88e302"),
+            "World News": UUID("45770171-36d1-4568-a270-bf80d6fe18e7"),
+            "Business": UUID("5f6de24a-9a1b-4863-ab01-1ecacf4c54b7"),
+            "Health": UUID("b967a4f4-ac9d-4c09-81d3-af228f846d06"),
+            "Entertainment": UUID("4554dcf2-6472-43a3-bfd6-e904a2936315"),
+        }
         self.added_topics = [
             AccountInterest(
                 account_id=self.profile_id,
-                entity_id=uuid4(),
+                entity_id=sections_id[topic],
                 entity_name=topic,
                 entity_type="topic",
                 preference=random.randint(1, 5),
@@ -240,7 +252,7 @@ class RequestGenerator:
         ]
 
         # an article pacakge per topic
-        all_articles = self.mind_data.list_articles()  # gives uuids
+        all_articles = [a.article_id for a in self.candidate_articles]  # gives uuids
         self.article_packages = []
         for interest in self.added_topics:
             seed_entity = Entity(

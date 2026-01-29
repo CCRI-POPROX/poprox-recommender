@@ -30,11 +30,11 @@ def test_no_clicks(service, mind_data, pipeline):  # noqa: F811
             "Science",
             "Technology",
             "Sports",
-            "Lifestyle",
             "Oddities",
+            "General News",
         ]
     )
-    request_generator.set_num_recs(15)
+    request_generator.set_num_recs(10)
     req_body = request_generator.get_request()
 
     logger.info("sending request")
