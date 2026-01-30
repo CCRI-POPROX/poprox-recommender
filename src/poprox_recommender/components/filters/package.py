@@ -21,12 +21,11 @@ class PackageFilter(Component):
         selected_articles = []
 
         for package in article_packages:
-            if not package.seed or package.seed.entity_id != self.config.package_entity_id:
-                continue
-
-            selected_articles.extend(
-                article_lookup[article_id] for article_id in package.article_ids if article_id in article_lookup
-            )
+            if package.seed and package.seed.entity_id == self.config.package_entity_id:
+                articles = [
+                    article_lookup[article_id] for article_id in package.article_ids if article_id in article_lookup
+                ]
+                selected_articles.extend(articles)
 
         logger.debug(
             "PackageFilter selected %d of %d candidate articles from'%d' packages",
@@ -34,5 +33,4 @@ class PackageFilter(Component):
             len(candidate_articles.articles),
             len(article_packages),
         )
-
         return CandidateSet(articles=selected_articles)

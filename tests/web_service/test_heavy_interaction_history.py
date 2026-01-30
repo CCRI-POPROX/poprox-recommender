@@ -27,19 +27,15 @@ def test_heavy_interaction_history(service, mind_data, pipeline):  # noqa: F811
     request_generator.add_clicks(num_clicks=100, num_days=10)
     request_generator.add_topics(
         [
-            "U.S. news",
-            "World news",
-            "Politics",
+            "U.S. News",
+            "World News",
+            "General News",
             "Business",
             "Entertainment",
             "Sports",
             "Health",
             "Science",
             "Technology",
-            "Lifestyle",
-            "Religion",
-            "Climate and environment",
-            "Education",
             "Oddities",
         ]
     )
@@ -50,8 +46,9 @@ def test_heavy_interaction_history(service, mind_data, pipeline):  # noqa: F811
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     # do we have recommendations?
-    section = response.recommendations[0]
-    recs = section.impressions
+    # get all recommendations from the sections
+    recs = [imp for section in response.recommendations for imp in section.impressions]
+    # recs = section.impressions
     assert len(recs) > 0
     # do we have the correct number of recommendations
     assert len(recs) == request_generator.num_recs

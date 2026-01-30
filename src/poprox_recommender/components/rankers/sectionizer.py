@@ -56,7 +56,6 @@ class Sectionizer(Component):
         )
         if top_section:
             sections.append(top_section)
-
         # topic sections
         for topic_entity_id in topic_entity_ids:
             section = self._make_section(
@@ -104,7 +103,6 @@ class Sectionizer(Component):
         else:
             # preserve order if no scores
             ranked_articles = [a for a in filtered.articles if a.article_id not in used_ids][:max_articles]
-
         if not ranked_articles:
             return None
 
