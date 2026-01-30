@@ -43,8 +43,12 @@ def main():
     agg_results = {}
     for mf in sorted(path.glob("*/metrics.json"), key=lambda p: p.as_posix()):
         pipe = mf.parent.name
-        logger.info("reading pipeline metrics", pipeline=pipe, path=mf)
-        metrics = json.loads(mf.read_text())
+        logger.info("reading pipeline metrics", pipeline=pipe, path=str(mf))
+        try:
+            metrics = json.loads(mf.read_text())
+        except Exception as e:
+            e.add_note(f"failed parsing file: {mf}")
+            raise e
         agg_results[pipe] = metrics
 
     rdf = pd.DataFrame.from_dict(agg_results, "index")
@@ -76,11 +80,11 @@ def main():
     for mf in sorted(path.glob("*/recommendation-metrics.csv.gz"), key=lambda p: p.as_posix()):
         pipe = mf.parent.name
         logger.info("reading pipeline recommendation metrics", pipeline=pipe, path=mf)
-        metrics = pd.read_csv(mf).set_index("recommendation_id")
+        metrics = pd.read_csv(mf).set_index("slate_id")
         prof_results[pipe] = metrics
 
     prof_df = pd.concat(prof_results, names=["pipeline"])
-    csv_out = path.parent / f"{name}-recommendation-metrics.csv.gz"
+    csv_out = path.parent / f"{name}-slate-metrics.csv.gz"
     logger.info("saving recommendation metrics for %d pipelines", len(prof_results), file=str(csv_out))
     prof_df.to_csv(csv_out, index=True)
 
