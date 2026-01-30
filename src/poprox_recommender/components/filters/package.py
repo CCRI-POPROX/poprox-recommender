@@ -21,7 +21,7 @@ class PackageFilter(Component):
         selected_articles = []
 
         for package in article_packages:
-            if package.seed.entity_id == self.config.package_entity_id:
+            if package.seed and package.seed.entity_id == self.config.package_entity_id:
                 articles = [
                     article_lookup[article_id] for article_id in package.article_ids if article_id in article_lookup
                 ]
