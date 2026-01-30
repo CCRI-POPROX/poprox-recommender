@@ -1,5 +1,6 @@
+import hashlib
 import logging
-import random
+from datetime import date
 from uuid import UUID
 
 import numpy as np
@@ -19,6 +20,7 @@ class SectionizerConfig(BaseModel):
     max_articles_per_topic: int = 3
     max_misc_articles: int = 3
     add_section_metadata: bool = True
+    random_seed: int = 22
 
 
 class Sectionizer(Component):
@@ -29,6 +31,7 @@ class Sectionizer(Component):
         candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
+        today: date = date.today(),
     ) -> list[ImpressedSection]:
         """
         Build newsletter sections from ranked articles and topic packages.
@@ -37,7 +40,9 @@ class Sectionizer(Component):
             logger.debug("No ranked articles available.")
             return []
 
-        topic_entity_ids = get_top_topics(interest_profile, top_n=self.config.max_topic_sections)
+        seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
+
+        topic_entity_ids = get_top_topics(interest_profile, top_n=self.config.max_topic_sections, seed=seed)
         used_ids = set()
         sections = []
 
@@ -71,6 +76,12 @@ class Sectionizer(Component):
 
         logger.debug("Sectionizer created %d total sections", len(sections))
         return sections
+
+    def random_daily_seed(self, profile_id, day, base_seed: int) -> int:
+        seed_str = f"{profile_id}_{day.isoformat()}_{base_seed}"
+        hash_obj = hashlib.sha256(seed_str.encode("utf-8"))
+        hash_hex = hash_obj.hexdigest()
+        return int(hash_hex, 16)
 
     def _make_section(self, candidate_set, packages, entity_id, max_articles, used_ids):
         package = next((p for p in packages if p.seed and p.seed.entity_id == entity_id), None)
@@ -132,12 +143,12 @@ class Sectionizer(Component):
         return section
 
 
-def get_top_topics(interest_profile: InterestProfile, top_n: int) -> list[UUID]:
+def get_top_topics(interest_profile: InterestProfile, top_n: int, seed: int) -> list[UUID]:
     topics = list(interest_profile.interests_by_type("topic"))
-    random.shuffle(topics)
+    rng = np.random.default_rng(seed)
     topics_sorted = sorted(
         topics,
-        key=lambda i: i.preference,
+        key=lambda t: (t.preference, rng.random()),
         reverse=True,
     )
     return [i.entity_id for i in topics_sorted[:top_n]]
