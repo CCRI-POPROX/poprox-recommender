@@ -82,26 +82,6 @@ class Sectionizer(Component):
         logger.debug("Sectionizer created %d total sections", len(sections))
         return sections
 
-    def _make_section(self, candidate_set, packages, entity_id, max_articles, used_ids):
-        package = next((p for p in packages if p.seed and p.seed.entity_id == entity_id), None)
-        if not package:
-            logger.debug("No package found for entity_id '%s'", entity_id)
-            return None
-
-        package_filter = PackageFilter(config=PackageFilterConfig(package_entity_id=entity_id))
-        filtered = package_filter(candidate_set, [package])
-
-        ranked_articles = select_from_candidates(filtered, max_articles, used_ids)
-        if not ranked_articles:
-            return None
-
-        used_ids.update(a.article_id for a in ranked_articles)
-        section = ImpressedSection.from_articles(
-            ranked_articles, title=package.title, personalized=True, seed_entity_id=entity_id
-        )
-
-        return section
-
     def _make_misc_section(self, candidate_set, used_ids):
         remaining = [a for a in candidate_set.articles if a.article_id not in used_ids]
         if not remaining:
