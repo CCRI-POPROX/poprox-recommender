@@ -32,21 +32,21 @@ def make_package(entity_id, title, articles):
 
 
 def test_sectionizer_creates_sections():
-    top_news_id = uuid4()
+    general_news_id = uuid4()
     topic1_id, topic2_id = uuid4(), uuid4()
-    articles = [Article(article_id=uuid4(), headline=f"Article {i}") for i in range(1, 7)]
+    articles = [Article(article_id=uuid4(), headline=f"Article {i}") for i in range(1, 20)]
     candidates = CandidateSet(articles=articles)
     packages = [
-        make_package(top_news_id, "Top News", articles[:2]),
-        make_package(topic1_id, "Sports", articles[2:4]),
-        make_package(topic2_id, "Tech", articles[4:6]),
+        make_package(general_news_id, "General News", articles[:5]),
+        make_package(topic1_id, "Sports", articles[5:10]),
+        make_package(topic2_id, "Tech", articles[10:15]),
     ]
 
     # user likes both topics
     profile = make_interest_profile([topic1_id, topic2_id])
 
     config = SectionizerConfig(
-        top_news_entity_id=top_news_id,
+        top_news_entity_id=general_news_id,
         max_top_news=2,
         max_topic_sections=2,
         max_articles_per_topic=2,
@@ -56,12 +56,13 @@ def test_sectionizer_creates_sections():
     sectionizer = Sectionizer(config=config)
     sections = sectionizer(candidate_set=candidates, article_packages=packages, interest_profile=profile)
 
-    # there should be 3 sections
-    assert len(sections) == 3
+    # We should get a top news section, two topical sections, and a misc section
+    assert len(sections) == 4
     titles = [s.title for s in sections]
-    assert "Top News" in titles
+    assert "Your Top Stories" in titles
     assert "Sports" in titles
     assert "Tech" in titles
+    assert "In Other News" in titles
 
 
 def test_sectionizer_creates_misc_section():
@@ -87,7 +88,7 @@ def test_sectionizer_creates_misc_section():
     sections = sectionizer(candidate_set=candidates, article_packages=packages, interest_profile=profile)
 
     assert len(sections) == 2
-    assert sections[0].title == "Top News"
+    assert sections[0].title == "Your Top Stories"
     assert sections[1].title == "In Other News"
     used_ids = {imp.article.article_id for s in sections for imp in s.impressions}
     assert a1.article_id in used_ids
