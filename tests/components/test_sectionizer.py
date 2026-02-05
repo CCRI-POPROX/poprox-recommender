@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 
 from poprox_concepts.domain import AccountInterest, Article, ArticlePackage, CandidateSet, Entity, InterestProfile
-from poprox_recommender.components.rankers.sectionizer import Sectionizer, SectionizerConfig
+from poprox_recommender.components.rankers.sectionizer import Sectionizer, SectionizerConfig, select_from_candidates
 
 
 def make_interest_profile(topic_ids: list[UUID]) -> InterestProfile:
@@ -88,3 +88,55 @@ def test_sectionizer_creates_misc_section():
     assert a1.article_id in used_ids
     assert a2.article_id in used_ids
     assert a3.article_id in used_ids
+
+
+def test_select_from_candidates_with_scores():
+    articles = [
+        Article(article_id=uuid4(), headline="Article 1"),
+        Article(article_id=uuid4(), headline="Article 2"),
+        Article(article_id=uuid4(), headline="Article 3"),
+        Article(article_id=uuid4(), headline="Article 4"),
+    ]
+    candidates = CandidateSet(articles=articles, scores=[0.1, 0.2, 0.3, 0.4])
+    selected = select_from_candidates(candidates, 3)
+    assert len(selected) == 3
+    assert [a.article_id for a in selected] == [articles[3].article_id, articles[2].article_id, articles[1].article_id]
+
+
+def test_select_from_candidates_excluding_with_scores():
+    articles = [
+        Article(article_id=uuid4(), headline="Article 1"),
+        Article(article_id=uuid4(), headline="Article 2"),
+        Article(article_id=uuid4(), headline="Article 3"),
+        Article(article_id=uuid4(), headline="Article 4"),
+    ]
+    candidates = CandidateSet(articles=articles, scores=[0.1, 0.2, 0.3, 0.4])
+    selected = select_from_candidates(candidates, 3, excluding=[articles[3].article_id])
+    assert len(selected) == 3
+    assert [a.article_id for a in selected] == [articles[2].article_id, articles[1].article_id, articles[0].article_id]
+
+
+def test_select_from_candidates_without_scores():
+    articles = [
+        Article(article_id=uuid4(), headline="Article 1"),
+        Article(article_id=uuid4(), headline="Article 2"),
+        Article(article_id=uuid4(), headline="Article 3"),
+        Article(article_id=uuid4(), headline="Article 4"),
+    ]
+    candidates = CandidateSet(articles=articles)
+    selected = select_from_candidates(candidates, 3)
+    assert len(selected) == 3
+    assert [a.article_id for a in selected] == [articles[0].article_id, articles[1].article_id, articles[2].article_id]
+
+
+def test_select_from_candidates_excluding_without_scores():
+    articles = [
+        Article(article_id=uuid4(), headline="Article 1"),
+        Article(article_id=uuid4(), headline="Article 2"),
+        Article(article_id=uuid4(), headline="Article 3"),
+        Article(article_id=uuid4(), headline="Article 4"),
+    ]
+    candidates = CandidateSet(articles=articles)
+    selected = select_from_candidates(candidates, 3, excluding=[articles[0].article_id])
+    assert len(selected) == 3
+    assert [a.article_id for a in selected] == [articles[1].article_id, articles[2].article_id, articles[3].article_id]

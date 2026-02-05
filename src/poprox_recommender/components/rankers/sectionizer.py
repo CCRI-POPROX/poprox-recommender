@@ -6,7 +6,7 @@ import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
+from poprox_concepts.domain import Article, ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
 from poprox_recommender.components.filters import PackageFilter, PackageFilterConfig
 
 logger = logging.getLogger(__name__)
@@ -80,18 +80,7 @@ class Sectionizer(Component):
         package_filter = PackageFilter(config=PackageFilterConfig(package_entity_id=entity_id))
         filtered = package_filter(candidate_set, [package])
 
-        # rank filtered candidates
-        if hasattr(candidate_set, "scores") and candidate_set.scores is not None:
-            article_ids = [a.article_id for a in filtered.articles if a.article_id not in used_ids]
-            article_indices = [i for i, a in enumerate(candidate_set.articles) if a.article_id in article_ids]
-
-            scores = np.array(candidate_set.scores)[article_indices]
-            sorted_indices = np.argsort(scores)[::-1][:max_articles]
-
-            ranked_articles = [candidate_set.articles[article_indices[int(i)]] for i in sorted_indices]
-        else:
-            # preserve order if no scores
-            ranked_articles = [a for a in filtered.articles if a.article_id not in used_ids][:max_articles]
+        ranked_articles = select_from_candidates(filtered, max_articles, used_ids)
         if not ranked_articles:
             return None
 
@@ -128,6 +117,24 @@ class Sectionizer(Component):
             section.personalized = True
 
         return section
+
+
+def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: list[UUID] = None) -> list[Article]:
+    excluding = excluding or []
+
+    if hasattr(candidates, "scores") and candidates.scores is not None:
+        # rank candidates by score if scores are available
+        sorted_indices = np.argsort(np.array(candidates.scores))[::-1]
+        ranked_articles = [
+            candidates.articles[int(i)]
+            for i in sorted_indices
+            if candidates.articles[int(i)].article_id not in excluding
+        ][:num_articles]
+    else:
+        # otherwise select from the top of the list of candidates preserving order
+        ranked_articles = [a for a in candidates.articles if a.article_id not in excluding][:num_articles]
+
+    return ranked_articles
 
 
 def get_top_topics(interest_profile: InterestProfile, top_n: int) -> list[UUID]:
