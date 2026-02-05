@@ -119,7 +119,9 @@ class Sectionizer(Component):
         return section
 
 
-def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: list[UUID]) -> list[Article]:
+def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: list[UUID] = None) -> list[Article]:
+    excluding = excluding or []
+
     if hasattr(candidates, "scores") and candidates.scores is not None:
         # rank candidates by score if scores are available
         sorted_indices = np.argsort(np.array(candidates.scores))[::-1]
