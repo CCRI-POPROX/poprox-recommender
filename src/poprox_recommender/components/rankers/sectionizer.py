@@ -7,7 +7,6 @@ from lenskit.pipeline import Component
 from pydantic import BaseModel
 
 from poprox_concepts.domain import Article, ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
-from poprox_recommender.components.filters import PackageFilter, PackageFilterConfig
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +43,7 @@ class Sectionizer(Component):
         entity_id = self.config.top_news_entity_id
         package = next((p for p in article_packages if p.seed and p.seed.entity_id == entity_id), None)
         if package:
-            package_filter = PackageFilter(config=PackageFilterConfig(package_entity_id=entity_id))
-            filtered = package_filter(candidate_set, [package])
-
+            filtered = filter_using_package(candidate_set, package)
             ranked_articles = select_from_candidates(filtered, self.config.max_top_news, list(used_ids))
 
             used_ids.update(a.article_id for a in ranked_articles)
@@ -61,9 +58,7 @@ class Sectionizer(Component):
         for topic_entity_id in topic_entity_ids:
             package = next((p for p in article_packages if p.seed and p.seed.entity_id == topic_entity_id), None)
             if package:
-                package_filter = PackageFilter(config=PackageFilterConfig(package_entity_id=topic_entity_id))
-                filtered = package_filter(candidate_set, [package])
-
+                filtered = filter_using_package(candidate_set, package)
                 ranked_articles = select_from_candidates(filtered, self.config.max_top_news, list(used_ids))
 
                 used_ids.update(a.article_id for a in ranked_articles)
@@ -101,6 +96,34 @@ class Sectionizer(Component):
         section = ImpressedSection.from_articles(misc_articles, title="In Other News", personalized=True)
 
         return section
+
+
+def filter_using_package(candidate_articles: CandidateSet, package: ArticlePackage):
+    article_index_lookup = {article.article_id: i for i, article in enumerate(candidate_articles.articles)}
+    selected_articles = []
+    selected_indices = []
+
+    for article_id in package.article_ids:
+        if article_id in article_index_lookup:
+            idx = article_index_lookup[article_id]
+            selected_articles.append(candidate_articles.articles[idx])
+            selected_indices.append(idx)
+
+    logger.debug(
+        "PackageFilter selected %d of %d candidate articles using %s package",
+        len(selected_articles),
+        len(candidate_articles.articles),
+        package.title,
+    )
+
+    filtered = CandidateSet(articles=selected_articles)
+    scores = getattr(candidate_articles, "scores", None)
+    if scores is not None:
+        filtered.scores = [scores[i] for i in selected_indices]
+    else:
+        filtered.scores = None
+
+    return filtered
 
 
 def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: list[UUID] = None) -> list[Article]:
