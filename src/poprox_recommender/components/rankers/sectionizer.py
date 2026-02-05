@@ -18,7 +18,6 @@ class SectionizerConfig(BaseModel):
     max_topic_sections: int = 3
     max_articles_per_topic: int = 3
     max_misc_articles: int = 3
-    add_section_metadata: bool = True
 
 
 class Sectionizer(Component):
@@ -85,12 +84,9 @@ class Sectionizer(Component):
             return None
 
         used_ids.update(a.article_id for a in ranked_articles)
-        section = ImpressedSection.from_articles(ranked_articles)
-
-        if self.config.add_section_metadata:
-            section.title = package.title
-            section.personalized = True
-            section.seed_entity_id = entity_id
+        section = ImpressedSection.from_articles(
+            ranked_articles, title=package.title, personalized=True, seed_entity_id=entity_id
+        )
 
         return section
 
@@ -110,11 +106,7 @@ class Sectionizer(Component):
         else:
             misc_articles = remaining[: self.config.max_misc_articles]
 
-        section = ImpressedSection.from_articles(misc_articles)
-
-        if self.config.add_section_metadata:
-            section.title = "In Other News"
-            section.personalized = True
+        section = ImpressedSection.from_articles(misc_articles, title="In Other News", personalized=True)
 
         return section
 
