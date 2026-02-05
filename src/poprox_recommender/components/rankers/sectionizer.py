@@ -41,7 +41,7 @@ class Sectionizer(Component):
 
         # top news section
         filtered = filter_using_packages(candidate_set, article_packages)
-        ranked_articles = select_from_candidates(filtered, self.config.max_top_news, list(used_ids))
+        ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
 
         used_ids.update(a.article_id for a in ranked_articles)
         top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
@@ -54,7 +54,7 @@ class Sectionizer(Component):
             package = next((p for p in article_packages if p.seed and p.seed.entity_id == topic_entity_id), None)
             if package:
                 filtered = filter_using_packages(candidate_set, [package])
-                ranked_articles = select_from_candidates(filtered, self.config.max_top_news, list(used_ids))
+                ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
 
                 used_ids.update(a.article_id for a in ranked_articles)
                 topic_section = ImpressedSection.from_articles(
@@ -123,8 +123,8 @@ def filter_using_packages(candidate_articles: CandidateSet, packages: list[Artic
     return filtered
 
 
-def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: list[UUID] = None) -> list[Article]:
-    excluding = excluding or []
+def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: set[UUID] = None) -> list[Article]:
+    excluding = excluding or set()
 
     if hasattr(candidates, "scores") and candidates.scores is not None:
         # rank candidates by score if scores are available
