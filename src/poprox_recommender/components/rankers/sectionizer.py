@@ -41,15 +41,22 @@ class Sectionizer(Component):
         sections = []
 
         # top news section
-        top_section = self._make_section(
-            candidate_set,
-            article_packages,
-            entity_id=self.config.top_news_entity_id,
-            max_articles=self.config.max_top_news,
-            used_ids=used_ids,
-        )
-        if top_section:
-            sections.append(top_section)
+        entity_id = self.config.top_news_entity_id
+        package = next((p for p in article_packages if p.seed and p.seed.entity_id == entity_id), None)
+        if package:
+            package_filter = PackageFilter(config=PackageFilterConfig(package_entity_id=entity_id))
+            filtered = package_filter(candidate_set, [package])
+
+            ranked_articles = select_from_candidates(filtered, self.config.max_top_news, list(used_ids))
+
+            used_ids.update(a.article_id for a in ranked_articles)
+            top_section = ImpressedSection.from_articles(
+                ranked_articles, title=package.title, personalized=True, seed_entity_id=entity_id
+            )
+
+            if top_section and len(top_section.impressions) > 0:
+                sections.append(top_section)
+
         # topic sections
         for topic_entity_id in topic_entity_ids:
             section = self._make_section(
