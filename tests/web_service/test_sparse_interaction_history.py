@@ -23,7 +23,9 @@ def test_sparse_interaction_history(service, mind_data, pipeline):  # noqa: F811
     request_generator.add_clicks(num_clicks=1, num_days=10)
     # add topics also builds article packages
     request_generator.add_topics(["Science", "Technology", "Sports", "Oddities", "General News"])
-    request_generator.set_num_recs(10)
+    num_recs = 15 if pipeline == "nrms_sections" else 10
+    request_generator.set_num_recs(num_recs)
+
     req_body = request_generator.get_request()
 
     logger.info("sending request")
