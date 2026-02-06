@@ -37,7 +37,7 @@ class Sectionizer(Component):
         if not candidate_set.articles:
             logger.debug("No ranked articles available.")
             return []
-          
+
         if today is None:
             today = date.today()
 
