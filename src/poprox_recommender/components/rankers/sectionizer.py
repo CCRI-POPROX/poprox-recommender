@@ -7,7 +7,6 @@ from lenskit.pipeline import Component
 from pydantic import BaseModel
 
 from poprox_concepts.domain import Article, ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
-from poprox_recommender.components.filters import PackageFilter, PackageFilterConfig
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +17,6 @@ class SectionizerConfig(BaseModel):
     max_topic_sections: int = 3
     max_articles_per_topic: int = 3
     max_misc_articles: int = 3
-    add_section_metadata: bool = True
 
 
 class Sectionizer(Component):
@@ -42,26 +40,29 @@ class Sectionizer(Component):
         sections = []
 
         # top news section
-        top_section = self._make_section(
-            candidate_set,
-            article_packages,
-            entity_id=self.config.top_news_entity_id,
-            max_articles=self.config.max_top_news,
-            used_ids=used_ids,
-        )
-        if top_section:
+        filtered = filter_using_packages(candidate_set, article_packages)
+        ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
+
+        used_ids.update(a.article_id for a in ranked_articles)
+        top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
+
+        if len(top_section.impressions) > 0:
             sections.append(top_section)
+
         # topic sections
         for topic_entity_id in topic_entity_ids:
-            section = self._make_section(
-                candidate_set,
-                article_packages,
-                entity_id=topic_entity_id,
-                max_articles=self.config.max_articles_per_topic,
-                used_ids=used_ids,
-            )
-            if section:
-                sections.append(section)
+            package = next((p for p in article_packages if p.seed and p.seed.entity_id == topic_entity_id), None)
+            if package:
+                filtered = filter_using_packages(candidate_set, [package])
+                ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
+
+                used_ids.update(a.article_id for a in ranked_articles)
+                topic_section = ImpressedSection.from_articles(
+                    ranked_articles, title=package.title, personalized=True, seed_entity_id=topic_entity_id
+                )
+
+                if len(topic_section.impressions) > 0:
+                    sections.append(topic_section)
 
         # in other news / misc / for you section
         misc_section = self._make_misc_section(candidate_set, used_ids)
@@ -70,29 +71,6 @@ class Sectionizer(Component):
 
         logger.debug("Sectionizer created %d total sections", len(sections))
         return sections
-
-    def _make_section(self, candidate_set, packages, entity_id, max_articles, used_ids):
-        package = next((p for p in packages if p.seed and p.seed.entity_id == entity_id), None)
-        if not package:
-            logger.debug("No package found for entity_id '%s'", entity_id)
-            return None
-
-        package_filter = PackageFilter(config=PackageFilterConfig(package_entity_id=entity_id))
-        filtered = package_filter(candidate_set, [package])
-
-        ranked_articles = select_from_candidates(filtered, max_articles, used_ids)
-        if not ranked_articles:
-            return None
-
-        used_ids.update(a.article_id for a in ranked_articles)
-        section = ImpressedSection.from_articles(ranked_articles)
-
-        if self.config.add_section_metadata:
-            section.title = package.title
-            section.personalized = True
-            section.seed_entity_id = entity_id
-
-        return section
 
     def _make_misc_section(self, candidate_set, used_ids):
         remaining = [a for a in candidate_set.articles if a.article_id not in used_ids]
@@ -110,17 +88,43 @@ class Sectionizer(Component):
         else:
             misc_articles = remaining[: self.config.max_misc_articles]
 
-        section = ImpressedSection.from_articles(misc_articles)
-
-        if self.config.add_section_metadata:
-            section.title = "In Other News"
-            section.personalized = True
+        section = ImpressedSection.from_articles(misc_articles, title="In Other News", personalized=True)
 
         return section
 
 
-def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: list[UUID] = None) -> list[Article]:
-    excluding = excluding or []
+def filter_using_packages(candidate_articles: CandidateSet, packages: list[ArticlePackage]):
+    article_index_lookup = {article.article_id: i for i, article in enumerate(candidate_articles.articles)}
+    selected_articles = []
+    selected_indices = []
+
+    package_article_ids = set(article_id for package in packages for article_id in package.article_ids)
+
+    for article_id in package_article_ids:
+        if article_id in article_index_lookup:
+            idx = article_index_lookup[article_id]
+            selected_articles.append(candidate_articles.articles[idx])
+            selected_indices.append(idx)
+
+    logger.debug(
+        "PackageFilter selected %d of %d candidate articles using %s packages",
+        len(selected_articles),
+        len(candidate_articles.articles),
+        ", ".join([p.title for p in packages]),
+    )
+
+    filtered = CandidateSet(articles=selected_articles)
+    scores = getattr(candidate_articles, "scores", None)
+    if scores is not None:
+        filtered.scores = [scores[i] for i in selected_indices]
+    else:
+        filtered.scores = None
+
+    return filtered
+
+
+def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: set[UUID] = None) -> list[Article]:
+    excluding = excluding or set()
 
     if hasattr(candidates, "scores") and candidates.scores is not None:
         # rank candidates by score if scores are available
