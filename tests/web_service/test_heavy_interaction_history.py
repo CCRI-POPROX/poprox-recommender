@@ -23,7 +23,7 @@ def test_heavy_interaction_history(service, mind_data, pipeline):  # noqa: F811
     Initialize request data
     """
     request_generator = RequestGenerator(mind_data)
-    request_generator.add_candidates(100)
+    request_generator.add_candidates(150)
     request_generator.add_clicks(num_clicks=100, num_days=10)
     request_generator.add_topics(
         [

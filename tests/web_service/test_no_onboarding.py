@@ -24,7 +24,7 @@ def test_no_onboarding(service, mind_data, pipeline):  # noqa: F811
     """
     request_generator = RequestGenerator(mind_data)
     default_topics = ["General News", "Science", "Technology", "Sports"]  # set default topics
-    request_generator.add_candidates(100)
+    request_generator.add_candidates(150)
     request_generator.add_clicks(num_clicks=37, num_days=7)
     request_generator.add_topics(default_topics)
     num_recs = 15 if pipeline == "nrms_sections" else 10
