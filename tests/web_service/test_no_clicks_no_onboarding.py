@@ -27,7 +27,7 @@ def test_no_clicks_no_onboarding(service, mind_data, pipeline):  # noqa: F811
     request_generator.add_candidates(100)
     request_generator.add_clicks(num_clicks=0, num_days=0)
     request_generator.add_topics(default_topics)  # pick the default topics when no onboarding
-    request_generator.set_num_recs(10)
+    request_generator.set_num_recs(15)
     req_body = request_generator.get_request()
 
     logger.info("sending request")

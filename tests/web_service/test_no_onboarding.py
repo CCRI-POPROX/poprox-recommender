@@ -27,7 +27,7 @@ def test_no_onboarding(service, mind_data, pipeline):  # noqa: F811
     request_generator.add_candidates(100)
     request_generator.add_clicks(num_clicks=37, num_days=7)
     request_generator.add_topics(default_topics)
-    request_generator.set_num_recs(10)
+    request_generator.set_num_recs(15)
     req_body = request_generator.get_request()
 
     logger.info("sending request")

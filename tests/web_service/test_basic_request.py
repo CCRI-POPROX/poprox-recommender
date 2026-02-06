@@ -34,7 +34,7 @@ def test_basic_request(service, mind_data, pipeline):  # noqa: F811
             "Oddities",
         ]
     )
-    request_generator.set_num_recs(10)
+    request_generator.set_num_recs(15)
     req_body = request_generator.get_request()
 
     logger.info("sending request")
