@@ -17,7 +17,6 @@ class SectionizerConfig(BaseModel):
     max_topic_sections: int = 3
     max_articles_per_topic: int = 3
     max_misc_articles: int = 3
-    add_section_metadata: bool = True
     random_seed: int = 22
 
 
