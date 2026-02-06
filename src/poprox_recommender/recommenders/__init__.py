@@ -34,6 +34,7 @@ def select_articles(
     interest_profile: InterestProfile,
     pipeline_params: dict[str, Any] | None = None,
     article_packages: list | None = None,
+    num_slots: int = 10,
 ) -> tuple[list[ImpressedSection], Any]:
     """
     Select articles with default recommender configuration.  It returns a
@@ -46,7 +47,7 @@ def select_articles(
     if name is None:
         name = default_pipeline()
 
-    pipeline = get_pipeline(name)
+    pipeline = get_pipeline(name, num_slots=num_slots)
 
     recs = pipeline.node("recommender")
     topk = pipeline.node("ranker", missing="none")
