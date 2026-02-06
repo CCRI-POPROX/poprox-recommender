@@ -42,7 +42,6 @@ class Sectionizer(Component):
 
         seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
 
-        topic_entity_ids = get_top_topics(interest_profile, top_n=self.config.max_topic_sections, seed=seed)
         used_ids = set()
         sections = []
 
@@ -57,15 +56,24 @@ class Sectionizer(Component):
             sections.append(top_section)
 
         # topic sections
-        for topic_entity_id in topic_entity_ids:
-            package = next((p for p in article_packages if p.seed and p.seed.entity_id == topic_entity_id), None)
+        topical_interests = list(interest_profile.interests_by_type("topic"))
+        rng = np.random.default_rng(seed)
+        rng.shuffle(topical_interests)
+        sorted_interests = sorted(
+            topical_interests,
+            key=lambda i: i.preference,
+            reverse=True,
+        )
+
+        for interest in sorted_interests[: self.config.max_topic_sections]:
+            package = next((p for p in article_packages if p.seed and p.seed.entity_id == interest.entity_id), None)
             if package:
                 filtered = filter_using_packages(candidate_set, [package])
                 ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
 
                 used_ids.update(a.article_id for a in ranked_articles)
                 topic_section = ImpressedSection.from_articles(
-                    ranked_articles, title=package.title, personalized=True, seed_entity_id=topic_entity_id
+                    ranked_articles, title=package.title, personalized=True, seed_entity_id=interest.entity_id
                 )
 
                 if len(topic_section.impressions) > 0:
@@ -152,11 +160,3 @@ def select_from_candidates(candidates: CandidateSet, num_articles: int, excludin
         ranked_articles = [a for a in candidates.articles if a.article_id not in excluding][:num_articles]
 
     return ranked_articles
-
-
-def get_top_topics(interest_profile: InterestProfile, top_n: int, seed: int) -> list[UUID]:
-    topics = list(interest_profile.interests_by_type("topic"))
-    rng = np.random.default_rng(seed)
-    rng.shuffle(topics)
-    topics_sorted = sorted(topics, key=lambda t: t.preference, reverse=True)
-    return [t.entity_id for t in topics_sorted[:top_n]]
