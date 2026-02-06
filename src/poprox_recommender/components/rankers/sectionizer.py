@@ -130,8 +130,8 @@ class Sectionizer(Component):
         return section
 
 
-def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: list[UUID] = None) -> list[Article]:
-    excluding = excluding or []
+def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: set[UUID] = None) -> list[Article]:
+    excluding = excluding or set()
 
     if hasattr(candidates, "scores") and candidates.scores is not None:
         # rank candidates by score if scores are available
