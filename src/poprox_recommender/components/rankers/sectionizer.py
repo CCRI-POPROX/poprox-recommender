@@ -37,7 +37,6 @@ class Sectionizer(Component):
         if not candidate_set.articles:
             logger.debug("No ranked articles available.")
             return []
-
         if today is None:
             today = date.today()
 
@@ -158,9 +157,6 @@ def select_from_candidates(candidates: CandidateSet, num_articles: int, excludin
 def get_top_topics(interest_profile: InterestProfile, top_n: int, seed: int) -> list[UUID]:
     topics = list(interest_profile.interests_by_type("topic"))
     rng = np.random.default_rng(seed)
-    topics_sorted = sorted(
-        topics,
-        key=lambda t: (t.preference, rng.random()),
-        reverse=True,
-    )
-    return [i.entity_id for i in topics_sorted[:top_n]]
+    rng.shuffle(topics)
+    topics_sorted = sorted(topics, key=lambda t: t.preference, reverse=True)
+    return [t.entity_id for t in topics_sorted[:top_n]]
