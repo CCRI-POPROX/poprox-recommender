@@ -65,7 +65,8 @@ class Sectionizer(Component):
             reverse=True,
         )
 
-        for interest in sorted_interests[: self.config.max_topic_sections]:
+        topical_sections = []
+        for interest in sorted_interests:
             package = next((p for p in article_packages if p.seed and p.seed.entity_id == interest.entity_id), None)
             if package:
                 filtered = filter_using_packages(candidate_set, [package])
@@ -77,7 +78,12 @@ class Sectionizer(Component):
                 )
 
                 if len(topic_section.impressions) > 0:
-                    sections.append(topic_section)
+                    topical_sections.append(topic_section)
+
+                if len(topical_sections) >= self.config.max_topic_sections:
+                    break
+
+        sections.extend(topical_sections)
 
         # in other news / misc / for you section
         misc_section = self._make_misc_section(candidate_set, used_ids)
