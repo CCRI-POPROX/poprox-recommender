@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class SectionizerConfig(BaseModel):
-    top_news_entity_id: UUID
     max_top_news: int = 3
     max_topic_sections: int = 3
     max_articles_per_topic: int = 3

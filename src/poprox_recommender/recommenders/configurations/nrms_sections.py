@@ -189,12 +189,10 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
 
     # Sectionizer
     s_config = SectionizerConfig(
-        top_news_entity_id=TOP_NEWS_PACKAGE_ID,
         max_top_news=3,
         max_topic_sections=3,
         max_articles_per_topic=3,
         max_misc_articles=3,
-        add_section_metadata=True,
     )
 
     builder.add_component(
