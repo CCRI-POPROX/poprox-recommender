@@ -29,7 +29,7 @@ class Sectionizer(Component):
         candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
-        today: date = date.today(),
+        today: date | None = None,
     ) -> list[ImpressedSection]:
         """
         Build newsletter sections from ranked articles and topic packages.
@@ -37,6 +37,9 @@ class Sectionizer(Component):
         if not candidate_set.articles:
             logger.debug("No ranked articles available.")
             return []
+
+        if today is None:
+            today = date.today()
 
         seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
 
