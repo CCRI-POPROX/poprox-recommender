@@ -75,6 +75,7 @@ def root(
         profile,
         {"pipeline": pipeline},
         article_packages=req.article_packages,
+        impressed_article_ids=req.impressed_article_ids,
     )
 
     resp_body = RecommendationResponseV5.model_validate({"recommendations": recs, "recommender": rec_info.model_dump()})
