@@ -12,8 +12,8 @@ from poprox_concepts.domain import (
 from poprox_recommender.components.rankers.sectionizer import (
     Sectionizer,
     SectionizerConfig,
-    filter_in_packages,
     select_from_candidates,
+    select_from_packages,
 )
 
 
@@ -178,7 +178,7 @@ def test_filter_using_one_package():
     package_article_ids = [articles[1].article_id, articles[3].article_id]
     package = ArticlePackage(title="half the articles", source="test", article_ids=package_article_ids)
 
-    filtered = filter_in_packages(candidates, [package])
+    filtered = select_from_packages(candidates, [package])
     filtered_ids = [a.article_id for a in filtered.articles]
 
     for article_id in package_article_ids:
@@ -197,7 +197,7 @@ def test_filter_using_multiple_packages():
     package_1 = ArticlePackage(title="half the articles", source="test", article_ids=[articles[1].article_id])
     package_2 = ArticlePackage(title="half the articles", source="test", article_ids=[articles[3].article_id])
 
-    filtered = filter_in_packages(candidates, [package_1, package_2])
+    filtered = select_from_packages(candidates, [package_1, package_2])
     filtered_ids = [a.article_id for a in filtered.articles]
 
     for article_id in package_1.article_ids + package_2.article_ids:

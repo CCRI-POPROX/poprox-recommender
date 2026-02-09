@@ -47,7 +47,7 @@ class Sectionizer(Component):
         sections = []
 
         # top news section
-        filtered = filter_in_packages(candidate_set, article_packages)
+        filtered = select_from_packages(candidate_set, article_packages)
         ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
 
         used_ids.update(a.article_id for a in ranked_articles)
@@ -63,7 +63,7 @@ class Sectionizer(Component):
                 displayed_title = package.title.replace("Top ", "").replace(" Stories", "")
                 displayed_title = f"{displayed_title} For You"
 
-                filtered = filter_mentioning(candidate_set, [package.seed] if package.seed else [])
+                filtered = select_mentioning(candidate_set, [package.seed] if package.seed else [])
                 ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic, used_ids)
 
                 used_ids.update(a.article_id for a in ranked_articles)
@@ -109,7 +109,7 @@ class Sectionizer(Component):
         return section
 
 
-def filter_mentioning(candidate: CandidateSet, entities: list[Entity]):
+def select_mentioning(candidate: CandidateSet, entities: list[Entity]):
     entity_ids = set(e.entity_id for e in entities)
 
     kept_articles = []
@@ -130,7 +130,7 @@ def filter_mentioning(candidate: CandidateSet, entities: list[Entity]):
     return filtered
 
 
-def filter_in_packages(candidate_articles: CandidateSet, packages: list[ArticlePackage]) -> CandidateSet:
+def select_from_packages(candidate_articles: CandidateSet, packages: list[ArticlePackage]) -> CandidateSet:
     article_index_lookup = {article.article_id: i for i, article in enumerate(candidate_articles.articles)}
     selected_articles = []
     selected_indices = []
