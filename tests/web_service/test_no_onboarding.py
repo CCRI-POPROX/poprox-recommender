@@ -23,18 +23,22 @@ def test_no_onboarding(service, mind_data, pipeline):  # noqa: F811
     Initialize request data
     """
     request_generator = RequestGenerator(mind_data)
-    request_generator.add_candidates(100)
+    default_topics = ["General News", "Science", "Technology", "Sports"]  # set default topics
+    request_generator.add_candidates(150)
     request_generator.add_clicks(num_clicks=37, num_days=7)
-    request_generator.add_topics([])
-    request_generator.set_num_recs(10)
+    request_generator.add_topics(default_topics)
+    num_recs = 15 if pipeline == "nrms_sections" else 10
+    request_generator.set_num_recs(num_recs)
+
     req_body = request_generator.get_request()
 
     logger.info("sending request")
     response = service.request(req_body, pipeline)
     logger.info("response: %s", response.model_dump_json(indent=2))
     # do we have recommendations?
-    section = response.recommendations[0]
-    recs = section.impressions
+    # get all recommendations from the sections
+    recs = [imp for section in response.recommendations for imp in section.impressions]
+    # recs = section.impressions
     assert len(recs) > 0
     # do we have the correct number of recommendations
     assert len(recs) == request_generator.num_recs

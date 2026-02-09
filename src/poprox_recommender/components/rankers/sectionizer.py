@@ -1,24 +1,23 @@
+import hashlib
 import logging
-import random
+from datetime import date
 from uuid import UUID
 
 import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
-from poprox_recommender.components.filters import PackageFilter, PackageFilterConfig
+from poprox_concepts.domain import Article, ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
 
 logger = logging.getLogger(__name__)
 
 
 class SectionizerConfig(BaseModel):
-    top_news_entity_id: UUID
     max_top_news: int = 3
     max_topic_sections: int = 3
     max_articles_per_topic: int = 3
     max_misc_articles: int = 3
-    add_section_metadata: bool = True
+    random_seed: int = 22
 
 
 class Sectionizer(Component):
@@ -29,6 +28,7 @@ class Sectionizer(Component):
         candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
+        today: date | None = None,
     ) -> list[ImpressedSection]:
         """
         Build newsletter sections from ranked articles and topic packages.
@@ -37,32 +37,41 @@ class Sectionizer(Component):
             logger.debug("No ranked articles available.")
             return []
 
-        topic_entity_ids = get_top_topics(interest_profile, top_n=self.config.max_topic_sections)
+        if today is None:
+            today = date.today()
+
+        seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
+
+        topic_entity_ids = get_top_topics(interest_profile, top_n=self.config.max_topic_sections, seed=seed)
         used_ids = set()
         sections = []
 
         # top news section
-        top_section = self._make_section(
-            candidate_set,
-            article_packages,
-            entity_id=self.config.top_news_entity_id,
-            max_articles=self.config.max_top_news,
-            used_ids=used_ids,
-        )
-        if top_section:
+        filtered = filter_using_packages(candidate_set, article_packages)
+        ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
+
+        used_ids.update(a.article_id for a in ranked_articles)
+        top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
+
+        if len(top_section.impressions) > 0:
             sections.append(top_section)
 
         # topic sections
         for topic_entity_id in topic_entity_ids:
-            section = self._make_section(
-                candidate_set,
-                article_packages,
-                entity_id=topic_entity_id,
-                max_articles=self.config.max_articles_per_topic,
-                used_ids=used_ids,
-            )
-            if section:
-                sections.append(section)
+            package = next((p for p in article_packages if p.seed and p.seed.entity_id == topic_entity_id), None)
+            if package:
+                displayed_title = package.title.replace("Top ", "").replace(" Stories", "")
+                displayed_title = f"{displayed_title} For You"
+                filtered = filter_using_packages(candidate_set, [package])
+                ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
+
+                used_ids.update(a.article_id for a in ranked_articles)
+                topic_section = ImpressedSection.from_articles(
+                    ranked_articles, title=displayed_title, personalized=True, seed_entity_id=topic_entity_id
+                )
+
+                if len(topic_section.impressions) > 0:
+                    sections.append(topic_section)
 
         # in other news / misc / for you section
         misc_section = self._make_misc_section(candidate_set, used_ids)
@@ -72,40 +81,11 @@ class Sectionizer(Component):
         logger.debug("Sectionizer created %d total sections", len(sections))
         return sections
 
-    def _make_section(self, candidate_set, packages, entity_id, max_articles, used_ids):
-        package = next((p for p in packages if p.seed and p.seed.entity_id == entity_id), None)
-        if not package:
-            logger.debug("No package found for entity_id '%s'", entity_id)
-            return None
-
-        package_filter = PackageFilter(config=PackageFilterConfig(package_entity_id=entity_id))
-        filtered = package_filter(candidate_set, [package])
-
-        # rank filtered candidates
-        if hasattr(candidate_set, "scores") and candidate_set.scores is not None:
-            article_ids = [a.article_id for a in filtered.articles if a.article_id not in used_ids]
-            article_indices = [i for i, a in enumerate(candidate_set.articles) if a.article_id in article_ids]
-
-            scores = np.array(candidate_set.scores)[article_indices]
-            sorted_indices = np.argsort(scores)[::-1][:max_articles]
-
-            ranked_articles = [candidate_set.articles[article_indices[int(i)]] for i in sorted_indices]
-        else:
-            # preserve order if no scores
-            ranked_articles = [a for a in filtered.articles if a.article_id not in used_ids][:max_articles]
-
-        if not ranked_articles:
-            return None
-
-        used_ids.update(a.article_id for a in ranked_articles)
-        section = ImpressedSection.from_articles(ranked_articles)
-
-        if self.config.add_section_metadata:
-            section.title = package.title
-            section.personalized = True
-            section.seed_entity_id = entity_id
-
-        return section
+    def random_daily_seed(self, profile_id, day, base_seed: int) -> int:
+        seed_str = f"{profile_id}_{day.isoformat()}_{base_seed}"
+        hash_obj = hashlib.sha256(seed_str.encode("utf-8"))
+        hash_hex = hash_obj.hexdigest()
+        return int(hash_hex, 16)
 
     def _make_misc_section(self, candidate_set, used_ids):
         remaining = [a for a in candidate_set.articles if a.article_id not in used_ids]
@@ -123,21 +103,62 @@ class Sectionizer(Component):
         else:
             misc_articles = remaining[: self.config.max_misc_articles]
 
-        section = ImpressedSection.from_articles(misc_articles)
-
-        if self.config.add_section_metadata:
-            section.title = "In Other News"
-            section.personalized = True
+        section = ImpressedSection.from_articles(misc_articles, title="In Other News", personalized=True)
 
         return section
 
 
-def get_top_topics(interest_profile: InterestProfile, top_n: int) -> list[UUID]:
-    topics = list(interest_profile.interests_by_type("topic"))
-    random.shuffle(topics)
-    topics_sorted = sorted(
-        topics,
-        key=lambda i: i.preference,
-        reverse=True,
+def filter_using_packages(candidate_articles: CandidateSet, packages: list[ArticlePackage]):
+    article_index_lookup = {article.article_id: i for i, article in enumerate(candidate_articles.articles)}
+    selected_articles = []
+    selected_indices = []
+
+    package_article_ids = set(article_id for package in packages for article_id in package.article_ids)
+
+    for article_id in package_article_ids:
+        if article_id in article_index_lookup:
+            idx = article_index_lookup[article_id]
+            selected_articles.append(candidate_articles.articles[idx])
+            selected_indices.append(idx)
+
+    logger.debug(
+        "PackageFilter selected %d of %d candidate articles using %s packages",
+        len(selected_articles),
+        len(candidate_articles.articles),
+        ", ".join([p.title for p in packages]),
     )
-    return [i.entity_id for i in topics_sorted[:top_n]]
+
+    filtered = CandidateSet(articles=selected_articles)
+    scores = getattr(candidate_articles, "scores", None)
+    if scores is not None:
+        filtered.scores = [scores[i] for i in selected_indices]
+    else:
+        filtered.scores = None
+
+    return filtered
+
+
+def select_from_candidates(candidates: CandidateSet, num_articles: int, excluding: set[UUID] = None) -> list[Article]:
+    excluding = excluding or set()
+
+    if hasattr(candidates, "scores") and candidates.scores is not None:
+        # rank candidates by score if scores are available
+        sorted_indices = np.argsort(np.array(candidates.scores))[::-1]
+        ranked_articles = [
+            candidates.articles[int(i)]
+            for i in sorted_indices
+            if candidates.articles[int(i)].article_id not in excluding
+        ][:num_articles]
+    else:
+        # otherwise select from the top of the list of candidates preserving order
+        ranked_articles = [a for a in candidates.articles if a.article_id not in excluding][:num_articles]
+
+    return ranked_articles
+
+
+def get_top_topics(interest_profile: InterestProfile, top_n: int, seed: int) -> list[UUID]:
+    topics = list(interest_profile.interests_by_type("topic"))
+    rng = np.random.default_rng(seed)
+    rng.shuffle(topics)
+    topics_sorted = sorted(topics, key=lambda t: t.preference, reverse=True)
+    return [t.entity_id for t in topics_sorted[:top_n]]
