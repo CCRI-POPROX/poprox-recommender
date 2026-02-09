@@ -69,12 +69,14 @@ class Sectionizer(Component):
         for interest in sorted_interests:
             package = next((p for p in article_packages if p.seed and p.seed.entity_id == interest.entity_id), None)
             if package:
+                displayed_title = package.title.replace("Top ", "").replace(" Stories", "")
+                displayed_title = f"{displayed_title} For You"
                 filtered = filter_using_packages(candidate_set, [package])
                 ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
 
                 used_ids.update(a.article_id for a in ranked_articles)
                 topic_section = ImpressedSection.from_articles(
-                    ranked_articles, title=package.title, personalized=True, seed_entity_id=interest.entity_id
+                    ranked_articles, title=displayed_title, personalized=True, seed_entity_id=interest.entity_id
                 )
 
                 if len(topic_section.impressions) > 0:
