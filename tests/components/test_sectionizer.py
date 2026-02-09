@@ -1,10 +1,18 @@
 from uuid import UUID, uuid4
 
-from poprox_concepts.domain import AccountInterest, Article, ArticlePackage, CandidateSet, Entity, InterestProfile
+from poprox_concepts.domain import (
+    AccountInterest,
+    Article,
+    ArticlePackage,
+    CandidateSet,
+    Entity,
+    InterestProfile,
+    Mention,
+)
 from poprox_recommender.components.rankers.sectionizer import (
     Sectionizer,
     SectionizerConfig,
-    filter_using_packages,
+    filter_in_packages,
     select_from_candidates,
 )
 
@@ -33,17 +41,27 @@ def make_package(entity_id, title, articles):
 
 def test_sectionizer_creates_sections():
     general_news_id = uuid4()
-    topic1_id, topic2_id = uuid4(), uuid4()
-    articles = [Article(article_id=uuid4(), headline=f"Article {i}") for i in range(1, 20)]
+    sports_id, technology_id = uuid4(), uuid4()
+    sports_entity = Entity(entity_id=sports_id, name="Sports", entity_type="topic", source="test")
+    tech_entity = Entity(entity_id=technology_id, name="Technology", entity_type="topic", source="test")
+
+    articles = [
+        Article(
+            article_id=uuid4(),
+            headline=f"Article {i}",
+            mentions=[Mention(source="test", entity=[sports_entity, tech_entity][i % 2])],
+        )
+        for i in range(1, 20)
+    ]
     candidates = CandidateSet(articles=articles)
     packages = [
         make_package(general_news_id, "General News", articles[:5]),
-        make_package(topic1_id, "Top Sports Stories", articles[5:10]),
-        make_package(topic2_id, "Top Technology Stories", articles[10:15]),
+        make_package(sports_id, "Top Sports Stories", articles[5:10]),
+        make_package(technology_id, "Top Technology Stories", articles[10:15]),
     ]
 
     # user likes both topics
-    profile = make_interest_profile([topic1_id, topic2_id])
+    profile = make_interest_profile([sports_id, technology_id])
 
     config = SectionizerConfig(
         top_news_entity_id=general_news_id,
@@ -160,7 +178,7 @@ def test_filter_using_one_package():
     package_article_ids = [articles[1].article_id, articles[3].article_id]
     package = ArticlePackage(title="half the articles", source="test", article_ids=package_article_ids)
 
-    filtered = filter_using_packages(candidates, [package])
+    filtered = filter_in_packages(candidates, [package])
     filtered_ids = [a.article_id for a in filtered.articles]
 
     for article_id in package_article_ids:
@@ -179,7 +197,7 @@ def test_filter_using_multiple_packages():
     package_1 = ArticlePackage(title="half the articles", source="test", article_ids=[articles[1].article_id])
     package_2 = ArticlePackage(title="half the articles", source="test", article_ids=[articles[3].article_id])
 
-    filtered = filter_using_packages(candidates, [package_1, package_2])
+    filtered = filter_in_packages(candidates, [package_1, package_2])
     filtered_ids = [a.article_id for a in filtered.articles]
 
     for article_id in package_1.article_ids + package_2.article_ids:
