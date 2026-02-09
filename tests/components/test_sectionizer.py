@@ -38,8 +38,8 @@ def test_sectionizer_creates_sections():
     candidates = CandidateSet(articles=articles)
     packages = [
         make_package(general_news_id, "General News", articles[:5]),
-        make_package(topic1_id, "Sports", articles[5:10]),
-        make_package(topic2_id, "Tech", articles[10:15]),
+        make_package(topic1_id, "Top Sports Stories", articles[5:10]),
+        make_package(topic2_id, "Top Technology Stories", articles[10:15]),
     ]
 
     # user likes both topics
@@ -60,8 +60,8 @@ def test_sectionizer_creates_sections():
     assert len(sections) == 4
     titles = [s.title for s in sections]
     assert "Your Top Stories" in titles
-    assert "Sports" in titles
-    assert "Tech" in titles
+    assert "Sports For You" in titles
+    assert "Technology For You" in titles
     assert "In Other News" in titles
 
 
