@@ -7,7 +7,7 @@ import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import Article, ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
+from poprox_concepts.domain import Article, ArticlePackage, CandidateSet, Entity, ImpressedSection, InterestProfile
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class Sectionizer(Component):
         sections = []
 
         # top news section
-        filtered = filter_using_packages(candidate_set, article_packages)
+        filtered = select_from_packages(candidate_set, article_packages)
         ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
 
         used_ids.update(a.article_id for a in ranked_articles)
@@ -71,8 +71,9 @@ class Sectionizer(Component):
             if package:
                 displayed_title = package.title.replace("Top ", "").replace(" Stories", "")
                 displayed_title = f"{displayed_title} For You"
-                filtered = filter_using_packages(candidate_set, [package])
-                ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
+
+                filtered = select_mentioning(candidate_set, [package.seed] if package.seed else [])
+                ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic, used_ids)
 
                 used_ids.update(a.article_id for a in ranked_articles)
                 topic_section = ImpressedSection.from_articles(
@@ -122,7 +123,28 @@ class Sectionizer(Component):
         return section
 
 
-def filter_using_packages(candidate_articles: CandidateSet, packages: list[ArticlePackage]):
+def select_mentioning(candidate: CandidateSet, entities: list[Entity]):
+    entity_ids = set(e.entity_id for e in entities)
+
+    kept_articles = []
+    kept_scores = []
+    for idx, article in enumerate(candidate.articles):
+        mentioned = set(m.entity.entity_id for m in article.mentions)
+        if len(entity_ids.intersection(mentioned)) > 0:
+            kept_articles.append(article)
+            if hasattr(candidate, "scores") and candidate.scores is not None:
+                kept_scores.append(candidate.scores[idx])
+
+    filtered = CandidateSet(articles=kept_articles)
+    if kept_scores:
+        filtered.scores = np.array(kept_scores)
+    else:
+        filtered.scores = None
+
+    return filtered
+
+
+def select_from_packages(candidate_articles: CandidateSet, packages: list[ArticlePackage]) -> CandidateSet:
     article_index_lookup = {article.article_id: i for i, article in enumerate(candidate_articles.articles)}
     selected_articles = []
     selected_indices = []

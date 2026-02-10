@@ -24,7 +24,15 @@ from pydantic import ValidationError
 from pytest import fixture, skip
 
 from poprox_concepts.api.recommendations.v5 import RecommendationRequestV5, RecommendationResponseV5
-from poprox_concepts.domain import AccountInterest, ArticlePackage, CandidateSet, Click, Entity, InterestProfile
+from poprox_concepts.domain import (
+    AccountInterest,
+    ArticlePackage,
+    CandidateSet,
+    Click,
+    Entity,
+    InterestProfile,
+    Mention,
+)
 from poprox_recommender.config import allow_data_test_failures
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.recommenders.load import PipelineLoadError
@@ -227,7 +235,7 @@ class RequestGenerator:
         self.interacted_articles = [self.mind_data.lookup_article(uuid=click.article_id) for click in self.clicks]
 
     def add_topics(self, topics: List[str]):
-        sections_id = {
+        entity_ids = {
             "General News": UUID("72bb7674-7bde-4f3e-a351-ccdeae888502"),
             "Science": UUID("1e813fd6-0998-43fb-9839-75fa96b69b32"),
             "Technology": UUID("606afcb8-3fc1-47a7-9da7-3d95115373a3"),
@@ -242,7 +250,7 @@ class RequestGenerator:
         self.added_topics = [
             AccountInterest(
                 account_id=self.profile_id,
-                entity_id=sections_id[topic],
+                entity_id=entity_ids[topic],
                 entity_name=topic,
                 entity_type="topic",
                 preference=random.randint(1, 5),
@@ -269,6 +277,22 @@ class RequestGenerator:
                 article_ids=package_article_ids,
             )
             self.article_packages.append(package)
+
+        for article in self.candidate_articles:
+            num_topics = random.randint(1, 4)
+            article_topics = random.sample(list(entity_ids.keys()), num_topics)
+            for topic in article_topics:
+                article.mentions.append(
+                    Mention(
+                        source="MIND",
+                        entity=Entity(
+                            entity_id=entity_ids[topic],
+                            name=topic,
+                            entity_type="topic",
+                            source="MIND",
+                        ),
+                    )
+                )
 
     def add_candidates(self, num_candidates):
         all_articles = self.mind_data.list_articles()
