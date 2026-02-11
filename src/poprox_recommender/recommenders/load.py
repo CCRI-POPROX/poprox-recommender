@@ -109,10 +109,3 @@ def load_all_pipelines(device: str | None = None, num_slots: int = 10) -> dict[s
 
     names = discover_pipelines()
     return {n: get_pipeline(n, device, num_slots) for n in names}
-
-
-def get_pipeline_newsletter_length(pipeline: str) -> int:
-    norm_name = pipeline.replace("-", "_")
-    mod_name = f"poprox_recommender.recommenders.configurations.{norm_name}"
-    pipe_mode = import_module(mod_name)
-    return getattr(pipe_mode, "NEWSLETTER_LENGTH")
