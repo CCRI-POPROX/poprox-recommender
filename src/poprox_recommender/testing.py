@@ -291,6 +291,7 @@ class RequestGenerator:
                             entity_type="topic",
                             source="MIND",
                         ),
+                        relevance=99.0,
                     )
                 )
 
