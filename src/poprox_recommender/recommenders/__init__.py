@@ -13,6 +13,7 @@ from .load import (
     discover_pipelines,
     get_pipeline,
     get_pipeline_builder,
+    get_pipeline_newsletter_length,
     load_all_pipelines,
 )
 
@@ -25,6 +26,7 @@ __all__ = [
     "discover_pipelines",
     "load_all_pipelines",
     "select_articles",
+    "get_pipeline_newsletter_length",
 ]
 
 
