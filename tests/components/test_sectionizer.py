@@ -49,7 +49,7 @@ def test_sectionizer_creates_sections():
         Article(
             article_id=uuid4(),
             headline=f"Article {i}",
-            mentions=[Mention(source="test", entity=[sports_entity, tech_entity][i % 2])],
+            mentions=[Mention(source="test", entity=[sports_entity, tech_entity][i % 2], relevance=99.0)],
         )
         for i in range(1, 20)
     ]
