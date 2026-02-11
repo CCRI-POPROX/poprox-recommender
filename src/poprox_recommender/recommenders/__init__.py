@@ -1,6 +1,5 @@
 import logging
 from typing import Any
-from uuid import UUID
 
 from poprox_concepts.domain import (
     CandidateSet,
@@ -36,7 +35,6 @@ def select_articles(
     pipeline_params: dict[str, Any] | None = None,
     article_packages: list | None = None,
     num_slots: int = 10,
-    impressed_article_ids: list[UUID] | None = None,
 ) -> tuple[list[ImpressedSection], Any]:
     """
     Select articles with default recommender configuration.  It returns a
@@ -63,7 +61,6 @@ def select_articles(
         "clicked": clicked_articles,
         "profile": interest_profile,
         "packages": article_packages or [],
-        "impressed_article_ids": impressed_article_ids or [],
     }
 
     outputs = pipeline.run_all(*wanted, **inputs)
