@@ -1,7 +1,10 @@
+from uuid import UUID
+
 from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts.domain import CandidateSet, InterestProfile
 from poprox_recommender.components.embedders import NRMSArticleEmbedder
+from poprox_recommender.components.filters.impression import ImpressionFilter
 from poprox_recommender.components.embedders.article import NRMSArticleEmbedderConfig
 from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSUserEmbedderConfig
 from poprox_recommender.components.embedders.user_article_feedback import (
@@ -23,12 +26,21 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     i_candidates = builder.create_input("candidate", CandidateSet)
     i_clicked = builder.create_input("clicked", CandidateSet)
     i_profile = builder.create_input("profile", InterestProfile)
+    i_impressed_ids = builder.create_input("impressed_article_ids", list[UUID])
+
+    # Filter out articles user has already received (prevents duplicates)
+    f_candidates = builder.add_component(
+        "impression-filter",
+        ImpressionFilter,
+        candidates=i_candidates,
+        impressed_article_ids=i_impressed_ids,
+    )
 
     # Embed candidate and clicked articles
     ae_config = NRMSArticleEmbedderConfig(
         model_path=model_file_path("nrms-mind/news_encoder.safetensors"), device=device
     )
-    e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=i_candidates)
+    e_candidates = builder.add_component("candidate-embedder", NRMSArticleEmbedder, ae_config, article_set=f_candidates)
     e_clicked = builder.add_component(
         "history-NRMSArticleEmbedder", NRMSArticleEmbedder, ae_config, article_set=i_clicked
     )
