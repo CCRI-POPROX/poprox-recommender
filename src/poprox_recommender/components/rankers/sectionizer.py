@@ -129,7 +129,7 @@ def select_mentioning(candidate: CandidateSet, entities: list[Entity]):
     kept_articles = []
     kept_scores = []
     for idx, article in enumerate(candidate.articles):
-        mentioned = set(m.entity.entity_id for m in article.mentions)
+        mentioned = set(m.entity.entity_id for m in article.mentions if m.relevance and m.relevance >= 76)
         if len(entity_ids.intersection(mentioned)) > 0:
             kept_articles.append(article)
             if hasattr(candidate, "scores") and candidate.scores is not None:
