@@ -27,11 +27,16 @@ def test_no_clicks(service, mind_data, pipeline):  # noqa: F811
     request_generator.add_clicks(num_clicks=0, num_days=10)
     request_generator.add_topics(
         [
+            "U.S. News",
+            "World News",
+            "General News",
+            "Business",
+            "Entertainment",
+            "Sports",
+            "Health",
             "Science",
             "Technology",
-            "Sports",
             "Oddities",
-            "General News",
         ]
     )
     num_recs = 15
@@ -45,7 +50,6 @@ def test_no_clicks(service, mind_data, pipeline):  # noqa: F811
     # do we have recommendations?
     # get all recommendations from the sections
     recs = [imp for section in response.recommendations for imp in section.impressions]
-    # recs = section.impressions
     assert len(recs) > 0
     # do we have the correct number of recommendations
     assert len(recs) == request_generator.num_recs
