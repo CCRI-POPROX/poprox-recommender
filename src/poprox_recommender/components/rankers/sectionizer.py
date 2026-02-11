@@ -80,7 +80,7 @@ class Sectionizer(Component):
                     ranked_articles, title=displayed_title, personalized=True, seed_entity_id=interest.entity_id
                 )
 
-                if len(topic_section.impressions) > 0:
+                if len(topic_section.impressions) >= self.config.max_articles_per_topic:
                     topical_sections.append(topic_section)
 
                 if len(topical_sections) >= self.config.max_topic_sections:
