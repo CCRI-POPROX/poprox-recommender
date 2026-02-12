@@ -41,15 +41,18 @@ def make_package(entity_id, title, articles):
 
 def test_sectionizer_creates_sections():
     general_news_id = uuid4()
-    sports_id, technology_id = uuid4(), uuid4()
+    sports_id, technology_id, business_id = uuid4(), uuid4(), uuid4()
     sports_entity = Entity(entity_id=sports_id, name="Sports", entity_type="topic", source="test")
     tech_entity = Entity(entity_id=technology_id, name="Technology", entity_type="topic", source="test")
+    business_entity = Entity(entity_id=business_id, name="Business", entity_type="topic", source="test")
 
     articles = [
         Article(
             article_id=uuid4(),
             headline=f"Article {i}",
-            mentions=[Mention(source="test", entity=[sports_entity, tech_entity][i % 2], relevance=99.0)],
+            mentions=[
+                Mention(source="test", entity=[sports_entity, tech_entity, business_entity][i % 3], relevance=99.0)
+            ],
         )
         for i in range(1, 20)
     ]

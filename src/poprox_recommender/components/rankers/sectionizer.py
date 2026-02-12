@@ -65,7 +65,8 @@ class Sectionizer(Component):
             reverse=True,
         )
 
-        topical_sections = []
+        topic_seeds: list[Entity] = []
+        topical_sections: list[ImpressedSection] = []
         for interest in sorted_interests:
             package = next((p for p in article_packages if p.seed and p.seed.entity_id == interest.entity_id), None)
             if package:
@@ -81,6 +82,7 @@ class Sectionizer(Component):
                 )
 
                 if len(topic_section.impressions) >= self.config.max_articles_per_topic:
+                    topic_seeds.append(package.seed)
                     topical_sections.append(topic_section)
 
                 if len(topical_sections) >= self.config.max_topic_sections:
@@ -89,20 +91,11 @@ class Sectionizer(Component):
         sections.extend(topical_sections)
 
         # in other news / misc / for you section
-        remaining = [a for a in candidate_set.articles if a.article_id not in used_ids]
-
-        if hasattr(candidate_set, "scores") and candidate_set.scores is not None:
-            # rank remaining by score
-            articles_indices = [
-                i for i, a in enumerate(candidate_set.articles) if a.article_id in [r.article_id for r in remaining]
-            ]
-            scores = np.array(candidate_set.scores)[articles_indices]
-            sorted_indices = np.argsort(scores)[::-1][: self.config.max_misc_articles]
-            misc_articles = [candidate_set.articles[articles_indices[int(i)]] for i in sorted_indices]
-        else:
-            misc_articles = remaining[: self.config.max_misc_articles]
-
-        misc_section = ImpressedSection.from_articles(misc_articles, title="In Other News", personalized=True)
+        filtered = select_mentioning(candidate_set, topic_seeds)
+        for article in filtered.articles:
+            used_ids.add(article.article_id)
+        ranked_articles = select_from_candidates(candidate_set, self.config.max_misc_articles, used_ids)
+        misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
 
         if len(misc_section.impressions) > 0:
             sections.append(misc_section)
