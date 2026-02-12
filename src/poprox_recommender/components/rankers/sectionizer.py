@@ -89,23 +89,7 @@ class Sectionizer(Component):
         sections.extend(topical_sections)
 
         # in other news / misc / for you section
-        misc_section = self._make_misc_section(candidate_set, used_ids)
-        if misc_section:
-            sections.append(misc_section)
-
-        logger.debug("Sectionizer created %d total sections", len(sections))
-        return sections
-
-    def random_daily_seed(self, profile_id, day, base_seed: int) -> int:
-        seed_str = f"{profile_id}_{day.isoformat()}_{base_seed}"
-        hash_obj = hashlib.sha256(seed_str.encode("utf-8"))
-        hash_hex = hash_obj.hexdigest()
-        return int(hash_hex, 16)
-
-    def _make_misc_section(self, candidate_set, used_ids):
         remaining = [a for a in candidate_set.articles if a.article_id not in used_ids]
-        if not remaining:
-            return None
 
         if hasattr(candidate_set, "scores") and candidate_set.scores is not None:
             # rank remaining by score
@@ -118,9 +102,19 @@ class Sectionizer(Component):
         else:
             misc_articles = remaining[: self.config.max_misc_articles]
 
-        section = ImpressedSection.from_articles(misc_articles, title="In Other News", personalized=True)
+        misc_section = ImpressedSection.from_articles(misc_articles, title="In Other News", personalized=True)
 
-        return section
+        if len(misc_section.impressions) > 0:
+            sections.append(misc_section)
+
+        logger.debug("Sectionizer created %d total sections", len(sections))
+        return sections
+
+    def random_daily_seed(self, profile_id, day, base_seed: int) -> int:
+        seed_str = f"{profile_id}_{day.isoformat()}_{base_seed}"
+        hash_obj = hashlib.sha256(seed_str.encode("utf-8"))
+        hash_hex = hash_obj.hexdigest()
+        return int(hash_hex, 16)
 
 
 def select_mentioning(candidate: CandidateSet, entities: list[Entity]):
