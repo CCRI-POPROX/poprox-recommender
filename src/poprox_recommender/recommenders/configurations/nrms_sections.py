@@ -188,11 +188,17 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Sectionizer
+    top_news_articles = 3
+    min_misc_articles = 3
+    articles_per_topic = 3
+    topic_sections = (num_slots - top_news_articles - min_misc_articles) // articles_per_topic
+    remaining_slots = num_slots - (top_news_articles + (articles_per_topic * topic_sections))
+
     s_config = SectionizerConfig(
-        max_top_news=3,
-        max_topic_sections=3,
-        max_articles_per_topic=3,
-        max_misc_articles=3,
+        max_top_news=top_news_articles,
+        max_topic_sections=topic_sections,
+        max_articles_per_topic=articles_per_topic,
+        max_misc_articles=max(remaining_slots, min_misc_articles),
     )
 
     builder.add_component(

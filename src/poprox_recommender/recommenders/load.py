@@ -19,7 +19,7 @@ from .hooks import shallow_copy_pydantic_model
 logger = get_logger(__name__)
 
 
-_cached_pipelines: dict[str, Pipeline] = {}
+_cached_pipelines: dict[tuple[str, int], Pipeline] = {}
 _component_cache = PipelineCache()
 
 
@@ -88,7 +88,8 @@ def get_pipeline(name: str, device: str | None = None, num_slots: int = 10) -> P
     """
     Get a built pipeline by name.
     """
-    pipeline = _cached_pipelines.get(name, None)
+    cached_key = (name, num_slots)
+    pipeline = _cached_pipelines.get(cached_key, None)
     if pipeline is None:
         try:
             builder = get_pipeline_builder(name, device, num_slots)
@@ -99,7 +100,7 @@ def get_pipeline(name: str, device: str | None = None, num_slots: int = 10) -> P
         except Exception as e:
             logger.error("failed to load pipeline", name=name, device=device, num_slots=num_slots, exc_info=e)
             raise PipelineLoadError(f"could not load pipeline {name}")
-        _cached_pipelines[name] = pipeline
+        _cached_pipelines[cached_key] = pipeline
 
     return pipeline
 
