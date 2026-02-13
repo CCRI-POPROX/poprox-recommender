@@ -37,7 +37,7 @@ class TopicFilter(Component):
             # Articles with very high interest topics are included in the candidate set
             if overlap(article_topics, very_high):
                 kept_articles.append(article)
-                if hasattr(candidates, "scores"):
+                if hasattr(candidates, "scores") and candidates.scores:
                     kept_scores.append(candidates.scores[idx])
                 continue
 
@@ -51,7 +51,7 @@ class TopicFilter(Component):
 
             # If none of the above apply, default to including the article
             kept_articles.append(article)
-            if hasattr(candidates, "scores"):
+            if hasattr(candidates, "scores") and candidates.scores:
                 kept_scores.append(candidates.scores[idx])
 
         logger.debug(
