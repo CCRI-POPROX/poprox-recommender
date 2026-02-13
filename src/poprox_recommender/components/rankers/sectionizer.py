@@ -47,13 +47,13 @@ class Sectionizer(Component):
         sections = []
 
         topic_filter = TopicFilter()
-        topic_filtered_articles = topic_filter(candidate_set, interest_profile)
 
         # top news section
-        top_articles = select_from_packages(topic_filtered_articles, article_packages)
-        ranked_articles = select_from_candidates(top_articles, self.config.max_top_news, used_ids)
+        top_articles = select_from_packages(candidate_set, article_packages)
+        filtered_top_articles = topic_filter(top_articles, interest_profile)
+
+        ranked_articles = select_from_candidates(filtered_top_articles, self.config.max_top_news, used_ids)
         if len(ranked_articles) < self.config.max_top_news:
-            top_articles = select_from_packages(candidate_set, article_packages)
             ranked_articles = select_from_candidates(top_articles, self.config.max_top_news, used_ids)
 
         used_ids.update(a.article_id for a in ranked_articles)
@@ -102,6 +102,7 @@ class Sectionizer(Component):
         for article in used_topic_articles.articles:
             used_ids.add(article.article_id)
 
+        topic_filtered_articles = topic_filter(candidate_set, interest_profile)
         ranked_articles = select_from_candidates(topic_filtered_articles, self.config.max_misc_articles, used_ids)
         if len(ranked_articles) < self.config.max_misc_articles:
             ranked_articles = select_from_candidates(candidate_set, self.config.max_misc_articles, used_ids)
