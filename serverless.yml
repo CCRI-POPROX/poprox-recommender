@@ -28,7 +28,6 @@ provider:
       poprox-recommender:
         path: "./"
         platform: linux/amd64
-        provenance: false
 
 package:
   patterns:
