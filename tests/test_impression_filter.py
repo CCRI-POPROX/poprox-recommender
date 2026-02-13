@@ -9,10 +9,26 @@ from poprox_recommender.components.filters.impression import ImpressionFilter
 def test_impression_filter_removes_impressed_articles():
     """Test that impressed articles are filtered out from candidates."""
     # Create test articles
-    article1 = Article(article_id=uuid4(), headline="Elon Musk", url="https://apnews.com/article/elon-musk-orbital-ai-data-centers-xai-spacex-92bc8ad95593bf3b5b801ddf36427194")
-    article2 = Article(article_id=uuid4(), headline="Iran US", url="https://apnews.com/article/iran-us-nuclear-talks-protests-araghchi-389531836ccaa4c126b5ee06c1d5b1f8")
-    article3 = Article(article_id=uuid4(), headline="Googles Results", url="https://apnews.com/article/google-alphabet-fourth-quarter-results-73922dd5d0c2398e1d4f23ddfccd0277")
-    article4 = Article(article_id=uuid4(), headline="AI OpenAI", url="https://apnews.com/article/openai-anthropic-chatgpt-claude-rivalry-c19e0cca22c37190cc4e0dc08e889ef0")
+    article1 = Article(
+        article_id=uuid4(),
+        headline="Elon Musk",
+        url="https://apnews.com/article/elon-musk-orbital-ai-data-centers-xai-spacex-92bc8ad95593bf3b5b801ddf36427194",
+    )
+    article2 = Article(
+        article_id=uuid4(),
+        headline="Iran US",
+        url="https://apnews.com/article/iran-us-nuclear-talks-protests-araghchi-389531836ccaa4c126b5ee06c1d5b1f8",
+    )
+    article3 = Article(
+        article_id=uuid4(),
+        headline="Googles Results",
+        url="https://apnews.com/article/google-alphabet-fourth-quarter-results-73922dd5d0c2398e1d4f23ddfccd0277",
+    )
+    article4 = Article(
+        article_id=uuid4(),
+        headline="AI OpenAI",
+        url="https://apnews.com/article/openai-anthropic-chatgpt-claude-rivalry-c19e0cca22c37190cc4e0dc08e889ef0",
+    )
 
     # Create candidate set with all 4 articles
     candidates = CandidateSet(articles=[article1, article2, article3, article4])
@@ -32,13 +48,19 @@ def test_impression_filter_removes_impressed_articles():
     assert article2 not in filtered.articles
 
 
-
-
 def test_impression_filter_empty_history():
     """Test that no filtering happens when impression history is empty."""
     # Create test articles
-    article1 = Article(article_id=uuid4(), headline="Elon Musk", url="https://apnews.com/article/elon-musk-orbital-ai-data-centers-xai-spacex-92bc8ad95593bf3b5b801ddf36427194")
-    article2 = Article(article_id=uuid4(), headline="Iran US", url="https://apnews.com/article/iran-us-nuclear-talks-protests-araghchi-389531836ccaa4c126b5ee06c1d5b1f8")
+    article1 = Article(
+        article_id=uuid4(),
+        headline="Elon Musk",
+        url="https://apnews.com/article/elon-musk-orbital-ai-data-centers-xai-spacex-92bc8ad95593bf3b5b801ddf36427194",
+    )
+    article2 = Article(
+        article_id=uuid4(),
+        headline="Iran US",
+        url="https://apnews.com/article/iran-us-nuclear-talks-protests-araghchi-389531836ccaa4c126b5ee06c1d5b1f8",
+    )
     # Create candidate set
     candidates = CandidateSet(articles=[article1, article2])
 
@@ -58,8 +80,16 @@ def test_impression_filter_empty_history():
 def test_impression_filter_all_articles_impressed():
     """Test behavior when all candidate articles have been impressed."""
     # Create test articles
-    article1 = Article(article_id=uuid4(), headline="Elon Musk", url="https://apnews.com/article/elon-musk-orbital-ai-data-centers-xai-spacex-92bc8ad95593bf3b5b801ddf36427194")
-    article2 = Article(article_id=uuid4(), headline="Iran US", url="https://apnews.com/article/iran-us-nuclear-talks-protests-araghchi-389531836ccaa4c126b5ee06c1d5b1f8")
+    article1 = Article(
+        article_id=uuid4(),
+        headline="Elon Musk",
+        url="https://apnews.com/article/elon-musk-orbital-ai-data-centers-xai-spacex-92bc8ad95593bf3b5b801ddf36427194",
+    )
+    article2 = Article(
+        article_id=uuid4(),
+        headline="Iran US",
+        url="https://apnews.com/article/iran-us-nuclear-talks-protests-araghchi-389531836ccaa4c126b5ee06c1d5b1f8",
+    )
     # Create candidate set
     candidates = CandidateSet(articles=[article1, article2])
 
@@ -79,8 +109,16 @@ def test_impression_filter_all_articles_impressed():
 def test_impression_filter_no_overlap():
     """Test when impressed articles don't overlap with candidates."""
     # Create test articles
-    article1 = Article(article_id=uuid4(), headline="Elon Musk", url="https://apnews.com/article/elon-musk-orbital-ai-data-centers-xai-spacex-92bc8ad95593bf3b5b801ddf36427194")
-    article2 = Article(article_id=uuid4(), headline="Iran US", url="https://apnews.com/article/iran-us-nuclear-talks-protests-araghchi-389531836ccaa4c126b5ee06c1d5b1f8")
+    article1 = Article(
+        article_id=uuid4(),
+        headline="Elon Musk",
+        url="https://apnews.com/article/elon-musk-orbital-ai-data-centers-xai-spacex-92bc8ad95593bf3b5b801ddf36427194",
+    )
+    article2 = Article(
+        article_id=uuid4(),
+        headline="Iran US",
+        url="https://apnews.com/article/iran-us-nuclear-talks-protests-araghchi-389531836ccaa4c126b5ee06c1d5b1f8",
+    )
 
     # Create different impressed article IDs (not matching any candidates)
     impressed_id1 = uuid4()
