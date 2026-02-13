@@ -56,6 +56,7 @@ jobs:
         run: |
           npx serverless@3.40.0 deploy --stage "${STAGE}" --region "${REGION}"
         env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           STAGE: prod
