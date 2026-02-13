@@ -8,6 +8,7 @@ from lenskit.pipeline import Component
 from pydantic import BaseModel
 
 from poprox_concepts.domain import Article, ArticlePackage, CandidateSet, Entity, ImpressedSection, InterestProfile
+from poprox_recommender.components.filters.topic import TopicFilter
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +46,15 @@ class Sectionizer(Component):
         used_ids = set()
         sections = []
 
+        topic_filter = TopicFilter()
+
         # top news section
-        filtered = select_from_packages(candidate_set, article_packages)
-        ranked_articles = select_from_candidates(filtered, self.config.max_top_news, used_ids)
+        top_articles = select_from_packages(candidate_set, article_packages)
+        filtered_top_articles = topic_filter(top_articles, interest_profile)
+
+        ranked_articles = select_from_candidates(filtered_top_articles, self.config.max_top_news, used_ids)
+        if len(ranked_articles) < self.config.max_top_news:
+            ranked_articles = select_from_candidates(top_articles, self.config.max_top_news, used_ids)
 
         used_ids.update(a.article_id for a in ranked_articles)
         top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
@@ -91,10 +98,15 @@ class Sectionizer(Component):
         sections.extend(topical_sections)
 
         # in other news / misc / for you section
-        filtered = select_mentioning(candidate_set, topic_seeds)
-        for article in filtered.articles:
+        used_topic_articles = select_mentioning(candidate_set, topic_seeds)
+        for article in used_topic_articles.articles:
             used_ids.add(article.article_id)
-        ranked_articles = select_from_candidates(candidate_set, self.config.max_misc_articles, used_ids)
+
+        topic_filtered_articles = topic_filter(candidate_set, interest_profile)
+        ranked_articles = select_from_candidates(topic_filtered_articles, self.config.max_misc_articles, used_ids)
+        if len(ranked_articles) < self.config.max_misc_articles:
+            ranked_articles = select_from_candidates(candidate_set, self.config.max_misc_articles, used_ids)
+
         misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
 
         if len(misc_section.impressions) > 0:
