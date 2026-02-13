@@ -56,10 +56,10 @@ class Sectionizer(Component):
         if len(ranked_articles) < self.config.max_top_news:
             ranked_articles = select_from_candidates(top_articles, self.config.max_top_news, used_ids)
 
-        used_ids.update(a.article_id for a in ranked_articles)
         top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
 
         if len(top_section.impressions) > 0:
+            used_ids.update(a.article_id for a in ranked_articles)
             sections.append(top_section)
 
         # topic sections
@@ -83,12 +83,12 @@ class Sectionizer(Component):
                 filtered = select_mentioning(candidate_set, [package.seed] if package.seed else [])
                 ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic, used_ids)
 
-                used_ids.update(a.article_id for a in ranked_articles)
                 topic_section = ImpressedSection.from_articles(
                     ranked_articles, title=displayed_title, personalized=True, seed_entity_id=interest.entity_id
                 )
 
                 if len(topic_section.impressions) >= self.config.max_articles_per_topic:
+                    used_ids.update(a.article_id for a in ranked_articles)
                     topic_seeds.append(package.seed)
                     topical_sections.append(topic_section)
 
