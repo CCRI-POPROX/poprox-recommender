@@ -75,6 +75,7 @@ def root(
         profile,
         {"pipeline": pipeline},
         article_packages=req.article_packages,
+        impressed_article_ids=req.impressed_article_ids,
         num_slots=req.num_recs,
     )
 
