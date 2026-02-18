@@ -23,7 +23,7 @@ import re
 from pathlib import Path
 from uuid import NAMESPACE_URL, UUID, uuid5
 
-import duckdb.typing as dt
+import duckdb.sqltypes as dt
 from docopt import ParsedOptions, docopt
 from duckdb import DuckDBPyConnection, Statement, StatementType, connect, extract_statements
 from lenskit.logging import LoggingConfig, get_logger

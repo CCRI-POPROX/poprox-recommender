@@ -42,20 +42,24 @@ if __name__ == "__main__":
     print("\n")
     print(f"{event_nrms['queryStringParameters']['pipeline']}")
 
-    for idx, article in enumerate([impression.article for impression in response_nrms.recommendations]):
+    for idx, article in enumerate([impression.article for impression in response_nrms.recommendations.impressions]):
         article_topics = extract_general_topics(article)
         print(f"{idx + 1}. {article.headline} {article_topics}")
 
     print("\n")
     print(f"{event_topic_score['queryStringParameters']['pipeline']}")
 
-    for idx, article in enumerate([impression.article for impression in response_topic_score.recommendations]):
+    for idx, article in enumerate(
+        [impression.article for impression in response_topic_score.recommendations.impressions]
+    ):
         article_topics = extract_general_topics(article)
         print(f"{idx + 1}. {article.headline} {article_topics}")
 
     print("\n")
     print(f"{event_feedback_score['queryStringParameters']['pipeline']}")
 
-    for idx, article in enumerate([impression.article for impression in response_feedback_score.recommendations]):
+    for idx, article in enumerate(
+        [impression.article for impression in response_feedback_score.recommendations.impressions]
+    ):
         article_topics = extract_general_topics(article)
         print(f"{idx + 1}. {article.headline} {article_topics}")

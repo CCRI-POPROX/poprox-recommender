@@ -212,7 +212,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
     Can be used as a Ray actor.
     """
 
-    WANTED_NODES = {"recommender", "ranker", "reranker"}
+    WANTED_NODES = {"recommender", "unfiltered-ranker", "filtered-ranker"}
 
     path: Path
     writer: ParquetBatchedWriter
@@ -244,7 +244,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
                 }
             )
         ]
-        ranked = pipeline_state.get("ranker", None)
+        ranked = pipeline_state.get("unfiltered-ranker", None)
         if ranked is not None:
             assert isinstance(ranked, ImpressedSection), f"reranked has unexpected type {type(ranked)}"
             frames.append(
@@ -257,7 +257,7 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
                     }
                 )
             )
-        reranked = pipeline_state.get("reranker", None)
+        reranked = pipeline_state.get("filtered-ranker", None)
         if reranked is not None:
             assert isinstance(reranked, ImpressedSection), f"reranked has unexpected type {type(reranked)}"
             frames.append(
@@ -291,7 +291,7 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
     Can be used as a Ray actor.
     """
 
-    WANTED_NODES = {"recommender", "ranker", "reranker"}
+    WANTED_NODES = {"recommender", "unfiltered-ranker", "filtered-ranker"}
 
     writer: TextIO
 
@@ -311,11 +311,11 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
         recs = pipeline_state["recommender"]
         results = OfflineRecResults(final=recs)
 
-        ranked = pipeline_state.get("ranker", None)
+        ranked = pipeline_state.get("unfiltered-ranker", None)
         if ranked is not None:
             results.ranked = ranked
 
-        reranked = pipeline_state.get("reranker", None)
+        reranked = pipeline_state.get("filtered-ranker", None)
         if reranked is not None:
             results.reranked = reranked
 
