@@ -50,10 +50,13 @@ class Sectionizer(Component):
 
         # top news section
         top_articles = select_from_packages(candidate_set, article_packages)
-        filtered_top_articles = topic_filter(top_articles, interest_profile)
+        filtered_top = topic_filter(top_articles, interest_profile)
 
-        ranked_articles = select_from_candidates(filtered_top_articles, self.config.max_top_news, used_ids)
+        logger.info(f"Creating Top Stories section from {len(filtered_top.articles)} filtered candidates")
+        ranked_articles = select_from_candidates(filtered_top, self.config.max_top_news, used_ids)
+
         if len(ranked_articles) < self.config.max_top_news:
+            logger.info(f"Falling back to full pool of {len(candidate_set.articles)} top candidates")
             ranked_articles = select_from_candidates(top_articles, self.config.max_top_news, used_ids)
 
         top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
@@ -81,6 +84,7 @@ class Sectionizer(Component):
                 displayed_title = f"{displayed_title} For You"
 
                 filtered = select_mentioning(candidate_set, [package.seed] if package.seed else [])
+                logger.info(f"Creating {package.seed.name} section from {len(filtered.articles)} topical candidates")
                 ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic, used_ids)
 
                 topic_section = ImpressedSection.from_articles(
@@ -91,6 +95,10 @@ class Sectionizer(Component):
                     used_ids.update(a.article_id for a in ranked_articles)
                     topic_seeds.append(package.seed)
                     topical_sections.append(topic_section)
+                else:
+                    logger.info(
+                        f"Discarding partial {package.seed.name} section with {len(topic_section.impressions)} articles"
+                    )
 
                 if len(topical_sections) >= self.config.max_topic_sections:
                     break
@@ -102,9 +110,11 @@ class Sectionizer(Component):
         for article in used_topic_articles.articles:
             used_ids.add(article.article_id)
 
-        topic_filtered_articles = topic_filter(candidate_set, interest_profile)
-        ranked_articles = select_from_candidates(topic_filtered_articles, self.config.max_misc_articles, used_ids)
+        topic_filtered = topic_filter(candidate_set, interest_profile)
+        logger.info(f"Creating Other News section from {len(topic_filtered.articles)} filtered candidates")
+        ranked_articles = select_from_candidates(topic_filtered, self.config.max_misc_articles, used_ids)
         if len(ranked_articles) < self.config.max_misc_articles:
+            logger.info(f"Falling back to full pool of {len(candidate_set.articles)} candidates")
             ranked_articles = select_from_candidates(candidate_set, self.config.max_misc_articles, used_ids)
 
         misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
