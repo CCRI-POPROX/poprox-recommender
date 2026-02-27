@@ -81,7 +81,6 @@ class Sectionizer(Component):
             package = next((p for p in article_packages if p.seed and p.seed.entity_id == interest.entity_id), None)
             if package:
                 displayed_title = package.title.replace("Top ", "").replace(" Stories", "")
-                displayed_title = f"{displayed_title} For You"
 
                 filtered = select_mentioning(candidate_set, [package.seed] if package.seed else [])
                 logger.info(f"Creating {package.seed.name} section from {len(filtered.articles)} topical candidates")
