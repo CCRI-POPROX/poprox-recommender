@@ -299,7 +299,7 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
         super().__init__()
         if outs is not None:
             outs.rec_parquet_file.parent.mkdir(exist_ok=True, parents=True)
-            self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(1))
+            self.writer = zstandard.open(outs.rec_json_file, "wt", zstandard.ZstdCompressor(9, threads=2))
 
     def prepare_write(self, slate_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState) -> str:
         logger.debug("writing recommendations to JSON", slate_id=slate_id)
