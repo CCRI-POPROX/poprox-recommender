@@ -81,8 +81,8 @@ def test_sectionizer_creates_sections():
     assert len(sections) == 4
     titles = [s.title for s in sections]
     assert "Your Top Stories" in titles
-    assert "Sports For You" in titles
-    assert "Technology For You" in titles
+    assert "Sports" in titles
+    assert "Technology" in titles
     assert "In Other News" in titles
 
 
