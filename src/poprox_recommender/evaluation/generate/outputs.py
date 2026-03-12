@@ -39,7 +39,7 @@ class OfflineRecommendations(BaseModel):
 
 
 class OfflineRecResults(BaseModel, validate_assignment=True):
-    final: ImpressedSection
+    final: list[ImpressedSection] | ImpressedSection
     ranked: ImpressedSection | None = None
     reranked: ImpressedSection | None = None
 
@@ -234,13 +234,18 @@ class ParquetRecommendationWriter(RecommendationWriter[list[pd.DataFrame]]):
 
         # get the different recommendation lists to record
         recs = pipeline_state["recommender"]
+        if isinstance(recs, list):
+            impressions = [imp for section in recs for imp in section.impressions]
+        else:
+            impressions = recs.impressions
+
         frames = [
             pd.DataFrame(
                 {
                     "slate_id": str(slate_id),
                     "stage": "final",
-                    "item_id": [str(impression.article.article_id) for impression in recs.impressions],
-                    "rank": np.arange(len(recs.impressions), dtype=np.int16) + 1,
+                    "item_id": [str(imp.article.article_id) for imp in impressions],
+                    "rank": np.arange(len(impressions), dtype=np.int16) + 1,
                 }
             )
         ]

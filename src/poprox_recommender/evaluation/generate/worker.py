@@ -181,6 +181,8 @@ def recommend_for_request(pipeline: Pipeline, request: RecommendationRequestV5) 
         "candidate": request.candidates,
         "clicked": request.interacted,
         "profile": request.interest_profile,
+        "packages": request.article_packages,
+        "impressed_article_ids": request.impressed_article_ids,
     }
 
     try:
