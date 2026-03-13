@@ -39,7 +39,6 @@ from rich.pretty import pprint
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.measure.batch_measure import recommendation_eval_results
-from poprox_recommender.evaluation.measure.recloader import RecLoader
 from poprox_recommender.evaluation.options import load_eval_options
 from poprox_recommender.paths import project_root
 
@@ -71,17 +70,14 @@ def main():
     options = load_eval_options(out_dir)
 
     logger.info("measuring evaluation %s for %s", eval_name, pipe_name)
-    recs_fn = out_dir / "recommendations.parquet"
+    recs_fn = out_dir / "recommendations.ndjson.zst"
 
-    metric_records = []
     logger.info("loading recommendations from %s", recs_fn)
-    with RecLoader.from_parquet(recs_fn) as recs:
-        n_slates = recs.count_slates()
-        logger.info("measuring %d recommendation slates", n_slates)
-        with item_progress("evaluate", total=n_slates) as pb:
-            for metric_row in recommendation_eval_results(eval_data, recs):
-                metric_records.append(metric_row)
-                pb.update()
+    metric_records = []
+    with item_progress("evaluate") as pb:
+        for metric_row in recommendation_eval_results(eval_data, recs_fn):
+            metric_records.append(metric_row)
+            pb.update()
 
     metrics = pd.DataFrame.from_records(metric_records)
 
