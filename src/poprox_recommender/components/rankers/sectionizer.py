@@ -25,10 +25,12 @@ class PersonalizedTopNews(Component):
         candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
-        used_ids: set[UUID],
+        sections: list[ImpressedSection] | None = None,
         today: date | None = None,
     ) -> list[ImpressedSection]:
-        sections: list[ImpressedSection] = []
+        sections = sections or []
+
+        used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
 
         topic_filter = TopicFilter()
 
@@ -66,13 +68,17 @@ class TopicalSections(Component):
         candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
-        used_ids: set[UUID],
+        sections: list[ImpressedSection] | None = None,
         today: date | None = None,
     ) -> tuple[list[ImpressedSection], list[Entity]]:
+        sections = sections or []
+
         if today is None:
             today = date.today()
 
         seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
+
+        used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
 
         topical_interests = list(interest_profile.interests_by_type("topic"))
         rng = np.random.default_rng(seed)
@@ -131,12 +137,15 @@ class InOtherNews(Component):
         candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
-        used_ids: set[UUID],
         topic_seeds: list[Entity],
+        sections: list[ImpressedSection] | None = None,
     ):
+        sections = sections or []
+
         topic_filter = TopicFilter()
 
-        sections = []
+        used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
+
         used_topic_articles = select_mentioning(candidate_set, topic_seeds)
         for article in used_topic_articles.articles:
             used_ids.add(article.article_id)
@@ -148,12 +157,13 @@ class InOtherNews(Component):
             logger.info(f"Falling back to full pool of {len(candidate_set.articles)} candidates")
             ranked_articles = select_from_candidates(candidate_set, self.config.max_articles, used_ids)
 
+        misc_sections = []
         misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
 
         if len(misc_section.impressions) > 0:
-            sections.append(misc_section)
+            misc_sections.append(misc_section)
 
-        return sections
+        return misc_sections
 
 
 class SectionizerConfig(BaseModel):
@@ -181,12 +191,11 @@ class Sectionizer(Component):
             logger.debug("No ranked articles available.")
             return []
 
-        used_ids = set()
         sections = []
 
         top_news_config = PersonalizedTopNewsConfig(max_articles=self.config.max_top_news)
         top_news_sections = PersonalizedTopNews(top_news_config).__call__(
-            candidate_set, article_packages, interest_profile, used_ids
+            candidate_set, article_packages, interest_profile, sections
         )
         sections.extend(top_news_sections)
 
@@ -196,13 +205,17 @@ class Sectionizer(Component):
             random_seed=self.config.random_seed,
         )
         topical_sections, topic_seeds = TopicalSections(topical_config).__call__(
-            candidate_set, article_packages, interest_profile, used_ids
+            candidate_set, article_packages, interest_profile, sections
         )
         sections.extend(topical_sections)
 
         other_news_config = InOtherNewsConfig(max_articles=self.config.max_misc_articles)
         other_news_sections = InOtherNews(other_news_config).__call__(
-            candidate_set, article_packages, interest_profile, used_ids, topic_seeds
+            candidate_set,
+            article_packages,
+            interest_profile,
+            topic_seeds,
+            sections,
         )
         sections.extend(other_news_sections)
 
