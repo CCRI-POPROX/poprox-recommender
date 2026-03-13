@@ -116,7 +116,9 @@ class TopicalSections(Component):
                 if len(topical_sections) >= self.config.max_topic_sections:
                     break
 
-        return topical_sections, topic_seeds
+        sections.extend(topical_sections)
+
+        return sections, topic_seeds
 
     def random_daily_seed(self, profile_id, day, base_seed: int) -> int:
         seed_str = f"{profile_id}_{day.isoformat()}_{base_seed}"
@@ -157,13 +159,12 @@ class InOtherNews(Component):
             logger.info(f"Falling back to full pool of {len(candidate_set.articles)} candidates")
             ranked_articles = select_from_candidates(candidate_set, self.config.max_articles, used_ids)
 
-        misc_sections = []
         misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
 
         if len(misc_section.impressions) > 0:
-            misc_sections.append(misc_section)
+            sections.append(misc_section)
 
-        return misc_sections
+        return sections
 
 
 class SectionizerConfig(BaseModel):
@@ -191,36 +192,33 @@ class Sectionizer(Component):
             logger.debug("No ranked articles available.")
             return []
 
-        sections = []
+        newsletter_sections = []
 
         top_news_config = PersonalizedTopNewsConfig(max_articles=self.config.max_top_news)
-        top_news_sections = PersonalizedTopNews(top_news_config).__call__(
-            candidate_set, article_packages, interest_profile, sections
+        newsletter_sections = PersonalizedTopNews(top_news_config).__call__(
+            candidate_set, article_packages, interest_profile, newsletter_sections
         )
-        sections.extend(top_news_sections)
 
         topical_config = TopicalSectionsConfig(
             max_topic_sections=self.config.max_topic_sections,
             max_articles_per_topic=self.config.max_articles_per_topic,
             random_seed=self.config.random_seed,
         )
-        topical_sections, topic_seeds = TopicalSections(topical_config).__call__(
-            candidate_set, article_packages, interest_profile, sections
+        newsletter_sections, topic_seeds = TopicalSections(topical_config).__call__(
+            candidate_set, article_packages, interest_profile, newsletter_sections
         )
-        sections.extend(topical_sections)
 
         other_news_config = InOtherNewsConfig(max_articles=self.config.max_misc_articles)
-        other_news_sections = InOtherNews(other_news_config).__call__(
+        newsletter_sections = InOtherNews(other_news_config).__call__(
             candidate_set,
             article_packages,
             interest_profile,
             topic_seeds,
-            sections,
+            newsletter_sections,
         )
-        sections.extend(other_news_sections)
 
-        logger.debug("Sectionizer created %d total sections", len(sections))
-        return sections
+        logger.debug("Sectionizer created %d total sections", len(newsletter_sections))
+        return newsletter_sections
 
 
 def select_mentioning(candidate: CandidateSet, entities: list[Entity]):
