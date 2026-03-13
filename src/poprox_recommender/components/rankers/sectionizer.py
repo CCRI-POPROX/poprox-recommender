@@ -70,7 +70,7 @@ class TopicalSections(Component):
         interest_profile: InterestProfile,
         sections: list[ImpressedSection] | None = None,
         today: date | None = None,
-    ) -> tuple[list[ImpressedSection], list[Entity]]:
+    ) -> list[ImpressedSection]:
         sections = sections or []
 
         if today is None:
@@ -89,7 +89,6 @@ class TopicalSections(Component):
             reverse=True,
         )
 
-        topic_seeds: list[Entity] = []
         topical_sections: list[ImpressedSection] = []
         for interest in sorted_interests:
             package = next((p for p in article_packages if p.seed and p.seed.entity_id == interest.entity_id), None)
@@ -106,7 +105,6 @@ class TopicalSections(Component):
 
                 if len(topic_section.impressions) >= self.config.max_articles_per_topic:
                     used_ids.update(a.article_id for a in ranked_articles)
-                    topic_seeds.append(package.seed)
                     topical_sections.append(topic_section)
                 else:
                     logger.info(
@@ -118,7 +116,7 @@ class TopicalSections(Component):
 
         sections.extend(topical_sections)
 
-        return sections, topic_seeds
+        return sections
 
     def random_daily_seed(self, profile_id, day, base_seed: int) -> int:
         seed_str = f"{profile_id}_{day.isoformat()}_{base_seed}"
@@ -139,14 +137,19 @@ class InOtherNews(Component):
         candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
-        topic_seeds: list[Entity],
         sections: list[ImpressedSection] | None = None,
-    ):
+    ) -> list[ImpressedSection]:
         sections = sections or []
 
         topic_filter = TopicFilter()
 
         used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
+        topic_seeds = [
+            package.seed
+            for package in article_packages
+            for section in sections
+            if section.seed_entity_id == package.seed.entity_id
+        ]
 
         used_topic_articles = select_mentioning(candidate_set, topic_seeds)
         for article in used_topic_articles.articles:
@@ -204,7 +207,7 @@ class Sectionizer(Component):
             max_articles_per_topic=self.config.max_articles_per_topic,
             random_seed=self.config.random_seed,
         )
-        newsletter_sections, topic_seeds = TopicalSections(topical_config).__call__(
+        newsletter_sections = TopicalSections(topical_config).__call__(
             candidate_set, article_packages, interest_profile, newsletter_sections
         )
 
@@ -213,7 +216,6 @@ class Sectionizer(Component):
             candidate_set,
             article_packages,
             interest_profile,
-            topic_seeds,
             newsletter_sections,
         )
 
