@@ -25,9 +25,9 @@ class PersonalizedTopNews(Component):
         candidate_set: CandidateSet,
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
+        used_ids: set[UUID],
         today: date | None = None,
     ) -> list[ImpressedSection]:
-        used_ids: set[UUID] = set()
         sections: list[ImpressedSection] = []
 
         topic_filter = TopicFilter()
@@ -185,6 +185,7 @@ class Sectionizer(Component):
         sections = []
 
         top_news_sections = PersonalizedTopNews().__call__(candidate_set, article_packages, interest_profile)
+        top_news_sections = PersonalizedTopNews().__call__(candidate_set, article_packages, interest_profile, used_ids)
         sections.extend(top_news_sections)
 
         topical_sections, topic_seeds = TopicalSections().__call__(
