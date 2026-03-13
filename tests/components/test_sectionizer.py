@@ -13,8 +13,8 @@ from poprox_recommender.components.rankers.sectionizer import (
     Sectionizer,
     SectionizerConfig,
     select_from_candidates,
-    select_from_packages,
 )
+from poprox_recommender.components.sections.top_news import select_from_packages
 
 
 def make_interest_profile(topic_ids: list[UUID]) -> InterestProfile:
