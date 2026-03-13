@@ -12,8 +12,8 @@ from poprox_concepts.domain import (
 from poprox_recommender.components.rankers.sectionizer import (
     Sectionizer,
     SectionizerConfig,
-    select_from_candidates,
 )
+from poprox_recommender.components.sections.base import select_from_candidates
 from poprox_recommender.components.sections.top_news import select_from_packages
 
 
