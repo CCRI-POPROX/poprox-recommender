@@ -20,9 +20,7 @@ def test_request_with_softmax_sampler():
 
     try:
         base_outputs = select_articles(
-            req.candidates,
-            req.interacted,
-            req.interest_profile,
+            req.candidates, req.interacted, req.interest_profile, pipeline_params={"pipeline": "nrms"}
         )
         sampled_outputs = select_articles(
             req.candidates,
