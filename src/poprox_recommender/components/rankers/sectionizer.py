@@ -13,16 +13,12 @@ from poprox_recommender.components.filters.topic import TopicFilter
 logger = logging.getLogger(__name__)
 
 
-class SectionizerConfig(BaseModel):
-    max_top_news: int = 3
-    max_topic_sections: int = 3
-    max_articles_per_topic: int = 3
-    max_misc_articles: int = 3
-    random_seed: int = 22
+class PersonalizedTopNewsConfig(BaseModel):
+    max_articles: int = 3
 
 
-class Sectionizer(Component):
-    config: SectionizerConfig
+class PersonalizedTopNews(Component):
+    config: PersonalizedTopNewsConfig
 
     def __call__(
         self,
@@ -31,20 +27,8 @@ class Sectionizer(Component):
         interest_profile: InterestProfile,
         today: date | None = None,
     ) -> list[ImpressedSection]:
-        """
-        Build newsletter sections from ranked articles and topic packages.
-        """
-        if not candidate_set.articles:
-            logger.debug("No ranked articles available.")
-            return []
-
-        if today is None:
-            today = date.today()
-
-        seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
-
-        used_ids = set()
-        sections = []
+        used_ids: set[UUID] = set()
+        sections: list[ImpressedSection] = []
 
         topic_filter = TopicFilter()
 
@@ -53,11 +37,11 @@ class Sectionizer(Component):
         filtered_top = topic_filter(top_articles, interest_profile)
 
         logger.info(f"Creating Top Stories section from {len(filtered_top.articles)} filtered candidates")
-        ranked_articles = select_from_candidates(filtered_top, self.config.max_top_news, used_ids)
+        ranked_articles = select_from_candidates(filtered_top, self.config.max_articles, used_ids)
 
-        if len(ranked_articles) < self.config.max_top_news:
+        if len(ranked_articles) < self.config.max_articles:
             logger.info(f"Falling back to full pool of {len(candidate_set.articles)} top candidates")
-            ranked_articles = select_from_candidates(top_articles, self.config.max_top_news, used_ids)
+            ranked_articles = select_from_candidates(top_articles, self.config.max_articles, used_ids)
 
         top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
 
@@ -65,7 +49,31 @@ class Sectionizer(Component):
             used_ids.update(a.article_id for a in ranked_articles)
             sections.append(top_section)
 
-        # topic sections
+        return sections
+
+
+class TopicalSectionsConfig(BaseModel):
+    max_topic_sections: int = 3
+    max_articles_per_topic: int = 3
+    random_seed: int = 22
+
+
+class TopicalSections(Component):
+    config: TopicalSectionsConfig
+
+    def __call__(
+        self,
+        candidate_set: CandidateSet,
+        article_packages: list[ArticlePackage],
+        interest_profile: InterestProfile,
+        used_ids: set[UUID],
+        today: date | None = None,
+    ) -> tuple[list[ImpressedSection], list[Entity]]:
+        if today is None:
+            today = date.today()
+
+        seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
+
         topical_interests = list(interest_profile.interests_by_type("topic"))
         rng = np.random.default_rng(seed)
         rng.shuffle(topical_interests)
@@ -102,33 +110,95 @@ class Sectionizer(Component):
                 if len(topical_sections) >= self.config.max_topic_sections:
                     break
 
-        sections.extend(topical_sections)
-
-        # in other news / misc / for you section
-        used_topic_articles = select_mentioning(candidate_set, topic_seeds)
-        for article in used_topic_articles.articles:
-            used_ids.add(article.article_id)
-
-        topic_filtered = topic_filter(candidate_set, interest_profile)
-        logger.info(f"Creating Other News section from {len(topic_filtered.articles)} filtered candidates")
-        ranked_articles = select_from_candidates(topic_filtered, self.config.max_misc_articles, used_ids)
-        if len(ranked_articles) < self.config.max_misc_articles:
-            logger.info(f"Falling back to full pool of {len(candidate_set.articles)} candidates")
-            ranked_articles = select_from_candidates(candidate_set, self.config.max_misc_articles, used_ids)
-
-        misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
-
-        if len(misc_section.impressions) > 0:
-            sections.append(misc_section)
-
-        logger.debug("Sectionizer created %d total sections", len(sections))
-        return sections
+        return topical_sections, topic_seeds
 
     def random_daily_seed(self, profile_id, day, base_seed: int) -> int:
         seed_str = f"{profile_id}_{day.isoformat()}_{base_seed}"
         hash_obj = hashlib.sha256(seed_str.encode("utf-8"))
         hash_hex = hash_obj.hexdigest()
         return int(hash_hex, 16)
+
+
+class InOtherNewsConfig(BaseModel):
+    max_articles: int = 3
+
+
+class InOtherNews(Component):
+    config: InOtherNewsConfig
+
+    def __call__(
+        self,
+        candidate_set: CandidateSet,
+        article_packages: list[ArticlePackage],
+        interest_profile: InterestProfile,
+        used_ids: set[UUID],
+        topic_seeds: list[Entity],
+    ):
+        topic_filter = TopicFilter()
+
+        sections = []
+        used_topic_articles = select_mentioning(candidate_set, topic_seeds)
+        for article in used_topic_articles.articles:
+            used_ids.add(article.article_id)
+
+        topic_filtered = topic_filter(candidate_set, interest_profile)
+        logger.info(f"Creating Other News section from {len(topic_filtered.articles)} filtered candidates")
+        ranked_articles = select_from_candidates(topic_filtered, self.config.max_articles, used_ids)
+        if len(ranked_articles) < self.config.max_articles:
+            logger.info(f"Falling back to full pool of {len(candidate_set.articles)} candidates")
+            ranked_articles = select_from_candidates(candidate_set, self.config.max_articles, used_ids)
+
+        misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
+
+        if len(misc_section.impressions) > 0:
+            sections.append(misc_section)
+
+        return sections
+
+
+class SectionizerConfig(BaseModel):
+    max_top_news: int = 3
+    max_topic_sections: int = 3
+    max_articles_per_topic: int = 3
+    max_misc_articles: int = 3
+    random_seed: int = 22
+
+
+class Sectionizer(Component):
+    config: SectionizerConfig
+
+    def __call__(
+        self,
+        candidate_set: CandidateSet,
+        article_packages: list[ArticlePackage],
+        interest_profile: InterestProfile,
+        today: date | None = None,
+    ) -> list[ImpressedSection]:
+        """
+        Build newsletter sections from ranked articles and topic packages.
+        """
+        if not candidate_set.articles:
+            logger.debug("No ranked articles available.")
+            return []
+
+        used_ids = set()
+        sections = []
+
+        top_news_sections = PersonalizedTopNews().__call__(candidate_set, article_packages, interest_profile)
+        sections.extend(top_news_sections)
+
+        topical_sections, topic_seeds = TopicalSections().__call__(
+            candidate_set, article_packages, interest_profile, used_ids
+        )
+        sections.extend(topical_sections)
+
+        other_news_sections = InOtherNews().__call__(
+            candidate_set, article_packages, interest_profile, used_ids, topic_seeds
+        )
+        sections.extend(other_news_sections)
+
+        logger.debug("Sectionizer created %d total sections", len(sections))
+        return sections
 
 
 def select_mentioning(candidate: CandidateSet, entities: list[Entity]):
