@@ -184,16 +184,24 @@ class Sectionizer(Component):
         used_ids = set()
         sections = []
 
-        top_news_sections = PersonalizedTopNews().__call__(candidate_set, article_packages, interest_profile)
-        top_news_sections = PersonalizedTopNews().__call__(candidate_set, article_packages, interest_profile, used_ids)
+        top_news_config = PersonalizedTopNewsConfig(max_articles=self.config.max_top_news)
+        top_news_sections = PersonalizedTopNews(top_news_config).__call__(
+            candidate_set, article_packages, interest_profile, used_ids
+        )
         sections.extend(top_news_sections)
 
-        topical_sections, topic_seeds = TopicalSections().__call__(
+        topical_config = TopicalSectionsConfig(
+            max_topic_sections=self.config.max_topic_sections,
+            max_articles_per_topic=self.config.max_articles_per_topic,
+            random_seed=self.config.random_seed,
+        )
+        topical_sections, topic_seeds = TopicalSections(topical_config).__call__(
             candidate_set, article_packages, interest_profile, used_ids
         )
         sections.extend(topical_sections)
 
-        other_news_sections = InOtherNews().__call__(
+        other_news_config = InOtherNewsConfig(max_articles=self.config.max_misc_articles)
+        other_news_sections = InOtherNews(other_news_config).__call__(
             candidate_set, article_packages, interest_profile, used_ids, topic_seeds
         )
         sections.extend(other_news_sections)
