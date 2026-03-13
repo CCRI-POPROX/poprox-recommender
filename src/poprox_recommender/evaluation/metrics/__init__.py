@@ -9,6 +9,7 @@ from lenskit.metrics.ranking import NDCG, RBP, RecipRank
 
 from poprox_concepts.domain import Article, CandidateSet
 from poprox_recommender.data.eval import EvalData
+from poprox_recommender.evaluation.generate.outputs import OfflineRecResults
 from poprox_recommender.evaluation.metrics.ils import intralist_similarity
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
@@ -33,7 +34,7 @@ def convert_df_to_article_set(rec_df):
 
 
 def measure_rec_metrics(
-    slate_id: UUID, recs_df: pd.DataFrame, truth_df: pd.DataFrame, eval_data: EvalData | None = None
+    slate_id: UUID, results: OfflineRecResults, truth_df: pd.DataFrame, eval_data: EvalData | None = None
 ) -> dict[str, Any]:
     """
     Measure a single set of recommendations against ground truth.  Returns the recommendation ID and
@@ -45,9 +46,13 @@ def measure_rec_metrics(
 
     truth = truth[truth["rating"] > 0]
     truth = ItemList.from_df(truth)
+    final = results.final
+    if isinstance(final, list):
+        articles = [imp.article for section in final for imp in section.impressions]
+    else:
+        articles = [imp.article for imp in final.impressions]
 
-    final_rec_df = recs_df[recs_df["stage"] == "final"]
-    final_rec = ItemList.from_df(final_rec_df)
+    final_rec = ItemList(item_ids=[str(a.article_id) for a in articles], ordered=True)
 
     # we only compute effectiveness with truth
     if len(truth) > 0:
@@ -58,11 +63,17 @@ def measure_rec_metrics(
     else:
         single_rbp = single_rr = single_ndcg5 = single_ndcg10 = None
 
-    ranked_rec_df = recs_df[recs_df["stage"] == "ranked"]
-    ranked = convert_df_to_article_set(ranked_rec_df)
+    ranked = (
+        CandidateSet(articles=[imp.article for imp in results.ranked.impressions])
+        if results.ranked
+        else CandidateSet(articles=[])
+    )
 
-    reranked_rec_df = recs_df[recs_df["stage"] == "reranked"]
-    reranked = convert_df_to_article_set(reranked_rec_df)
+    reranked = (
+        CandidateSet(articles=[imp.article for imp in results.reranked.impressions])
+        if results.reranked
+        else CandidateSet(articles=[])
+    )
 
     if ranked and reranked:
         single_rbo5 = rank_biased_overlap(ranked, reranked, k=5)
