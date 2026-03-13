@@ -6,9 +6,9 @@ import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import ArticlePackage, CandidateSet, Entity, ImpressedSection, InterestProfile
+from poprox_concepts.domain import ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
 from poprox_recommender.components.filters.topic import TopicFilter
-from poprox_recommender.components.sections.base import select_from_candidates
+from poprox_recommender.components.sections.base import select_from_candidates, select_mentioning
 from poprox_recommender.components.sections.top_news import PersonalizedTopNews, PersonalizedTopNewsConfig
 
 logger = logging.getLogger(__name__)
@@ -181,24 +181,3 @@ class Sectionizer(Component):
 
         logger.debug("Sectionizer created %d total sections", len(newsletter_sections))
         return newsletter_sections
-
-
-def select_mentioning(candidate: CandidateSet, entities: list[Entity]):
-    entity_ids = set(e.entity_id for e in entities)
-
-    kept_articles = []
-    kept_scores = []
-    for idx, article in enumerate(candidate.articles):
-        mentioned = set(m.entity.entity_id for m in article.mentions if m.relevance and m.relevance >= 76)
-        if len(entity_ids.intersection(mentioned)) > 0:
-            kept_articles.append(article)
-            if hasattr(candidate, "scores") and candidate.scores is not None:
-                kept_scores.append(candidate.scores[idx])
-
-    filtered = CandidateSet(articles=kept_articles)
-    if kept_scores:
-        filtered.scores = np.array(kept_scores)
-    else:
-        filtered.scores = None
-
-    return filtered
