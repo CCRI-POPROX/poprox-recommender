@@ -9,12 +9,14 @@ from poprox_concepts.domain import (
     InterestProfile,
     Mention,
 )
-from poprox_recommender.components.rankers.sectionizer import (
-    Sectionizer,
-    SectionizerConfig,
-)
 from poprox_recommender.components.sections.base import select_from_candidates
-from poprox_recommender.components.sections.top_news import select_from_packages
+from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
+from poprox_recommender.components.sections.top_news import (
+    PersonalizedTopNews,
+    PersonalizedTopNewsConfig,
+    select_from_packages,
+)
+from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
 
 
 def make_interest_profile(topic_ids: list[UUID]) -> InterestProfile:
@@ -66,16 +68,24 @@ def test_sectionizer_creates_sections():
     # user likes both topics
     profile = make_interest_profile([sports_id, technology_id])
 
-    config = SectionizerConfig(
-        top_news_entity_id=general_news_id,
-        max_top_news=2,
+    sections = []
+
+    top_news_config = PersonalizedTopNewsConfig(max_articles=2)
+    sections = PersonalizedTopNews(top_news_config).__call__(candidates, packages, profile, sections)
+
+    topical_config = TopicalSectionsConfig(
         max_topic_sections=2,
         max_articles_per_topic=2,
-        max_misc_articles=2,
     )
+    sections = TopicalSections(topical_config).__call__(candidates, packages, profile, sections)
 
-    sectionizer = Sectionizer(config=config)
-    sections = sectionizer(candidate_set=candidates, article_packages=packages, interest_profile=profile)
+    other_news_config = InOtherNewsConfig(max_articles=2)
+    sections = InOtherNews(other_news_config).__call__(
+        candidates,
+        packages,
+        profile,
+        sections,
+    )
 
     # We should get a top news section, two topical sections, and a misc section
     assert len(sections) == 4
@@ -101,12 +111,23 @@ def test_sectionizer_creates_misc_section():
     packages = [make_package(top_news_id, "Top News", [a1])]
     profile = make_interest_profile([topic_id])
 
-    config = SectionizerConfig(
-        top_news_entity_id=top_news_id, max_top_news=1, max_topic_sections=1, max_misc_articles=2
-    )
+    sections = []
 
-    sectionizer = Sectionizer(config=config)
-    sections = sectionizer(candidate_set=candidates, article_packages=packages, interest_profile=profile)
+    top_news_config = PersonalizedTopNewsConfig(max_articles=1)
+    sections = PersonalizedTopNews(top_news_config).__call__(candidates, packages, profile, sections)
+
+    topical_config = TopicalSectionsConfig(
+        max_topic_sections=1,
+    )
+    sections = TopicalSections(topical_config).__call__(candidates, packages, profile, sections)
+
+    other_news_config = InOtherNewsConfig(max_articles=2)
+    sections = InOtherNews(other_news_config).__call__(
+        candidates,
+        packages,
+        profile,
+        sections,
+    )
 
     assert len(sections) == 2
     assert sections[0].title == "Your Top Stories"
