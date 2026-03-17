@@ -105,7 +105,7 @@ def test_sectionizer_creates_sections():
     joiner = FillRecs(joiner_config)
     top_section = joiner(filtered_articles, unfiltered_articles)
 
-    top_news_config = AddSectionConfig(max_articles=2, title="Your Top Stories", personalized=True)
+    top_news_config = AddSectionConfig(title="Your Top Stories", personalized=True)
     sections = AddSection(top_news_config).__call__(top_section)
 
     topical_config = TopicalSectionsConfig(
@@ -157,21 +157,21 @@ def test_sectionizer_creates_misc_section():
     topic_filter = TopicFilter()
     filtered_top = topic_filter(deduped_top, profile)
 
-    filtered_config = TopkConfig(num_slots=2)
+    filtered_config = TopkConfig(num_slots=1)
     filtered_topk = TopkRanker(filtered_config)
     filtered_articles = filtered_topk(filtered_top)
 
     # The maximum overlap with the articles chosen above is self.config.max_articles,
     # so here we pull twice as many to cover the worst case
-    unfiltered_config = TopkConfig(num_slots=4)
+    unfiltered_config = TopkConfig(num_slots=2)
     unfiltered_topk = TopkRanker(unfiltered_config)
     unfiltered_articles = LazyShim(unfiltered_topk(deduped_top))
 
-    joiner_config = FillConfig(num_slots=2)
+    joiner_config = FillConfig(num_slots=1)
     joiner = FillRecs(joiner_config)
     top_section = joiner(filtered_articles, unfiltered_articles)
 
-    top_news_config = AddSectionConfig(max_articles=1, title="Your Top Stories", personalized=True)
+    top_news_config = AddSectionConfig(title="Your Top Stories", personalized=True)
     sections = AddSection(top_news_config).__call__(top_section, sections)
 
     topical_config = TopicalSectionsConfig(

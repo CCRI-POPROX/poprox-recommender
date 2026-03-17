@@ -229,7 +229,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         "ptn_fill", FillRecs, FillConfig(num_slots=3), recs1=ptn_topk_filtered, recs2=ptn_topk_unfiltered
     )
 
-    ptn_config = AddSectionConfig(max_articles=3, title="Your Top Stories", personalized=True)
+    ptn_config = AddSectionConfig(title="Your Top Stories", personalized=True)
     ptn_sections = builder.add_component("top_news", AddSection, ptn_config, new_section=ptn_fill)
 
     topical_config = TopicalSectionsConfig(

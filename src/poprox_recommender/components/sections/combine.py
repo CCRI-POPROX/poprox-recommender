@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class AddSectionConfig(BaseModel):
-    max_articles: int = 3
     title: str | None = None
     personalized: bool | None = None
 
