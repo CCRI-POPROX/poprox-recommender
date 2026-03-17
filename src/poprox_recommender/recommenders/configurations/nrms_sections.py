@@ -13,8 +13,10 @@ from poprox_recommender.components.embedders.user_article_feedback import (
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.filters.impression import ImpressionFilter
 from poprox_recommender.components.joiners.score import ScoreFusion
-from poprox_recommender.components.rankers.sectionizer import Sectionizer, SectionizerConfig
 from poprox_recommender.components.scorers.article import ArticleScorer
+from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
+from poprox_recommender.components.sections.top_news import PersonalizedTopNews, PersonalizedTopNewsConfig
+from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
 from poprox_recommender.paths import model_file_path
 
 TOP_NEWS_PACKAGE_ID = UUID("72bb7674-7bde-4f3e-a351-ccdeae888502")
@@ -197,19 +199,38 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         candidates2=explicit_fusion,
     )
 
-    # Sectionizer
-    s_config = SectionizerConfig(
-        max_top_news=3,
-        max_topic_sections=3,
-        max_articles_per_topic=3,
-        max_misc_articles=3,
-    )
-
-    builder.add_component(
-        "recommender",
-        Sectionizer,
-        s_config,
+    # Sections
+    top_news_config = PersonalizedTopNewsConfig(max_articles=3)
+    ptn_sections = builder.add_component(
+        "top_news",
+        PersonalizedTopNews,
+        top_news_config,
         candidate_set=fusion,
         article_packages=i_packages,
         interest_profile=i_profile,
+    )
+
+    topical_config = TopicalSectionsConfig(
+        max_topic_sections=3,
+        max_articles_per_topic=3,
+    )
+    tp_sections = builder.add_component(
+        "topical",
+        TopicalSections,
+        topical_config,
+        candidate_set=fusion,
+        article_packages=i_packages,
+        interest_profile=i_profile,
+        sections=ptn_sections,
+    )
+
+    on_config = InOtherNewsConfig(max_articles=3)
+    builder.add_component(
+        "recommender",
+        InOtherNews,
+        on_config,
+        candidate_set=fusion,
+        article_packages=i_packages,
+        interest_profile=i_profile,
+        sections=tp_sections,
     )
