@@ -3,12 +3,13 @@ from datetime import date
 
 from lenskit.pipeline import Component
 from pydantic import BaseModel
-from recommender.src.poprox_recommender.components.selectors.top_news import TopStoryCandidates
 
 from poprox_concepts.domain import ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
 from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.filters.topic import TopicFilter
-from poprox_recommender.components.sections.base import select_from_candidates
+from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
+from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
+from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 
 logger = logging.getLogger(__name__)
 
@@ -34,19 +35,29 @@ class PersonalizedTopNews(Component):
         top_articles = selector(candidate_set, article_packages)
 
         dup_filter = DuplicateFilter()
-        filtered_top = dup_filter(top_articles, sections)
+        deduped_top = dup_filter(top_articles, sections)
 
         topic_filter = TopicFilter()
-        filtered_top = topic_filter(filtered_top, interest_profile)
+        filtered_top = topic_filter(deduped_top, interest_profile)
 
         logger.info(f"Creating Top Stories section from {len(filtered_top.articles)} filtered candidates")
-        ranked_articles = select_from_candidates(filtered_top, self.config.max_articles)
 
-        if len(ranked_articles) < self.config.max_articles:
-            logger.info(f"Falling back to full pool of {len(candidate_set.articles)} top candidates")
-            ranked_articles = select_from_candidates(top_articles, self.config.max_articles)
+        filtered_config = TopkConfig(num_slots=self.config.max_articles)
+        filtered_topk = TopkRanker(filtered_config)
+        filtered_articles = filtered_topk(filtered_top)
 
-        top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
+        # The maximum overlap with the articles chosen above is self.config.max_articles,
+        # so here we pull twice as many to cover the worst case
+        unfiltered_config = TopkConfig(num_slots=self.config.max_articles * 2)
+        unfiltered_topk = TopkRanker(unfiltered_config)
+        unfiltered_articles = unfiltered_topk(deduped_top)
+
+        joiner_config = FillConfig(num_slots=self.config.max_articles)
+        joiner = FillRecs(joiner_config)
+        top_section = joiner(filtered_articles, unfiltered_articles)
+
+        top_section.title = "Your Top Stories"
+        top_section.personalized = True
 
         if len(top_section.impressions) > 0:
             sections.append(top_section)
