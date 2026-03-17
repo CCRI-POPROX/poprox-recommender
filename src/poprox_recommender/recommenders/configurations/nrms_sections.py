@@ -13,7 +13,9 @@ from poprox_recommender.components.embedders.user_article_feedback import (
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.filters.impression import ImpressionFilter
 from poprox_recommender.components.filters.topic import TopicFilter
+from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
 from poprox_recommender.components.joiners.score import ScoreFusion
+from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
 from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
 from poprox_recommender.components.sections.top_news import PersonalizedTopNews, PersonalizedTopNewsConfig
@@ -210,16 +212,25 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     ptn_filtered = builder.add_component(
-        "ptf_filtered", TopicFilter, candidates=ptn_candidates, interest_profile=i_profile
+        "ptn_filtered", TopicFilter, candidates=ptn_candidates, interest_profile=i_profile
     )
 
-    top_news_config = PersonalizedTopNewsConfig(max_articles=3)
+    ptn_topk_filtered = builder.add_component(
+        "ptn_topk_filtered", TopkRanker, TopkConfig(num_slots=3), candidate_articles=ptn_filtered
+    )
+
+    # The maximum overlap with the articles chosen above is self.config.max_articles,
+    # so here we pull twice as many to cover the worst case
+    ptn_topk_unfiltered = builder.add_component(
+        "ptn_topk_unfiltered", TopkRanker, TopkConfig(num_slots=6), candidate_articles=ptn_candidates
+    )
+
+    ptn_fill = builder.add_component(
+        "ptn_fill", FillRecs, FillConfig(num_slots=3), recs1=ptn_topk_filtered, recs2=ptn_topk_unfiltered
+    )
+
     ptn_sections = builder.add_component(
-        "top_news",
-        PersonalizedTopNews,
-        top_news_config,
-        filtered=ptn_filtered,
-        unfiltered=ptn_candidates,
+        "top_news", PersonalizedTopNews, PersonalizedTopNewsConfig(max_articles=3), ptn_section=ptn_fill
     )
 
     topical_config = TopicalSectionsConfig(
