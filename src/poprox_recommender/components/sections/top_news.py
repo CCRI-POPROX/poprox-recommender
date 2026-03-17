@@ -1,5 +1,4 @@
 import logging
-from datetime import date
 
 from lenskit.pipeline import Component
 from pydantic import BaseModel
@@ -35,7 +34,6 @@ class PersonalizedTopNews(Component):
         article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
         sections: list[ImpressedSection] | None = None,
-        today: date | None = None,
     ) -> list[ImpressedSection]:
         sections = sections or []
 
