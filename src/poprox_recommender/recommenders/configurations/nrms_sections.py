@@ -18,7 +18,7 @@ from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
 from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
-from poprox_recommender.components.sections.top_news import PersonalizedTopNews, PersonalizedTopNewsConfig
+from poprox_recommender.components.sections.top_news import AddSection, AddSectionConfig
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
 from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 from poprox_recommender.paths import model_file_path
@@ -229,9 +229,8 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         "ptn_fill", FillRecs, FillConfig(num_slots=3), recs1=ptn_topk_filtered, recs2=ptn_topk_unfiltered
     )
 
-    ptn_sections = builder.add_component(
-        "top_news", PersonalizedTopNews, PersonalizedTopNewsConfig(max_articles=3), ptn_section=ptn_fill
-    )
+    ptn_config = AddSectionConfig(max_articles=3, title="Your Top Stories", personalized=True)
+    ptn_sections = builder.add_component("top_news", AddSection, ptn_config, new_section=ptn_fill)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=3,

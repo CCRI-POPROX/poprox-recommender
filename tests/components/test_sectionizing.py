@@ -16,8 +16,8 @@ from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.sections.base import select_from_candidates
 from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
 from poprox_recommender.components.sections.top_news import (
-    PersonalizedTopNews,
-    PersonalizedTopNewsConfig,
+    AddSection,
+    AddSectionConfig,
 )
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
 from poprox_recommender.components.selectors.top_news import TopStoryCandidates
@@ -105,8 +105,8 @@ def test_sectionizer_creates_sections():
     joiner = FillRecs(joiner_config)
     top_section = joiner(filtered_articles, unfiltered_articles)
 
-    top_news_config = PersonalizedTopNewsConfig(max_articles=2)
-    sections = PersonalizedTopNews(top_news_config).__call__(top_section)
+    top_news_config = AddSectionConfig(max_articles=2, title="Your Top Stories", personalized=True)
+    sections = AddSection(top_news_config).__call__(top_section)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=2,
@@ -171,8 +171,8 @@ def test_sectionizer_creates_misc_section():
     joiner = FillRecs(joiner_config)
     top_section = joiner(filtered_articles, unfiltered_articles)
 
-    top_news_config = PersonalizedTopNewsConfig(max_articles=1)
-    sections = PersonalizedTopNews(top_news_config).__call__(top_section, sections)
+    top_news_config = AddSectionConfig(max_articles=1, title="Your Top Stories", personalized=True)
+    sections = AddSection(top_news_config).__call__(top_section, sections)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=1,

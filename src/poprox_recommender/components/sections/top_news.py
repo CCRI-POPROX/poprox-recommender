@@ -8,24 +8,29 @@ from poprox_concepts.domain import ImpressedSection
 logger = logging.getLogger(__name__)
 
 
-class PersonalizedTopNewsConfig(BaseModel):
+class AddSectionConfig(BaseModel):
     max_articles: int = 3
+    title: str | None = None
+    personalized: bool | None = None
 
 
-class PersonalizedTopNews(Component):
-    config: PersonalizedTopNewsConfig
+class AddSection(Component):
+    config: AddSectionConfig
 
     def __call__(
         self,
-        ptn_section: ImpressedSection,
-        sections: list[ImpressedSection] | None = None,
+        new_section: ImpressedSection,
+        existing_sections: list[ImpressedSection] | None = None,
     ) -> list[ImpressedSection]:
-        sections = sections or []
+        existing_sections = existing_sections or []
 
-        ptn_section.title = "Your Top Stories"
-        ptn_section.personalized = True
+        if self.config.title:
+            new_section.title = self.config.title
 
-        if len(ptn_section.impressions) > 0:
-            sections.append(ptn_section)
+        if self.config.personalized:
+            new_section.personalized = self.config.personalized
 
-        return sections
+        if len(new_section.impressions) > 0:
+            existing_sections.append(new_section)
+
+        return existing_sections
