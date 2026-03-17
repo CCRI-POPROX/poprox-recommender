@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from recommender.src.poprox_recommender.components.selectors.top_news import TopStoryCandidates
 
 from poprox_concepts.domain import ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
+from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.sections.base import select_from_candidates
 
@@ -29,25 +30,25 @@ class PersonalizedTopNews(Component):
     ) -> list[ImpressedSection]:
         sections = sections or []
 
-        used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
-
         selector = TopStoryCandidates()
         top_articles = selector(candidate_set, article_packages)
 
+        dup_filter = DuplicateFilter()
+        filtered_top = dup_filter(top_articles, sections)
+
         topic_filter = TopicFilter()
-        filtered_top = topic_filter(top_articles, interest_profile)
+        filtered_top = topic_filter(filtered_top, interest_profile)
 
         logger.info(f"Creating Top Stories section from {len(filtered_top.articles)} filtered candidates")
-        ranked_articles = select_from_candidates(filtered_top, self.config.max_articles, used_ids)
+        ranked_articles = select_from_candidates(filtered_top, self.config.max_articles)
 
         if len(ranked_articles) < self.config.max_articles:
             logger.info(f"Falling back to full pool of {len(candidate_set.articles)} top candidates")
-            ranked_articles = select_from_candidates(top_articles, self.config.max_articles, used_ids)
+            ranked_articles = select_from_candidates(top_articles, self.config.max_articles)
 
         top_section = ImpressedSection.from_articles(ranked_articles, title="Your Top Stories", personalized=True)
 
         if len(top_section.impressions) > 0:
-            used_ids.update(a.article_id for a in ranked_articles)
             sections.append(top_section)
 
         return sections
