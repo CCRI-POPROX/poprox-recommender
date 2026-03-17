@@ -9,6 +9,8 @@ from poprox_concepts.domain import (
     InterestProfile,
     Mention,
 )
+from poprox_recommender.components.filters.duplicate import DuplicateFilter
+from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.sections.base import select_from_candidates
 from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
 from poprox_recommender.components.sections.top_news import (
@@ -16,6 +18,7 @@ from poprox_recommender.components.sections.top_news import (
     PersonalizedTopNewsConfig,
 )
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
+from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 
 
 def make_interest_profile(topic_ids: list[UUID]) -> InterestProfile:
@@ -69,8 +72,17 @@ def test_sectionizer_creates_sections():
 
     sections = []
 
+    selector = TopStoryCandidates()
+    top_articles = selector(candidates, packages)
+
+    dup_filter = DuplicateFilter()
+    deduped_top = dup_filter(top_articles, sections)
+
+    topic_filter = TopicFilter()
+    filtered_top = topic_filter(deduped_top, profile)
+
     top_news_config = PersonalizedTopNewsConfig(max_articles=2)
-    sections = PersonalizedTopNews(top_news_config).__call__(candidates, packages, profile, sections)
+    sections = PersonalizedTopNews(top_news_config).__call__(filtered_top, deduped_top)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=2,
@@ -112,8 +124,17 @@ def test_sectionizer_creates_misc_section():
 
     sections = []
 
+    selector = TopStoryCandidates()
+    top_articles = selector(candidates, packages)
+
+    dup_filter = DuplicateFilter()
+    deduped_top = dup_filter(top_articles, sections)
+
+    topic_filter = TopicFilter()
+    filtered_top = topic_filter(deduped_top, profile)
+
     top_news_config = PersonalizedTopNewsConfig(max_articles=1)
-    sections = PersonalizedTopNews(top_news_config).__call__(candidates, packages, profile, sections)
+    sections = PersonalizedTopNews(top_news_config).__call__(filtered_top, deduped_top, sections)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=1,

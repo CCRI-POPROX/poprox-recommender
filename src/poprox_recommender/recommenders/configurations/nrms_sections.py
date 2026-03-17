@@ -11,12 +11,15 @@ from poprox_recommender.components.embedders.user_article_feedback import (
     UserArticleFeedbackEmbedder,
 )
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
+from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.filters.impression import ImpressionFilter
+from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.scorers.article import ArticleScorer
 from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
 from poprox_recommender.components.sections.top_news import PersonalizedTopNews, PersonalizedTopNewsConfig
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
+from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 from poprox_recommender.paths import model_file_path
 
 TOP_NEWS_PACKAGE_ID = UUID("72bb7674-7bde-4f3e-a351-ccdeae888502")
@@ -200,14 +203,30 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Sections
+    ptn_candidates = builder.add_component(
+        "ptn_candidates",
+        TopStoryCandidates,
+        candidate_articles=fusion,
+        article_packages=i_packages,
+    )
+
+    ptn_deduped = builder.add_component(
+        "ptn_deduped",
+        DuplicateFilter,
+        candidate=ptn_candidates,
+    )
+
+    ptn_filtered = builder.add_component(
+        "ptf_filtered", TopicFilter, candidates=ptn_deduped, interest_profile=i_profile
+    )
+
     top_news_config = PersonalizedTopNewsConfig(max_articles=3)
     ptn_sections = builder.add_component(
         "top_news",
         PersonalizedTopNews,
         top_news_config,
-        candidate_set=fusion,
-        article_packages=i_packages,
-        interest_profile=i_profile,
+        filtered=ptn_filtered,
+        unfiltered=ptn_deduped,
     )
 
     topical_config = TopicalSectionsConfig(
