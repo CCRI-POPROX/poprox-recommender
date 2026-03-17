@@ -11,7 +11,6 @@ from poprox_recommender.components.embedders.user_article_feedback import (
     UserArticleFeedbackEmbedder,
 )
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
-from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.filters.impression import ImpressionFilter
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.score import ScoreFusion
@@ -210,14 +209,8 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         article_packages=i_packages,
     )
 
-    ptn_deduped = builder.add_component(
-        "ptn_deduped",
-        DuplicateFilter,
-        candidate=ptn_candidates,
-    )
-
     ptn_filtered = builder.add_component(
-        "ptf_filtered", TopicFilter, candidates=ptn_deduped, interest_profile=i_profile
+        "ptf_filtered", TopicFilter, candidates=ptn_candidates, interest_profile=i_profile
     )
 
     top_news_config = PersonalizedTopNewsConfig(max_articles=3)
@@ -226,7 +219,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         PersonalizedTopNews,
         top_news_config,
         filtered=ptn_filtered,
-        unfiltered=ptn_deduped,
+        unfiltered=ptn_candidates,
     )
 
     topical_config = TopicalSectionsConfig(
