@@ -204,33 +204,33 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Sections
-    ptn_candidates = builder.add_component(
-        "ptn_candidates",
+    yts_candidates = builder.add_component(
+        "yts_candidates",
         TopStoryCandidates,
         candidate_articles=fusion,
         article_packages=i_packages,
     )
 
-    ptn_filtered = builder.add_component(
-        "ptn_filtered", TopicFilter, candidates=ptn_candidates, interest_profile=i_profile
+    yts_filtered = builder.add_component(
+        "yts_filtered", TopicFilter, candidates=yts_candidates, interest_profile=i_profile
     )
 
-    ptn_topk_filtered = builder.add_component(
-        "ptn_topk_filtered", TopkRanker, TopkConfig(num_slots=3), candidate_articles=ptn_filtered
+    yts_topk_filtered = builder.add_component(
+        "yts_topk_filtered", TopkRanker, TopkConfig(num_slots=3), candidate_articles=yts_filtered
     )
 
     # The maximum overlap with the articles chosen above is self.config.max_articles,
     # so here we pull twice as many to cover the worst case
-    ptn_topk_unfiltered = builder.add_component(
-        "ptn_topk_unfiltered", TopkRanker, TopkConfig(num_slots=6), candidate_articles=ptn_candidates
+    yts_topk_unfiltered = builder.add_component(
+        "yts_topk_unfiltered", TopkRanker, TopkConfig(num_slots=6), candidate_articles=yts_candidates
     )
 
-    ptn_fill = builder.add_component(
-        "ptn_fill", FillRecs, FillConfig(num_slots=3), recs1=ptn_topk_filtered, recs2=ptn_topk_unfiltered
+    yts_fill = builder.add_component(
+        "yts_fill", FillRecs, FillConfig(num_slots=3), recs1=yts_topk_filtered, recs2=yts_topk_unfiltered
     )
 
-    ptn_config = AddSectionConfig(title="Your Top Stories", personalized=True)
-    ptn_sections = builder.add_component("top_news", AddSection, ptn_config, new_section=ptn_fill)
+    yts_config = AddSectionConfig(title="Your Top Stories", personalized=True)
+    yts_sections = builder.add_component("top_stories", AddSection, yts_config, new_section=yts_fill)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=3,
@@ -243,7 +243,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         candidate_set=fusion,
         article_packages=i_packages,
         interest_profile=i_profile,
-        sections=ptn_sections,
+        sections=yts_sections,
     )
 
     on_config = InOtherNewsConfig(max_articles=3)
