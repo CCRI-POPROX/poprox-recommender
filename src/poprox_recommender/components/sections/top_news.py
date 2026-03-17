@@ -18,6 +18,14 @@ class PersonalizedTopNewsConfig(BaseModel):
     max_articles: int = 3
 
 
+class LazyShim:
+    def __init__(self, value):
+        self._value = value
+
+    def get(self):
+        return self._value
+
+
 class PersonalizedTopNews(Component):
     config: PersonalizedTopNewsConfig
 
@@ -50,7 +58,7 @@ class PersonalizedTopNews(Component):
         # so here we pull twice as many to cover the worst case
         unfiltered_config = TopkConfig(num_slots=self.config.max_articles * 2)
         unfiltered_topk = TopkRanker(unfiltered_config)
-        unfiltered_articles = unfiltered_topk(deduped_top)
+        unfiltered_articles = LazyShim(unfiltered_topk(deduped_top))
 
         joiner_config = FillConfig(num_slots=self.config.max_articles)
         joiner = FillRecs(joiner_config)
