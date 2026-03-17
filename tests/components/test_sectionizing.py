@@ -14,7 +14,7 @@ from poprox_recommender.components.sections.other_news import InOtherNews, InOth
 from poprox_recommender.components.sections.top_news import (
     PersonalizedTopNews,
     PersonalizedTopNewsConfig,
-    select_from_packages,
+    TopStoryCandidates,
 )
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
 
@@ -202,7 +202,8 @@ def test_filter_using_one_package():
     package_article_ids = [articles[1].article_id, articles[3].article_id]
     package = ArticlePackage(title="half the articles", source="test", article_ids=package_article_ids)
 
-    filtered = select_from_packages(candidates, [package])
+    selector = TopStoryCandidates()
+    filtered = selector(candidates, [package])
     filtered_ids = [a.article_id for a in filtered.articles]
 
     for article_id in package_article_ids:
@@ -221,7 +222,8 @@ def test_filter_using_multiple_packages():
     package_1 = ArticlePackage(title="half the articles", source="test", article_ids=[articles[1].article_id])
     package_2 = ArticlePackage(title="half the articles", source="test", article_ids=[articles[3].article_id])
 
-    filtered = select_from_packages(candidates, [package_1, package_2])
+    selector = TopStoryCandidates()
+    filtered = selector(candidates, [package_1, package_2])
     filtered_ids = [a.article_id for a in filtered.articles]
 
     for article_id in package_1.article_ids + package_2.article_ids:

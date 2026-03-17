@@ -30,10 +30,10 @@ class PersonalizedTopNews(Component):
 
         used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
 
-        topic_filter = TopicFilter()
+        selector = TopStoryCandidates()
+        top_articles = selector(candidate_set, article_packages)
 
-        # top news section
-        top_articles = select_from_packages(candidate_set, article_packages)
+        topic_filter = TopicFilter()
         filtered_top = topic_filter(top_articles, interest_profile)
 
         logger.info(f"Creating Top Stories section from {len(filtered_top.articles)} filtered candidates")
@@ -52,31 +52,32 @@ class PersonalizedTopNews(Component):
         return sections
 
 
-def select_from_packages(candidate_articles: CandidateSet, packages: list[ArticlePackage]) -> CandidateSet:
-    article_index_lookup = {article.article_id: i for i, article in enumerate(candidate_articles.articles)}
-    selected_articles = []
-    selected_indices = []
+class TopStoryCandidates(Component):
+    def __call__(self, candidate_articles: CandidateSet, article_packages: list[ArticlePackage]) -> CandidateSet:
+        article_index_lookup = {article.article_id: i for i, article in enumerate(candidate_articles.articles)}
+        selected_articles = []
+        selected_indices = []
 
-    package_article_ids = set(article_id for package in packages for article_id in package.article_ids)
+        package_article_ids = set(article_id for package in article_packages for article_id in package.article_ids)
 
-    for article_id in package_article_ids:
-        if article_id in article_index_lookup:
-            idx = article_index_lookup[article_id]
-            selected_articles.append(candidate_articles.articles[idx])
-            selected_indices.append(idx)
+        for article_id in package_article_ids:
+            if article_id in article_index_lookup:
+                idx = article_index_lookup[article_id]
+                selected_articles.append(candidate_articles.articles[idx])
+                selected_indices.append(idx)
 
-    logger.debug(
-        "PackageFilter selected %d of %d candidate articles using %s packages",
-        len(selected_articles),
-        len(candidate_articles.articles),
-        ", ".join([p.title for p in packages]),
-    )
+        logger.debug(
+            "TopStoryCandidates selected %d of %d candidate articles using %s packages",
+            len(selected_articles),
+            len(candidate_articles.articles),
+            ", ".join([p.title for p in article_packages]),
+        )
 
-    filtered = CandidateSet(articles=selected_articles)
-    scores = getattr(candidate_articles, "scores", None)
-    if scores is not None:
-        filtered.scores = [scores[i] for i in selected_indices]
-    else:
-        filtered.scores = None
+        filtered = CandidateSet(articles=selected_articles)
+        scores = getattr(candidate_articles, "scores", None)
+        if scores is not None:
+            filtered.scores = [scores[i] for i in selected_indices]
+        else:
+            filtered.scores = None
 
-    return filtered
+        return filtered
