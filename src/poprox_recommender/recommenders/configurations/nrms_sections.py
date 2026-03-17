@@ -17,8 +17,8 @@ from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
+from poprox_recommender.components.sections.combine import AddSection, AddSectionConfig
 from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
-from poprox_recommender.components.sections.top_news import AddSection, AddSectionConfig
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
 from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 from poprox_recommender.paths import model_file_path

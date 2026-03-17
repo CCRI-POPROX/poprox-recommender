@@ -14,11 +14,11 @@ from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
 from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.sections.base import select_from_candidates
-from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
-from poprox_recommender.components.sections.top_news import (
+from poprox_recommender.components.sections.combine import (
     AddSection,
     AddSectionConfig,
 )
+from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
 from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 
