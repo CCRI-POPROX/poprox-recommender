@@ -9,14 +9,18 @@ from poprox_concepts.domain import (
     InterestProfile,
     Mention,
 )
+from poprox_recommender.components.filters.duplicate import DuplicateFilter
+from poprox_recommender.components.filters.topic import TopicFilter
+from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
+from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.sections.base import select_from_candidates
-from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
-from poprox_recommender.components.sections.top_news import (
-    PersonalizedTopNews,
-    PersonalizedTopNewsConfig,
-    select_from_packages,
+from poprox_recommender.components.sections.combine import (
+    AddSection,
+    AddSectionConfig,
 )
+from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
+from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 
 
 def make_interest_profile(topic_ids: list[UUID]) -> InterestProfile:
@@ -39,6 +43,14 @@ def make_package(entity_id, title, articles):
         seed=Entity(entity_id=entity_id, name=title, entity_type="topic", source="AP"),
         article_ids=[a.article_id for a in articles],
     )
+
+
+class LazyShim:
+    def __init__(self, value):
+        self._value = value
+
+    def get(self):
+        return self._value
 
 
 def test_sectionizer_creates_sections():
@@ -70,8 +82,31 @@ def test_sectionizer_creates_sections():
 
     sections = []
 
-    top_news_config = PersonalizedTopNewsConfig(max_articles=2)
-    sections = PersonalizedTopNews(top_news_config).__call__(candidates, packages, profile, sections)
+    selector = TopStoryCandidates()
+    top_articles = selector(candidates, packages)
+
+    dup_filter = DuplicateFilter()
+    deduped_top = dup_filter(top_articles, sections)
+
+    topic_filter = TopicFilter()
+    filtered_top = topic_filter(deduped_top, profile)
+
+    filtered_config = TopkConfig(num_slots=2)
+    filtered_topk = TopkRanker(filtered_config)
+    filtered_articles = filtered_topk(filtered_top)
+
+    # The maximum overlap with the articles chosen above is self.config.max_articles,
+    # so here we pull twice as many to cover the worst case
+    unfiltered_config = TopkConfig(num_slots=4)
+    unfiltered_topk = TopkRanker(unfiltered_config)
+    unfiltered_articles = LazyShim(unfiltered_topk(deduped_top))
+
+    joiner_config = FillConfig(num_slots=2)
+    joiner = FillRecs(joiner_config)
+    top_section = joiner(filtered_articles, unfiltered_articles)
+
+    top_news_config = AddSectionConfig(title="Your Top Stories", personalized=True)
+    sections = AddSection(top_news_config).__call__(top_section)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=2,
@@ -113,8 +148,31 @@ def test_sectionizer_creates_misc_section():
 
     sections = []
 
-    top_news_config = PersonalizedTopNewsConfig(max_articles=1)
-    sections = PersonalizedTopNews(top_news_config).__call__(candidates, packages, profile, sections)
+    selector = TopStoryCandidates()
+    top_articles = selector(candidates, packages)
+
+    dup_filter = DuplicateFilter()
+    deduped_top = dup_filter(top_articles, sections)
+
+    topic_filter = TopicFilter()
+    filtered_top = topic_filter(deduped_top, profile)
+
+    filtered_config = TopkConfig(num_slots=1)
+    filtered_topk = TopkRanker(filtered_config)
+    filtered_articles = filtered_topk(filtered_top)
+
+    # The maximum overlap with the articles chosen above is self.config.max_articles,
+    # so here we pull twice as many to cover the worst case
+    unfiltered_config = TopkConfig(num_slots=2)
+    unfiltered_topk = TopkRanker(unfiltered_config)
+    unfiltered_articles = LazyShim(unfiltered_topk(deduped_top))
+
+    joiner_config = FillConfig(num_slots=1)
+    joiner = FillRecs(joiner_config)
+    top_section = joiner(filtered_articles, unfiltered_articles)
+
+    top_news_config = AddSectionConfig(title="Your Top Stories", personalized=True)
+    sections = AddSection(top_news_config).__call__(top_section, sections)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=1,
@@ -188,41 +246,3 @@ def test_select_from_candidates_excluding_without_scores():
     selected = select_from_candidates(candidates, 3, excluding=[articles[0].article_id])
     assert len(selected) == 3
     assert [a.article_id for a in selected] == [articles[1].article_id, articles[2].article_id, articles[3].article_id]
-
-
-def test_filter_using_one_package():
-    articles = [
-        Article(article_id=uuid4(), headline="Article 1"),
-        Article(article_id=uuid4(), headline="Article 2"),
-        Article(article_id=uuid4(), headline="Article 3"),
-        Article(article_id=uuid4(), headline="Article 4"),
-    ]
-    candidates = CandidateSet(articles=articles)
-
-    package_article_ids = [articles[1].article_id, articles[3].article_id]
-    package = ArticlePackage(title="half the articles", source="test", article_ids=package_article_ids)
-
-    filtered = select_from_packages(candidates, [package])
-    filtered_ids = [a.article_id for a in filtered.articles]
-
-    for article_id in package_article_ids:
-        assert article_id in filtered_ids
-
-
-def test_filter_using_multiple_packages():
-    articles = [
-        Article(article_id=uuid4(), headline="Article 1"),
-        Article(article_id=uuid4(), headline="Article 2"),
-        Article(article_id=uuid4(), headline="Article 3"),
-        Article(article_id=uuid4(), headline="Article 4"),
-    ]
-    candidates = CandidateSet(articles=articles)
-
-    package_1 = ArticlePackage(title="half the articles", source="test", article_ids=[articles[1].article_id])
-    package_2 = ArticlePackage(title="half the articles", source="test", article_ids=[articles[3].article_id])
-
-    filtered = select_from_packages(candidates, [package_1, package_2])
-    filtered_ids = [a.article_id for a in filtered.articles]
-
-    for article_id in package_1.article_ids + package_2.article_ids:
-        assert article_id in filtered_ids

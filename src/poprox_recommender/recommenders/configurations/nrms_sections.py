@@ -12,11 +12,15 @@ from poprox_recommender.components.embedders.user_article_feedback import (
 )
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.filters.impression import ImpressionFilter
+from poprox_recommender.components.filters.topic import TopicFilter
+from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
 from poprox_recommender.components.joiners.score import ScoreFusion
+from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
+from poprox_recommender.components.sections.combine import AddSection, AddSectionConfig
 from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
-from poprox_recommender.components.sections.top_news import PersonalizedTopNews, PersonalizedTopNewsConfig
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
+from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 from poprox_recommender.paths import model_file_path
 
 TOP_NEWS_PACKAGE_ID = UUID("72bb7674-7bde-4f3e-a351-ccdeae888502")
@@ -200,15 +204,33 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Sections
-    top_news_config = PersonalizedTopNewsConfig(max_articles=3)
-    ptn_sections = builder.add_component(
-        "top_news",
-        PersonalizedTopNews,
-        top_news_config,
-        candidate_set=fusion,
+    yts_candidates = builder.add_component(
+        "yts_candidates",
+        TopStoryCandidates,
+        candidate_articles=fusion,
         article_packages=i_packages,
-        interest_profile=i_profile,
     )
+
+    yts_filtered = builder.add_component(
+        "yts_filtered", TopicFilter, candidates=yts_candidates, interest_profile=i_profile
+    )
+
+    yts_topk_filtered = builder.add_component(
+        "yts_topk_filtered", TopkRanker, TopkConfig(num_slots=3), candidate_articles=yts_filtered
+    )
+
+    # The maximum overlap with the articles chosen above is self.config.max_articles,
+    # so here we pull twice as many to cover the worst case
+    yts_topk_unfiltered = builder.add_component(
+        "yts_topk_unfiltered", TopkRanker, TopkConfig(num_slots=6), candidate_articles=yts_candidates
+    )
+
+    yts_fill = builder.add_component(
+        "yts_fill", FillRecs, FillConfig(num_slots=3), recs1=yts_topk_filtered, recs2=yts_topk_unfiltered
+    )
+
+    yts_config = AddSectionConfig(title="Your Top Stories", personalized=True)
+    yts_sections = builder.add_component("top_stories", AddSection, yts_config, new_section=yts_fill)
 
     topical_config = TopicalSectionsConfig(
         max_topic_sections=3,
@@ -221,7 +243,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         candidate_set=fusion,
         article_packages=i_packages,
         interest_profile=i_profile,
-        sections=ptn_sections,
+        sections=yts_sections,
     )
 
     on_config = InOtherNewsConfig(max_articles=3)
