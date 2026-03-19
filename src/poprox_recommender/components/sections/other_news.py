@@ -7,7 +7,8 @@ from poprox_concepts.domain import ArticlePackage, CandidateSet, ImpressedSectio
 from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.filters.seeds import PreviousSectionsFilter
 from poprox_recommender.components.filters.topic import TopicFilter
-from poprox_recommender.components.sections.base import select_from_candidates
+from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
+from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 
 logger = logging.getLogger(__name__)
 
@@ -37,15 +38,24 @@ class InOtherNews(Component):
         topic_filter = TopicFilter()
         topic_filtered = topic_filter(deduped_candidates, interest_profile)
 
-        logger.info(f"Creating Other News section from {len(topic_filtered.articles)} filtered candidates")
-        ranked_articles = select_from_candidates(topic_filtered, self.config.max_articles)
-        if len(ranked_articles) < self.config.max_articles:
-            logger.info(f"Falling back to full pool of {len(deduped_candidates.articles)} candidates")
-            ranked_articles = select_from_candidates(deduped_candidates, self.config.max_articles)
+        filtered_config = TopkConfig(num_slots=self.config.max_articles)
+        filtered_topk = TopkRanker(filtered_config)
+        filtered_articles = filtered_topk(topic_filtered)
 
-        misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
+        # The maximum overlap with the articles chosen above is self.config.max_articles,
+        # so here we pull twice as many to cover the worst case
+        unfiltered_config = TopkConfig(num_slots=self.config.max_articles * 2)
+        unfiltered_topk = TopkRanker(unfiltered_config)
+        unfiltered_articles = unfiltered_topk(deduped_candidates)
 
-        if len(misc_section.impressions) > 0:
-            sections.append(misc_section)
+        joiner_config = FillConfig(num_slots=self.config.max_articles)
+        joiner = FillRecs(joiner_config)
+        other_news_section = joiner(filtered_articles, unfiltered_articles)
+
+        other_news_section.title = "In Other News"
+        other_news_section.personalized = True
+
+        if len(other_news_section.impressions) > 0:
+            sections.append(other_news_section)
 
         return sections
