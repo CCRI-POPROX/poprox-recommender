@@ -2,6 +2,8 @@
 POPROX recommendation hooks.
 """
 
+from collections.abc import MutableMapping, MutableSequence, MutableSet
+from copy import copy
 from typing import Any
 
 from lenskit.pipeline.nodes import ComponentInstanceNode
@@ -17,5 +19,7 @@ def shallow_copy_pydantic_model(
     """
     if isinstance(value, BaseModel):
         return value.model_copy()
+    elif isinstance(value, (MutableSequence, MutableSet, MutableMapping)):
+        return copy(value)
     else:
         return value
