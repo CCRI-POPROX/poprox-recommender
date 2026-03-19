@@ -5,8 +5,9 @@ from pydantic import BaseModel
 
 from poprox_concepts.domain import ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
 from poprox_recommender.components.filters.duplicate import DuplicateFilter
+from poprox_recommender.components.filters.seeds import PreviousSectionsFilter
 from poprox_recommender.components.filters.topic import TopicFilter
-from poprox_recommender.components.sections.base import select_from_candidates, select_mentioning
+from poprox_recommender.components.sections.base import select_from_candidates
 
 logger = logging.getLogger(__name__)
 
@@ -27,27 +28,20 @@ class InOtherNews(Component):
     ) -> list[ImpressedSection]:
         sections = sections or []
 
+        section_filter = PreviousSectionsFilter()
+        narrow_candidates = section_filter(candidate_set, article_packages, sections)
+
         dup_filter = DuplicateFilter()
-        deduped_candidates = dup_filter(candidate_set, sections)
-
-        topic_seeds = [
-            package.seed
-            for package in article_packages
-            for section in sections
-            if section.seed_entity_id == package.seed.entity_id
-        ]
-
-        used_topic_articles = select_mentioning(deduped_candidates, topic_seeds)
-        used_ids = set(article.article_id for article in used_topic_articles.articles)
+        deduped_candidates = dup_filter(narrow_candidates, sections)
 
         topic_filter = TopicFilter()
         topic_filtered = topic_filter(deduped_candidates, interest_profile)
 
         logger.info(f"Creating Other News section from {len(topic_filtered.articles)} filtered candidates")
-        ranked_articles = select_from_candidates(topic_filtered, self.config.max_articles, used_ids)
+        ranked_articles = select_from_candidates(topic_filtered, self.config.max_articles)
         if len(ranked_articles) < self.config.max_articles:
             logger.info(f"Falling back to full pool of {len(deduped_candidates.articles)} candidates")
-            ranked_articles = select_from_candidates(deduped_candidates, self.config.max_articles, used_ids)
+            ranked_articles = select_from_candidates(deduped_candidates, self.config.max_articles)
 
         misc_section = ImpressedSection.from_articles(ranked_articles, title="In Other News", personalized=True)
 

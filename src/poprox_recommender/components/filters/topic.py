@@ -51,7 +51,7 @@ class TopicFilter(Component):
 
             # If none of the above apply, default to including the article
             kept_articles.append(article)
-            if hasattr(candidates, "scores") and candidates.scores:
+            if hasattr(candidates, "scores") and candidates.scores is not None:
                 kept_scores.append(candidates.scores[idx])
 
         logger.debug(
