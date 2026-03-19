@@ -22,4 +22,4 @@ class DuplicateFilter(Component):
         else:
             filtered.scores = None
 
-        return candidate
+        return filtered
