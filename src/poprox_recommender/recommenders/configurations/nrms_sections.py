@@ -20,7 +20,7 @@ from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
 from poprox_recommender.components.sections.combine import AddSection, AddSectionConfig
-from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
+from poprox_recommender.components.sections.topical import TopicalSection, TopicalSectionConfig
 from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 from poprox_recommender.paths import model_file_path
 
@@ -233,24 +233,41 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     yts_config = AddSectionConfig(title="Your Top Stories", personalized=True)
     yts_sections = builder.add_component("top_stories", AddSection, yts_config, new_section=yts_fill)
 
-    topical_config = TopicalSectionsConfig(
-        max_topic_sections=3,
+    topical_config = TopicalSectionConfig(
         max_articles_per_topic=3,
     )
-    tp_sections = builder.add_component(
-        "topical",
-        TopicalSections,
+    topical_1 = builder.add_component(
+        "topical_section_1",
+        TopicalSection,
         topical_config,
         candidate_set=fusion,
         article_packages=i_packages,
         interest_profile=i_profile,
         sections=yts_sections,
     )
+    topical_2 = builder.add_component(
+        "topical_section_2",
+        TopicalSection,
+        topical_config,
+        candidate_set=fusion,
+        article_packages=i_packages,
+        interest_profile=i_profile,
+        sections=topical_1,
+    )
+    topical_3 = builder.add_component(
+        "topical_section_3",
+        TopicalSection,
+        topical_config,
+        candidate_set=fusion,
+        article_packages=i_packages,
+        interest_profile=i_profile,
+        sections=topical_2,
+    )
 
-    ion_deduped = builder.add_component("ion_deduped", DuplicateFilter, candidate=fusion, sections=tp_sections)
+    ion_deduped = builder.add_component("ion_deduped", DuplicateFilter, candidate=fusion, sections=topical_3)
 
     ion_narrowed = builder.add_component(
-        "ion_narrowed", PreviousSectionsFilter, candidate=ion_deduped, article_packages=i_packages, sections=tp_sections
+        "ion_narrowed", PreviousSectionsFilter, candidate=ion_deduped, article_packages=i_packages, sections=topical_3
     )
 
     ion_filtered = builder.add_component(
@@ -272,4 +289,4 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     ion_config = AddSectionConfig(title="In Other News", personalized=True)
-    builder.add_component("recommender", AddSection, ion_config, new_section=ion_fill, existing_sections=tp_sections)
+    builder.add_component("recommender", AddSection, ion_config, new_section=ion_fill, existing_sections=topical_3)

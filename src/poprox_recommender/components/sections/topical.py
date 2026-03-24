@@ -12,14 +12,13 @@ from poprox_recommender.components.sections.base import select_from_candidates, 
 logger = logging.getLogger(__name__)
 
 
-class TopicalSectionsConfig(BaseModel):
-    max_topic_sections: int = 3
+class TopicalSectionConfig(BaseModel):
     max_articles_per_topic: int = 3
     random_seed: int = 22
 
 
-class TopicalSections(Component):
-    config: TopicalSectionsConfig
+class TopicalSection(Component):
+    config: TopicalSectionConfig
 
     def __call__(
         self,
@@ -34,12 +33,10 @@ class TopicalSections(Component):
         if today is None:
             today = date.today()
 
-        seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
-
-        used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
+        random_seed = self.random_daily_seed(interest_profile.profile_id, today, self.config.random_seed)
 
         topical_interests = list(interest_profile.interests_by_type("topic"))
-        rng = np.random.default_rng(seed)
+        rng = np.random.default_rng(random_seed)
         rng.shuffle(topical_interests)
         sorted_interests = sorted(
             topical_interests,
@@ -47,9 +44,24 @@ class TopicalSections(Component):
             reverse=True,
         )
 
-        topical_sections: list[ImpressedSection] = []
+        used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
+
+        prev_section_seed_ids = [
+            package.seed.entity_id
+            for package in article_packages
+            for section in sections
+            if section.seed_entity_id == package.seed.entity_id
+        ]
+
         for interest in sorted_interests:
-            package = next((p for p in article_packages if p.seed and p.seed.entity_id == interest.entity_id), None)
+            package = next(
+                (
+                    p
+                    for p in article_packages
+                    if p.seed and p.seed not in prev_section_seed_ids and p.seed.entity_id == interest.entity_id
+                ),
+                None,
+            )
             if package:
                 displayed_title = package.title.replace("Top ", "").replace(" Stories", "")
 
@@ -63,16 +75,12 @@ class TopicalSections(Component):
 
                 if len(topic_section.impressions) >= self.config.max_articles_per_topic:
                     used_ids.update(a.article_id for a in ranked_articles)
-                    topical_sections.append(topic_section)
+                    sections.append(topic_section)
+                    break
                 else:
                     logger.info(
                         f"Discarding partial {package.seed.name} section with {len(topic_section.impressions)} articles"
                     )
-
-                if len(topical_sections) >= self.config.max_topic_sections:
-                    break
-
-        sections.extend(topical_sections)
 
         return sections
 
