@@ -42,9 +42,7 @@ class TopicalSection(Component):
         ranker = TopkRanker(TopkConfig(num_slots=self.config.max_articles_per_topic))
         topic_section = ranker(candidates)
 
-        config = AddSectionConfig(
-            title=candidates.seed_entity_name, seed_entity_id=candidates.seed_entity_id, personalized=True
-        )
+        config = AddSectionConfig(personalized=True)
         sections = AddSection(config).__call__(topic_section, sections)
 
         return sections

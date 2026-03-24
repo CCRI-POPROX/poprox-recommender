@@ -23,4 +23,8 @@ class TopkRanker(Component):
             # otherwise select from the top of the list of candidates preserving order
             ranked_articles = candidate_articles.articles[: self.config.num_slots]
 
-        return ImpressedSection.from_articles(ranked_articles)
+        return ImpressedSection.from_articles(
+            ranked_articles,
+            title=candidate_articles.seed_entity_name,
+            seed_entity_id=candidate_articles.seed_entity_id,
+        )
