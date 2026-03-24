@@ -1,5 +1,4 @@
 import logging
-from uuid import UUID
 
 from lenskit.pipeline import Component
 from pydantic import BaseModel
@@ -11,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 class AddSectionConfig(BaseModel):
     title: str | None = None
-    seed_entity_id: UUID | None = None
     personalized: bool | None = None
 
 
@@ -27,9 +25,6 @@ class AddSection(Component):
 
         if self.config.title:
             new_section.title = self.config.title
-
-        if self.config.seed_entity_id:
-            new_section.seed_entity_id = self.config.seed_entity_id
 
         if self.config.personalized:
             new_section.personalized = self.config.personalized
