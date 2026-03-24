@@ -8,7 +8,8 @@ from pydantic import BaseModel
 
 from poprox_concepts.domain import CandidateSet, ImpressedSection, InterestProfile
 from poprox_recommender.components.filters.duplicate import DuplicateFilter
-from poprox_recommender.components.sections.base import select_from_candidates, select_mentioning
+from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
+from poprox_recommender.components.sections.base import select_mentioning
 
 logger = logging.getLogger(__name__)
 
@@ -54,11 +55,12 @@ class TopicalSection(Component):
             filtered = select_mentioning(deduped_candidates, [interest.entity_id])
             logger.info(f"Creating {interest.entity_name} section from {len(filtered.articles)} topical candidates")
 
-            ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic)
+            ranker = TopkRanker(TopkConfig(num_slots=self.config.max_articles_per_topic))
+            topic_section = ranker(filtered)
 
-            topic_section = ImpressedSection.from_articles(
-                ranked_articles, title=interest.entity_name, personalized=True, seed_entity_id=interest.entity_id
-            )
+            topic_section.title = interest.entity_name
+            topic_section.personalized = True
+            topic_section.seed_entity_id = interest.entity_id
 
             if len(topic_section.impressions) >= self.config.max_articles_per_topic:
                 sections.append(topic_section)
