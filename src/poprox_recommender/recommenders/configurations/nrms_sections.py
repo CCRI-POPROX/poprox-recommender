@@ -11,14 +11,15 @@ from poprox_recommender.components.embedders.user_article_feedback import (
     UserArticleFeedbackEmbedder,
 )
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
+from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.filters.impression import ImpressionFilter
+from poprox_recommender.components.filters.seeds import PreviousSectionsFilter
 from poprox_recommender.components.filters.topic import TopicFilter
 from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
 from poprox_recommender.components.sections.combine import AddSection, AddSectionConfig
-from poprox_recommender.components.sections.other_news import InOtherNews, InOtherNewsConfig
 from poprox_recommender.components.sections.topical import TopicalSections, TopicalSectionsConfig
 from poprox_recommender.components.selectors.top_news import TopStoryCandidates
 from poprox_recommender.paths import model_file_path
@@ -246,13 +247,29 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         sections=yts_sections,
     )
 
-    on_config = InOtherNewsConfig(max_articles=3)
-    builder.add_component(
-        "recommender",
-        InOtherNews,
-        on_config,
-        candidate_set=fusion,
-        article_packages=i_packages,
-        interest_profile=i_profile,
-        sections=tp_sections,
+    ion_deduped = builder.add_component("ion_deduped", DuplicateFilter, candidate=fusion, sections=tp_sections)
+
+    ion_narrowed = builder.add_component(
+        "ion_narrowed", PreviousSectionsFilter, candidate=ion_deduped, article_packages=i_packages, sections=tp_sections
     )
+
+    ion_filtered = builder.add_component(
+        "ion_topic_filtered", TopicFilter, candidates=ion_narrowed, interest_profile=i_profile
+    )
+
+    ion_topk_filtered = builder.add_component(
+        "ion_topk_filtered", TopkRanker, TopkConfig(num_slots=3), candidate_articles=ion_filtered
+    )
+
+    # The maximum overlap with the articles chosen above is self.config.max_articles,
+    # so here we pull twice as many to cover the worst case
+    ion_topk_unfiltered = builder.add_component(
+        "ion_topk_unfiltered", TopkRanker, TopkConfig(num_slots=6), candidate_articles=ion_narrowed
+    )
+
+    ion_fill = builder.add_component(
+        "ion_fill", FillRecs, FillConfig(num_slots=3), recs1=ion_topk_filtered, recs2=ion_topk_unfiltered
+    )
+
+    ion_config = AddSectionConfig(title="In Other News", personalized=True)
+    builder.add_component("recommender", AddSection, ion_config, new_section=ion_fill, existing_sections=tp_sections)
