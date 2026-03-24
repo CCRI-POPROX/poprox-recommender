@@ -6,7 +6,7 @@ import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
 
-from poprox_concepts.domain import ArticlePackage, CandidateSet, ImpressedSection, InterestProfile
+from poprox_concepts.domain import CandidateSet, ImpressedSection, InterestProfile
 from poprox_recommender.components.sections.base import select_from_candidates, select_mentioning
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,6 @@ class TopicalSection(Component):
     def __call__(
         self,
         candidate_set: CandidateSet,
-        article_packages: list[ArticlePackage],
         interest_profile: InterestProfile,
         sections: list[ImpressedSection] | None = None,
         today: date | None = None,
@@ -46,41 +45,27 @@ class TopicalSection(Component):
 
         used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
 
-        prev_section_seed_ids = [
-            package.seed.entity_id
-            for package in article_packages
-            for section in sections
-            if section.seed_entity_id == package.seed.entity_id
-        ]
+        prev_section_seed_ids = [section.seed_entity_id for section in sections]
+        sorted_interests = [i for i in sorted_interests if i.entity_id not in prev_section_seed_ids]
 
         for interest in sorted_interests:
-            package = next(
-                (
-                    p
-                    for p in article_packages
-                    if p.seed and p.seed not in prev_section_seed_ids and p.seed.entity_id == interest.entity_id
-                ),
-                None,
+            filtered = select_mentioning(candidate_set, [interest.entity_id])
+            logger.info(f"Creating {interest.entity_name} section from {len(filtered.articles)} topical candidates")
+
+            ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic, used_ids)
+
+            topic_section = ImpressedSection.from_articles(
+                ranked_articles, title=interest.entity_name, personalized=True, seed_entity_id=interest.entity_id
             )
-            if package:
-                displayed_title = package.title.replace("Top ", "").replace(" Stories", "")
 
-                filtered = select_mentioning(candidate_set, [package.seed.entity_id] if package.seed else [])
-                logger.info(f"Creating {package.seed.name} section from {len(filtered.articles)} topical candidates")
-                ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic, used_ids)
-
-                topic_section = ImpressedSection.from_articles(
-                    ranked_articles, title=displayed_title, personalized=True, seed_entity_id=interest.entity_id
+            if len(topic_section.impressions) >= self.config.max_articles_per_topic:
+                used_ids.update(a.article_id for a in ranked_articles)
+                sections.append(topic_section)
+                break
+            else:
+                logger.info(
+                    f"Discarding partial {interest.entity_name} section with {len(topic_section.impressions)} articles"
                 )
-
-                if len(topic_section.impressions) >= self.config.max_articles_per_topic:
-                    used_ids.update(a.article_id for a in ranked_articles)
-                    sections.append(topic_section)
-                    break
-                else:
-                    logger.info(
-                        f"Discarding partial {package.seed.name} section with {len(topic_section.impressions)} articles"
-                    )
 
         return sections
 

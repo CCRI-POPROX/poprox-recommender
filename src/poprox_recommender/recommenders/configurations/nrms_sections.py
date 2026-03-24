@@ -241,7 +241,6 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         TopicalSection,
         topical_config,
         candidate_set=fusion,
-        article_packages=i_packages,
         interest_profile=i_profile,
         sections=yts_sections,
     )
@@ -250,7 +249,6 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         TopicalSection,
         topical_config,
         candidate_set=fusion,
-        article_packages=i_packages,
         interest_profile=i_profile,
         sections=topical_1,
     )
@@ -259,7 +257,6 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         TopicalSection,
         topical_config,
         candidate_set=fusion,
-        article_packages=i_packages,
         interest_profile=i_profile,
         sections=topical_2,
     )
