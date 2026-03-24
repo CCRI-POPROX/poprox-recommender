@@ -7,6 +7,7 @@ from lenskit.pipeline import Component
 from pydantic import BaseModel
 
 from poprox_concepts.domain import CandidateSet, ImpressedSection, InterestProfile
+from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.sections.base import select_from_candidates, select_mentioning
 
 logger = logging.getLogger(__name__)
@@ -43,23 +44,23 @@ class TopicalSection(Component):
             reverse=True,
         )
 
-        used_ids = set(impression.article.article_id for section in sections for impression in section.impressions)
+        dedup_filter = DuplicateFilter()
+        deduped_candidates = dedup_filter(candidate_set, sections)
 
         prev_section_seed_ids = [section.seed_entity_id for section in sections]
         sorted_interests = [i for i in sorted_interests if i.entity_id not in prev_section_seed_ids]
 
         for interest in sorted_interests:
-            filtered = select_mentioning(candidate_set, [interest.entity_id])
+            filtered = select_mentioning(deduped_candidates, [interest.entity_id])
             logger.info(f"Creating {interest.entity_name} section from {len(filtered.articles)} topical candidates")
 
-            ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic, used_ids)
+            ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic)
 
             topic_section = ImpressedSection.from_articles(
                 ranked_articles, title=interest.entity_name, personalized=True, seed_entity_id=interest.entity_id
             )
 
             if len(topic_section.impressions) >= self.config.max_articles_per_topic:
-                used_ids.update(a.article_id for a in ranked_articles)
                 sections.append(topic_section)
                 break
             else:
