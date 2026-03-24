@@ -65,7 +65,7 @@ class TopicalSection(Component):
             if package:
                 displayed_title = package.title.replace("Top ", "").replace(" Stories", "")
 
-                filtered = select_mentioning(candidate_set, [package.seed] if package.seed else [])
+                filtered = select_mentioning(candidate_set, [package.seed.entity_id] if package.seed else [])
                 logger.info(f"Creating {package.seed.name} section from {len(filtered.articles)} topical candidates")
                 ranked_articles = select_from_candidates(filtered, self.config.max_articles_per_topic, used_ids)
 

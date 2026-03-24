@@ -9,14 +9,14 @@ class PreviousSectionsFilter(Component):
     def __call__(
         self, candidate: CandidateSet, article_packages: list[ArticlePackage], sections: list[ImpressedSection]
     ) -> CandidateSet:
-        prev_section_seeds = [
-            package.seed
+        prev_section_seed_ids = [
+            package.seed.entity_id
             for package in article_packages
             for section in sections
             if section.seed_entity_id == package.seed.entity_id
         ]
 
-        used_topic_articles = select_mentioning(candidate, prev_section_seeds)
+        used_topic_articles = select_mentioning(candidate, prev_section_seed_ids)
         used_ids = set(article.article_id for article in used_topic_articles.articles)
 
         kept_articles = []

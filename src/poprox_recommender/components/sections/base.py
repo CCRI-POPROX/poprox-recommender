@@ -3,7 +3,7 @@ from uuid import UUID
 
 import numpy as np
 
-from poprox_concepts.domain import Article, CandidateSet, Entity
+from poprox_concepts.domain import Article, CandidateSet
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +26,12 @@ def select_from_candidates(candidates: CandidateSet, num_articles: int, excludin
     return ranked_articles
 
 
-def select_mentioning(candidate: CandidateSet, entities: list[Entity]):
-    entity_ids = set(e.entity_id for e in entities)
-
+def select_mentioning(candidate: CandidateSet, entity_ids: list[UUID]):
     kept_articles = []
     kept_scores = []
     for idx, article in enumerate(candidate.articles):
         mentioned = set(m.entity.entity_id for m in article.mentions if m.relevance and m.relevance >= 76)
-        if len(entity_ids.intersection(mentioned)) > 0:
+        if len(set(entity_ids).intersection(mentioned)) > 0:
             kept_articles.append(article)
             if hasattr(candidate, "scores") and candidate.scores is not None:
                 kept_scores.append(candidate.scores[idx])
