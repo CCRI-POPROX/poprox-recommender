@@ -52,23 +52,28 @@ class TopicalSection(Component):
         prev_section_seed_ids = [section.seed_entity_id for section in sections]
         sorted_interests = [i for i in sorted_interests if i.entity_id not in prev_section_seed_ids]
 
-        interest = None
         candidates = None
 
-        for potential_interest in sorted_interests:
-            relevant_candidates = select_mentioning(deduped_candidates, [potential_interest.entity_id])
+        for interest in sorted_interests:
+            relevant_candidates = select_mentioning(deduped_candidates, [interest.entity_id])
             if len(relevant_candidates.articles) >= self.config.max_articles_per_topic:
-                interest = potential_interest
                 candidates = relevant_candidates
+                candidates.seed_entity_id = interest.entity_id
+                candidates.seed_entity_name = interest.entity_name
+                candidates.seed_entity_type = interest.entity_type
                 break
 
-        if interest and candidates:
-            logger.info(f"Creating {interest.entity_name} section from {len(candidates.articles)} topical candidates")
+        if candidates:
+            logger.info(
+                f"Creating {candidates.seed_entity_name} section from {len(candidates.articles)} topical candidates"
+            )
 
             ranker = TopkRanker(TopkConfig(num_slots=self.config.max_articles_per_topic))
             topic_section = ranker(candidates)
 
-            config = AddSectionConfig(title=interest.entity_name, seed_entity_id=interest.entity_id, personalized=True)
+            config = AddSectionConfig(
+                title=candidates.seed_entity_name, seed_entity_id=candidates.seed_entity_id, personalized=True
+            )
             sections = AddSection(config).__call__(topic_section, sections)
 
         return sections
