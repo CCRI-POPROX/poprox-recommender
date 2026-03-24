@@ -51,24 +51,27 @@ class TopicalSection(Component):
         prev_section_seed_ids = [section.seed_entity_id for section in sections]
         sorted_interests = [i for i in sorted_interests if i.entity_id not in prev_section_seed_ids]
 
-        for interest in sorted_interests:
-            filtered = select_mentioning(deduped_candidates, [interest.entity_id])
-            logger.info(f"Creating {interest.entity_name} section from {len(filtered.articles)} topical candidates")
+        interest = None
+        candidates = None
+
+        for potential_interest in sorted_interests:
+            relevant_candidates = select_mentioning(deduped_candidates, [potential_interest.entity_id])
+            if len(relevant_candidates.articles) >= self.config.max_articles_per_topic:
+                interest = potential_interest
+                candidates = relevant_candidates
+                break
+
+        if interest and candidates:
+            logger.info(f"Creating {interest.entity_name} section from {len(candidates.articles)} topical candidates")
 
             ranker = TopkRanker(TopkConfig(num_slots=self.config.max_articles_per_topic))
-            topic_section = ranker(filtered)
+            topic_section = ranker(candidates)
 
             topic_section.title = interest.entity_name
             topic_section.personalized = True
             topic_section.seed_entity_id = interest.entity_id
 
-            if len(topic_section.impressions) >= self.config.max_articles_per_topic:
-                sections.append(topic_section)
-                break
-            else:
-                logger.info(
-                    f"Discarding partial {interest.entity_name} section with {len(topic_section.impressions)} articles"
-                )
+            sections.append(topic_section)
 
         return sections
 
