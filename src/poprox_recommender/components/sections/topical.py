@@ -10,6 +10,7 @@ from poprox_concepts.domain import CandidateSet, ImpressedSection, InterestProfi
 from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.sections.base import select_mentioning
+from poprox_recommender.components.sections.combine import AddSection, AddSectionConfig
 
 logger = logging.getLogger(__name__)
 
@@ -67,11 +68,8 @@ class TopicalSection(Component):
             ranker = TopkRanker(TopkConfig(num_slots=self.config.max_articles_per_topic))
             topic_section = ranker(candidates)
 
-            topic_section.title = interest.entity_name
-            topic_section.personalized = True
-            topic_section.seed_entity_id = interest.entity_id
-
-            sections.append(topic_section)
+            config = AddSectionConfig(title=interest.entity_name, seed_entity_id=interest.entity_id, personalized=True)
+            sections = AddSection(config).__call__(topic_section, sections)
 
         return sections
 
