@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 from lenskit.pipeline import Component
 from pydantic import BaseModel
@@ -23,8 +25,13 @@ class TopkRanker(Component):
             # otherwise select from the top of the list of candidates preserving order
             ranked_articles = candidate_articles.articles[: self.config.num_slots]
 
+        # Python's native title() method struggles with unpunctuated abbreviations
+        # like "US" and lowercases everything but the first letter. This custom
+        # version uppercases the first letter of each word without changing others
+        titleized_name = re.sub(r"(?:(?<=\W)|^)\w", lambda x: x.group(0).upper(), candidate_articles.seed_entity_name)
+
         return ImpressedSection.from_articles(
             ranked_articles,
-            title=candidate_articles.seed_entity_name,
+            title=titleized_name,
             seed_entity_id=candidate_articles.seed_entity_id,
         )
