@@ -266,7 +266,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         TopicalCandidatesConfig(min_candidates=3),
         candidate_set=topic2_deduped,
         interest_profile=i_profile,
-        sections=yts_sections,
+        sections=topic1_sections,
     )
     topic2_topk = builder.add_component(
         "topic2_topk", TopkRanker, TopkConfig(num_slots=3), candidate_articles=topic2_candidates
@@ -277,7 +277,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         AddSection,
         AddSectionConfig(personalized=True),
         new_section=topic2_topk,
-        existing_sections=yts_sections,
+        existing_sections=topic1_sections,
     )
 
     topic3_deduped = builder.add_component(
@@ -290,7 +290,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         TopicalCandidatesConfig(min_candidates=3),
         candidate_set=topic3_deduped,
         interest_profile=i_profile,
-        sections=yts_sections,
+        sections=topic2_sections,
     )
     topic3_topk = builder.add_component(
         "topic3_topk", TopkRanker, TopkConfig(num_slots=3), candidate_articles=topic3_candidates
@@ -301,7 +301,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         AddSection,
         AddSectionConfig(personalized=True),
         new_section=topic3_topk,
-        existing_sections=yts_sections,
+        existing_sections=topic2_sections,
     )
 
     # In Other News section
