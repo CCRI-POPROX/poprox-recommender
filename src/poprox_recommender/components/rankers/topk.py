@@ -28,7 +28,9 @@ class TopkRanker(Component):
         # Python's native title() method struggles with unpunctuated abbreviations
         # like "US" and lowercases everything but the first letter. This custom
         # version uppercases the first letter of each word without changing others
-        titleized_name = re.sub(r"(?:(?<=\W)|^)\w", lambda x: x.group(0).upper(), candidate_articles.seed_entity_name)
+        titleized_name = re.sub(
+            r"(?:(?<=\W)|^)\w", lambda x: x.group(0).upper(), candidate_articles.seed_entity_name or ""
+        )
 
         return ImpressedSection.from_articles(
             ranked_articles,
