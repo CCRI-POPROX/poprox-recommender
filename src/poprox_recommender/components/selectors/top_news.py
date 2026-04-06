@@ -45,14 +45,17 @@ class TopGeneralNewsCandidates(Component):
 
         # Find article ids from the General News package
         general_news_package = next(
-            package for package in article_packages if package.seed.entity_id == general_news_uuid
+            (package for package in article_packages if package.seed.entity_id == general_news_uuid), None
         )
-        article_ids = general_news_package.article_ids
+
+        article_ids = general_news_package.article_ids if general_news_package else []
 
         # Iterate through the candidates to find the right articles and build an ordered list
         selected = []
         for article_id in article_ids:
-            article = next(article for article in candidate_articles.articles if article.article_id == article_id)
+            article = next(
+                (article for article in candidate_articles.articles if article.article_id == article_id), None
+            )
             if article:
                 selected.append(article)
 
