@@ -33,7 +33,7 @@ def test_basic_request(service, mind_data, pipeline):  # noqa: F811
             "Oddities",
         ]
     )
-    num_recs = 15 if pipeline == "nrms_sections" else 10
+    num_recs = 15 if pipeline.startswith("nrms_sections") else 10
     request_generator.set_num_recs(num_recs)
 
     req_body = request_generator.get_request()
