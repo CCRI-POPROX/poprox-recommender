@@ -23,7 +23,7 @@ class TopicalCandidates(Component):
         interest_profile: InterestProfile,
         sections: list[ImpressedSection] | None = None,
         today: date | None = None,
-        descending: bool = True,
+        descending: bool | None = True,
     ) -> CandidateSet:
         sections = sections or []
 
