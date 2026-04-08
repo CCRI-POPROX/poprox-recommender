@@ -8,7 +8,7 @@ from poprox_concepts.domain import CandidateSet, InterestProfile
 logger = logging.getLogger(__name__)
 
 
-class TopicFilter(Component):
+class TopicPrefsFilter(Component):
     config: None
 
     def __call__(self, candidates: CandidateSet, interest_profile: InterestProfile) -> CandidateSet:

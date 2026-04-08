@@ -3,13 +3,13 @@ from uuid import uuid4
 from lenskit.pipeline import Pipeline, PipelineBuilder
 
 from poprox_concepts.domain import Article, CandidateSet, ImpressedSection, InterestProfile
-from poprox_recommender.components.filters import TopicFilter
+from poprox_recommender.components.filters import TopicPrefsFilter
 from poprox_recommender.components.joiners import Concatenate, FillRecs, Interleave
 from poprox_recommender.components.samplers import UniformSampler
 
 
 def init_builder(total_slots):
-    topic_filter = TopicFilter()
+    topic_filter = TopicPrefsFilter()
     sampler = UniformSampler(num_slots=total_slots)
 
     builder = PipelineBuilder(name="random_concat")

@@ -12,7 +12,7 @@ from poprox_recommender.components.embedders.user_article_feedback import (
 )
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
 from poprox_recommender.components.filters.impression import ImpressionFilter
-from poprox_recommender.components.filters.topic import TopicFilter
+from poprox_recommender.components.filters.topic import TopicPrefsFilter
 from poprox_recommender.components.joiners.fill import FillRecs
 from poprox_recommender.components.joiners.score import ScoreFusion
 from poprox_recommender.components.rankers.topk import TopkRanker
@@ -188,7 +188,9 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     # Filter articles based on topic preferences
-    f_candidates = builder.add_component("topic-filter", TopicFilter, candidates=fusion, interest_profile=i_profile)
+    f_candidates = builder.add_component(
+        "topic-filter", TopicPrefsFilter, candidates=fusion, interest_profile=i_profile
+    )
 
     r_filtered = builder.add_component(
         "filtered-ranker", TopkRanker, {"num_slots": num_slots}, candidate_articles=f_candidates
