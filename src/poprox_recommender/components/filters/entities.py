@@ -34,7 +34,7 @@ class MentionedEntitiesFilter(Component):
 
             # Keep or exclude articles that mention at least one of the entities
             # depending on the value of `self.config.include`
-            if (self.config.include and len(overlap) > 0) or (not self.config.include and len(overlap) == 0):
+            if (len(overlap) > 0 and self.config.include) or (len(overlap) == 0 and not self.config.include):
                 kept_articles.append(article)
                 if hasattr(candidates, "scores") and candidates.scores is not None:
                     kept_scores.append(candidates.scores[idx])
