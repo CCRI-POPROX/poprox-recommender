@@ -249,7 +249,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     topic1_candidates = builder.add_component(
         "topic1_candidates",
         TopicalCandidates,
-        TopicalCandidatesConfig(min_candidates=3),
+        TopicalCandidatesConfig(min_candidates=1),
         candidate_set=topic1_deduped,
         interest_profile=i_profile,
         sections=yts_sections,
@@ -273,7 +273,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     topic2_candidates = builder.add_component(
         "topic2_candidates",
         TopicalCandidates,
-        TopicalCandidatesConfig(min_candidates=3),
+        TopicalCandidatesConfig(min_candidates=1),
         candidate_set=topic2_deduped,
         interest_profile=i_profile,
         sections=topic1_sections,
@@ -297,7 +297,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     topic3_candidates = builder.add_component(
         "topic3_candidates",
         TopicalCandidates,
-        TopicalCandidatesConfig(min_candidates=3),
+        TopicalCandidatesConfig(min_candidates=1),
         candidate_set=topic3_deduped,
         interest_profile=i_profile,
         sections=topic2_sections,
