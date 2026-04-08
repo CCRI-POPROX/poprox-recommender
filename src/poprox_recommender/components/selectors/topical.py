@@ -23,6 +23,7 @@ class TopicalCandidates(Component):
         interest_profile: InterestProfile,
         sections: list[ImpressedSection] | None = None,
         today: date | None = None,
+        descending: bool | None = True,
     ) -> CandidateSet:
         sections = sections or []
 
@@ -37,7 +38,7 @@ class TopicalCandidates(Component):
         sorted_interests = sorted(
             topical_interests,
             key=lambda i: i.preference,
-            reverse=True,
+            reverse=descending,
         )
 
         prev_section_seed_ids = [section.seed_entity_id for section in sections]
