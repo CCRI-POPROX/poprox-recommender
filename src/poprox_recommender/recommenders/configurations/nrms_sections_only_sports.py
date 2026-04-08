@@ -204,6 +204,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         candidates2=explicit_fusion,
     )
 
+    # Filter out stories that don't mention sports
     f_mentioned = builder.add_component(
         "sports-filter",
         MentionedEntitiesFilter,
