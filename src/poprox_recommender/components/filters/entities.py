@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 class MentionedEntitiesConfig(BaseModel):
     entities: set[str]
     entity_type: str | None = None
+    min_relevance: int = 0
     include: bool | None = True
 
 
@@ -26,7 +27,8 @@ class MentionedEntitiesFilter(Component):
             mentioned = set(
                 mention.entity.name
                 for mention in article.mentions
-                if mention.entity.entity_type == self.config.entity_type or not self.config.entity_type
+                if mention.relevance >= self.config.min_relevance
+                and (mention.entity.entity_type == self.config.entity_type or not self.config.entity_type)
             )
             overlap = self.config.entities.intersection(mentioned)
 
