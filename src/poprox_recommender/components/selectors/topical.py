@@ -25,6 +25,9 @@ class TopicalCandidates(Component):
         today: date | None = None,
         descending: bool | None = True,
     ) -> CandidateSet:
+        if descending is None:
+            descending = True
+
         sections = sections or []
 
         if today is None:
