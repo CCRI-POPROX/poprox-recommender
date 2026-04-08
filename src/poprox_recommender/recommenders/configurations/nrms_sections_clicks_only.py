@@ -9,7 +9,7 @@ from poprox_recommender.components.embedders.user import NRMSUserEmbedder, NRMSU
 from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.filters.impression import ImpressionFilter
 from poprox_recommender.components.filters.seeds import PreviousSectionsFilter
-from poprox_recommender.components.filters.topic import TopicFilter
+from poprox_recommender.components.filters.topic import TopicPrefsFilter
 from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
 from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
@@ -79,7 +79,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     yts_filtered = builder.add_component(
-        "yts_filtered", TopicFilter, candidates=yts_candidates, interest_profile=i_profile
+        "yts_filtered", TopicPrefsFilter, candidates=yts_candidates, interest_profile=i_profile
     )
 
     yts_topk_filtered = builder.add_component(
@@ -182,7 +182,7 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
     )
 
     ion_filtered = builder.add_component(
-        "ion_topic_filtered", TopicFilter, candidates=ion_narrowed, interest_profile=i_profile
+        "ion_topic_filtered", TopicPrefsFilter, candidates=ion_narrowed, interest_profile=i_profile
     )
 
     ion_topk_filtered = builder.add_component(
