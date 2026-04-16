@@ -4,7 +4,7 @@ from lenskit.pipeline import PipelineBuilder
 
 from poprox_concepts.domain import Article, CandidateSet, Click, Entity, Mention
 from poprox_concepts.domain.profile import AccountInterest, InterestProfile
-from poprox_recommender.components.filters import TopicFilter
+from poprox_recommender.components.filters import TopicPrefsFilter
 from poprox_recommender.components.samplers import UniformSampler
 
 
@@ -47,7 +47,7 @@ def test_select_by_topic_filters_articles():
         ),
     ]
 
-    topic_filter = TopicFilter()
+    topic_filter = TopicPrefsFilter()
     sampler = UniformSampler(num_slots=2)
 
     builder = PipelineBuilder()

@@ -11,10 +11,17 @@ from poprox_recommender.components.embedders.user_article_feedback import (
     UserArticleFeedbackEmbedder,
 )
 from poprox_recommender.components.embedders.user_topic_prefs import UserOnboardingConfig, UserOnboardingEmbedder
+from poprox_recommender.components.filters.duplicate import DuplicateFilter
 from poprox_recommender.components.filters.impression import ImpressionFilter
+from poprox_recommender.components.filters.seeds import PreviousSectionsFilter
+from poprox_recommender.components.filters.topic import TopicPrefsFilter
+from poprox_recommender.components.joiners.fill import FillConfig, FillRecs
 from poprox_recommender.components.joiners.score import ScoreFusion
-from poprox_recommender.components.rankers.sectionizer import Sectionizer, SectionizerConfig
+from poprox_recommender.components.rankers.topk import TopkConfig, TopkRanker
 from poprox_recommender.components.scorers.article import ArticleScorer
+from poprox_recommender.components.sections.combine import AddSection, AddSectionConfig
+from poprox_recommender.components.selectors.top_news import TopStoryCandidates
+from poprox_recommender.components.selectors.topical import TopicalCandidates, TopicalCandidatesConfig
 from poprox_recommender.paths import model_file_path
 
 TOP_NEWS_PACKAGE_ID = UUID("72bb7674-7bde-4f3e-a351-ccdeae888502")
@@ -197,19 +204,136 @@ def configure(builder: PipelineBuilder, num_slots: int, device: str):
         candidates2=explicit_fusion,
     )
 
-    # Sectionizer
-    s_config = SectionizerConfig(
-        max_top_news=3,
-        max_topic_sections=3,
-        max_articles_per_topic=3,
-        max_misc_articles=3,
+    # Sections
+    yts_candidates = builder.add_component(
+        "yts_candidates",
+        TopStoryCandidates,
+        candidate_articles=fusion,
+        article_packages=i_packages,
     )
 
-    builder.add_component(
-        "recommender",
-        Sectionizer,
-        s_config,
-        candidate_set=fusion,
-        article_packages=i_packages,
+    yts_filtered = builder.add_component(
+        "yts_filtered", TopicPrefsFilter, candidates=yts_candidates, interest_profile=i_profile
+    )
+
+    yts_topk_filtered = builder.add_component(
+        "yts_topk_filtered", TopkRanker, TopkConfig(num_slots=3), candidate_articles=yts_filtered
+    )
+
+    # The maximum overlap with the articles chosen above is self.config.max_articles,
+    # so here we pull twice as many to cover the worst case
+    yts_topk_unfiltered = builder.add_component(
+        "yts_topk_unfiltered", TopkRanker, TopkConfig(num_slots=6), candidate_articles=yts_candidates
+    )
+
+    yts_fill = builder.add_component(
+        "yts_fill", FillRecs, FillConfig(num_slots=3), recs1=yts_topk_filtered, recs2=yts_topk_unfiltered
+    )
+
+    yts_config = AddSectionConfig(title="Your Top Stories", personalized=True)
+    yts_sections = builder.add_component("top_stories", AddSection, yts_config, new_section=yts_fill)
+
+    # Topical Sections
+    topic1_deduped = builder.add_component("topic1_deduped", DuplicateFilter, candidate=fusion, sections=yts_sections)
+
+    topic1_candidates = builder.add_component(
+        "topic1_candidates",
+        TopicalCandidates,
+        TopicalCandidatesConfig(min_candidates=3),
+        candidate_set=topic1_deduped,
         interest_profile=i_profile,
+        sections=yts_sections,
+    )
+    topic1_topk = builder.add_component(
+        "topic1_topk", TopkRanker, TopkConfig(num_slots=3), candidate_articles=topic1_candidates
+    )
+
+    topic1_sections = builder.add_component(
+        "topic1_sections",
+        AddSection,
+        AddSectionConfig(personalized=True),
+        new_section=topic1_topk,
+        existing_sections=yts_sections,
+    )
+
+    topic2_deduped = builder.add_component(
+        "topic2_deduped", DuplicateFilter, candidate=fusion, sections=topic1_sections
+    )
+
+    topic2_candidates = builder.add_component(
+        "topic2_candidates",
+        TopicalCandidates,
+        TopicalCandidatesConfig(min_candidates=3),
+        candidate_set=topic2_deduped,
+        interest_profile=i_profile,
+        sections=topic1_sections,
+    )
+    topic2_topk = builder.add_component(
+        "topic2_topk", TopkRanker, TopkConfig(num_slots=3), candidate_articles=topic2_candidates
+    )
+
+    topic2_sections = builder.add_component(
+        "topic2_sections",
+        AddSection,
+        AddSectionConfig(personalized=True),
+        new_section=topic2_topk,
+        existing_sections=topic1_sections,
+    )
+
+    topic3_deduped = builder.add_component(
+        "topic3_deduped", DuplicateFilter, candidate=fusion, sections=topic2_sections
+    )
+
+    topic3_candidates = builder.add_component(
+        "topic3_candidates",
+        TopicalCandidates,
+        TopicalCandidatesConfig(min_candidates=3),
+        candidate_set=topic3_deduped,
+        interest_profile=i_profile,
+        sections=topic2_sections,
+    )
+    topic3_topk = builder.add_component(
+        "topic3_topk", TopkRanker, TopkConfig(num_slots=3), candidate_articles=topic3_candidates
+    )
+
+    topic3_sections = builder.add_component(
+        "topic3_sections",
+        AddSection,
+        AddSectionConfig(personalized=True),
+        new_section=topic3_topk,
+        existing_sections=topic2_sections,
+    )
+
+    # In Other News section
+    ion_deduped = builder.add_component("ion_deduped", DuplicateFilter, candidate=fusion, sections=topic3_sections)
+
+    ion_narrowed = builder.add_component(
+        "ion_narrowed",
+        PreviousSectionsFilter,
+        candidate=ion_deduped,
+        article_packages=i_packages,
+        sections=topic3_sections,
+    )
+
+    ion_filtered = builder.add_component(
+        "ion_topic_filtered", TopicPrefsFilter, candidates=ion_narrowed, interest_profile=i_profile
+    )
+
+    ion_topk_filtered = builder.add_component(
+        "ion_topk_filtered", TopkRanker, TopkConfig(num_slots=3), candidate_articles=ion_filtered
+    )
+
+    # The maximum overlap with the articles chosen above is self.config.max_articles,
+    # so here we pull twice as many to cover the worst case
+    ion_topk_unfiltered = builder.add_component(
+        "ion_topk_unfiltered", TopkRanker, TopkConfig(num_slots=6), candidate_articles=ion_narrowed
+    )
+
+    ion_fill = builder.add_component(
+        "ion_fill", FillRecs, FillConfig(num_slots=3), recs1=ion_topk_filtered, recs2=ion_topk_unfiltered
+    )
+
+    ion_config = AddSectionConfig(title="In Other News", personalized=True)
+    builder.add_component(
+        "recommender", AddSection, ion_config, new_section=ion_fill, existing_sections=topic3_sections
     )

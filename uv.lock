@@ -2656,7 +2656,7 @@ wheels = [
 [[package]]
 name = "poprox-concepts"
 version = "0.0.1"
-source = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git#d20881882ba1eb3db17dc29e626debb5fd065a94" }
+source = { git = "https://github.com/CCRI-POPROX/poprox-concepts.git#8e104fc0a265c466d62f287f4b8b16653dfa74db" }
 dependencies = [
     { name = "pydantic" },
 ]
