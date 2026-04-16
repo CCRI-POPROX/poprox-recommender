@@ -49,10 +49,13 @@ def measure_rec_metrics(
     final = results.final
     if isinstance(final, list):
         articles = [imp.article for section in final for imp in section.impressions]
+        num_sections = len(final)
     else:
         articles = [imp.article for imp in final.impressions]
+        num_sections = None
 
     final_rec = ItemList(item_ids=[str(a.article_id) for a in articles], ordered=True)
+    total_articles = len(final_rec)
 
     # we only compute effectiveness with truth
     if len(truth) > 0:
@@ -119,4 +122,6 @@ def measure_rec_metrics(
         "rank_based_entropy": rbe,
         "least_item_promoted": lip,
         "intralist_similarity": ils,
+        "total_articles": total_articles,
+        "num_sections": num_sections,
     }

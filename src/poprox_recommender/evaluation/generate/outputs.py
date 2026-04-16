@@ -314,6 +314,7 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
         # get the different recommendation lists to record
 
         recs = pipeline_state["recommender"]
+        logger.info("number of sections", n_sections=len(recs))
         results = OfflineRecResults(final=recs)
 
         ranked = pipeline_state.get("ranker", None)
