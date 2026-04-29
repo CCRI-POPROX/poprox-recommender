@@ -185,6 +185,12 @@ def recommend_for_request(pipeline: Pipeline, request: RecommendationRequestV5) 
         "impressed_article_ids": request.impressed_article_ids,
     }
 
+    logger.info(
+        "input packages",
+        n_packages=len(inputs["packages"]) if inputs["packages"] else 0,
+        package_names=[p.name for p in inputs["packages"]] if inputs["packages"] else [],
+    )
+
     try:
         return pipeline.run_all(**inputs)
     except Exception as e:
