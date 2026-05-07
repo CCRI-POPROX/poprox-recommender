@@ -5,6 +5,12 @@ For an evaluation EVAL and PIPELINE, this script reads
 outputs/DATA/PIPELINE/recommendations.parquet and produces
 ouptuts/DATA/PIPELINE/recommendation-metrics.csv.gz and ouptuts/DATA/PIPELINE/metrics.json.
 
+When --section-eval is given it additionally reads
+outputs/DATA/PIPELINE/recommendations.ndjson.zst (which preserves the section
+structure written by JSONRecommendationWriter) and produces
+outputs/DATA/PIPELINE/section-recommendation-metrics.csv.gz and
+outputs/DATA/PIPELINE/section-metrics.json.
+
 Usage:
     poprox_recommender.evaluation.measure [options] EVAL PIPELINE
 
@@ -17,30 +23,37 @@ Options:
             read MIND test data DATA [default: MINDsmall_dev]
     -P DATA, --poprox-data=DATA
             read POPROX test data DATA
+    --section-eval
+            run section-based evaluation (requires recommendations.ndjson.zst)
     EVAL    the name of the evaluation to measure
     PIPELINE
             the name of the pipeline to measure
 """
 
 # pyright: basic
+import json
 import logging
 import os
 import re
+from uuid import UUID
 
 import lenskit
 import numpy as np
 import pandas as pd
+import zstandard
 from docopt import docopt
 from humanize import metric
 from lenskit.logging import LoggingConfig, item_progress
 from rich import print
 from rich.pretty import pprint
 
+from poprox_concepts.domain import ImpressedSection
 from poprox_recommender.data.mind import MindData
 from poprox_recommender.data.poprox import PoproxData
 from poprox_recommender.evaluation.measure.batch_measure import recommendation_eval_results
 from poprox_recommender.evaluation.measure.recloader import RecLoader
 from poprox_recommender.evaluation.options import load_eval_options
+from poprox_recommender.evaluation.section_metrics import measure_section_rec_metrics
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger("poprox_recommender.evaluation.measure")
@@ -127,6 +140,65 @@ def main():
 
     print("[bold]Summary of Metrics:[/bold]", end=" ")
     pprint(printable, expand_all=True)
+
+    if cli_opts["--section-eval"]:
+        _run_section_eval(out_dir, eval_data, options)
+
+
+def _run_section_eval(out_dir, eval_data, options):
+    json_fn = out_dir / "recommendations.ndjson.zst"
+    if not json_fn.exists():
+        logger.error(
+            "section eval requires %s, which does not exist; " "re-run generation with a pipeline that writes NDJSON",
+            json_fn,
+        )
+        return
+
+    logger.info("running section-based evaluation from %s", json_fn)
+    section_metric_records = []
+
+    with zstandard.open(json_fn, "rt") as jf:
+        for line in jf:
+            line = line.strip()
+            if not line:
+                continue
+            data = json.loads(line)
+            slate_id = UUID(data["slate_id"])
+
+            final = data["results"]["final"]
+            if isinstance(final, list):
+                sections = [ImpressedSection.model_validate(s) for s in final]
+            else:
+                sections = [ImpressedSection.model_validate(final)]
+
+            truth = eval_data.slate_truth(slate_id)
+            if truth is None:
+                logger.debug("slate %s has no truth, skipping section eval", slate_id)
+                continue
+
+            row = measure_section_rec_metrics(slate_id, sections, truth, eval_data)
+            section_metric_records.append(row)
+
+    if not section_metric_records:
+        logger.warning("no section metrics produced; check that truth data aligns with the pipeline output")
+        return
+
+    section_metrics = pd.DataFrame.from_records(section_metric_records)
+    logger.info("measured section metrics for %d slates", section_metrics["slate_id"].nunique())
+
+    section_metrics_out_fn = out_dir / "section-recommendation-metrics.csv.gz"
+    logger.info("saving per-slate section metrics to %s", section_metrics_out_fn)
+    section_metrics.to_csv(section_metrics_out_fn)
+
+    agg_section_metrics = section_metrics.drop(columns=["slate_id"]).mean(numeric_only=True)
+
+    section_out_fn = out_dir / "section-metrics.json"
+    logger.info("saving section evaluation summary to %s", section_out_fn)
+    with open(section_out_fn, "wt") as jsf:
+        print(agg_section_metrics.to_json(indent=2), file=jsf)
+
+    print("[bold]Section Metrics Summary:[/bold]", end=" ")
+    pprint(agg_section_metrics.to_dict(), expand_all=True)
 
 
 if __name__ == "__main__":
