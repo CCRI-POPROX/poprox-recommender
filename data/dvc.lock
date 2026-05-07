@@ -113,7 +113,7 @@ stages:
     outs:
     - path: MINDsmall_dev.db
       hash: md5
-      md5: d72b031b65edac58252c4a5a72ed70a9
+      md5: 8e944ef27fa666d3f04c99a51cc69916
       size: 110899200
   ingest-mind@MINDlarge_dev:
     cmd: python -m poprox_recommender.data.duckscript -D mind_path=MINDlarge_dev
@@ -138,8 +138,8 @@ stages:
       md5: ef2ca97555e63a36b0d7b09bc8b2b0c7
       size: 476065792
   ingest-mind@MINDlarge_train:
-    cmd: python -m poprox_recommender.data.duckscript -D
-      mind_path=MINDlarge_train MINDlarge_train.db mind-schema.sql
+    cmd: python -m poprox_recommender.data.duckscript -D 
+      mind_path=MINDlarge_train MINDlarge_train.db mind-schema.sql 
       mind-ingest.sql
     deps:
     - path: MINDlarge_train
@@ -161,8 +161,8 @@ stages:
       md5: 192048225c5a337014340ed814c0d6af
       size: 2632724480
   ingest-mind@MINDsmall_train:
-    cmd: python -m poprox_recommender.data.duckscript -D
-      mind_path=MINDsmall_train MINDsmall_train.db mind-schema.sql
+    cmd: python -m poprox_recommender.data.duckscript -D 
+      mind_path=MINDsmall_train MINDsmall_train.db mind-schema.sql 
       mind-ingest.sql
     deps:
     - path: MINDsmall_train
@@ -184,7 +184,7 @@ stages:
       md5: a245249210d3ce50e507086919ad274c
       size: 212348928
   ingest-poprox:
-    cmd: python -m poprox_recommender.data.duckscript POPROX.db
+    cmd: python -m poprox_recommender.data.duckscript POPROX.db 
       poprox-schema.sql poprox-ingest.sql poprox-post.sql
     deps:
     - path: POPROX

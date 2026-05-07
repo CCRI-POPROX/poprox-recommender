@@ -314,6 +314,9 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
         # get the different recommendation lists to record
 
         recs = pipeline_state["recommender"]
+        if isinstance(recs, ImpressedSection):
+            recs = [recs]
+
         results = OfflineRecResults(final=recs)
 
         ranked = pipeline_state.get("ranker", None)

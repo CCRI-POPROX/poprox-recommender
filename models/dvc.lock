@@ -46,15 +46,10 @@ stages:
       md5: b46257fa21d5847dbb140fffee7bc289.dir
       size: 65658285
       nfiles: 1
-    - path: ../data/MINDlarge_post_test
-      hash: md5
-      md5: 76ef57e4d4f5c9c965bfc4b99334ce84.dir
-      size: 112514303
-      nfiles: 1
     - path: ../data/MINDlarge_post_train
       hash: md5
-      md5: 1596fb67e704f44da0f990adfdb8975c.dir
-      size: 1163363644
+      md5: 3c827b4fd624bde959628b117929a9b4.dir
+      size: 1163363710
       nfiles: 3
     - path: ../src/poprox_recommender/training/train.py
       hash: md5
