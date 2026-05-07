@@ -171,12 +171,16 @@ def _run_section_eval(out_dir, eval_data, options):
             else:
                 sections = [ImpressedSection.model_validate(final)]
 
+            # global_article_ids: article IDs ordered by fusion score (best first)
+            # each entry is {"article_id": "...", "mentions": [...], "embedding": [...]}
+            global_article_ids = [str(c["article_id"]) for c in data.get("candidates", [])]
+
             truth = eval_data.slate_truth(slate_id)
             if truth is None:
                 logger.debug("slate %s has no truth, skipping section eval", slate_id)
                 continue
 
-            row = measure_section_rec_metrics(slate_id, sections, truth, eval_data)
+            row = measure_section_rec_metrics(slate_id, sections, truth, global_article_ids, eval_data)
             section_metric_records.append(row)
 
     if not section_metric_records:

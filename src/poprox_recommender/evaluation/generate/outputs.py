@@ -20,16 +20,24 @@ import torch
 import zstandard
 from lenskit.logging import Task, get_logger
 from lenskit.pipeline import PipelineState
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing_extensions import TypeVar
 
 from poprox_concepts.api.recommendations import RecommendationRequest, RecommendationRequestV5
-from poprox_concepts.domain import CandidateSet, ImpressedSection
+from poprox_concepts.domain import CandidateSet, ImpressedSection, Mention
 from poprox_recommender.evaluation.writer import ParquetBatchedWriter
 
 logger = get_logger(__name__)
 
 Package = TypeVar("Package", default=Any)
+
+
+class CandidateRecord(BaseModel):
+    """One article from the global fusion-ranked candidate list."""
+
+    article_id: UUID
+    mentions: list[Mention]
+    embedding: list[float] | None = None
 
 
 class OfflineRecommendations(BaseModel):
@@ -42,6 +50,9 @@ class OfflineRecResults(BaseModel, validate_assignment=True):
     final: list[ImpressedSection] | ImpressedSection
     ranked: ImpressedSection | None = None
     reranked: ImpressedSection | None = None
+    # Global fusion ranking: articles ordered best-first by combined score.
+    # Includes mentions and embeddings for use in section-based metrics.
+    candidates: list[CandidateRecord] = Field(default_factory=list)
 
 
 class RecOutputs:
@@ -296,7 +307,7 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
     Can be used as a Ray actor.
     """
 
-    WANTED_NODES = {"recommender", "ranker", "reranker"}
+    WANTED_NODES = {"recommender", "ranker", "reranker", "fusion", "candidate-embedder"}
 
     writer: TextIO
 
@@ -308,10 +319,6 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
 
     def prepare_write(self, slate_id: UUID, request: RecommendationRequest, pipeline_state: PipelineState) -> str:
         logger.debug("writing recommendations to JSON", slate_id=slate_id)
-        # recommendations {account id (uuid): LIST[Article]}
-        # use the url of Article
-
-        # get the different recommendation lists to record
 
         recs = pipeline_state["recommender"]
         results = OfflineRecResults(final=recs)
@@ -324,8 +331,47 @@ class JSONRecommendationWriter(RecommendationWriter[str]):
         if reranked is not None:
             results.reranked = reranked
 
+        results.candidates = self._build_candidate_records(pipeline_state)
+
         data = OfflineRecommendations(slate_id=slate_id, request=request, results=results)
         return data.model_dump_json(serialize_as_any=True, fallback=_json_fallback)
+
+    def _build_candidate_records(self, pipeline_state: PipelineState) -> list[CandidateRecord]:
+        """
+        Build the global ranked candidate list from the fusion node output.
+
+        Steps:
+        1. Get fusion scores to determine global rank order.
+        2. Get embeddings from the candidate-embedder node (keyed by article_id).
+        3. Sort articles by fusion score descending (rank 1 = highest score).
+        4. Return one CandidateRecord per article with id, mentions, and embedding.
+        """
+        fusion_out = pipeline_state.get("fusion", None)
+        if fusion_out is None or not hasattr(fusion_out, "scores") or fusion_out.scores is None:
+            return []
+
+        # Build a lookup from article_id -> embedding vector (as plain float list)
+        emb_lookup: dict[UUID, list[float]] = {}
+        embedder_out = pipeline_state.get("candidate-embedder", None)
+        if embedder_out is not None and hasattr(embedder_out, "embeddings") and embedder_out.embeddings is not None:
+            for idx, article in enumerate(embedder_out.articles):
+                emb_lookup[article.article_id] = embedder_out.embeddings[idx].cpu().tolist()
+
+        # Pair each article with its fusion score, then sort best-first
+        scored = sorted(
+            zip(fusion_out.articles, fusion_out.scores),
+            key=lambda pair: float(pair[1]),
+            reverse=True,
+        )
+
+        return [
+            CandidateRecord(
+                article_id=article.article_id,
+                mentions=article.mentions,
+                embedding=emb_lookup.get(article.article_id),
+            )
+            for article, _score in scored
+        ]
 
     def write_package(self, package: str):
         print(package, file=self.writer)
