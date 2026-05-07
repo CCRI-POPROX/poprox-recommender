@@ -9,7 +9,6 @@ from lenskit.metrics.ranking import NDCG, RBP, RecipRank
 
 from poprox_concepts.domain import Article, CandidateSet
 from poprox_recommender.data.eval import EvalData
-from poprox_recommender.evaluation.generate.outputs import OfflineRecResults
 from poprox_recommender.evaluation.metrics.ils import intralist_similarity
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
@@ -34,8 +33,10 @@ def convert_df_to_article_set(rec_df):
 
 
 def measure_rec_metrics(
-    slate_id: UUID, results: OfflineRecResults, truth_df: pd.DataFrame, eval_data: EvalData | None = None
+    slate_id: UUID, results, truth_df: pd.DataFrame, eval_data: EvalData | None = None
 ) -> dict[str, Any]:
+    from poprox_recommender.evaluation.generate.outputs import OfflineRecResults  # noqa: F401
+
     """
     Measure a single set of recommendations against ground truth.  Returns the recommendation ID and
     a dictionary of evaluation metrics.
