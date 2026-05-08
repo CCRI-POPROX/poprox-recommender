@@ -9,6 +9,7 @@ from lenskit.metrics.ranking import NDCG, RBP, RecipRank
 
 from poprox_concepts.domain import Article, CandidateSet
 from poprox_recommender.data.eval import EvalData
+from poprox_recommender.evaluation.measure.section_browsing_model import section_browsing_weights
 from poprox_recommender.evaluation.metrics.ils import intralist_similarity
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
@@ -51,11 +52,24 @@ def measure_rec_metrics(
     if isinstance(final, list):
         articles = [imp.article for section in final for imp in section.impressions]
         num_sections = len(final)
+        browsing_weights = section_browsing_weights(final)
     else:
         articles = [imp.article for imp in final.impressions]
         num_sections = None
+        browsing_weights = None
 
-    final_rec = ItemList(item_ids=[str(a.article_id) for a in articles], ordered=True)
+    if browsing_weights is not None:  # build weighted ItemList
+        final_rec = ItemList(
+            item_ids=[str(a.article_id) for a in articles],
+            ordered=True,
+            weight=browsing_weights,
+        )
+    else:
+        final_rec = ItemList(
+            item_ids=[str(a.article_id) for a in articles],
+            ordered=True,
+        )
+
     total_articles = len(final_rec)
 
     # we only compute effectiveness with truth
@@ -64,8 +78,16 @@ def measure_rec_metrics(
         single_rr = call_metric(RecipRank, final_rec, truth)
         single_ndcg5 = call_metric(NDCG, final_rec, truth, k=5)
         single_ndcg10 = call_metric(NDCG, final_rec, truth, k=10)
+
+        # section-aware RBP
+        if browsing_weights is not None:
+            section_aware_rbp = RBP(weight_field="weight")
+            sa_rbp = section_aware_rbp.measure_list(final_rec, truth)
+        else:
+            sa_rbp = None
+
     else:
-        single_rbp = single_rr = single_ndcg5 = single_ndcg10 = None
+        single_rbp = single_rr = single_ndcg5 = single_ndcg10 = sa_rbp = None
 
     ranked = (
         CandidateSet(articles=[imp.article for imp in results.ranked.impressions])
@@ -115,6 +137,7 @@ def measure_rec_metrics(
         # count the number of instances with non-empty truth sets
         "num_truth": len(truth),
         "RBP": single_rbp,
+        "section_aware_RBP": sa_rbp,
         "NDCG@5": single_ndcg5,
         "NDCG@10": single_ndcg10,
         "RR": single_rr,

@@ -1,0 +1,15 @@
+{
+  "num_truth":0.056,
+  "RBP":0.0484784311,
+  "section_aware_RBP":0.0668867127,
+  "NDCG@5":0.1359108128,
+  "NDCG@10":0.2477493929,
+  "MRR":0.1704365079,
+  "RBO@5":0.0,
+  "RBO@10":0.0,
+  "rank_based_entropy":0.0,
+  "least_item_promoted":null,
+  "intralist_similarity":null,
+  "total_articles":12.0,
+  "num_sections":4.0
+}
