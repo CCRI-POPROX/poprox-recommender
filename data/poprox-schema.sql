@@ -69,3 +69,14 @@ CREATE TABLE clicked_article_mentions (
     relevance FLOAT,
     entity JSON,
 );
+
+CREATE TABLE packages (
+    package_id UUID NOT NULL PRIMARY KEY,
+    newsletter_id UUID NOT NULL,
+    title VARCHAR,
+    source VARCHAR,
+    seed JSON,
+    article_ids UUID[],
+    current_as_of TIMESTAMP,
+    created_at TIMESTAMP,
+);
