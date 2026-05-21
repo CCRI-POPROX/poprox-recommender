@@ -98,7 +98,7 @@ torch = [
   { index = "pytorch-cuda", group = "cuda" },
 ]
 # following can be uncommented when temporarily using a git checkout
-# lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "feature/settings-and-metrics" }
+lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "fix/1101-input-type-forms" }
 
 # pre-release version of LensKit
 [[tool.uv.index]]
