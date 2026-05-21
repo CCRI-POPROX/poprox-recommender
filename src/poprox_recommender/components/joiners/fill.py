@@ -1,5 +1,4 @@
-from lenskit.pipeline import Component
-from lenskit.pipeline.types import Lazy
+from lenskit.pipeline import Component, Lazy
 from pydantic import BaseModel
 
 from poprox_concepts.domain import ImpressedSection, Impression
