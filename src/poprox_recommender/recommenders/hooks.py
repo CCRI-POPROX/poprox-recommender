@@ -6,12 +6,13 @@ from collections.abc import MutableMapping, MutableSequence, MutableSet
 from copy import copy
 from typing import Any
 
+from lenskit.pipeline.components import ComponentInput
 from lenskit.pipeline.nodes import ComponentInstanceNode
 from pydantic import BaseModel
 
 
 def shallow_copy_pydantic_model(
-    node: ComponentInstanceNode[Any], input_name: str, input_type: Any, value: Any, **context: Any
+    node: ComponentInstanceNode[Any], input: ComponentInput, value: Any, **context: Any
 ) -> Any:
     """
     LensKit component-input hook to perform shallow copies of Pydantic models
