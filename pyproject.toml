@@ -19,7 +19,7 @@ dependencies = [
   "fastapi[all]~=0.115.11",
   "mangum~=0.19.0",
   "uvicorn~=0.34.0",
-  "lenskit ~=2026.1",
+  "lenskit >=2026.1.1a1.dev121,<2027",
   "nltk>=3.8,<4",
   "torch~=2.2",
   "smart_open==7.*",
@@ -92,13 +92,13 @@ conflicts = [[{ group = "cpu" }, { group = "cuda" }]]
 index-strategy = "unsafe-first-match"
 
 [tool.uv.sources]
-# lenskit = { index = "lenskit-dev" }
+lenskit = { index = "lenskit-dev" }
 torch = [
   { index = "pytorch-cpu", group = "cpu" },
   { index = "pytorch-cuda", group = "cuda" },
 ]
 # following can be uncommented when temporarily using a git checkout
-lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "fix/1101-input-type-forms" }
+# lenskit = { git = "https://github.com/mdekstrand/lkpy.git", branch = "fix/1101-input-type-forms" }
 
 # pre-release version of LensKit
 [[tool.uv.index]]
