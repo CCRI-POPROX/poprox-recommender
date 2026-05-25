@@ -5,8 +5,9 @@ from uuid import UUID
 import ray
 import torch
 from humanize import metric, naturaldelta
+from lenskit.config import ParallelSettings
 from lenskit.logging import Progress, Task, get_logger, item_progress
-from lenskit.parallel.config import ParallelConfig, get_parallel_config, subprocess_config
+from lenskit.parallel import get_parallel_config
 from lenskit.parallel.ray import TaskLimiter, init_cluster
 from lenskit.pipeline import Pipeline, PipelineState
 from torch.multiprocessing.reductions import reduce_tensor
@@ -42,7 +43,7 @@ def generate_recs_for_requests(dataset: EvalData, outs: RecOutputs, pipeline: st
 
     # check for parallel operation
     pc = get_parallel_config()
-    cluster = pc.processes > 1
+    cluster = pc.num_procs > 1
 
     count = n_requests if n_requests is not None else dataset.n_requests
     logger.info("recommending for %d requests", count)
@@ -98,7 +99,7 @@ def cluster_recommend(
     pipeline: str,
     max_recommendations: int | None,
     outs: RecOutputs,
-    pc: ParallelConfig,
+    pc: ParallelSettings,
     task: Task,
     pb: Progress,
 ):
@@ -131,7 +132,7 @@ def cluster_recommend(
 
     # Set up parallel task and throttle for running the eval
     rec_batch = dynamic_remote(recommend_batch)
-    limit = TaskLimiter(pc.processes)
+    limit = TaskLimiter(pc.num_procs)
 
     writes = []
     for n, btask, bwrites in limit.imap(
@@ -241,7 +242,7 @@ def dynamic_remote(task_or_actor):
     Dynamically configure the resource requirements of a task or actor based on
     CUDA availability and parallelism configuration.
     """
-    pc = subprocess_config()
+    pc = get_parallel_config()
     logger.debug("worker parallel config: %s", pc)
     if torch.cuda.is_available():
         _cuda_props = torch.cuda.get_device_properties()

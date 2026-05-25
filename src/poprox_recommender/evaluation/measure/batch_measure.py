@@ -21,11 +21,11 @@ BATCH_SIZE = 1000
 def recommendation_eval_results(eval_data: EvalData, rec_path: Path) -> Iterator[dict[str, Any]]:
     pc = get_parallel_config()
     with xopen(rec_path, "rb") as f:
-        if pc.processes > 1:
-            logger.info("starting parallel measurement with up to %d tasks", pc.processes)
+        if pc.num_procs > 1:
+            logger.info("starting parallel measurement with up to %d tasks", pc.num_procs)
             init_cluster(global_logging=True, configure_logging=False)
             eval_data_ref = ray.put(eval_data)
-            limit = TaskLimiter(pc.processes)
+            limit = TaskLimiter(pc.num_procs)
             for bres in limit.imap(
                 lambda batch: measure_batch.remote(batch, eval_data_ref),
                 batched(f, BATCH_SIZE),
