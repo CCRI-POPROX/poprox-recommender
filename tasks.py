@@ -21,9 +21,42 @@ from invoke.context import Context
 from invoke.tasks import task
 from wcmatch import glob
 
+from poprox_recommender.recommenders.load import discover_pipelines
+
 FileAccess: TypeAlias = Literal["public", "shared", "private"]
 
 REPO_DIR = Path(__file__).parent
+
+
+@task
+def list_pipelines(c: Context):
+    "List pipelines defined in the repository."
+    pipes = discover_pipelines()
+    for pipe in pipes:
+        print(pipe)
+
+
+@task
+def export_pipelines(c: Context, dir="pipelines"):
+    """
+    Export pipeline configurations to JSON.
+    """
+    pipes = discover_pipelines()
+    for pipe in pipes:
+        cmd = "python -m poprox_recommender.recommenders.export"
+        cmd += f" -o {dir}/{pipe}.json"
+        c.run(f"{cmd} {pipe}")
+
+
+@task
+def diagram_pipelines(c: Context, dir="pipelines"):
+    """
+    Render pipeline diagrams to Mermaid.
+    """
+    pipes = discover_pipelines()
+    for pipe in pipes:
+        cmd = f"lenskit pipeline diagram -o {dir}/{pipe}.mmd -c {dir}/{pipe}.json"
+        c.run(cmd)
 
 
 @task
