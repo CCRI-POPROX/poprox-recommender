@@ -1927,7 +1927,7 @@ wheels = [
 
 [[package]]
 name = "lenskit"
-version = "2026.1.1a1.dev121+g3a8c1939"
+version = "2026.1.1a1.dev129+g2b705a83"
 source = { registry = "https://pypi.lenskit.org/lenskit-dev/" }
 dependencies = [
     { name = "click" },
@@ -1956,12 +1956,12 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "xopen" },
 ]
-sdist = { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev121%2Bg3a8c1939.tar.gz" }
+sdist = { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83.tar.gz" }
 wheels = [
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev121%2Bg3a8c1939-cp312-abi3-macosx_11_0_arm64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev121%2Bg3a8c1939-cp312-abi3-manylinux_2_28_aarch64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev121%2Bg3a8c1939-cp312-abi3-manylinux_2_28_x86_64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev121%2Bg3a8c1939-cp312-abi3-win_amd64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83-cp312-abi3-macosx_11_0_arm64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83-cp312-abi3-manylinux_2_28_aarch64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83-cp312-abi3-manylinux_2_28_x86_64.whl" },
+    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83-cp312-abi3-win_amd64.whl" },
 ]
 
 [[package]]
