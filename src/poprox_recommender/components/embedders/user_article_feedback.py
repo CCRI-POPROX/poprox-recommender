@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from typing import Literal
 
 import torch as th
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class UserArticleFeedbackConfig(NRMSUserEmbedderConfig):
     # True -> positive, False -> negative
-    feedback_type: bool | None = None
+    feedback_type: bool | Literal["positive", "negative"] | None = None
 
 
 class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
