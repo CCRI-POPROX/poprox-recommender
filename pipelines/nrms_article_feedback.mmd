@@ -1,0 +1,59 @@
+flowchart TB
+    subgraph Inputs
+        candidate[/"candidate"/]
+        clicked[/"clicked"/]
+        profile[/"profile"/]
+    end
+
+    candidate-embedder["candidate-embedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    history-NRMSArticleEmbedder["history-NRMSArticleEmbedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    user-embedder["user-embedder<br><tt>poprox_recommender.components.embedders.user:NRMSUserEmbedder</tt>"]
+    user-embedder2["user-embedder2<br><tt>poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder</tt>"]
+    user-embedder3["user-embedder3<br><tt>poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder</tt>"]
+    user-embedder4["user-embedder4<br><tt>poprox_recommender.components.embedders.user_article_feedback:UserArticleFeedbackEmbedder</tt>"]
+    user-embedder5["user-embedder5<br><tt>poprox_recommender.components.embedders.user_article_feedback:UserArticleFeedbackEmbedder</tt>"]
+    scorer["scorer<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    positive_topic_score["positive_topic_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    negative_topic_score["negative_topic_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    topic_fusion["topic_fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    positive_feedback_score["positive_feedback_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    negative_feedback_score["negative_feedback_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    feedback_fusion["feedback_fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    explicit_fusion["explicit_fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    fusion["fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    recommender(["recommender<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"])
+
+    candidate --> candidate-embedder
+    clicked --> history-NRMSArticleEmbedder
+    candidate-embedder --> user-embedder
+    history-NRMSArticleEmbedder --> user-embedder
+    profile --> user-embedder
+    candidate-embedder --> user-embedder2
+    history-NRMSArticleEmbedder --> user-embedder2
+    profile --> user-embedder2
+    candidate-embedder --> user-embedder3
+    history-NRMSArticleEmbedder --> user-embedder3
+    profile --> user-embedder3
+    history-NRMSArticleEmbedder --> user-embedder4
+    profile --> user-embedder4
+    history-NRMSArticleEmbedder --> user-embedder5
+    profile --> user-embedder5
+    candidate-embedder --> scorer
+    user-embedder --> scorer
+    candidate-embedder --> positive_topic_score
+    user-embedder2 --> positive_topic_score
+    candidate-embedder --> negative_topic_score
+    user-embedder3 --> negative_topic_score
+    positive_topic_score --> topic_fusion
+    negative_topic_score --> topic_fusion
+    candidate-embedder --> positive_feedback_score
+    user-embedder4 --> positive_feedback_score
+    candidate-embedder --> negative_feedback_score
+    user-embedder5 --> negative_feedback_score
+    positive_feedback_score --> feedback_fusion
+    negative_feedback_score --> feedback_fusion
+    topic_fusion --> explicit_fusion
+    feedback_fusion --> explicit_fusion
+    scorer --> fusion
+    explicit_fusion --> fusion
+    fusion --> recommender

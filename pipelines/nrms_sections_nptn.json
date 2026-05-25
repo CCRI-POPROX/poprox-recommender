@@ -1,0 +1,464 @@
+{
+  "options": null,
+  "meta": {
+    "name": "nrms_sections_nptn",
+    "version": "0.0.1",
+    "hash": "5720409762add673f41ce1307145f130a6febf0b2893cd5fc29709deefa47263"
+  },
+  "inputs": [
+    {
+      "name": "candidate",
+      "types": [
+        "poprox_concepts.domain.recommendation:CandidatePool"
+      ]
+    },
+    {
+      "name": "clicked",
+      "types": [
+        "poprox_concepts.domain.recommendation:CandidatePool"
+      ]
+    },
+    {
+      "name": "profile",
+      "types": [
+        "poprox_concepts.domain.profile:InterestProfile"
+      ]
+    },
+    {
+      "name": "packages",
+      "types": [
+        "list"
+      ]
+    },
+    {
+      "name": "impressed_article_ids",
+      "types": [
+        "list"
+      ]
+    }
+  ],
+  "components": {
+    "impression-filter": {
+      "code": "poprox_recommender.components.filters.impression:ImpressionFilter",
+      "config": null,
+      "inputs": {
+        "candidates": "candidate",
+        "impressed_article_ids": "impressed_article_ids"
+      }
+    },
+    "candidate-embedder": {
+      "code": "poprox_recommender.components.embedders.article:NRMSArticleEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/news_encoder.safetensors",
+        "device": "cuda"
+      },
+      "inputs": {
+        "article_set": "impression-filter"
+      }
+    },
+    "history-NRMSArticleEmbedder": {
+      "code": "poprox_recommender.components.embedders.article:NRMSArticleEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/news_encoder.safetensors",
+        "device": "cuda"
+      },
+      "inputs": {
+        "article_set": "clicked"
+      }
+    },
+    "user-embedder": {
+      "code": "poprox_recommender.components.embedders.user:NRMSUserEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "clicked_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "user-pos-topic-embedder": {
+      "code": "poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50,
+        "embedding_source": "static",
+        "topic_embedding": "nrms",
+        "scorer_source": "ArticleScorer",
+        "topic_pref_values": [
+          4,
+          5
+        ]
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "clicked_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "user-neg-topic-embedder": {
+      "code": "poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50,
+        "embedding_source": "static",
+        "topic_embedding": "nrms",
+        "scorer_source": "ArticleScorer",
+        "topic_pref_values": [
+          1,
+          2
+        ]
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "clicked_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "user-pos-fb-embedder": {
+      "code": "poprox_recommender.components.embedders.user_article_feedback:UserArticleFeedbackEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50,
+        "feedback_type": true
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interacted_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "user-neg-fb-embedder": {
+      "code": "poprox_recommender.components.embedders.user_article_feedback:UserArticleFeedbackEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50,
+        "feedback_type": false
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interacted_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "scorer": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-embedder"
+      }
+    },
+    "positive_topic_score": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-pos-topic-embedder"
+      }
+    },
+    "negative_topic_score": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-neg-topic-embedder"
+      }
+    },
+    "topic_fusion": {
+      "code": "poprox_recommender.components.joiners.score:ScoreFusion",
+      "config": {
+        "combiner": "sub",
+        "weight1": 1.0,
+        "weight2": 1.0
+      },
+      "inputs": {
+        "candidates1": "positive_topic_score",
+        "candidates2": "negative_topic_score"
+      }
+    },
+    "positive_feedback_score": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-pos-fb-embedder"
+      }
+    },
+    "negative_feedback_score": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-neg-fb-embedder"
+      }
+    },
+    "feedback_fusion": {
+      "code": "poprox_recommender.components.joiners.score:ScoreFusion",
+      "config": {
+        "combiner": "sub",
+        "weight1": 1.0,
+        "weight2": 1.0
+      },
+      "inputs": {
+        "candidates1": "positive_feedback_score",
+        "candidates2": "negative_feedback_score"
+      }
+    },
+    "explicit_fusion": {
+      "code": "poprox_recommender.components.joiners.score:ScoreFusion",
+      "config": {
+        "combiner": "avg",
+        "weight1": 1.0,
+        "weight2": 1.0
+      },
+      "inputs": {
+        "candidates1": "topic_fusion",
+        "candidates2": "feedback_fusion"
+      }
+    },
+    "fusion": {
+      "code": "poprox_recommender.components.joiners.score:ScoreFusion",
+      "config": {
+        "combiner": "avg",
+        "weight1": 1.0,
+        "weight2": 2.0
+      },
+      "inputs": {
+        "candidates1": "scorer",
+        "candidates2": "explicit_fusion"
+      }
+    },
+    "ts_candidates": {
+      "code": "poprox_recommender.components.selectors.top_news:TopGeneralNewsCandidates",
+      "config": null,
+      "inputs": {
+        "article_packages": "packages",
+        "candidate_articles": "fusion"
+      }
+    },
+    "ts_topk": {
+      "code": "poprox_recommender.components.rankers.topk:TopkRanker",
+      "config": {
+        "num_slots": 3
+      },
+      "inputs": {
+        "candidate_articles": "ts_candidates"
+      }
+    },
+    "top_stories": {
+      "code": "poprox_recommender.components.sections.combine:AddSection",
+      "config": {
+        "title": "Top Stories",
+        "personalized": false
+      },
+      "inputs": {
+        "new_section": "ts_topk"
+      }
+    },
+    "topic1_deduped": {
+      "code": "poprox_recommender.components.filters.duplicate:DuplicateFilter",
+      "config": null,
+      "inputs": {
+        "candidate": "fusion",
+        "sections": "top_stories"
+      }
+    },
+    "topic1_candidates": {
+      "code": "poprox_recommender.components.selectors.topical:TopicalCandidates",
+      "config": {
+        "min_candidates": 3,
+        "random_seed": 22
+      },
+      "inputs": {
+        "candidate_set": "topic1_deduped",
+        "interest_profile": "profile",
+        "sections": "top_stories"
+      }
+    },
+    "topic1_topk": {
+      "code": "poprox_recommender.components.rankers.topk:TopkRanker",
+      "config": {
+        "num_slots": 3
+      },
+      "inputs": {
+        "candidate_articles": "topic1_candidates"
+      }
+    },
+    "topic1_sections": {
+      "code": "poprox_recommender.components.sections.combine:AddSection",
+      "config": {
+        "title": null,
+        "personalized": true
+      },
+      "inputs": {
+        "existing_sections": "top_stories",
+        "new_section": "topic1_topk"
+      }
+    },
+    "topic2_deduped": {
+      "code": "poprox_recommender.components.filters.duplicate:DuplicateFilter",
+      "config": null,
+      "inputs": {
+        "candidate": "fusion",
+        "sections": "topic1_sections"
+      }
+    },
+    "topic2_candidates": {
+      "code": "poprox_recommender.components.selectors.topical:TopicalCandidates",
+      "config": {
+        "min_candidates": 3,
+        "random_seed": 22
+      },
+      "inputs": {
+        "candidate_set": "topic2_deduped",
+        "interest_profile": "profile",
+        "sections": "topic1_sections"
+      }
+    },
+    "topic2_topk": {
+      "code": "poprox_recommender.components.rankers.topk:TopkRanker",
+      "config": {
+        "num_slots": 3
+      },
+      "inputs": {
+        "candidate_articles": "topic2_candidates"
+      }
+    },
+    "topic2_sections": {
+      "code": "poprox_recommender.components.sections.combine:AddSection",
+      "config": {
+        "title": null,
+        "personalized": true
+      },
+      "inputs": {
+        "existing_sections": "topic1_sections",
+        "new_section": "topic2_topk"
+      }
+    },
+    "topic3_deduped": {
+      "code": "poprox_recommender.components.filters.duplicate:DuplicateFilter",
+      "config": null,
+      "inputs": {
+        "candidate": "fusion",
+        "sections": "topic2_sections"
+      }
+    },
+    "topic3_candidates": {
+      "code": "poprox_recommender.components.selectors.topical:TopicalCandidates",
+      "config": {
+        "min_candidates": 3,
+        "random_seed": 22
+      },
+      "inputs": {
+        "candidate_set": "topic3_deduped",
+        "interest_profile": "profile",
+        "sections": "topic2_sections"
+      }
+    },
+    "topic3_topk": {
+      "code": "poprox_recommender.components.rankers.topk:TopkRanker",
+      "config": {
+        "num_slots": 3
+      },
+      "inputs": {
+        "candidate_articles": "topic3_candidates"
+      }
+    },
+    "topic3_sections": {
+      "code": "poprox_recommender.components.sections.combine:AddSection",
+      "config": {
+        "title": null,
+        "personalized": true
+      },
+      "inputs": {
+        "existing_sections": "topic2_sections",
+        "new_section": "topic3_topk"
+      }
+    },
+    "ion_deduped": {
+      "code": "poprox_recommender.components.filters.duplicate:DuplicateFilter",
+      "config": null,
+      "inputs": {
+        "candidate": "fusion",
+        "sections": "topic3_sections"
+      }
+    },
+    "ion_narrowed": {
+      "code": "poprox_recommender.components.filters.seeds:PreviousSectionsFilter",
+      "config": null,
+      "inputs": {
+        "article_packages": "packages",
+        "candidate": "ion_deduped",
+        "sections": "topic3_sections"
+      }
+    },
+    "ion_topic_filtered": {
+      "code": "poprox_recommender.components.filters.topic:TopicPrefsFilter",
+      "config": null,
+      "inputs": {
+        "candidates": "ion_narrowed",
+        "interest_profile": "profile"
+      }
+    },
+    "ion_topk_filtered": {
+      "code": "poprox_recommender.components.rankers.topk:TopkRanker",
+      "config": {
+        "num_slots": 3
+      },
+      "inputs": {
+        "candidate_articles": "ion_topic_filtered"
+      }
+    },
+    "ion_topk_unfiltered": {
+      "code": "poprox_recommender.components.rankers.topk:TopkRanker",
+      "config": {
+        "num_slots": 6
+      },
+      "inputs": {
+        "candidate_articles": "ion_narrowed"
+      }
+    },
+    "ion_fill": {
+      "code": "poprox_recommender.components.joiners.fill:FillRecs",
+      "config": {
+        "num_slots": 3,
+        "deduplicate": true
+      },
+      "inputs": {
+        "recs1": "ion_topk_filtered",
+        "recs2": "ion_topk_unfiltered"
+      }
+    },
+    "recommender": {
+      "code": "poprox_recommender.components.sections.combine:AddSection",
+      "config": {
+        "title": "In Other News",
+        "personalized": true
+      },
+      "inputs": {
+        "existing_sections": "topic3_sections",
+        "new_section": "ion_fill"
+      }
+    }
+  },
+  "aliases": {},
+  "default": null,
+  "literals": {},
+  "hooks": {
+    "run": {
+      "component-input": [
+        {
+          "function": "poprox_recommender.recommenders.hooks:shallow_copy_pydantic_model",
+          "priority": 1
+        }
+      ]
+    }
+  }
+}

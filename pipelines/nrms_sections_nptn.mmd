@@ -1,0 +1,127 @@
+flowchart TB
+    subgraph Inputs
+        candidate[/"candidate"/]
+        clicked[/"clicked"/]
+        profile[/"profile"/]
+        packages[/"packages"/]
+        impressed_article_ids[/"impressed_article_ids"/]
+    end
+
+    impression-filter["impression-filter<br><tt>poprox_recommender.components.filters.impression:ImpressionFilter</tt>"]
+    candidate-embedder["candidate-embedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    history-NRMSArticleEmbedder["history-NRMSArticleEmbedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    user-embedder["user-embedder<br><tt>poprox_recommender.components.embedders.user:NRMSUserEmbedder</tt>"]
+    user-pos-topic-embedder["user-pos-topic-embedder<br><tt>poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder</tt>"]
+    user-neg-topic-embedder["user-neg-topic-embedder<br><tt>poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder</tt>"]
+    user-pos-fb-embedder["user-pos-fb-embedder<br><tt>poprox_recommender.components.embedders.user_article_feedback:UserArticleFeedbackEmbedder</tt>"]
+    user-neg-fb-embedder["user-neg-fb-embedder<br><tt>poprox_recommender.components.embedders.user_article_feedback:UserArticleFeedbackEmbedder</tt>"]
+    scorer["scorer<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    positive_topic_score["positive_topic_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    negative_topic_score["negative_topic_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    topic_fusion["topic_fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    positive_feedback_score["positive_feedback_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    negative_feedback_score["negative_feedback_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    feedback_fusion["feedback_fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    explicit_fusion["explicit_fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    fusion["fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    ts_candidates["ts_candidates<br><tt>poprox_recommender.components.selectors.top_news:TopGeneralNewsCandidates</tt>"]
+    ts_topk["ts_topk<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    top_stories["top_stories<br><tt>poprox_recommender.components.sections.combine:AddSection</tt>"]
+    topic1_deduped["topic1_deduped<br><tt>poprox_recommender.components.filters.duplicate:DuplicateFilter</tt>"]
+    topic1_candidates["topic1_candidates<br><tt>poprox_recommender.components.selectors.topical:TopicalCandidates</tt>"]
+    topic1_topk["topic1_topk<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    topic1_sections["topic1_sections<br><tt>poprox_recommender.components.sections.combine:AddSection</tt>"]
+    topic2_deduped["topic2_deduped<br><tt>poprox_recommender.components.filters.duplicate:DuplicateFilter</tt>"]
+    topic2_candidates["topic2_candidates<br><tt>poprox_recommender.components.selectors.topical:TopicalCandidates</tt>"]
+    topic2_topk["topic2_topk<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    topic2_sections["topic2_sections<br><tt>poprox_recommender.components.sections.combine:AddSection</tt>"]
+    topic3_deduped["topic3_deduped<br><tt>poprox_recommender.components.filters.duplicate:DuplicateFilter</tt>"]
+    topic3_candidates["topic3_candidates<br><tt>poprox_recommender.components.selectors.topical:TopicalCandidates</tt>"]
+    topic3_topk["topic3_topk<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    topic3_sections["topic3_sections<br><tt>poprox_recommender.components.sections.combine:AddSection</tt>"]
+    ion_deduped["ion_deduped<br><tt>poprox_recommender.components.filters.duplicate:DuplicateFilter</tt>"]
+    ion_narrowed["ion_narrowed<br><tt>poprox_recommender.components.filters.seeds:PreviousSectionsFilter</tt>"]
+    ion_topic_filtered["ion_topic_filtered<br><tt>poprox_recommender.components.filters.topic:TopicPrefsFilter</tt>"]
+    ion_topk_filtered["ion_topk_filtered<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    ion_topk_unfiltered["ion_topk_unfiltered<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    ion_fill["ion_fill<br><tt>poprox_recommender.components.joiners.fill:FillRecs</tt>"]
+    recommender(["recommender<br><tt>poprox_recommender.components.sections.combine:AddSection</tt>"])
+
+    candidate --> impression-filter
+    impressed_article_ids --> impression-filter
+    impression-filter --> candidate-embedder
+    clicked --> history-NRMSArticleEmbedder
+    candidate-embedder --> user-embedder
+    history-NRMSArticleEmbedder --> user-embedder
+    profile --> user-embedder
+    candidate-embedder --> user-pos-topic-embedder
+    history-NRMSArticleEmbedder --> user-pos-topic-embedder
+    profile --> user-pos-topic-embedder
+    candidate-embedder --> user-neg-topic-embedder
+    history-NRMSArticleEmbedder --> user-neg-topic-embedder
+    profile --> user-neg-topic-embedder
+    candidate-embedder --> user-pos-fb-embedder
+    history-NRMSArticleEmbedder --> user-pos-fb-embedder
+    profile --> user-pos-fb-embedder
+    candidate-embedder --> user-neg-fb-embedder
+    history-NRMSArticleEmbedder --> user-neg-fb-embedder
+    profile --> user-neg-fb-embedder
+    candidate-embedder --> scorer
+    user-embedder --> scorer
+    candidate-embedder --> positive_topic_score
+    user-pos-topic-embedder --> positive_topic_score
+    candidate-embedder --> negative_topic_score
+    user-neg-topic-embedder --> negative_topic_score
+    positive_topic_score --> topic_fusion
+    negative_topic_score --> topic_fusion
+    candidate-embedder --> positive_feedback_score
+    user-pos-fb-embedder --> positive_feedback_score
+    candidate-embedder --> negative_feedback_score
+    user-neg-fb-embedder --> negative_feedback_score
+    positive_feedback_score --> feedback_fusion
+    negative_feedback_score --> feedback_fusion
+    topic_fusion --> explicit_fusion
+    feedback_fusion --> explicit_fusion
+    scorer --> fusion
+    explicit_fusion --> fusion
+    packages --> ts_candidates
+    fusion --> ts_candidates
+    ts_candidates --> ts_topk
+    ts_topk --> top_stories
+    fusion --> topic1_deduped
+    top_stories --> topic1_deduped
+    topic1_deduped --> topic1_candidates
+    profile --> topic1_candidates
+    top_stories --> topic1_candidates
+    topic1_candidates --> topic1_topk
+    top_stories --> topic1_sections
+    topic1_topk --> topic1_sections
+    fusion --> topic2_deduped
+    topic1_sections --> topic2_deduped
+    topic2_deduped --> topic2_candidates
+    profile --> topic2_candidates
+    topic1_sections --> topic2_candidates
+    topic2_candidates --> topic2_topk
+    topic1_sections --> topic2_sections
+    topic2_topk --> topic2_sections
+    fusion --> topic3_deduped
+    topic2_sections --> topic3_deduped
+    topic3_deduped --> topic3_candidates
+    profile --> topic3_candidates
+    topic2_sections --> topic3_candidates
+    topic3_candidates --> topic3_topk
+    topic2_sections --> topic3_sections
+    topic3_topk --> topic3_sections
+    fusion --> ion_deduped
+    topic3_sections --> ion_deduped
+    packages --> ion_narrowed
+    ion_deduped --> ion_narrowed
+    topic3_sections --> ion_narrowed
+    ion_narrowed --> ion_topic_filtered
+    profile --> ion_topic_filtered
+    ion_topic_filtered --> ion_topk_filtered
+    ion_narrowed --> ion_topk_unfiltered
+    ion_topk_filtered --> ion_fill
+    ion_topk_unfiltered --> ion_fill
+    topic3_sections --> recommender
+    ion_fill --> recommender

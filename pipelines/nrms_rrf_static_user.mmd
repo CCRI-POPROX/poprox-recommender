@@ -1,0 +1,33 @@
+flowchart TB
+    subgraph Inputs
+        candidate[/"candidate"/]
+        clicked[/"clicked"/]
+        profile[/"profile"/]
+    end
+
+    candidate-embedder["candidate-embedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    history-NRMSArticleEmbedder["history-NRMSArticleEmbedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    user-embedder["user-embedder<br><tt>poprox_recommender.components.embedders.user:NRMSUserEmbedder</tt>"]
+    user-embedder2["user-embedder2<br><tt>poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder</tt>"]
+    scorer["scorer<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    ranker["ranker<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    scorer2["scorer2<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    ranker2["ranker2<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    recommender(["recommender<br><tt>poprox_recommender.components.joiners.rrf:ReciprocalRankFusion</tt>"])
+
+    candidate --> candidate-embedder
+    clicked --> history-NRMSArticleEmbedder
+    candidate-embedder --> user-embedder
+    history-NRMSArticleEmbedder --> user-embedder
+    profile --> user-embedder
+    candidate-embedder --> user-embedder2
+    history-NRMSArticleEmbedder --> user-embedder2
+    profile --> user-embedder2
+    candidate-embedder --> scorer
+    user-embedder --> scorer
+    scorer --> ranker
+    candidate-embedder --> scorer2
+    user-embedder2 --> scorer2
+    scorer2 --> ranker2
+    ranker --> recommender
+    ranker2 --> recommender
