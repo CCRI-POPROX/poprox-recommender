@@ -1927,8 +1927,8 @@ wheels = [
 
 [[package]]
 name = "lenskit"
-version = "2026.1.1a1.dev129+g2b705a83"
-source = { registry = "https://pypi.lenskit.org/lenskit-dev/" }
+version = "2026.2.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "humanize" },
@@ -1956,12 +1956,12 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "xopen" },
 ]
-sdist = { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83.tar.gz" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/14/0ef45aa7116c3195ab539a1ad5769cf860d0f9e91166408a4115086c0a5b/lenskit-2026.2.0.tar.gz", hash = "sha256:591ed8998654e55eeb4c6c73c5f5f8eae6f58575a3cd4094d0b8a5911a0ebc7e", size = 2982373, upload-time = "2026-05-25T19:23:21.711Z" }
 wheels = [
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83-cp312-abi3-macosx_11_0_arm64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83-cp312-abi3-manylinux_2_28_aarch64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83-cp312-abi3-manylinux_2_28_x86_64.whl" },
-    { url = "https://inertial.cci.drexel.edu/dist/lenskit-dev/packages/lenskit-2026.1.1a1.dev129%2Bg2b705a83-cp312-abi3-win_amd64.whl" },
+    { url = "https://files.pythonhosted.org/packages/07/7b/67a987213d89d46e3ede32524bd650bd3a979706dc4873d26e6fbfe02e4a/lenskit-2026.2.0-cp312-abi3-macosx_11_0_arm64.whl", hash = "sha256:374c736325c9e81e414b77626938d18b55e42af959f6434e6fa310068395fbfe", size = 3219747, upload-time = "2026-05-25T19:23:06.944Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/fa/90ff09ebd391ff934eddc9fc31c5a3000107aea78cf6b96da57fedc72ae3/lenskit-2026.2.0-cp312-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:feba134f2499978a1428bb4d4b38e3e0807de0e82461b88aa526f8004402995d", size = 9418276, upload-time = "2026-05-25T19:23:09.09Z" },
+    { url = "https://files.pythonhosted.org/packages/4c/d1/0150b7d96406a5af4ec269423025efc4d7b4015b928afbe46a725f587867/lenskit-2026.2.0-cp312-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:9da3f423264b19191adfba57e018fb17008f4573f9620ade36be6076f146fe70", size = 9933365, upload-time = "2026-05-25T19:23:11.294Z" },
+    { url = "https://files.pythonhosted.org/packages/a6/8d/49691dfac735ea8fa8c6ead0e75ed76284011576111b1eba6a71ec742dd2/lenskit-2026.2.0-cp312-abi3-win_amd64.whl", hash = "sha256:604aba608ac7974a6be7e625576388275450132182ccac07befb3af8666959c0", size = 3394465, upload-time = "2026-05-25T19:23:13.314Z" },
 ]
 
 [[package]]
@@ -2783,7 +2783,7 @@ requires-dist = [
     { name = "awslambdaric", marker = "extra == 'deploy'", specifier = "~=2.2" },
     { name = "fastapi", extras = ["all"], specifier = "~=0.115.11" },
     { name = "httpx", specifier = "~=0.28.1" },
-    { name = "lenskit", specifier = ">=2026.1.1a1.dev121,<2027", index = "https://pypi.lenskit.org/lenskit-dev/" },
+    { name = "lenskit", specifier = ">=2026.2.0,<2027" },
     { name = "mangum", specifier = "~=0.19.0" },
     { name = "nltk", specifier = ">=3.8,<4" },
     { name = "poprox-concepts", git = "https://github.com/CCRI-POPROX/poprox-concepts.git" },
