@@ -106,7 +106,7 @@ def cluster_recommend(
     """
     Generate and save recommendations with parallel worker processes.
     """
-    logger.info("starting parallel evaluation with task limit of %d", pc.processes)
+    logger.info("starting parallel evaluation with task limit of %d", pc.num_procs)
     init_cluster(global_logging=True)
 
     device = default_device()
