@@ -113,7 +113,7 @@ stages:
     outs:
     - path: MINDsmall_dev.db
       hash: md5
-      md5: 8e944ef27fa666d3f04c99a51cc69916
+      md5: 787b798b1c002a1319a21b4bf005fa5a
       size: 110899200
   ingest-mind@MINDlarge_dev:
     cmd: python -m poprox_recommender.data.duckscript -D mind_path=MINDlarge_dev

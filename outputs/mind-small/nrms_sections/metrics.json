@@ -1,12 +1,15 @@
 {
   "num_truth":1.5226241251,
-  "RBP":0.1272770874,
-  "NDCG@5":0.6557262235,
-  "NDCG@10":0.7076162032,
-  "MRR":0.2779254156,
+  "RBP":0.0636385437,
+  "section_aware_RBP":0.1773548714,
+  "NDCG@5":0.3543618577,
+  "NDCG@10":0.3538081016,
+  "MRR":0.3146211541,
   "RBO@5":0.0,
   "RBO@10":0.0,
   "rank_based_entropy":0.0,
   "least_item_promoted":null,
-  "intralist_similarity":null
+  "intralist_similarity":null,
+  "total_articles":2.9463445976,
+  "num_sections":1.0
 }
