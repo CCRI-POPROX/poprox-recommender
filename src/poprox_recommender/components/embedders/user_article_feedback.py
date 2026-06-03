@@ -12,10 +12,10 @@ from poprox_recommender.pytorch.decorators import torch_inference
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class UserArticleFeedbackConfig(NRMSUserEmbedderConfig):
     # True -> positive, False -> negative
-    feedback_type: bool | Literal["positive", "negative"] | None = None
+    feedback_type: bool | Literal["positive", "negative"]
 
 
 class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
@@ -37,13 +37,15 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
             interest_profile.embedding = None
         else:
             feedback = interest_profile.article_feedbacks
+            # this is checked by preceeding if, but typechecker doesn't know that
+            assert feedback is not None
             logger.info(f"{len(feedback)} unfiltered article feedbacks of types {set(feedback.values())}")
 
             # Filter the list of feedback to only include the type this component is configured to process
             filtered_feedback = {
                 article_id: feedback_type
                 for article_id, feedback_type in feedback.items()
-                if feedback_type == self.config.feedback_type
+                if _compatible_feedback(feedback_type, self.config.feedback_type)
             }
 
             logger.info(f"{len(filtered_feedback)} filtered article feedbacks of type {self.config.feedback_type}")
@@ -100,3 +102,18 @@ class UserArticleFeedbackEmbedder(NRMSUserEmbedder):
         )
 
         return self.user_encoder(clicked_news_vector)
+
+
+def _compatible_feedback(observed: bool, requested: bool | Literal["positive", "negative"]) -> bool:
+    """
+    Function to check if the observed feedback matches the requested feedback
+    type, that accounts for legacy feedback configuration.
+    """
+    if observed == requested:
+        return True
+    elif requested == "positive" and observed:
+        return True
+    elif requested == "negative" and observed:
+        return True
+    else:
+        return False
