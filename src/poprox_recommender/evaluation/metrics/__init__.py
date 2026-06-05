@@ -10,10 +10,12 @@ from lenskit.metrics.ranking import NDCG, RBP, RecipRank
 from poprox_concepts.domain import Article, CandidateSet
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.evaluation.measure.section_browsing_model import section_browsing_weights
+from poprox_recommender.evaluation.metrics.distinct_sections_clicked import distinct_sections_clicked
 from poprox_recommender.evaluation.metrics.ils import intralist_similarity
 from poprox_recommender.evaluation.metrics.lip import least_item_promoted
 from poprox_recommender.evaluation.metrics.rbe import rank_bias_entropy
 from poprox_recommender.evaluation.metrics.rbo import rank_biased_overlap
+from poprox_recommender.evaluation.metrics.sctr import section_click_through_rate
 
 __all__ = [
     "rank_biased_overlap",
@@ -21,6 +23,8 @@ __all__ = [
     "least_item_promoted",
     "rank_bias_entropy",
     "intralist_similarity",
+    "distinct_sections_clicked",
+    "section_click_through_rate",
 ]
 
 logger = logging.getLogger(__name__)
@@ -86,8 +90,13 @@ def measure_rec_metrics(
         else:
             sa_rbp = None
 
+        num_distinct_sections_clicked = distinct_sections_clicked(final, truth_df) if isinstance(final, list) else None
+        sctr = section_click_through_rate(final, truth_df) if isinstance(final, list) else None
+
     else:
         single_rbp = single_rr = single_ndcg5 = single_ndcg10 = sa_rbp = None
+        num_distinct_sections_clicked = None
+        sctr = None
 
     ranked = (
         CandidateSet(articles=[imp.article for imp in results.ranked.impressions])
@@ -148,4 +157,6 @@ def measure_rec_metrics(
         "intralist_similarity": ils,
         "total_articles": total_articles,
         "num_sections": num_sections,
+        "num_distinct_sections_clicked": num_distinct_sections_clicked,
+        "SCTR": sctr,
     }
