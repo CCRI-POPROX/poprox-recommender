@@ -1,0 +1,45 @@
+flowchart TB
+    subgraph Inputs
+        candidate[/"candidate"/]
+        clicked[/"clicked"/]
+        profile[/"profile"/]
+        packages[/"packages"/]
+    end
+
+    candidate-embedder["candidate-embedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    history-NRMSArticleEmbedder["history-NRMSArticleEmbedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    user-embedder["user-embedder<br><tt>poprox_recommender.components.embedders.user:NRMSUserEmbedder</tt>"]
+    pos-topic-embedder["pos-topic-embedder<br><tt>poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder</tt>"]
+    neg-topic-embedder["neg-topic-embedder<br><tt>poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder</tt>"]
+    scorer["scorer<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    positive_topic_score["positive_topic_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    negative_topic_score["negative_topic_score<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    topic_fusion["topic_fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    fusion["fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    ranker["ranker<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    recommender(["recommender<br><tt>poprox_recommender.components.rankers.top_news_placer:TopNewsPlacer</tt>"])
+
+    candidate --> candidate-embedder
+    clicked --> history-NRMSArticleEmbedder
+    candidate-embedder --> user-embedder
+    history-NRMSArticleEmbedder --> user-embedder
+    profile --> user-embedder
+    candidate-embedder --> pos-topic-embedder
+    history-NRMSArticleEmbedder --> pos-topic-embedder
+    profile --> pos-topic-embedder
+    candidate-embedder --> neg-topic-embedder
+    history-NRMSArticleEmbedder --> neg-topic-embedder
+    profile --> neg-topic-embedder
+    candidate-embedder --> scorer
+    user-embedder --> scorer
+    candidate-embedder --> positive_topic_score
+    pos-topic-embedder --> positive_topic_score
+    candidate-embedder --> negative_topic_score
+    neg-topic-embedder --> negative_topic_score
+    positive_topic_score --> topic_fusion
+    negative_topic_score --> topic_fusion
+    scorer --> fusion
+    topic_fusion --> fusion
+    fusion --> ranker
+    packages --> recommender
+    ranker --> recommender

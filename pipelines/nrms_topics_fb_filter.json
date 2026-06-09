@@ -1,0 +1,283 @@
+{
+  "options": null,
+  "meta": {
+    "name": "nrms_topics_fb_filter",
+    "version": "0.0.1",
+    "hash": "e187b3b4219fb6a3c039a67c717a85aa4ab371b39c2b6e8c0dc64fff3b577fb6"
+  },
+  "inputs": [
+    {
+      "name": "candidate",
+      "types": [
+        "poprox_concepts.domain.recommendation:CandidatePool"
+      ]
+    },
+    {
+      "name": "clicked",
+      "types": [
+        "poprox_concepts.domain.recommendation:CandidatePool"
+      ]
+    },
+    {
+      "name": "profile",
+      "types": [
+        "poprox_concepts.domain.profile:InterestProfile"
+      ]
+    },
+    {
+      "name": "impressed_article_ids",
+      "types": [
+        "list"
+      ]
+    }
+  ],
+  "components": {
+    "impression-filter": {
+      "code": "poprox_recommender.components.filters.impression:ImpressionFilter",
+      "config": null,
+      "inputs": {
+        "candidates": "candidate",
+        "impressed_article_ids": "impressed_article_ids"
+      }
+    },
+    "candidate-embedder": {
+      "code": "poprox_recommender.components.embedders.article:NRMSArticleEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/news_encoder.safetensors",
+        "device": "cuda"
+      },
+      "inputs": {
+        "article_set": "impression-filter"
+      }
+    },
+    "history-NRMSArticleEmbedder": {
+      "code": "poprox_recommender.components.embedders.article:NRMSArticleEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/news_encoder.safetensors",
+        "device": "cuda"
+      },
+      "inputs": {
+        "article_set": "clicked"
+      }
+    },
+    "user-embedder": {
+      "code": "poprox_recommender.components.embedders.user:NRMSUserEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "clicked_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "user-pos-topic-embedder": {
+      "code": "poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50,
+        "embedding_source": "static",
+        "topic_embedding": "nrms",
+        "scorer_source": "ArticleScorer",
+        "topic_pref_values": [
+          4,
+          5
+        ]
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "clicked_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "user-neg-topic-embedder": {
+      "code": "poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50,
+        "embedding_source": "static",
+        "topic_embedding": "nrms",
+        "scorer_source": "ArticleScorer",
+        "topic_pref_values": [
+          1,
+          2
+        ]
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "clicked_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "user-neg-fb-embedder": {
+      "code": "poprox_recommender.components.embedders.user_article_feedback:UserArticleFeedbackEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50,
+        "feedback_type": true
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interacted_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "user-pos-fb-embedder": {
+      "code": "poprox_recommender.components.embedders.user_article_feedback:UserArticleFeedbackEmbedder",
+      "config": {
+        "model_path": "/home/mde48/poprox/poprox-recommender/models/nrms-mind/user_encoder.safetensors",
+        "device": "cuda",
+        "max_clicks_per_user": 50,
+        "feedback_type": false
+      },
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interacted_articles": "history-NRMSArticleEmbedder",
+        "interest_profile": "profile"
+      }
+    },
+    "scorer": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-embedder"
+      }
+    },
+    "positive_topic_score": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-pos-topic-embedder"
+      }
+    },
+    "negative_topic_score": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-neg-topic-embedder"
+      }
+    },
+    "topic_fusion": {
+      "code": "poprox_recommender.components.joiners.score:ScoreFusion",
+      "config": {
+        "combiner": "sub",
+        "weight1": 1.0,
+        "weight2": 1.0
+      },
+      "inputs": {
+        "candidates1": "positive_topic_score",
+        "candidates2": "negative_topic_score"
+      }
+    },
+    "positive_feedback_score": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-neg-fb-embedder"
+      }
+    },
+    "negative_feedback_score": {
+      "code": "poprox_recommender.components.scorers.article:ArticleScorer",
+      "config": null,
+      "inputs": {
+        "candidate_articles": "candidate-embedder",
+        "interest_profile": "user-pos-fb-embedder"
+      }
+    },
+    "feedback_fusion": {
+      "code": "poprox_recommender.components.joiners.score:ScoreFusion",
+      "config": {
+        "combiner": "sub",
+        "weight1": 1.0,
+        "weight2": 1.0
+      },
+      "inputs": {
+        "candidates1": "positive_feedback_score",
+        "candidates2": "negative_feedback_score"
+      }
+    },
+    "explicit_fusion": {
+      "code": "poprox_recommender.components.joiners.score:ScoreFusion",
+      "config": {
+        "combiner": "avg",
+        "weight1": 1.0,
+        "weight2": 1.0
+      },
+      "inputs": {
+        "candidates1": "topic_fusion",
+        "candidates2": "feedback_fusion"
+      }
+    },
+    "fusion": {
+      "code": "poprox_recommender.components.joiners.score:ScoreFusion",
+      "config": {
+        "combiner": "avg",
+        "weight1": 1.0,
+        "weight2": 2.0
+      },
+      "inputs": {
+        "candidates1": "scorer",
+        "candidates2": "explicit_fusion"
+      }
+    },
+    "topic-filter": {
+      "code": "poprox_recommender.components.filters.topic:TopicPrefsFilter",
+      "config": null,
+      "inputs": {
+        "candidates": "fusion",
+        "interest_profile": "profile"
+      }
+    },
+    "filtered-ranker": {
+      "code": "poprox_recommender.components.rankers.topk:TopkRanker",
+      "config": {
+        "num_slots": 10
+      },
+      "inputs": {
+        "candidate_articles": "topic-filter"
+      }
+    },
+    "unfiltered-ranker": {
+      "code": "poprox_recommender.components.rankers.topk:TopkRanker",
+      "config": {
+        "num_slots": 10
+      },
+      "inputs": {
+        "candidate_articles": "fusion"
+      }
+    },
+    "recommender": {
+      "code": "poprox_recommender.components.joiners.fill:FillRecs",
+      "config": {
+        "num_slots": 10,
+        "deduplicate": true
+      },
+      "inputs": {
+        "recs1": "filtered-ranker",
+        "recs2": "unfiltered-ranker"
+      }
+    }
+  },
+  "aliases": {},
+  "default": null,
+  "literals": {},
+  "hooks": {
+    "run": {
+      "component-input": [
+        {
+          "function": "poprox_recommender.recommenders.hooks:shallow_copy_pydantic_model",
+          "priority": 1
+        }
+      ]
+    }
+  }
+}

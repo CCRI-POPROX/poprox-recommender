@@ -1,0 +1,37 @@
+flowchart TB
+    subgraph Inputs
+        candidate[/"candidate"/]
+        clicked[/"clicked"/]
+        profile[/"profile"/]
+    end
+
+    topic-filter["topic-filter<br><tt>poprox_recommender.components.filters.topic:TopicPrefsFilter</tt>"]
+    candidate-embedder["candidate-embedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    history-NRMSArticleEmbedder["history-NRMSArticleEmbedder<br><tt>poprox_recommender.components.embedders.article:NRMSArticleEmbedder</tt>"]
+    user-embedder["user-embedder<br><tt>poprox_recommender.components.embedders.user:NRMSUserEmbedder</tt>"]
+    user-embedder2["user-embedder2<br><tt>poprox_recommender.components.embedders.user_topic_prefs:UserOnboardingEmbedder</tt>"]
+    scorer["scorer<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    scorer2["scorer2<br><tt>poprox_recommender.components.scorers.article:ArticleScorer</tt>"]
+    fusion["fusion<br><tt>poprox_recommender.components.joiners.score:ScoreFusion</tt>"]
+    ranker["ranker<br><tt>poprox_recommender.components.rankers.topk:TopkRanker</tt>"]
+    recommender(["recommender<br><tt>poprox_recommender.components.samplers.epsilon_greedy:EpsilonGreedy</tt>"])
+
+    candidate --> topic-filter
+    profile --> topic-filter
+    topic-filter --> candidate-embedder
+    clicked --> history-NRMSArticleEmbedder
+    candidate-embedder --> user-embedder
+    history-NRMSArticleEmbedder --> user-embedder
+    profile --> user-embedder
+    candidate-embedder --> user-embedder2
+    history-NRMSArticleEmbedder --> user-embedder2
+    profile --> user-embedder2
+    candidate-embedder --> scorer
+    user-embedder --> scorer
+    candidate-embedder --> scorer2
+    user-embedder2 --> scorer2
+    scorer --> fusion
+    scorer2 --> fusion
+    fusion --> ranker
+    topic-filter --> recommender
+    ranker --> recommender
