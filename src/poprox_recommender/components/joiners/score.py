@@ -8,7 +8,7 @@ from poprox_concepts.domain import CandidateSet
 
 
 class ScoreFusionConfig(BaseModel):
-    combiner: Literal["sum", "avg"] = "sum"
+    combiner: Literal["sum", "avg", "sub"] = "sum"
     weight1: float = 1
     weight2: float = 1
 
