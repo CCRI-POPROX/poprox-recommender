@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Literal
 
 from lenskit.pipeline import Component
 from pydantic import BaseModel
@@ -7,7 +8,7 @@ from poprox_concepts.domain import CandidateSet
 
 
 class ScoreFusionConfig(BaseModel):
-    combiner: str = "sum"
+    combiner: Literal["sum", "avg"] = "sum"
     weight1: float = 1
     weight2: float = 1
 
