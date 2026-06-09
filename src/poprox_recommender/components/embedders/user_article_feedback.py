@@ -113,7 +113,7 @@ def _compatible_feedback(observed: bool, requested: bool | Literal["positive", "
         return True
     elif requested == "positive" and observed:
         return True
-    elif requested == "negative" and observed:
+    elif requested == "negative" and not observed:
         return True
     else:
         return False
