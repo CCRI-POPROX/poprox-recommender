@@ -51,3 +51,10 @@ FROM 'POPROX/clicked/article_mentions.parquet'
 ORDER BY article_id;
 
 CREATE INDEX clicked_article_mention_article_idx ON clicked_article_mentions (article_id);
+
+INSERT INTO packages
+SELECT package_id, newsletter_id, title, source, seed, article_ids, current_as_of, created_at
+FROM 'POPROX/packages.parquet'
+ORDER BY newsletter_id;
+
+CREATE INDEX package_newsletter_idx ON packages (newsletter_id);

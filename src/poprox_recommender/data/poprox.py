@@ -16,14 +16,23 @@ import pandas as pd
 from duckdb import DuckDBPyConnection
 
 from poprox_concepts.api.recommendations import RecommendationRequestV5
-from poprox_concepts.domain import AccountInterest, Article, CandidateSet, Click, Entity, InterestProfile, Mention
+from poprox_concepts.domain import (
+    AccountInterest,
+    Article,
+    ArticlePackage,
+    CandidateSet,
+    Click,
+    Entity,
+    InterestProfile,
+    Mention,
+)
 from poprox_recommender.data.eval import EvalData
 from poprox_recommender.paths import project_root
 
 logger = logging.getLogger(__name__)
 TEST_REC_COUNT = 10
 
-type SlateSet = Literal["all", "latest", "recent"]
+SlateSet = Literal["all", "latest", "recent"]
 """
 Type for selecting the set of slates to return from the POPROX data.
 """
@@ -262,11 +271,40 @@ class PoproxData(EvalData):
         )
         candidate_articles = list(self._iter_query_articles())
 
+        # Fetch packages for this newsletter
+        # TODO: requires packages table in POPROX.db export
+        self.duck.execute(
+            """
+            SELECT package_id, title, source, seed, articles_ids, current_as_of, created_at
+            FROM packages
+            WHERE newsletter_id = ?
+            """,
+            [slate_id],
+        )
+        packages = []
+        for row in self.duck.fetchall():
+            package_id, title, source, seed, article_ids, current_as_of, created_at = row
+            seed_entity = None
+            if seed is not None:
+                seed_entity = Entity.model_validate_json(seed)
+            packages.append(
+                ArticlePackage(
+                    package_id=package_id,
+                    title=title,
+                    source=source,
+                    seed=seed_entity,
+                    article_ids=article_ids,
+                    current_as_of=current_as_of,
+                    created_at=created_at,
+                )
+            )
+
         return RecommendationRequestV5(
             candidates=CandidateSet(articles=candidate_articles),
             interacted=CandidateSet(articles=past_articles),
             interest_profile=profile,
             num_recs=TEST_REC_COUNT,
+            article_packages=packages,
         )
 
     def lookup_article(self, uuid: UUID, source: Literal["clicked", "candidate"] = "candidate") -> Article:
